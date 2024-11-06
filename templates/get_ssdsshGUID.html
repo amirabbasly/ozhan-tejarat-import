@@ -1,0 +1,22 @@
+<!-- templates/get_ssdsshGUID.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Enter ssdsshGUID</title>
+</head>
+<body>
+    <h1>Enter ssdsshGUID</h1>
+    <form method="post" action="{% url 'get_ssdsshGUID' %}">
+        {% csrf_token %}
+        <label for="ssdsshGUID">Enter ssdsshGUID:</label>
+        <input type="text" id="ssdsshGUID" name="ssdsshGUID" required>
+        <button type="submit">Fetch Proforma Data</button>
+    </form>
+
+    {% if success %}
+        <p>Data fetched successfully!</p>
+    {% elif error %}
+        <p>Error: {{ error }}</p>
+    {% endif %}
+</body>
+</html>

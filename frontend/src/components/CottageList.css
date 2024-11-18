@@ -1,0 +1,62 @@
+/* CottageList.css */
+body{
+  font-family: 'Vazirmatn', sans-serif;
+}
+.cottage-list-container {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    direction: rtl;
+  }
+  
+  .cottage-list-container h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+  }
+  
+  .no-data {
+    text-align: center;
+    color: #888;
+    font-style: italic;
+  }
+  
+  .cottage-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .cottage-item {
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    padding: 15px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .cottage-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .cottage-details {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  
+  .cottage-details span {
+    flex: 0 1 45%;
+    font-size: 14px;
+    color: #555;
+  }
+  
+  .cottage-details strong {
+    color: #007bff;
+  }
+  

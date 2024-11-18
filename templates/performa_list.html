@@ -1,0 +1,87 @@
+<!-- templates/proforma_list.html -->
+
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}لیست پروفرماها{% endblock %}
+
+{% block content %}
+    <h1 class="mb-4 text-center">لیست پروفرماها</h1>
+    {% if performas %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>شماره پیش فاکتور</th>
+                        <th>نوع ارز</th>
+                        <th>قیمت کل</th>
+                        <th>نام فروشنده</th>
+                        <th>کشور فروشنده</th>
+                        <th>شماره سفارش</th>
+                        <th>عملیات</th>
+                        
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for performa in performas %}
+                        <tr>
+                            <td>{{ performa.prf_number }}</td>
+                            <td>{{ performa.prf_currency_type }}</td>
+                            <td>{{ performa.prf_total_price }}</td>
+                            <td>{{ performa.prf_seller_name }}</td>
+                            <td>{{ performa.prf_seller_country }}</td>
+                            <td>{{ performa.prf_order_no }}</td>
+                            <td>
+                                    <a href="{% url 'performa_details' performa.id %}" class="">جزئیات</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination Controls (Same as Before) -->
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                {% if performas.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ performas.previous_page_number }}" aria-label="قبلی">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link" aria-label="قبلی">
+                            <span aria-hidden="true">&laquo;</span>
+                        </span>
+                    </li>
+                {% endif %}
+
+                {% for num in performas.paginator.page_range %}
+                    {% if performas.number == num %}
+                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                    {% elif num > performas.number|add:'-3' and num < performas.number|add:'3' %}
+                        <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if performas.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ performas.next_page_number }}" aria-label="بعدی">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link" aria-label="بعدی">
+                            <span aria-hidden="true">&raquo;</span>
+                        </span>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% else %}
+        <div class="alert alert-warning text-center" role="alert">
+            هیچ پروفرمایی موجود نیست.
+        </div>
+    {% endif %}
+{% endblock %}

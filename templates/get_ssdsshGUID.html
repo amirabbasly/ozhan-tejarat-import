@@ -1,22 +1,85 @@
 <!-- templates/get_ssdsshGUID.html -->
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Enter ssdsshGUID</title>
-</head>
-<body>
-    <h1>Enter ssdsshGUID</h1>
-    <form method="post" action="{% url 'get_ssdsshGUID' %}">
-        {% csrf_token %}
-        <label for="ssdsshGUID">Enter ssdsshGUID:</label>
-        <input type="text" id="ssdsshGUID" name="ssdsshGUID" required>
-        <button type="submit">Fetch Proforma Data</button>
-    </form>
 
-    {% if success %}
-        <p>Data fetched successfully!</p>
-    {% elif error %}
-        <p>Error: {{ error }}</p>
-    {% endif %}
-</body>
-</html>
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}دریافت ssdsshGUID{% endblock %}
+
+{% block content %}
+    <div class="container mt-5">
+        <h1 class="text-center mb-4 display-4">دریافت لیست پروفرماها</h1>
+        
+        <!-- Display Error or Success Messages -->
+        {% if error %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+        {% endif %}
+        {% if success %}
+            <div class="alert alert-success" role="alert">
+                اطلاعات با موفقیت دریافت شد.
+            </div>
+        {% endif %}
+        
+        <!-- Card Container for the Form -->
+        <div class="card shadow-lg border-0" style="max-width: 700px; margin: auto;">
+            <div class="card-body p-5" style="align-items: center; display: flex; flex-direction: column;">
+                <h5 class="card-title text-center mb-4 fs-3">اطلاعات پروفرما را دریافت کنید</h5>
+                
+                <!-- Form Section -->
+                <form method="post" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    
+                    <!-- ssdsshGUID Input -->
+                    <div class="mb-4 position-relative">
+                        <label for="ssdsshGUID" class="form-label fs-4">ssdsshGUID:</label>
+                        <div class="input-group input-group-xl">
+                            <input type="text" class="form-control form-control-lg" id="ssdsshGUID" name="ssdsshGUID" required placeholder="Enter ssdsshGUID" style="padding: 5px; border-radius: 5px; font-size: 1.5rem;">
+                            <div class="invalid-feedback">
+                                لطفاً یک ssdsshGUID معتبر وارد کنید.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Page Size Input -->
+                    <div class="mb-4 position-relative">
+                        <label for="pageSize" class="form-label fs-4">Page Size:</label>
+                        <div class="input-group input-group-xl">
+                            <input type="number" class="form-control form-control-lg" id="pageSize" name="pageSize" value="10" required placeholder="Enter number of entries" min="1" style="padding: 5px;border-radius: 5px; font-size: 1.5rem;">
+                            <div class="invalid-feedback">
+                                لطفاً یک عدد معتبر برای اندازه صفحه وارد کنید.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg py-4" style="font-size: 1rem; padding: 5px 20px; border-radius: 5px;">دریافت</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap Form Validation Script -->
+    <script>
+        (function () {
+            'use strict'
+
+            // Fetch all the forms we want to apply custom Bootstrap validation styles to
+            var forms = document.querySelectorAll('.needs-validation')
+
+            // Loop over them and prevent submission
+            Array.prototype.slice.call(forms)
+                .forEach(function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (!form.checkValidity()) {
+                            event.preventDefault()
+                            event.stopPropagation()
+                        }
+
+                        form.classList.add('was-validated')
+                    }, false)
+                })
+        })()
+    </script>
+{% endblock %}

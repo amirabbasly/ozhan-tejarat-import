@@ -1,15 +1,21 @@
+# proforma/admin.py
+
 from django.contrib import admin
-from .models import Performa, ProformaDetail, ProformaPayment
+from .models import Performa, ProformaDetail, ProformaPayment, RequestStatus
 
+@admin.register(Performa)
+class PerformaAdmin(admin.ModelAdmin):
+    list_display = ('prf_order_no', 'prf_seller_name', 'prf_total_price', 'prf_status')
 
-class proformaAdmin(admin.ModelAdmin):
-   list_display = (
-   'prf_number',
+@admin.register(ProformaDetail)
+class ProformaDetailAdmin(admin.ModelAdmin):
+    list_display = ('performa', 'prfctm_name', 'prfctm_code')
 
-        # Add any other fields you want to display
-    )
+@admin.register(ProformaPayment)
+class ProformaPaymentAdmin(admin.ModelAdmin):
+    list_display = ('proforma', 'payment_amount', 'payment_date', 'payment_status')
 
-admin.site.register(Performa, proformaAdmin)
-admin.site.register(ProformaDetail)
-admin.site.register(ProformaPayment)
-# Register your models here.
+@admin.register(RequestStatus)
+class RequestStatusAdmin(admin.ModelAdmin):
+    list_display = ('performa', 'pfg_vcode_lng', 'agn_name_str', 'pgp_send_status_tny')
+    search_fields = ('performa__prf_number', 'agn_name_str')

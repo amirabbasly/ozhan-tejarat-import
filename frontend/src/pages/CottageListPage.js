@@ -1,10 +1,11 @@
 import React from 'react';
 import CottageList from '../components/CottageList';
+import Navbar from '../components/Navbar';
 
 const CottageListPage = () => {
   return (
     <div>
-      <h2>List of Cottages</h2>
+      <Navbar />
       <CottageList />
     </div>
   );

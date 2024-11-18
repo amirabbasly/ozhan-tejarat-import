@@ -1,11 +1,12 @@
 import React from 'react';
 import CottageForm from '../components/CottageForm';
+import Navbar from '../components/Navbar';
 
 const AddCottage = () => {
   return (
     <div>
-      <h2>Add a New Cottage</h2>
-      <CottageForm />
+        <Navbar />
+              <CottageForm />
     </div>
   );
 };

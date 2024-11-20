@@ -1,49 +1,65 @@
-from django.shortcuts import render, get_object_or_404
-import requests
-from .models import Performa, ProformaDetail, ProformaPayment, RequestStatus
-from datetime import datetime
-import logging
-from django.contrib import messages
-from django.conf import settings
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from django.db import transaction
-from dateutil import parser
-import json  # For logging JSON responses
+from django.utils.dateparse import parse_datetime
+from .models import Performa, ProformaDetail, ProformaPayment, RequestStatus
+from .serializers import (
+    PerformaSerializer,
+    ProformaDetailSerializer,
+    ProformaPaymentSerializer,
+    RequestStatusSerializer
+)
+import requests
+import logging
+import json
+from datetime import datetime
+from dateutil import parser  # Added import for parser
 
 logger = logging.getLogger(__name__)
 
-def performa_list(request):
-    performas = Performa.objects.all()
-    return render(request, 'performa_list.html', {'performas': performas})
+class PerformaListView(APIView):
 
-def performa_details(request, id):
-    try:
-        # Retrieve the Performa instance
-        performa = get_object_or_404(Performa, id=id)
-        
-        # Retrieve related ProformaDetail instances
-        details = performa.details.all()  # Using related_name='details'
-        
-        # Prepare context for the template
-        context = {
-            'performa': performa,
-            'details': details,
-        }
-        
-        # Render the template with context
-        return render(request, 'performa_detail.html', context)
-    
-    except Exception as e:
-        logger.error(f"Error retrieving details for Performa ID {id}: {e}")
-        return render(request, 'performa_detail.html', {'error': 'An error occurred while retrieving details.'})
-# proforma/views.py
 
-def get_ssdsshGUID(request):
-    if request.method == "POST":
-        ssdsshGUID = request.POST.get('ssdsshGUID')
-        pageSize = request.POST.get('pageSize')
+    def get(self, request):
+        performas = Performa.objects.all()
+        performa_serializer = PerformaSerializer(performa)
+        proforma_detail_serializer = ProformaDetailSerializer(proforma_details, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class PerformaDetailView(APIView):
+    def get(self, request, prf_order_no):
+        try:
+            performa = Performa.objects.get(prf_order_no=prf_order_no)
+            request = RequestStatus.objects.filter(performa=performa)
+            proforma_details = ProformaDetail.objects.filter(performa=performa)
+            # Serialize the data
+            performa_serializer = PerformaSerializer(performa)
+            proforma_detail_serializer = ProformaDetailSerializer(proforma_details, many=True)
+            Request_status_serializer = RequestStatusSerializer(request, many=True)
+            # Combine and return the data
+            return Response({
+                'performa': performa_serializer.data,
+                'proforma_details': proforma_detail_serializer.data,
+                'request_status': Request_status_serializer.data,
+            }, status=status.HTTP_200_OK)
+        except Performa.DoesNotExist:
+            return Response({'error': 'Performa not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"Error retrieving details for Performa ID {id}: {e}")
+            return Response({'error': 'An error occurred while retrieving details.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class GUIDApiView(APIView):
+
+    def post(self, request):
+        ssdsshGUID = request.data.get('ssdsshGUID')
+        pageSize = request.data.get('pageSize', 10)
+        urlVCodeInt = request.data.get('urlVCodeInt')
 
         if not ssdsshGUID:
-            return render(request, 'get_ssdsshGUID.html', {'error': 'Please enter a valid ssdsshGUID.'})
+            return Response({'error': 'Please enter a valid ssdsshGUID.'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             # First API Call: NTSW_ProformaList
@@ -61,7 +77,7 @@ def get_ssdsshGUID(request):
                 "PrfVCodeInt": 0,
                 "prfplbVCodeInt": "",
                 "prfromVCodeInt": "",
-                "urlVCodeInt": 1242090,
+                "urlVCodeInt": urlVCodeInt,
                 "ssdsshGUID": ssdsshGUID
             }
 
@@ -72,13 +88,15 @@ def get_ssdsshGUID(request):
             first_result = first_data.get('Result')
 
             if not first_result or 'PerformaList' not in first_result:
-                return render(request, 'get_ssdsshGUID.html', {'error': "No 'PerformaList' found in the API response"})
+                logger.error(f"API Response without 'PerformaList': {json.dumps(first_data, ensure_ascii=False, indent=2)}")
+                return Response({'error': "No 'PerformaList' found in the API response"}, status=status.HTTP_400_BAD_REQUEST)
 
             # Process each item in the first API response
             with transaction.atomic():
                 for proforma_data in first_result.get('PerformaList', []):
                     prf_number = proforma_data.get('prfNumberStr')
                     if not prf_number:
+                        logger.warning("Skipped Proforma without 'prfNumberStr'")
                         continue  # Skip if no prf_number
 
                     # Parse dates with error handling
@@ -120,8 +138,8 @@ def get_ssdsshGUID(request):
             performas = Performa.objects.filter(ssdsshGUID=ssdsshGUID)
 
             if not performas.exists():
-                messages.error(request, "No Performa entries found for the provided ssdsshGUID.")
-                return render(request, 'get_ssdsshGUID.html', {'error': "No Performa entries found for the provided ssdsshGUID."})
+                logger.error("No Performa entries found for the provided ssdsshGUID.")
+                return Response({'error': "No Performa entries found for the provided ssdsshGUID."}, status=status.HTTP_404_NOT_FOUND)
 
             # Second API Call: GetRegedOrderDetails for each Performa
             second_api_url = "https://www.ntsw.ir/users/Ac/Gateway/FacadeRest/api/Proforma/GetRegedOrderDetails"
@@ -133,7 +151,7 @@ def get_ssdsshGUID(request):
                 for proforma in performas:
                     second_api_payload = {
                         "ssdsshGUID": ssdsshGUID,
-                        "urlVCodeInt": 1242090,
+                        "urlVCodeInt": urlVCodeInt,
                         "prfVCodeInt": proforma.prfVCodeInt,  # Include prfVCodeInt here
                     }
 
@@ -147,18 +165,17 @@ def get_ssdsshGUID(request):
 
                         if second_data.get("ErrorCode") != 0:
                             error_desc = second_data.get("ErrorDesc", "Unknown error.")
-                            messages.error(request, f"Second API Error for Performa {proforma.prf_number}: {error_desc}")
-                            continue  # Skip to the next Performa
+                            logger.error(f"Second API Error for Performa {proforma.prf_number}: {error_desc}")
+                            continue
 
                         second_result = second_data.get('Result')
                         if not second_result:
-                            messages.error(request, f"No 'Result' found in the second API response for Performa {proforma.prf_number}.")
-                            continue  # Skip to the next Performa
+                            logger.error(f"No 'Result' found in the second API response for Performa {proforma.prf_number}.")
+                            continue
 
-                        # Process the second API response
+                        # Process ProformaDetail
                         proforma_struct = second_result.get('proformaStruct')
                         if proforma_struct:
-                            # Process ProformaDetail
                             prfctm_list = proforma_struct.get('prfctmList', [])
                             for item in prfctm_list:
                                 ProformaDetail.objects.update_or_create(
@@ -191,10 +208,10 @@ def get_ssdsshGUID(request):
 
                         # Process requestStatus
                         request_status_list = second_result.get('requestStatus', [])
-                        for status in request_status_list:
+                        for status_item in request_status_list:
                             try:
                                 # Serialize FldDescStr
-                                fld_desc_str = status.get('FldDescStr', [])
+                                fld_desc_str = status_item.get('FldDescStr', [])
                                 if isinstance(fld_desc_str, list):
                                     fld_desc_str = '\n'.join(fld_desc_str)
                                 else:
@@ -202,16 +219,16 @@ def get_ssdsshGUID(request):
 
                                 RequestStatus.objects.update_or_create(
                                     performa=proforma,
-                                    pfg_vcode_lng=status.get('pfgVCodeLng'),
+                                    pfg_vcode_lng=status_item.get('pfgVCodeLng'),
                                     defaults={
-                                        'gds_hs_code': status.get('gdsHSCode'),
-                                        'pfg_commercial_desc_str': status.get('pfgCommercialDescStr'),
-                                        'pgp_send_status_tny': status.get('pgpSendStatusTny'),
-                                        'pfg_status_criteria_inquiry': status.get('pfgStatusCriteriaInquiry'),
-                                        'pfg_status_result_request_sabtaresh': status.get('pfgStatusResultRequestSabtaresh'),
-                                        'pgp_description_str': status.get('pgpDescriptionStr'),
-                                        'agn_name_str': status.get('agnNameStr'),
-                                        'agn_vcode_int': status.get('agnVcodeInt'),
+                                        'gds_hs_code': status_item.get('gdsHSCode'),
+                                        'pfg_commercial_desc_str': status_item.get('pfgCommercialDescStr'),
+                                        'pgp_send_status_tny': status_item.get('pgpSendStatusTny'),
+                                        'pfg_status_criteria_inquiry': status_item.get('pfgStatusCriteriaInquiry'),
+                                        'pfg_status_result_request_sabtaresh': status_item.get('pfgStatusResultRequestSabtaresh'),
+                                        'pgp_description_str': status_item.get('pgpDescriptionStr'),
+                                        'agn_name_str': status_item.get('agnNameStr'),
+                                        'agn_vcode_int': status_item.get('agnVcodeInt'),
                                         'fld_desc_str': fld_desc_str,
                                     }
                                 )
@@ -221,18 +238,14 @@ def get_ssdsshGUID(request):
 
                     except requests.exceptions.RequestException as e:
                         logger.error(f"Second API request failed for Performa {proforma.prf_number}: {e}")
-                        messages.error(request, f"Failed to retrieve details for Performa {proforma.prf_number}.")
                         continue  # Skip to the next Performa
 
-            messages.success(request, "Data from both APIs successfully retrieved and stored.")
-            return render(request, 'get_ssdsshGUID.html', {'success': True})
+            return Response({'message': "Data from both APIs successfully retrieved and stored."}, status=status.HTTP_200_OK)
 
         except requests.exceptions.RequestException as e:
             logger.error(f"First API request failed: {e}")
-            return render(request, 'get_ssdsshGUID.html', {'error': 'Failed to retrieve data from the first API.'})
+            return Response({'error': 'Failed to retrieve data from the first API.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         except Exception as e:
             logger.error(f"An unexpected error occurred: {e}")
-            return render(request, 'get_ssdsshGUID.html', {'error': 'An unexpected error occurred while processing the data.'})
-
-    return render(request, 'get_ssdsshGUID.html')
+            return Response({'error': 'An unexpected error occurred while processing the data.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -1,30 +1,41 @@
 .shortcut{
     display: flex;
+    flex-direction: column-reverse;
     justify-content: center;
     align-items: center;
     width: 25%;
-    height: 60%;
+    height: 35vh;
     margin-right: 4.17%;
     margin-left: 4.17%;
     border-radius: 17px;
     box-shadow: -4px 4px 5.3px 0px rgba(0, 0, 0, 0.25);
+    text-decoration: none;
+    color: #fff;
+    font-size: 32px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 
 }
+.short-icon {
+    font-size: 60px;
+    color: #fff;
+    margin-bottom: 5px;
+  }
 .shortcut:hover{
 filter: drop-shadow(-7px 7px 5.3px rgba(0, 0, 0, 0.25));
+transform: translateY(-3px);
 }
 .settings{
     
     background-color: #EF625E;
 }
 .settings:hover{
-    background-color: #E43B35;
+    background-color: #e7443e;
 }
 .finance{
 background-color: #93D893;
 }
 .finance:hover{
-    background-color: #60D360;
+    background-color: #6cd16c;
     }
 
 .documents{
@@ -43,9 +54,16 @@ background-color: #93D893;
     display: flex;
     flex-direction: row;
 }
-.shortlinks {
-    text-decoration: none;
-    color: #fff;
-    font-size: 32px;
 
+@media (max-width: 768px) {
+    .home-container{
+        height: auto;
+        margin-top: 100px;
+        flex-direction: column-reverse;
+    }
+    .shortcut{
+        width: 100%;
+        
+        margin: 50px 0px;
+    }
 }

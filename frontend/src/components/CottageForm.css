@@ -17,7 +17,8 @@
   
   .form-group {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
+
     gap: 15px;
   }
   
@@ -28,13 +29,11 @@
     border: 1px solid #ccc;
     border-radius: 4px;
     font-size: 14px;
+    width: 90%;
+    margin-left: 3%;
+
   }
-  
-  .form-group input[type="date"] {
-    
-    flex: 1 1 100%;
-  }
-  
+
   .form-group input:focus {
     border-color: #007bff;
     outline: none;

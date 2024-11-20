@@ -20,6 +20,7 @@ const CottageList = () => {
   }, []);
 
   return (
+    <div className='cottage-cont'>
     <div className="cottage-list-container">
       <h2>لیست کوتاژ ها</h2>
       {cottages.length === 0 ? (
@@ -32,13 +33,15 @@ const CottageList = () => {
                 <span><strong>شماره کوتاژ :</strong> {cottage.cottage_number}</span>
                 <span><strong>تاریخ :</strong> {cottage.cottage_date}</span>
                 <span><strong>شماره ثبت سفارش :</strong> {cottage.proforma}</span>
+                <span><strong>حواله ریالی :</strong> {cottage.riali}  ریال</span>
+                <span><strong>حواله + حقوق و حلال احمر :</strong> {cottage.hhhg}  ریال</span>
                 <span><strong>بهای نهایی :</strong> {cottage.final_price}  ریال</span>
               </div>
             </li>
           ))}
         </ul>
       )}
-    </div>
+    </div></div>
   );
 };
 

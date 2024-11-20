@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import './CottageForm.css';
+import DatePicker from 'react-multi-date-picker';
+import persian from "react-date-object/calendars/persian"
+import persian_fa from "react-date-object/locales/persian_fa"
+
+
 
 const CottageForm = () => {
   const [formData, setFormData] = useState({
@@ -33,13 +38,24 @@ const CottageForm = () => {
       alert('Failed to create cottage.');
     }
   };
+  const [value, setValue] = useState(new Date());
 
   return (
     <form className="cottage-form" onSubmit={handleSubmit}>
       <h2>کوتاژ جدید</h2>
       <div className="form-group">
+      <DatePicker
+          value={value}
+          onChange={(date) => {
+            setValue(date);
+            setFormData({ ...formData, cottage_date: date.format("YYYY/MM/DD") }); // Update formData with formatted date
+          }}
+          calendar={persian}
+          locale={persian_fa}
+          format="YYYY/MM/DD"
+          placeholder="تاریخ را انتخاب کنید"
+        />
         <input type="number" name="cottage_number" onChange={handleChange} placeholder="شماره کوتاژ" required />
-        <input type="date" name="cottage_date" onChange={handleChange} required />
         <input type="text" name="proforma" onChange={handleChange} placeholder="شماره ثبت سقارش" required />
         <input type="number" name="total_value" onChange={handleChange} placeholder="ارزش کل" required />
         <input type="number" name="quantity" onChange={handleChange} placeholder="تعداد" required />
@@ -49,7 +65,6 @@ const CottageForm = () => {
         <input type="number" name="added_value" onChange={handleChange} placeholder="ارزش افزوده" />
         <input type="number" name="discount" onChange={handleChange} placeholder="تخفیف" />
         <input type="number" name="currency_price" onChange={handleChange} placeholder="نرخ ارز" />
-        <input type="number" name="other_expense" onChange={handleChange} placeholder="سایر هزینه ها" />
       </div>
       <button type="submit" className="submit-button">ایجاد کوتاژ</button>
     </form>

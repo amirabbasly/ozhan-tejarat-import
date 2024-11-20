@@ -5,7 +5,6 @@ import Navbar from '../components/Navbar';
 const CottageListPage = () => {
   return (
     <div>
-      <Navbar />
       <CottageList />
     </div>
   );

@@ -1,9 +1,8 @@
 from django.urls import path
-from . import views
+from .views import PerformaListView, PerformaDetailView, GUIDApiView
 
 urlpatterns = [
-    path('performas/', views.performa_list, name='performa_list'),
-    path('performas/<int:id>/details/', views.performa_details, name='performa_details'),
-    path('get_ssdsshGUID/', views.get_ssdsshGUID, name='get_ssdsshGUID'),
-    # ... other URL patterns ...
+    path('api/performas/', PerformaListView.as_view(), name='performa-list'),
+    path('api/performas/<int:prf_order_no>/', PerformaDetailView.as_view(), name='performa-detail'),
+    path('api/guid/', GUIDApiView.as_view(), name='guid-api'),
 ]

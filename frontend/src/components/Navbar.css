@@ -1,85 +1,211 @@
-/* Navbar.css */
+/* Shared Styles */
 .navbar-container {
-    width: 50%;
-    background-color: #ECECEC;
-    height: 70px;
-    margin-top: 50px;
+  width: 50%;
+  background-color: #ECECEC;
+  height: 70px;
+  margin-top: 50px;
+  display: flex;
+  justify-content: flex-start;
+}
 
-    display: flex;
-    justify-content: flex-start;
-  }
-  .navbar-container2 {
-    width: 50%;
-    background-color: #ECECEC;
-    margin-top: 50px;
-    display: flex;
-    justify-content: flex-start;
-    height: 70px;
+.navbar-container2 {
+  width: 50%;
+  background-color: #ECECEC;
+  margin-top: 50px;
+  display: flex;
+  justify-content: flex-start;
+  height: 70px;
+}
+
+.nacbar-container-cont {
+  align-items: center;
+  display: none;
+  flex-direction: row-reverse;
+}
+
+.navbar {
+  list-style-type: none;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  margin: 0;
+}
+
+.nav-item {
+  position: relative;
+  width: 150px;
+  justify-content: center;
+  height: 100%;
+  border-left: 1px solid #979797;
+  margin-right: 0px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  cursor: pointer;
+}
+
+.nav-item:hover {
+  background-color: #d6d6d6;
+}
+
+.nav-item-left {
+  position: relative; /* Add this */
+  justify-content: center;
+  height: 100%;
+  margin-left: 40px;
+  padding-right: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+}
+
+.nav-icon {
+  font-size: 24px;
+  color: #4b5563;
+  margin-bottom: 5px;
+}
+
+.nav-item span {
+  margin-right: 10px;
+  font-family: 'Vazirmatn', sans-serif;
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.navbar-container {
+  direction: rtl;
+}
+
+.nav-link {
+  display: flex;
+  flex-direction: row;
+  text-decoration: none;
+  color: #4b5563;
+}
+
+.nav-link:hover {
+  color: #0077b6;
+}
+
+/* Submenu Styles */
+.submenu {
+  position: absolute;
+  top: 100%; /* Place submenu below the parent */
+  right: 0; /* Align to the right for RTL layout */
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  z-index: 1000;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.submenu-item {
+  padding: 10px 15px;
+  cursor: pointer;
+
+}
+.submenu-link{
+  text-decoration: none;
+  color: #222222;
+}
+
+.submenu-item a {
+  text-decoration: none;
+  color: #333;
+  display: block;
+}
+
+.submenu-item:hover {
+  background-color: #f0f0f0;
+}
+
+/* Specific Styles for User Submenu */
+.nav-item-left:hover .submenu {
+  top: 100%; /* Adjusted for proper positioning */
+  right: 0; /* Aligns correctly under the parent */
+  background-color: #f9f9f9;
+}
+
+.nav-item-left .submenu-item {
+  color: #0077b6;
+}
+
+.nav-item-left .submenu-item:hover {
+  background-color: #e0f0ff;
+}
+
+/* Specific Styles for Notifications Submenu */
+.nav-item-left:hover .submenu.notifications {
+  top: 50px;
+  right: -20px;
+  background-color: #fdfdfd;
+}
+
+.nav-item-left .submenu-item {
+  color: #333;
+  border-bottom: 1px solid #ccc;
+}
+
+.nav-item-left .submenu-item:last-child {
+  border-bottom: none;
+}
+
+.nav-item-left .submenu-item:hover {
+  background-color: #ffecec;
+}
+
+/* Overlay Menu for Mobile */
+.overlay-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+.close-overlay {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: #fff;
+  cursor: pointer;
+}
+
+.overlay-navbar {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  text-align: center;
+}
+
+.overlay-navbar li {
+  margin: 20px 0;
+}
+
+.overlay-navbar a {
+  text-decoration: none;
+  color: #fff;
+  font-size: 1.5rem;
+}
+@media (min-width: 768px) {
+  .navbar-header {
+    display: none;
   }
   .nacbar-container-cont{
-    align-items: center;
     display: flex;
-    flex-direction: row-reverse;
   }
-  
-  .navbar {
-    
-    list-style-type: none;
-    display: flex;
-    align-items: center;
-    padding: 0;
-    margin: 0;
-  }
-  
-  .nav-item {
-    width: 150px;
-    justify-content: center;
-    height: 100%;
-    border-left: 1px solid #979797 ;
-    margin-right: 0px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    cursor: pointer;
-  }
-  .nav-item:hover{
-    background-color:#d6d6d6 ;
-  }
-  .nav-item-left {
-
-    justify-content: center;
-    height: 100%;
-    margin-left: 40px;
-    padding-right: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    cursor: pointer;
-  }
-  
-  .nav-icon {
-    font-size: 24px;
-    color: #4b5563;
-    margin-bottom: 5px;
-  }
-  
-  .nav-item span {
-    margin-left: 10px;
-    font-family: 'Vazirmatn', sans-serif;
-    font-size: 14px;
-    color: #4b5563;
-  }
-  
-  .navbar-container {
-    direction: rtl;
-  }
-  .nav-link {
-    display: flex;
-    flex-direction: column;
-    text-decoration: none;
-    color: #4b5563;
-  }
-  
-  .nav-link:hover {
-    color: #0077b6;
-  } 
+}

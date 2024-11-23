@@ -1,68 +1,63 @@
-/* CottageList.css */
-body{
-  font-family: 'Vazirmatn', sans-serif;
-}
-.cottage-cont{
+.cottage-cont {
+  width: 100%;
   display: flex;
   justify-content: center;
+  margin-top: 50px;
+  direction: rtl;
 }
-.cottage-list-container {
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    padding: 20px;
-    margin-top: 20px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    direction: rtl;
-    width: 70%;
 
-  }
-  
-  .cottage-list-container h2 {
-    text-align: center;
-    color: #333;
-    margin-bottom: 20px;
-  }
-  
-  .no-data {
-    text-align: center;
-    color: #888;
-    font-style: italic;
-  }
-  
-  .cottage-list {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-  }
-  
-  .cottage-item {
-    background-color: #ffffff;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    margin-bottom: 15px;
-    padding: 15px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
-  
-  .cottage-item:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-  }
-  
-  .cottage-details {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: 10px;
-  }
-  
-  .cottage-details span {
-    flex: 0 1 45%;
-    font-size: 14px;
-    color: #555;
-  }
-  
-  .cottage-details strong {
-    color: #007bff;
-  }
-  
+.cottage-list-container {
+  width: 100%;
+  max-width: 1200px;
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.cottage-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  direction: rtl;
+}
+
+.cottage-table th, .cottage-table td {
+
+  padding: 15px;
+  text-align: center;
+}
+
+.cottage-table th {
+  background-color: #ffffff;
+  font-weight: bold;
+}
+.cottage-table thead tr {
+border-top: 1px solid #a4a4a4;
+}
+
+
+.cottage-table tr:nth-child(odd) {
+  background-color: #efefef;
+}
+
+.cottage-table tr:nth-child(even) {
+  background-color: #ffffff;
+}
+
+.cottage-table tr:hover {
+  background-color: #e6e6e6;
+  cursor: pointer;
+}
+
+.no-data {
+  text-align: center;
+  color: #777;
+  margin-top: 20px;
+  font-size: 18px;
+}

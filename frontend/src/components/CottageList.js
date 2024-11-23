@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './CottageList.css';
+import { Link } from 'react-router-dom';
 
 const CottageList = () => {
   const [cottages, setCottages] = useState([]);
@@ -21,27 +22,39 @@ const CottageList = () => {
 
   return (
     <div className='cottage-cont'>
-    <div className="cottage-list-container">
-      <h2>لیست کوتاژ ها</h2>
-      {cottages.length === 0 ? (
-        <p className="no-data">No cottages available.</p>
-      ) : (
-        <ul className="cottage-list">
-          {cottages.map((cottage) => (
-            <li key={cottage.id} className="cottage-item">
-              <div className="cottage-details">
-                <span><strong>شماره کوتاژ :</strong> {cottage.cottage_number}</span>
-                <span><strong>تاریخ :</strong> {cottage.cottage_date}</span>
-                <span><strong>شماره ثبت سفارش :</strong> {cottage.proforma}</span>
-                <span><strong>حواله ریالی :</strong> {cottage.riali}  ریال</span>
-                <span><strong>حواله + حقوق و حلال احمر :</strong> {cottage.hhhg}  ریال</span>
-                <span><strong>بهای نهایی :</strong> {cottage.final_price}  ریال</span>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div></div>
+      <div className="cottage-list-container">
+        <h2>لیست کوتاژ ها</h2>
+        {cottages.length === 0 ? (
+          <p className="no-data">No cottages available.</p>
+        ) : (
+          <table className="cottage-table">
+            <thead>
+              <tr>
+                <th>شماره کوتاژ</th>
+                <th>تاریخ</th>
+                <th>شماره پرفورم</th>
+                <th>ارزش کل</th>
+                <th>نرخ ارز</th>
+                <th> </th>
+
+              </tr>
+            </thead>
+            <tbody>
+              {cottages.map((cottage) => (
+                <tr key={cottage.id}>
+                  <td>{cottage.cottage_number}</td>
+                  <td>{cottage.cottage_date}</td>
+                  <td>{cottage.proforma}</td>
+                  <td>{cottage.total_value} ریال</td>
+                  <td>{cottage.currency_price} ریال</td>
+                  <td><Link> جزئیات  </Link></td> 
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
   );
 };
 

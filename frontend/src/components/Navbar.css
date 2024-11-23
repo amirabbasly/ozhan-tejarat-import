@@ -66,6 +66,7 @@
   margin-bottom: 5px;
 }
 
+
 .nav-item span {
   margin-right: 10px;
   font-family: 'Vazirmatn', sans-serif;
@@ -86,6 +87,9 @@
 
 .nav-link:hover {
   color: #0077b6;
+}
+body{
+  font-family: 'Vazirmatn', sans-serif;
 }
 
 /* Submenu Styles */

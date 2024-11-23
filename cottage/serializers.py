@@ -12,9 +12,7 @@ class CottageSerializer(serializers.ModelSerializer):
         model = Cottage
         fields = [
              'cottage_number', 'cottage_date', 'proforma',
-            'total_value', 'quantity', 'customs_value', 'import_rights',
-            'red_cersent', 'added_value', 'discount', 'currency_price','riali','hhhg',
-            'other_expense', 'final_price'
+            'total_value', 'quantity'
         ]
         read_only_fields = ['final_price']
 
@@ -30,3 +28,13 @@ class CottageSerializer(serializers.ModelSerializer):
         instance.final_price = instance.calculate_final_price()
         instance.save()
         return instance
+class CustomsDeclarationInputSerializer(serializers.Serializer):
+    ssdsshGUID = serializers.CharField()
+    urlVCodeInt = serializers.IntegerField()
+    PageSize = serializers.IntegerField(min_value=1, max_value=10000) 
+
+
+class GreenCustomsDeclarationInputSerializer(serializers.Serializer):
+    FullSerilaNumber = serializers.CharField(max_length=50)
+    ssdsshGUID = serializers.UUIDField()
+    urlVCodeInt = serializers.IntegerField()

@@ -80,6 +80,10 @@
                   <li className="submenu-item">
                      دریافت پرفورم
                   </li></Link>
+                  <Link className='submenu-link' to="/decl">
+                  <li className="submenu-item">
+                     دریافت کوتاژ
+                  </li></Link>
                 </ul>
               )}
             </li>

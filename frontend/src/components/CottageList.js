@@ -45,7 +45,7 @@ const CottageList = () => {
                   <td>{cottage.cottage_number}</td>
                   <td>{cottage.cottage_date}</td>
                   <td>{cottage.proforma}</td>
-                  <td>{cottage.total_value} ریال</td>
+                  <td>{cottage.total_value} </td>
                   <td>{cottage.currency_price} ریال</td>
                   <td><Link> جزئیات  </Link></td> 
                 </tr>

@@ -1,0 +1,53 @@
+// src/store/store.js
+
+import { configureStore } from '@reduxjs/toolkit';
+import { combineReducers } from 'redux';
+import { cottageReducer } from './reducers/cottageReducers';
+import { customsDeclarationReducer } from './reducers/customsDeclarationReducers';
+import { loadCustomsParams, saveCustomsParams } from './utils/localSotrage/localstorage';
+
+// Load initial parameters from localStorage
+const persistedParams = loadCustomsParams();
+
+// Combine reducers as usual
+const rootReducer = combineReducers({
+  cottages: cottageReducer,
+  customsDeclarations: customsDeclarationReducer,
+});
+
+// Configure the store with preloaded state
+const store = configureStore({
+  reducer: rootReducer,
+  preloadedState: {
+    customsDeclarations: {
+      // ...other initial state properties
+      ssdsshGUID: persistedParams.ssdsshGUID,
+      urlVCodeInt: persistedParams.urlVCodeInt,
+      // Ensure other properties from initialState in the reducer are included
+      declarations: [],
+      declarationDetails: null,
+      goods: [],
+      customsDutyInfo: {},
+      loadingDeclarations: false,
+      loadingDeclarationDetails: false,
+      loadingGoods: false,
+      loadingCustomsDuty: {},
+      savingData: false,
+      errorDeclarations: '',
+      errorDeclarationDetails: '',
+      errorGoods: '',
+      errorCustomsDuty: {},
+      saveError: '',
+      saveMessage: '',
+    },
+    // ...other slices if any
+  },
+});
+
+// Subscribe to store updates to persist parameters
+store.subscribe(() => {
+  const { ssdsshGUID, urlVCodeInt } = store.getState().customsDeclarations;
+  saveCustomsParams({ ssdsshGUID, urlVCodeInt });
+});
+
+export default store;

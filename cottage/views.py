@@ -11,6 +11,7 @@ import requests
 import logging
 from django.conf import settings
 
+
 class FetchGoodsAPIView(APIView):
     def post(self, request):
         """
@@ -70,6 +71,7 @@ class SaveCottageView(APIView):
 
             # Check if Proforma exists
             proforma = Performa.objects.get(prf_order_no=proforma_number)
+            
 
             # Create or update the Cottage instance
             cottage, created = Cottage.objects.update_or_create(
@@ -125,12 +127,12 @@ class SaveCottageGoodsView(APIView):
                     goodscode=good.get('ggsVcodeInt'),
                     cottage=cottage,
                     defaults={
-                        'customs_value': Decimal(good.get('cintaxesBase', '0')),
-                        'import_rights': Decimal(good.get('ggsdutyIRRAmount', '0')),
-                        'red_cersent': Decimal(good.get('ggstaxesRate', '0')),
-                        'total_value': Decimal(good.get('ggscommodityItemCurrencyValue', '0')),
-                        'added_value': Decimal(good.get('ggsinsuranceIRRValue', '0')),
-                        'discount': Decimal(good.get('ggsdeliveryIRRValue', '0')),
+                        'customs_value': Decimal(good.get('customs_value', '0')),
+                        'import_rights': Decimal(good.get('import_rights', '0')),
+                        'red_cersent': Decimal(good.get('red_cersent', '0')),
+                        'total_value': Decimal(good.get('total_value', '0')),
+                        'added_value': Decimal(good.get('added_value', '0')),
+                        'discount': Decimal(good.get('discount', '0')),
                     }
                 )
 

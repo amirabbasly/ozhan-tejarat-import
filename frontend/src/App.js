@@ -7,6 +7,8 @@ import Navbar from './components/Navbar';
 import ImportProforma from './pages/ImportPrf';
 import CustomsDeclarationList from './components/CustomsDeclarationList';
 import CustomsDeclarationDetails from './components/CustomsDeclarationDetails';
+import { Provider } from 'react-redux';
+import store from './store'; // Import the store you created
 import './App.css';
 
 function App() {
@@ -15,6 +17,7 @@ function App() {
     <Router>
 
 <Navbar />
+<Provider store={store}>
         <main>
           <Routes>
             <Route path="/" element={<Home />} />
@@ -25,6 +28,7 @@ function App() {
             <Route path="/decl" element={<CustomsDeclarationList />} />
           </Routes>
         </main>
+        </Provider>,
 
     </Router>
   );

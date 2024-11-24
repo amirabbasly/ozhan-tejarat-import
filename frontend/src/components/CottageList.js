@@ -1,57 +1,58 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+// src/components/CottageList.js
+
+import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchCottages } from '../actions/cottageActions';
 import './CottageList.css';
 import { Link } from 'react-router-dom';
 
 const CottageList = () => {
-  const [cottages, setCottages] = useState([]);
+  const dispatch = useDispatch();
 
-  // Fetch cottages from the API
-  const fetchCottages = async () => {
-    try {
-      const response = await axios.get('http://127.0.0.1:8000/api/cottages/');
-      setCottages(response.data);
-    } catch (error) {
-      console.error('Error fetching cottages:', error);
-    }
-  };
+  // Access cottages state from Redux store
+  const { cottages, loading, error } = useSelector((state) => state.cottages);
 
   useEffect(() => {
-    fetchCottages();
-  }, []);
+    dispatch(fetchCottages());
+  }, [dispatch]);
 
   return (
     <div className='cottage-cont'>
       <div className="cottage-list-container">
         <h2>لیست کوتاژ ها</h2>
-        {cottages.length === 0 ? (
-          <p className="no-data">No cottages available.</p>
-        ) : (
-          <table className="cottage-table">
-            <thead>
-              <tr>
-                <th>شماره کوتاژ</th>
-                <th>تاریخ</th>
-                <th>شماره پرفورم</th>
-                <th>ارزش کل</th>
-                <th>نرخ ارز</th>
-                <th> </th>
-
-              </tr>
-            </thead>
-            <tbody>
-              {cottages.map((cottage) => (
-                <tr key={cottage.id}>
-                  <td>{cottage.cottage_number}</td>
-                  <td>{cottage.cottage_date}</td>
-                  <td>{cottage.proforma}</td>
-                  <td>{cottage.total_value} </td>
-                  <td>{cottage.currency_price} ریال</td>
-                  <td><Link> جزئیات  </Link></td> 
+        {loading && <p className="loading">در حال بارگذاری...</p>}
+        {error && <p className="error">{error}</p>}
+        {!loading && !error && (
+          cottages.length === 0 ? (
+            <p className="no-data">هیچ کوتاژی موجود نیست.</p>
+          ) : (
+            <table className="cottage-table">
+              <thead>
+                <tr>
+                  <th>شماره کوتاژ</th>
+                  <th>تاریخ</th>
+                  <th>شماره پرفورم</th>
+                  <th>ارزش کل</th>
+                  <th>نرخ ارز</th>
+                  <th> </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {cottages.map((cottage) => (
+                  <tr key={cottage.id}>
+                    <td>{cottage.cottage_number}</td>
+                    <td>{cottage.cottage_date}</td>
+                    <td>{cottage.proforma}</td>
+                    <td>{cottage.total_value}</td>
+                    <td>{cottage.currency_price} ریال</td>
+                    <td>
+                      <Link to={`/cottages/${cottage.id}`}>جزئیات</Link>
+                    </td> 
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )
         )}
       </div>
     </div>

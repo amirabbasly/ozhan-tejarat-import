@@ -8,7 +8,7 @@ class CottageAdmin(admin.ModelAdmin):
 @admin.register(CottageGoods)
 class CottageGoodsAdmin(admin.ModelAdmin):
     list_display = ("cottage", "final_price")
-    readonly_fields = ["riali","hhhg","final_price"]
+    readonly_fields = ["riali","hhhg","final_price","other_expense"]
 
 
 

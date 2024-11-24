@@ -1,75 +1,55 @@
-// CustomsDeclarationList.js
+// src/components/CustomsDeclarationList.js
 
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchDeclarations } from '../actions/customsDeclarationActions';
+import { setCustomsParams, clearCustomsParams } from '../actions/customsParamsAction'; // Import actions
 import './CustomsDeclarationList.css'; // Import the CSS file
 import { Link } from 'react-router-dom';
 
 const CustomsDeclarationList = () => {
-  const [declarations, setDeclarations] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const dispatch = useDispatch();
 
-  // State variables for form inputs
-  const [ssdsshGUID, setSsdsshGUID] = useState('');
-  const [urlVCodeInt, setUrlVCodeInt] = useState('');
+  // Access customs declarations state and stored parameters from Redux store
+  const { declarations, loading, error, ssdsshGUID, urlVCodeInt } = useSelector(
+    (state) => state.customsDeclarations
+  );
+
+  // Local state for form inputs
+  const [guidInput, setGuidInput] = useState(ssdsshGUID);
+  const [codeInput, setCodeInput] = useState(urlVCodeInt);
   const [pageSize, setPageSize] = useState(20000); // Default PageSize
 
+  // Synchronize local state with Redux state
+  useEffect(() => {
+    setGuidInput(ssdsshGUID);
+    setCodeInput(urlVCodeInt);
+  }, [ssdsshGUID, urlVCodeInt]);
+
   // Handler for form submission
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault(); // Prevent page reload
-    setLoading(true);
-    setError(null);
-    setDeclarations([]);
 
     // Validate inputs
-    if (!ssdsshGUID || !urlVCodeInt || !pageSize) {
-      setError('لطفاً همه فیلدها را پر کنید.');
-      setLoading(false);
+    if (!guidInput || !codeInput || !pageSize) {
+      alert('لطفاً همه فیلدها را پر کنید.');
       return;
     }
 
-    // Prepare the payload
-    const payload = {
-      ssdsshGUID: ssdsshGUID,
-      urlVCodeInt: parseInt(urlVCodeInt, 10),
-      PageSize: parseInt(pageSize, 10),
-    };
+    // Dispatch the setCustomsParams action to store parameters in Redux
+    dispatch(setCustomsParams(guidInput.trim(), codeInput.trim()));
 
-    try {
-      const response = await axios.post(
-        'http://127.0.0.1:8000/api/customs-declarations/',
-        payload,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+    // Dispatch the fetchDeclarations action with the entered parameters
+    dispatch(fetchDeclarations(guidInput.trim(), codeInput.trim(), pageSize));
+  };
 
-      console.log('API Response:', response.data); // Inspect the response
-
-      if (response.data.ErrorCode === 0) {
-        // Check if 'CustomizeCustomsDeclarationList' exists and is an array
-        if (Array.isArray(response.data.CustomizeCustomsDeclarationList)) {
-          setDeclarations(response.data.CustomizeCustomsDeclarationList);
-        }
-        // Else, check if response.data itself is an array
-        else if (Array.isArray(response.data)) {
-          setDeclarations(response.data);
-        }
-        // If neither, set an error
-        else {
-          setError('فرمت پاسخ غیرمنتظره است.');
-        }
-      } else {
-        setError(response.data.ErrorDesc || 'خطایی رخ داده است.');
-      }
-    } catch (err) {
-      console.error('Error during API call:', err); // Enhanced error logging
-      setError('خطا در برقراری ارتباط با سرور.');
-    } finally {
-      setLoading(false);
+  // Handler to clear parameters
+  const handleClearParams = () => {
+    if (window.confirm('آیا مطمئن هستید که می‌خواهید پارامترها را پاک کنید؟')) {
+      dispatch(clearCustomsParams());
+      setGuidInput('');
+      setCodeInput('');
+      alert('پارامترها پاک شدند.');
     }
   };
 
@@ -84,8 +64,8 @@ const CustomsDeclarationList = () => {
           <input
             type="text"
             id="ssdsshGUID"
-            value={ssdsshGUID}
-            onChange={(e) => setSsdsshGUID(e.target.value)}
+            value={guidInput}
+            onChange={(e) => setGuidInput(e.target.value)}
             required
             placeholder="مثال: 603FF82E-5EAF-4DFA-BBC1-FA0030D686DB"
           />
@@ -96,8 +76,8 @@ const CustomsDeclarationList = () => {
           <input
             type="number"
             id="urlVCodeInt"
-            value={urlVCodeInt}
-            onChange={(e) => setUrlVCodeInt(e.target.value)}
+            value={codeInput}
+            onChange={(e) => setCodeInput(e.target.value)}
             required
             placeholder="مثال: 124013"
           />
@@ -117,9 +97,14 @@ const CustomsDeclarationList = () => {
           />
         </div>
 
-        <button type="submit" className="submit-button">
-          دریافت اطلاعات
-        </button>
+        <div className="form-actions">
+          <button type="submit" className="submit-button" disabled={loading}>
+            دریافت اطلاعات
+          </button>
+          <button type="button" className="clear-button" onClick={handleClearParams} disabled={!ssdsshGUID && !urlVCodeInt}>
+            پاک کردن پارامترها
+          </button>
+        </div>
       </form>
 
       {/* Loading Indicator */}
@@ -127,6 +112,19 @@ const CustomsDeclarationList = () => {
 
       {/* Error Message */}
       {error && <p className="error">{error}</p>}
+
+      {/* Display Current Parameters */}
+      {ssdsshGUID && urlVCodeInt && (
+        <div className="current-params">
+          <h3>پارامترهای فعلی:</h3>
+          <p>
+            <strong>SSDSSH GUID:</strong> {ssdsshGUID}
+          </p>
+          <p>
+            <strong>URL VCode Int:</strong> {urlVCodeInt}
+          </p>
+        </div>
+      )}
 
       {/* Declarations Table */}
       {!loading && !error && declarations.length > 0 && (
@@ -168,10 +166,6 @@ const CustomsDeclarationList = () => {
                   <td>
                     <Link 
                       to={`/declarations/${encodeURIComponent(item.FullSerialNumber)}`} 
-                      state={{
-                        ssdsshGUID: ssdsshGUID,
-                        urlVCodeInt: urlVCodeInt
-                      }}
                       className="details-link"
                     >
                       جزئیات

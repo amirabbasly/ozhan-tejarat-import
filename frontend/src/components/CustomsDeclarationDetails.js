@@ -1,179 +1,130 @@
+// src/components/CustomsDeclarationDetails.js
+
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { useParams, Link, useLocation } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import {
+  fetchDeclarationDetails,
+  fetchGoods,
+  fetchCustomsDutyInformation,
+  saveData,
+} from '../actions/customsDeclarationActions';
 import './CustomsDeclarationDetails.css';
 
 const CustomsDeclarationDetails = () => {
   const { FullSerialNumber } = useParams();
-  const location = useLocation();
-  const { ssdsshGUID, urlVCodeInt } = location.state || {};
-  const [declaration, setDeclaration] = useState(null);
-  const [goods, setGoods] = useState([]);
-  const [customsDutyInfo, setCustomsDutyInfo] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [activeDuty, setActiveDuty] = useState(null); // Tracks which good's duty info is being shown
-  const [saveMessage, setSaveMessage] = useState('');
+  const dispatch = useDispatch();
 
-  const fetchDeclarationDetails = async () => {
-    if (!FullSerialNumber || !ssdsshGUID || !urlVCodeInt) {
-      setError('اطلاعات لازم برای نمایش جزئیات موجود نیست.');
-      setLoading(false);
-      return;
-    }
+  // State to manage the visibility of the customs duty overlay
+  const [activeDutyOverlay, setActiveDutyOverlay] = useState(null);
 
-    const payload = {
-      DeclarationType: 0,
-      FullSerilaNumber: FullSerialNumber,
-      ssdsshGUID: ssdsshGUID,
-      urlVCodeInt: parseInt(urlVCodeInt, 10),
-    };
+  // Access ssdsshGUID and urlVCodeInt from Redux state
+  const { ssdsshGUID, urlVCodeInt } = useSelector((state) => ({
+    ssdsshGUID: state.customsDeclarations.ssdsshGUID,
+    urlVCodeInt: state.customsDeclarations.urlVCodeInt,
+  }));
 
-    try {
-      const response = await axios.post(
-        'http://127.0.0.1:8000/api/customs-green-declaration/',
-        payload,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+  // Access other necessary state from Redux store
+  const {
+    declarationDetails,
+    goods,
+    customsDutyInfo,
+    loadingDeclarationDetails,
+    loadingGoods,
+    loadingCustomsDuty,
+    savingData,
+    errorDeclarationDetails,
+    errorGoods,
+    errorCustomsDuty,
+    saveError,
+    saveMessage,
+  } = useSelector((state) => state.customsDeclarations);
 
-      if (response.data.ErrorCode === 0) {
-        setDeclaration(response.data.GreenCustomsDeclaration);
-      } else {
-        setError(response.data.ErrorDesc || 'خطایی رخ داده است.');
-      }
-    } catch (err) {
-      console.error('Error fetching declaration details:', err);
-      setError('خطا در برقراری ارتباط با سرور.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchGoods = async (gcuVcodeInt) => {
-    if (!gcuVcodeInt || !ssdsshGUID || !urlVCodeInt) {
-      setError('اطلاعات لازم برای نمایش کالاها موجود نیست.');
-      return;
-    }
-
-    const payload = {
-      gcuVcodeInt: gcuVcodeInt,
-      ssdsshGUID: ssdsshGUID,
-      urlVCodeInt: parseInt(urlVCodeInt, 10),
-    };
-
-    try {
-      const response = await axios.post(
-        'http://127.0.0.1:8000/api/fetch-goods/',
-        payload,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      if (response.data.ErrorCode === 0) {
-        setGoods(response.data.GreenCustomsDeclarationGoodList || []);
-      } else {
-        setError(response.data.ErrorDesc || 'خطایی رخ داده است.');
-      }
-    } catch (err) {
-      console.error('Error fetching goods:', err);
-      setError('خطا در برقراری ارتباط با سرور.');
-    }
-  };
-
-  const fetchCustomsDutyInformation = async (ggsVcodeInt) => {
-    if (!ggsVcodeInt || !ssdsshGUID || !urlVCodeInt) {
-      setError('اطلاعات لازم برای نمایش مالیات‌ها موجود نیست.');
-      return;
-    }
-
-    const payload = {
-      ggsVcodeInt: ggsVcodeInt,
-      ssdsshGUID: ssdsshGUID,
-      urlVCodeInt: parseInt(urlVCodeInt, 10),
-    };
-
-    try {
-      const response = await axios.post(
-        'http://127.0.0.1:8000/api/fetch-customs-duty-info/',
-        payload,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      if (response.data.ErrorCode === 0) {
-        setCustomsDutyInfo((prev) => ({
-          ...prev,
-          [ggsVcodeInt]: response.data.GreenCustomsDutyInformationList || [],
-        }));
-        setActiveDuty(ggsVcodeInt); // Show duty info for the clicked good
-      } else {
-        setError(response.data.ErrorDesc || 'خطایی رخ داده است.');
-      }
-    } catch (err) {
-      console.error('Error fetching customs duty information:', err);
-      setError('خطا در برقراری ارتباط با سرور.');
-    }
-  };
-
-  const toggleDutyInfo = (ggsVcodeInt) => {
-    if (activeDuty === ggsVcodeInt) {
-      setActiveDuty(null); // Hide if already active
-    } else if (!customsDutyInfo[ggsVcodeInt]) {
-      fetchCustomsDutyInformation(ggsVcodeInt); // Fetch if not already fetched
+  // Fetch declaration details on component mount
+  useEffect(() => {
+    if (FullSerialNumber && ssdsshGUID && urlVCodeInt) {
+      dispatch(fetchDeclarationDetails(FullSerialNumber, ssdsshGUID, urlVCodeInt));
     } else {
-      setActiveDuty(ggsVcodeInt); // Show if already fetched
+      console.error('Missing parameters: ssdsshGUID or urlVCodeInt');
+    }
+  }, [dispatch, FullSerialNumber, ssdsshGUID, urlVCodeInt]);
+
+  // Fetch goods when declarationDetails are fetched
+  useEffect(() => {
+    if (declarationDetails && declarationDetails.gcuVcodeInt) {
+      dispatch(fetchGoods(declarationDetails.gcuVcodeInt, ssdsshGUID, urlVCodeInt));
+    }
+  }, [dispatch, declarationDetails, ssdsshGUID, urlVCodeInt]);
+
+  // Handler to fetch customs duty information for a specific good
+  const handleFetchCustomsDuty = (ggsVcodeInt) => {
+    dispatch(fetchCustomsDutyInformation(ggsVcodeInt, ssdsshGUID, urlVCodeInt));
+    setActiveDutyOverlay(ggsVcodeInt); // Set the active duty to show overlay
+  };
+
+  // Handler to close the overlay
+  const handleCloseOverlay = () => {
+    setActiveDutyOverlay(null);
+  };
+
+  // Handler to save data to the database
+  const handleSave = () => {
+    if (declarationDetails && goods.length > 0) {
+      dispatch(saveData(declarationDetails, goods, ssdsshGUID, urlVCodeInt));
+    } else {
+      console.warn('Cannot save data: Missing declarationDetails or goods');
     }
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      await fetchDeclarationDetails();
-    };
-    fetchData();
-  }, [FullSerialNumber, ssdsshGUID, urlVCodeInt]);
-
-  useEffect(() => {
-    if (declaration && declaration.gcuVcodeInt) {
-      fetchGoods(declaration.gcuVcodeInt);
-    }
-  }, [declaration]);
-
-  if (loading) {
+  // Conditional Rendering based on loading and error states
+  if (loadingDeclarationDetails || loadingGoods) {
     return <div className="loading">در حال بارگذاری...</div>;
   }
 
-  if (error) {
+  if (errorDeclarationDetails) {
     return (
       <div className="error">
-        <p>{error}</p>
-        <Link to="/" className="back-link">بازگشت به لیست</Link>
+        <p>{errorDeclarationDetails}</p>
+        <Link to="/" className="back-link">
+          بازگشت به لیست
+        </Link>
       </div>
     );
+  }
+
+  if (!declarationDetails) {
+    return <div className="loading">در حال بارگذاری جزئیات...</div>;
   }
 
   return (
     <div className="customs-declaration-details-container">
       <h2 className="title">جزئیات اظهارنامه گمرکی و کالاها</h2>
       <div className="details-section">
-        <p><strong>شماره اعلامیه:</strong> {declaration.gcucustomsDeclarationSerialNumber || 'نامشخص'}</p>
-        <p><strong>تاریخ ارزیابی:</strong> {declaration.gcuassessmentDate ? new Date(declaration.gcuassessmentDate).toLocaleDateString('fa-IR') : 'نامشخص'}</p>
-        <p><strong>نام بانک:</strong> {declaration.gcubankName || 'نامشخص'}</p>
-        <p><strong>ارزش ارزی کل:</strong> {declaration.gcutotalCurrencyValue || 'نامشخص'}</p>
-        <p><strong>وضعیت اعلامیه:</strong> {declaration.DeclarationStatus || 'نامشخص'}</p>
-        <p><strong>تعداد اقلام:</strong> {declaration.gcuCommodityItemQuantity || 'نامشخص'}</p>
+        <p>
+          <strong>شماره اعلامیه:</strong> {declarationDetails.gcucustomsDeclarationSerialNumber || 'نامشخص'}
+        </p>
+        <p>
+          <strong>تاریخ ارزیابی:</strong>{' '}
+          {declarationDetails.gcuassessmentDate
+            ? new Date(declarationDetails.gcuassessmentDate).toLocaleDateString('fa-IR')
+            : 'نامشخص'}
+        </p>
+        <p>
+          <strong>نام بانک:</strong> {declarationDetails.gcubankName || 'نامشخص'}
+        </p>
+        <p>
+          <strong>ارزش ارزی کل:</strong> {declarationDetails.gcutotalCurrencyValue || 'نامشخص'}
+        </p>
+        <p>
+          <strong>وضعیت اعلامیه:</strong> {declarationDetails.DeclarationStatus || 'نامشخص'}
+        </p>
+        <p>
+          <strong>تعداد اقلام:</strong> {declarationDetails.gcucommodityItemQuantity || 'نامشخص'}
+        </p>
       </div>
 
       <h3>لیست کالاها</h3>
+      {errorGoods && <p className="error">{errorGoods}</p>}
       {goods.length === 0 ? (
         <p>هیچ کالایی یافت نشد.</p>
       ) : (
@@ -201,7 +152,7 @@ const CustomsDeclarationDetails = () => {
                 <td>{item.ggspackageCount}</td>
                 <td>{item.OriginCountryCode}</td>
                 <td>
-                  <button onClick={() => toggleDutyInfo(item.ggsVcodeInt)}>
+                  <button onClick={() => handleFetchCustomsDuty(item.ggsVcodeInt)}>
                     نمایش مالیات
                   </button>
                 </td>
@@ -211,12 +162,13 @@ const CustomsDeclarationDetails = () => {
         </table>
       )}
 
-      {activeDuty && customsDutyInfo[activeDuty] && (
+      {/* Customs Duty Overlay */}
+      {activeDutyOverlay && customsDutyInfo[activeDutyOverlay] && (
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
               <h3>مالیات‌های گمرکی</h3>
-              <button className="close-button" onClick={() => setActiveDuty(null)}>
+              <button className="close-button" onClick={handleCloseOverlay}>
                 ×
               </button>
             </div>
@@ -231,22 +183,51 @@ const CustomsDeclarationDetails = () => {
                 </tr>
               </thead>
               <tbody>
-                {customsDutyInfo[activeDuty].map((duty) => (
-                  <tr key={duty.cinVcodeInt}>
-                    <td>{duty.cintaxesCode}</td>
-                    <td>{duty.cintaxesAmount}</td>
-                    <td>{duty.cintaxesBase}</td>
-                    <td>{duty.cintaxesRate}</td>
-                    <td>{new Date(duty.cinInsertDate).toLocaleDateString('fa-IR')}</td>
-                  </tr>
-                ))}
+                <tr>
+                  <td>041</td>
+                  <td>{customsDutyInfo[activeDutyOverlay].import_rights}</td>
+                  <td>{customsDutyInfo[activeDutyOverlay].customs_value}</td>
+                  <td>N/A</td>
+                  <td>N/A</td>
+                </tr>
+                <tr>
+                  <td>042</td>
+                  <td>{customsDutyInfo[activeDutyOverlay].red_cersent}</td>
+                  <td>N/A</td>
+                  <td>N/A</td>
+                  <td>N/A</td>
+                </tr>
+                <tr>
+                  <td>047</td>
+                  <td>{customsDutyInfo[activeDutyOverlay].added_value}</td>
+                  <td>N/A</td>
+                  <td>N/A</td>
+                  <td>N/A</td>
+                </tr>
+                <tr>
+                  <td>049</td>
+                  <td>{customsDutyInfo[activeDutyOverlay].discount}</td>
+                  <td>N/A</td>
+                  <td>N/A</td>
+                  <td>N/A</td>
+                </tr>
               </tbody>
             </table>
           </div>
         </div>
       )}
 
-      <Link to="/" className="back-link">بازگشت به لیست</Link>
+      {/* Save Button and Messages */}
+      <button className="save-button" onClick={handleSave} disabled={savingData}>
+        {savingData ? 'در حال ذخیره...' : 'ذخیره در پایگاه داده'}
+      </button>
+      {saveMessage && <p className="save-message">{saveMessage}</p>}
+      {saveError && <p className="error">{saveError}</p>}
+
+      {/* Back Link */}
+      <Link to="/" className="back-link">
+        بازگشت به لیست
+      </Link>
     </div>
   );
 };

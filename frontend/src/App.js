@@ -7,6 +7,8 @@ import Navbar from './components/Navbar';
 import ImportProforma from './pages/ImportPrf';
 import CustomsDeclarationList from './components/CustomsDeclarationList';
 import CustomsDeclarationDetails from './components/CustomsDeclarationDetails';
+import CottageDetails from './pages/CottageDetails';
+
 import { Provider } from 'react-redux';
 import store from './store'; // Import the store you created
 import './App.css';
@@ -26,6 +28,7 @@ function App() {
             <Route path="/import-prf" element={<ImportProforma />} />
             <Route path="/declarations/:FullSerialNumber" element={<CustomsDeclarationDetails />} />
             <Route path="/decl" element={<CustomsDeclarationList />} />
+            <Route path="/cottages/:cottageNumber" element={<CottageDetails />} />
           </Routes>
         </main>
         </Provider>,

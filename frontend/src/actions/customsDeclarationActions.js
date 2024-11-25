@@ -17,6 +17,10 @@
     SAVE_DATA_REQUEST,
     SAVE_DATA_SUCCESS,
     SAVE_DATA_FAILURE,
+    SAVE_MULTIPLE_DECLARATIONS_REQUEST,
+    SAVE_MULTIPLE_DECLARATIONS_SUCCESS,
+    SAVE_MULTIPLE_DECLARATIONS_FAILURE,
+
   } from './actionTypes';
 
   // Synchronous Action Creators
@@ -93,7 +97,22 @@
     type: SAVE_DATA_FAILURE,
     payload: error,
   });
+  export const saveMultipleDeclarationsRequest = () => ({
+    type: SAVE_MULTIPLE_DECLARATIONS_REQUEST,
+  });
+  
+  export const saveMultipleDeclarationsSuccess = (message) => ({
+    type: SAVE_MULTIPLE_DECLARATIONS_SUCCESS,
+    payload: message,
+  });
+  
+  export const saveMultipleDeclarationsFailure = (error) => ({
+    type: SAVE_MULTIPLE_DECLARATIONS_FAILURE,
+    payload: error,
+  });
 
+  
+  
   // Asynchronous Action Creator (Thunk)
   export const fetchDeclarations = (ssdsshGUID, urlVCodeInt, pageSize) => {
     return async (dispatch) => {
@@ -275,7 +294,6 @@
         proforma_number: declaration.OrderRegistrationNumber,
         cottage_date: formattedCottageDate,
         total_value: declaration.gcutotalCurrencyValue,
-        currency_price: declaration.gcucurrencyRate,
         quantity: declaration.gcucommodityItemQuantity,
       };
   
@@ -333,12 +351,14 @@
           goods: updatedGoods.map((good) => ({
             ggsVcodeInt: good.ggsVcodeInt,
             ggscommodityItemNumber: good.ggscommodityItemNumber,
+            ggscommodityDescription: good.ggscommodityDescription,
             total_value: good.ggscommodityItemCurrencyValue,
             import_rights: good.import_rights || 0,
             customs_value: good.customs_value || 0,
             red_cersent: good.red_cersent || 0,
             added_value: good.added_value || 0,
             discount: good.discount || 0,
+            quantity: good.ggspackageCount,
           })),
         };
   
@@ -364,6 +384,44 @@
             : 'خطا در ذخیره اطلاعات.';
   
         dispatch({ type: 'SAVE_DATA_FAILURE', payload: errorMsg });
+      }
+    };
+  };
+  export const saveMultipleDeclarations = (declarations, ssdsshGUID, urlVCodeInt) => {
+    return async (dispatch, getState) => {
+      dispatch(saveMultipleDeclarationsRequest());
+  
+      try {
+        // Loop through declarations and save each one
+        for (const declaration of declarations) {
+          // Fetch declaration details
+          await dispatch(
+            fetchDeclarationDetails(declaration.FullSerialNumber, ssdsshGUID, urlVCodeInt)
+          );
+  
+          // Get the latest state after fetching declaration details
+          const { declarationDetails } = getState().customsDeclarations;
+  
+          // Fetch goods for the declaration
+          await dispatch(
+            fetchGoods(declarationDetails.gcuVcodeInt, ssdsshGUID, urlVCodeInt)
+          );
+  
+          // Get the latest state after fetching goods
+          const { goods } = getState().customsDeclarations;
+  
+          // Save data to the database
+          await dispatch(saveData(declarationDetails, goods, ssdsshGUID, urlVCodeInt));
+        }
+  
+        dispatch(saveMultipleDeclarationsSuccess('اظهارنامه‌ها با موفقیت ذخیره شدند.'));
+      } catch (error) {
+        console.error('Error during bulk save:', error);
+        const errorMsg =
+          error.response && error.response.data
+            ? error.response.data.ErrorDesc || JSON.stringify(error.response.data)
+            : 'خطا در ذخیره اظهارنامه‌ها.';
+        dispatch(saveMultipleDeclarationsFailure(errorMsg));
       }
     };
   };

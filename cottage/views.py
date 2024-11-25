@@ -55,23 +55,21 @@ class FetchGoodsAPIView(APIView):
             return Response({'error': 'Error fetching goods from external API'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class SaveCottageView(APIView):
-    """
-    API endpoint to save a cottage instance and its goods from external API data.
-    """
     def post(self, request):
         data = request.data  # Data from the frontend
         try:
             # Extract and validate main cottage data
             cottage_number = data.get('cottage_number')
-            proforma_number = data.get('proforma_number')  # Replace with your field key
+            proforma_number = data.get('proforma_number')
             cottage_date = data.get('cottage_date')
             total_value = Decimal(data.get('total_value', '0'))
-            currency_price = Decimal(data.get('currency_price', '0'))
             quantity = data.get('quantity')
+
+            # Leave `currency_price` as None to allow user input later
+            currency_price = None
 
             # Check if Proforma exists
             proforma = Performa.objects.get(prf_order_no=proforma_number)
-            
 
             # Create or update the Cottage instance
             cottage, created = Cottage.objects.update_or_create(
@@ -98,6 +96,7 @@ class SaveCottageView(APIView):
                         'total_value': Decimal(good.get('total_value', '0')),
                         'added_value': Decimal(good.get('added_value', '0')),
                         'discount': Decimal(good.get('discount', '0')),
+                        'quantity': good.get('quantity', 0),
                     }
                 )
 
@@ -133,6 +132,9 @@ class SaveCottageGoodsView(APIView):
                         'total_value': Decimal(good.get('total_value', '0')),
                         'added_value': Decimal(good.get('added_value', '0')),
                         'discount': Decimal(good.get('discount', '0')),
+                        'quantity': Decimal(good.get('quantity', '0')),
+                        'goods_description': good.get('ggscommodityDescription','0')
+
                     }
                 )
 
@@ -185,10 +187,11 @@ class FetchCustomsDutyInformationAPIView(APIView):
 class CottageViewSet(viewsets.ModelViewSet):
     queryset = Cottage.objects.all()
     serializer_class = CottageSerializer
+
+    # Custom action to get a cottage by number (read-only)
     @action(detail=False, methods=['get'], url_path='by-number/(?P<cottage_number>[^/.]+)')
     def get_by_cottage_number(self, request, cottage_number=None):
         try:
-            # Retrieve the cottage by its number
             cottage = Cottage.objects.get(cottage_number=cottage_number)
             serializer = CottageSerializer(cottage)
             return Response(serializer.data, status=status.HTTP_200_OK)

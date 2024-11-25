@@ -3,6 +3,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { combineReducers } from 'redux';
 import { cottageReducer } from './reducers/cottageReducers';
+import { cottageDetailsReducer } from './reducers/cottageReducers'
 import { customsDeclarationReducer } from './reducers/customsDeclarationReducers';
 import { loadCustomsParams, saveCustomsParams } from './utils/localSotrage/localstorage';
 
@@ -13,6 +14,7 @@ const persistedParams = loadCustomsParams();
 const rootReducer = combineReducers({
   cottages: cottageReducer,
   customsDeclarations: customsDeclarationReducer,
+  cottageDetails: cottageDetailsReducer
 });
 
 // Configure the store with preloaded state

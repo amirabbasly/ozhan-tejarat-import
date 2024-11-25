@@ -1,0 +1,69 @@
+/* src/components/CottageDetails.css */
+
+.cottage-details-container {
+    direction: rtl;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 100px;
+}
+
+.header {
+    text-align: center;
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.cottage-info {
+    margin-bottom: 20px;
+    font-size: 1rem;
+    color: #555;
+}
+
+.cottage-info p {
+    margin: 8px 0;
+}
+
+.goods-header {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.goods-table {
+    width: 100%;
+    direction: rtl;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.goods-table thead {
+    background-color: #333;
+    color: #fff;
+}
+
+.goods-table th,
+.goods-table td {
+    border-top: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+
+.goods-table tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.loading,
+.error,
+.no-details,
+.no-goods {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #d9534f;
+    margin-top: 20px;
+}

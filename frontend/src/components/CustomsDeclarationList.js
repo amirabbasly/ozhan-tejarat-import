@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchDeclarations } from '../actions/customsDeclarationActions';
+import { fetchDeclarations,saveMultipleDeclarations } from '../actions/customsDeclarationActions';
 import { setCustomsParams, clearCustomsParams } from '../actions/customsParamsAction'; // Import actions
 import './CustomsDeclarationList.css'; // Import the CSS file
 import { Link } from 'react-router-dom';
@@ -11,14 +11,63 @@ const CustomsDeclarationList = () => {
   const dispatch = useDispatch();
 
   // Access customs declarations state and stored parameters from Redux store
-  const { declarations, loading, error, ssdsshGUID, urlVCodeInt } = useSelector(
-    (state) => state.customsDeclarations
-  );
+  const {
+    declarations,
+    loadingDeclarations: loading,
+    errorDeclarations: error,
+    ssdsshGUID,
+    urlVCodeInt,
+    savingMultipleDeclarations,
+    saveMultipleDeclarationsError,
+    saveMultipleDeclarationsMessage,
+  } = useSelector((state) => state.customsDeclarations);
+  const [selectedDeclarations, setSelectedDeclarations] = useState([]);
+  
+  const handleSelectDeclaration = (event, declaration) => {
+    const { checked } = event.target;
+    let updatedSelections;
+  
+    if (checked) {
+      updatedSelections = [...selectedDeclarations, declaration];
+    } else {
+      updatedSelections = selectedDeclarations.filter(
+        (item) => item.FullSerialNumber !== declaration.FullSerialNumber
+      );
+    }
+  
+    setSelectedDeclarations(updatedSelections);
+  
+    // Update areAllSelected state
+    setAreAllSelected(updatedSelections.length === declarations.length);
+  };
+  const handleSaveSelected = () => {
+    if (selectedDeclarations.length === 0) {
+      alert('لطفاً حداقل یک اظهارنامه را انتخاب کنید.');
+      return;
+    }
 
+    // Dispatch the save action
+    dispatch(saveMultipleDeclarations(selectedDeclarations, ssdsshGUID, urlVCodeInt));
+  };
   // Local state for form inputs
   const [guidInput, setGuidInput] = useState(ssdsshGUID);
   const [codeInput, setCodeInput] = useState(urlVCodeInt);
-  const [pageSize, setPageSize] = useState(20000); // Default PageSize
+  const [pageSize, setPageSize] = useState(20); // Default PageSize
+const [areAllSelected, setAreAllSelected] = useState(false);
+
+const handleSelectAll = (event) => {
+  const { checked } = event.target;
+  setAreAllSelected(checked);
+
+  if (checked) {
+    // Select all declarations
+    setSelectedDeclarations(declarations);
+  } else {
+    // Deselect all declarations
+    setSelectedDeclarations([]);
+  }
+};
+
 
   // Synchronize local state with Redux state
   useEffect(() => {
@@ -125,6 +174,20 @@ const CustomsDeclarationList = () => {
           </p>
         </div>
       )}
+       {/* Save Selected Button */}
+       <button
+        className="save-selected-button"
+        onClick={handleSaveSelected}
+        disabled={selectedDeclarations.length === 0 || savingMultipleDeclarations}
+      >
+        {savingMultipleDeclarations ? 'در حال ذخیره...' : 'ذخیره اظهارنامه‌های انتخاب‌شده'}
+      </button>
+
+      {/* Success and Error Messages */}
+      {saveMultipleDeclarationsMessage && (
+        <p className="save-message">{saveMultipleDeclarationsMessage}</p>
+      )}
+      {saveMultipleDeclarationsError && <p className="error">{saveMultipleDeclarationsError}</p>}
 
       {/* Declarations Table */}
       {!loading && !error && declarations.length > 0 && (
@@ -133,6 +196,13 @@ const CustomsDeclarationList = () => {
           <table className="customs-table">
             <thead>
               <tr>
+              <th>
+      <input
+        type="checkbox"
+        onChange={handleSelectAll}
+        checked={areAllSelected}
+      />
+    </th>
                 <th>ردیف</th> 
                 <th>کد ملی</th>
                 <th>شماره سریال کامل</th>
@@ -151,6 +221,16 @@ const CustomsDeclarationList = () => {
             <tbody>
               {declarations.map((item, index) => (
                 <tr key={item.FullSerialNumber || index}>
+                   <td>
+                    <input
+                      type="checkbox"
+                      onChange={(e) => handleSelectDeclaration(e, item)}
+                      checked={selectedDeclarations.some(
+                        (decl) =>
+                          decl.FullSerialNumber === item.FullSerialNumber
+                      )}
+                    />
+                  </td>
                   <td>{index + 1}</td> {/* Row Index */}
                   <td>{item.NationalCode || 'نامشخص'}</td>
                   <td>{item.FullSerialNumber || 'نامشخص'}</td>

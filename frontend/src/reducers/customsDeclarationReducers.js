@@ -16,6 +16,9 @@ import {
   SAVE_DATA_REQUEST,
   SAVE_DATA_SUCCESS,
   SAVE_DATA_FAILURE,
+  SAVE_MULTIPLE_DECLARATIONS_REQUEST,
+  SAVE_MULTIPLE_DECLARATIONS_SUCCESS,
+  SAVE_MULTIPLE_DECLARATIONS_FAILURE,
   SET_CUSTOMS_PARAMS,
   CLEAR_CUSTOMS_PARAMS,
 } from '../actions/actionTypes';
@@ -189,6 +192,29 @@ export const customsDeclarationReducer = (state = initialState, action) => {
           ssdsshGUID: '',
           urlVCodeInt: '',
         };
+           // Save Multiple Declarations
+    case SAVE_MULTIPLE_DECLARATIONS_REQUEST:
+      return {
+        ...state,
+        savingMultipleDeclarations: true,
+        saveMultipleDeclarationsError: '',
+        saveMultipleDeclarationsMessage: '',
+      };
+    case SAVE_MULTIPLE_DECLARATIONS_SUCCESS:
+      return {
+        ...state,
+        savingMultipleDeclarations: false,
+        saveMultipleDeclarationsError: '',
+        saveMultipleDeclarationsMessage: action.payload,
+      };
+    case SAVE_MULTIPLE_DECLARATIONS_FAILURE:
+      return {
+        ...state,
+        savingMultipleDeclarations: false,
+        saveMultipleDeclarationsError: action.payload,
+        saveMultipleDeclarationsMessage: '',
+      };
+
 
     default:
       return state;

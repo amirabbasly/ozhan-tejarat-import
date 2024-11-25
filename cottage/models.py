@@ -8,18 +8,34 @@ class Cottage(models.Model):
     proforma = models.ForeignKey(Performa, to_field='prf_order_no', on_delete=models.CASCADE, related_name='cottages')
     total_value = models.DecimalField(max_digits=15, decimal_places=2)
     quantity = models.PositiveIntegerField()
-    currency_price = models.DecimalField(max_digits=20, decimal_places=2)
-
-
-
+    currency_price = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
 
     def __str__(self):
         return f"Cottage {self.cottage_number} - {self.proforma}"
+
+    def save(self, *args, **kwargs):
+        # Check if currency_price is being updated
+        if self.pk:
+            old_instance = Cottage.objects.get(pk=self.pk)
+            if old_instance.currency_price != self.currency_price:
+                # Recalculate all related CottageGoods
+                self.recalculate_goods()
+
+        super().save(*args, **kwargs)
+
+    def recalculate_goods(self):
+        # Recalculate all related goods when the currency_price changes
+        related_goods = self.cottage_goods.all()
+        for good in related_goods:
+            good.recalculate_fields()
+            good.save()
+
 class CottageGoods(models.Model):
     goodscode = models.CharField(unique=True,max_length=20)
-    cottage = models.ForeignKey(Cottage, on_delete=models.CASCADE)
+    cottage = models.ForeignKey(Cottage, related_name='cottage_goods', on_delete=models.CASCADE)
     customs_value = models.DecimalField(max_digits=20, decimal_places=2)
     import_rights = models.DecimalField(max_digits=20, decimal_places=2)
+    quantity = models.PositiveIntegerField(null=True, blank=True) 
     red_cersent = models.DecimalField(max_digits=20, decimal_places=2)
     total_value = models.DecimalField(max_digits=15, decimal_places=2)
     added_value = models.DecimalField(max_digits=20, decimal_places=2)
@@ -28,6 +44,7 @@ class CottageGoods(models.Model):
     hhhg = models.DecimalField(max_digits=20, decimal_places=2, blank=True, editable=False, default=0)
     other_expense = models.DecimalField(max_digits=20, decimal_places=2, blank=True, editable=False, default=0)
     final_price = models.IntegerField(blank=True, editable=False, default=0)
+    goods_description = models.CharField(null=True, blank=True, max_length=500)
 
     def calculate_riali(self):
         return (self.total_value or Decimal(0)) * (self.cottage.currency_price or Decimal(0))
@@ -45,6 +62,13 @@ class CottageGoods(models.Model):
 
     def calculate_final_price(self):
         return (self.hhhg or Decimal(0)) + (self.other_expense or Decimal(0))
+
+    def recalculate_fields(self):
+        """Method to recalculate all necessary fields for this good."""
+        self.riali = self.calculate_riali()
+        self.hhhg = self.calculate_hhhg()
+        self.other_expense = self.calculate_other_expense()
+        self.final_price = self.calculate_final_price()
 
 
     def save(self, *args, **kwargs):

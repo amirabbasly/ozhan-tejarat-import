@@ -38,7 +38,7 @@ class FetchGoodsAPIView(APIView):
                 external_api_url,
                 json=payload,
                 headers={'Content-Type': 'application/json'},
-                timeout=10
+                timeout=30
             )
             external_response.raise_for_status()
 
@@ -169,7 +169,7 @@ class FetchCustomsDutyInformationAPIView(APIView):
                 external_api_url,
                 json=payload,
                 headers={'Content-Type': 'application/json'},
-                timeout=10
+                timeout=30
             )
             external_response.raise_for_status()
 
@@ -251,7 +251,7 @@ class CustomsDeclarationListView(APIView):
                 'https://www.ntsw.ir/users/Ac/Gateway/FacadeRest/api/Customs/NTSW_GetAllCustomizeCustomsDeclaration',
                 json=payload,
                 headers={'Content-Type': 'application/json'},
-                timeout=10
+                timeout=30
             )
             response.raise_for_status()
 
@@ -316,7 +316,7 @@ class GreenCustomsDeclarationView(APIView):
                 api_url,
                 json=payload,
                 headers=headers,
-                timeout=10  # seconds
+                timeout=30  # seconds
             )
             response.raise_for_status()  # Raise HTTPError for bad responses
 

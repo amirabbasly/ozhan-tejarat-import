@@ -2,17 +2,18 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchDeclarations,saveMultipleDeclarations } from '../actions/customsDeclarationActions';
-import { setCustomsParams, clearCustomsParams } from '../actions/customsParamsAction'; // Import actions
+import { fetchDeclarations, saveMultipleDeclarations } from '../actions/customsDeclarationActions';
+import { setCustomsParams, clearCustomsParams } from '../actions/customsParamsAction';
 import './CustomsDeclarationList.css'; // Import the CSS file
 import { Link } from 'react-router-dom';
 
 const CustomsDeclarationList = () => {
   const dispatch = useDispatch();
 
-  // Access customs declarations state and stored parameters from Redux store
+  // Redux state with default values to prevent undefined
+  const customsDeclarations = useSelector((state) => state.customsDeclarations) || {};
   const {
-    declarations,
+    declarations = [],
     loadingDeclarations: loading,
     errorDeclarations: error,
     ssdsshGUID,
@@ -20,13 +21,31 @@ const CustomsDeclarationList = () => {
     savingMultipleDeclarations,
     saveMultipleDeclarationsError,
     saveMultipleDeclarationsMessage,
-  } = useSelector((state) => state.customsDeclarations);
+    savingMultipleDeclarationsProgress = { current: 0, total: 0 },
+    failedDeclarations = [],
+  } = customsDeclarations;
+
+  // Local state
   const [selectedDeclarations, setSelectedDeclarations] = useState([]);
-  
+  const [areAllSelected, setAreAllSelected] = useState(false);
+  const [guidInput, setGuidInput] = useState(ssdsshGUID || '');
+  const [codeInput, setCodeInput] = useState(urlVCodeInt || '');
+  const [pageSize, setPageSize] = useState(20);
+
+  // Debugging: Log Redux state
+  useEffect(() => {
+    console.log('Declarations:', declarations);
+    console.log('Saving Progress:', savingMultipleDeclarationsProgress);
+    console.log('Failed Declarations:', failedDeclarations);
+    console.log('Save Message:', saveMultipleDeclarationsMessage);
+    console.log('Save Message Type:', typeof saveMultipleDeclarationsMessage);
+  }, [declarations, savingMultipleDeclarationsProgress, failedDeclarations, saveMultipleDeclarationsMessage]);
+
+  // Handle individual declaration selection
   const handleSelectDeclaration = (event, declaration) => {
     const { checked } = event.target;
-    let updatedSelections;
-  
+    let updatedSelections = [];
+
     if (checked) {
       updatedSelections = [...selectedDeclarations, declaration];
     } else {
@@ -34,79 +53,63 @@ const CustomsDeclarationList = () => {
         (item) => item.FullSerialNumber !== declaration.FullSerialNumber
       );
     }
-  
+
     setSelectedDeclarations(updatedSelections);
-  
-    // Update areAllSelected state
     setAreAllSelected(updatedSelections.length === declarations.length);
   };
-  const handleSaveSelected = () => {
-    if (selectedDeclarations.length === 0) {
-      alert('لطفاً حداقل یک اظهارنامه را انتخاب کنید.');
-      return;
-    }
 
-    // Dispatch the save action
-    dispatch(saveMultipleDeclarations(selectedDeclarations, ssdsshGUID, urlVCodeInt));
+  // Handle "Select All"
+  const handleSelectAll = (event) => {
+    const { checked } = event.target;
+    setAreAllSelected(checked);
+    setSelectedDeclarations(checked ? [...declarations] : []);
   };
-  // Local state for form inputs
-  const [guidInput, setGuidInput] = useState(ssdsshGUID);
-  const [codeInput, setCodeInput] = useState(urlVCodeInt);
-  const [pageSize, setPageSize] = useState(20); // Default PageSize
-const [areAllSelected, setAreAllSelected] = useState(false);
 
-const handleSelectAll = (event) => {
-  const { checked } = event.target;
-  setAreAllSelected(checked);
-
-  if (checked) {
-    // Select all declarations
-    setSelectedDeclarations(declarations);
-  } else {
-    // Deselect all declarations
-    setSelectedDeclarations([]);
-  }
-};
-
-
-  // Synchronize local state with Redux state
+  // Synchronize input state with Redux
   useEffect(() => {
-    setGuidInput(ssdsshGUID);
-    setCodeInput(urlVCodeInt);
+    setGuidInput(ssdsshGUID || '');
+    setCodeInput(urlVCodeInt || '');
   }, [ssdsshGUID, urlVCodeInt]);
 
-  // Handler for form submission
+  // Handle form submission to fetch declarations
   const handleSubmit = (e) => {
-    e.preventDefault(); // Prevent page reload
+    e.preventDefault();
 
-    // Validate inputs
     if (!guidInput || !codeInput || !pageSize) {
       alert('لطفاً همه فیلدها را پر کنید.');
       return;
     }
 
-    // Dispatch the setCustomsParams action to store parameters in Redux
     dispatch(setCustomsParams(guidInput.trim(), codeInput.trim()));
-
-    // Dispatch the fetchDeclarations action with the entered parameters
     dispatch(fetchDeclarations(guidInput.trim(), codeInput.trim(), pageSize));
   };
 
-  // Handler to clear parameters
+  // Clear parameters
   const handleClearParams = () => {
     if (window.confirm('آیا مطمئن هستید که می‌خواهید پارامترها را پاک کنید؟')) {
       dispatch(clearCustomsParams());
       setGuidInput('');
       setCodeInput('');
+      setSelectedDeclarations([]);
+      setAreAllSelected(false);
       alert('پارامترها پاک شدند.');
     }
+  };
+
+  // Save selected declarations
+  const handleSaveSelected = () => {
+    if (selectedDeclarations.length === 0) {
+      alert('لطفاً حداقل یک اظهارنامه را انتخاب کنید.');
+      return;
+    }
+    dispatch(saveMultipleDeclarations(selectedDeclarations, ssdsshGUID, urlVCodeInt));
   };
 
   return (
     <div className="customs-declaration-container">
       <h2 className="title">لیست اظهارنامه‌های گمرکی</h2>
 
-      {/* Form for user inputs */}
+      {/* Form for inputs */}
       <form className="declaration-form" onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="ssdsshGUID">ssdsshGUID:</label>
@@ -150,7 +153,12 @@ const handleSelectAll = (event) => {
           <button type="submit" className="submit-button" disabled={loading}>
             دریافت اطلاعات
           </button>
-          <button type="button" className="clear-button" onClick={handleClearParams} disabled={!ssdsshGUID && !urlVCodeInt}>
+          <button
+            type="button"
+            className="clear-button"
+            onClick={handleClearParams}
+            disabled={!ssdsshGUID && !urlVCodeInt}
+          >
             پاک کردن پارامترها
           </button>
         </div>
@@ -162,48 +170,70 @@ const handleSelectAll = (event) => {
       {/* Error Message */}
       {error && <p className="error">{error}</p>}
 
-      {/* Display Current Parameters */}
+      {/* Current Parameters */}
       {ssdsshGUID && urlVCodeInt && (
         <div className="current-params">
           <h3>پارامترهای فعلی:</h3>
-          <p>
-            <strong>SSDSSH GUID:</strong> {ssdsshGUID}
-          </p>
-          <p>
-            <strong>URL VCode Int:</strong> {urlVCodeInt}
-          </p>
+          <p><strong>SSDSSH GUID:</strong> {ssdsshGUID}</p>
+          <p><strong>URL VCode Int:</strong> {urlVCodeInt}</p>
         </div>
       )}
-       {/* Save Selected Button */}
-       <button
+
+      {/* Save Selected Button */}
+      <button
         className="save-selected-button"
         onClick={handleSaveSelected}
         disabled={selectedDeclarations.length === 0 || savingMultipleDeclarations}
       >
-        {savingMultipleDeclarations ? 'در حال ذخیره...' : 'ذخیره اظهارنامه‌های انتخاب‌شده'}
+        {savingMultipleDeclarations
+          ? `در حال ذخیره (${savingMultipleDeclarationsProgress.current}/${savingMultipleDeclarationsProgress.total})`
+          : 'ذخیره اظهارنامه‌های انتخاب‌شده'}
       </button>
 
-      {/* Success and Error Messages */}
-      {saveMultipleDeclarationsMessage && (
-        <p className="save-message">{saveMultipleDeclarationsMessage}</p>
+      {/* Progress Bar */}
+      {savingMultipleDeclarations && (
+        <div className="progress-container">
+          <progress
+            value={savingMultipleDeclarationsProgress.current || 0}
+            max={savingMultipleDeclarationsProgress.total || selectedDeclarations.length || 1} // Prevent max=0
+          />
+          <p>{`در حال ذخیره ${savingMultipleDeclarationsProgress.current || 0}/${savingMultipleDeclarationsProgress.total || selectedDeclarations.length || 0}`}</p>
+        </div>
       )}
+
+      {/* Success and Error Messages */}
+      {saveMultipleDeclarationsMessage && typeof saveMultipleDeclarationsMessage === 'string' && (
+        <div>
+          <p className="save-message">{saveMultipleDeclarationsMessage}</p>
+          {failedDeclarations.length > 0 && (
+            <div>
+              <h3>موارد ذخیره نشده:</h3>
+              <ul>
+                {failedDeclarations.map((serial) => (
+                  <li key={serial}>Declaration Serial: {serial}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+
       {saveMultipleDeclarationsError && <p className="error">{saveMultipleDeclarationsError}</p>}
 
       {/* Declarations Table */}
       {!loading && !error && declarations.length > 0 && (
-        <div className='customdec-list-container'>
-          {console.log('Declarations:', declarations)} {/* Verify declarations */}
+        <div className="customdec-list-container">
           <table className="customs-table">
             <thead>
               <tr>
-              <th>
-      <input
-        type="checkbox"
-        onChange={handleSelectAll}
-        checked={areAllSelected}
-      />
-    </th>
-                <th>ردیف</th> 
+                <th>
+                  <input
+                    type="checkbox"
+                    onChange={handleSelectAll}
+                    checked={areAllSelected}
+                  />
+                </th>
+                <th>ردیف</th>
                 <th>کد ملی</th>
                 <th>شماره سریال کامل</th>
                 <th>تاریخ اظهار</th>
@@ -221,17 +251,14 @@ const handleSelectAll = (event) => {
             <tbody>
               {declarations.map((item, index) => (
                 <tr key={item.FullSerialNumber || index}>
-                   <td>
+                  <td>
                     <input
                       type="checkbox"
                       onChange={(e) => handleSelectDeclaration(e, item)}
-                      checked={selectedDeclarations.some(
-                        (decl) =>
-                          decl.FullSerialNumber === item.FullSerialNumber
-                      )}
+                      checked={selectedDeclarations.some((decl) => decl.FullSerialNumber === item.FullSerialNumber)}
                     />
                   </td>
-                  <td>{index + 1}</td> {/* Row Index */}
+                  <td>{index + 1}</td>
                   <td>{item.NationalCode || 'نامشخص'}</td>
                   <td>{item.FullSerialNumber || 'نامشخص'}</td>
                   <td>{item.gcupreDeclarationDate || 'نامشخص'}</td>
@@ -244,8 +271,8 @@ const handleSelectAll = (event) => {
                   <td>{item.gculCReferenceNumber || 'نامشخص'}</td>
                   <td>{item.gcuCommodityItemQuantity || 'نامشخص'}</td>
                   <td>
-                    <Link 
-                      to={`/declarations/${encodeURIComponent(item.FullSerialNumber)}`} 
+                    <Link
+                      to={`/declarations/${encodeURIComponent(item.FullSerialNumber)}`}
                       className="details-link"
                     >
                       جزئیات
@@ -259,9 +286,7 @@ const handleSelectAll = (event) => {
       )}
 
       {/* No Declarations Message */}
-      {!loading && !error && declarations.length === 0 && (
-        <p className="no-data">هیچ اظهارنامه‌ای یافت نشد.</p>
-      )}
+      {!loading && !error && declarations.length === 0 && <p className="no-data">هیچ اظهارنامه‌ای یافت نشد.</p>}
     </div>
   );
 };

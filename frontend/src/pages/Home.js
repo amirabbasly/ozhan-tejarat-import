@@ -1,10 +1,11 @@
 import React from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCog, faFileAlt, faDollarSign } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+
 
 import "./Home.css"
 const Home = () => {
+        
   return (
     <div className='home'>
 

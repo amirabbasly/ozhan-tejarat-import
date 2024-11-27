@@ -14,7 +14,7 @@ class Performa(models.Model):
     prf_date = models.DateTimeField(null=True, blank=True)  # Changed to DateTimeField for precise timestamps
     prf_expire_date = models.DateTimeField(null=True, blank=True)  # Changed to DateTimeField
     prfVCodeInt = models.CharField(max_length=50, unique=True)  # Assuming this is a unique identifier
-    ssdsshGUID = models.CharField(max_length=255, default="")  
+
 
     def __str__(self):
         return self.prf_order_no

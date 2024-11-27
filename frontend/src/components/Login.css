@@ -1,0 +1,88 @@
+/* src/components/Login.css */
+
+body {
+    font-family: 'Vazir', sans-serif; /* You can use any Persian/Arabic web-safe font or Google Fonts */
+}
+
+.login-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: #f9f9f9;
+}
+
+.login-box {
+    background-color: #ffffff;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    max-width: 400px;
+    width: 100%;
+}
+
+h2 {
+    margin-bottom: 30px;
+    font-size: 1.5rem;
+    color: #333333;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+input[type='email'],
+input[type='password'] {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #e0e0e0;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+input[type='email']::placeholder,
+input[type='password']::placeholder {
+    color: #b3b3b3;
+}
+
+.remember-me {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+}
+
+.remember-me input {
+    margin-left: 10px;
+}
+
+.login-button {
+    width: 100%;
+    padding: 10px;
+    background-color: #20e2ad;
+    border: none;
+    border-radius: 5px;
+    color: #ffffff;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.login-button:hover {
+    background-color: #1bc495;
+}
+
+.error-message {
+    color: red;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+}
+
+.login-footer {
+    margin-top: 20px;
+    font-size: 0.8rem;
+    color: #888888;
+}

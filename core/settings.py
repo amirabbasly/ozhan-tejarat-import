@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
+
 import os
 
 
@@ -27,7 +29,7 @@ SECRET_KEY = 'django-insecure-1sthzzzc)04fopf0(zw9tkrsw+#y^rb5-)$i#p@13kf4oj$vep
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -39,6 +41,7 @@ INSTALLED_APPS = [
     'corsheaders',             
     'proforma',
     'cottage',
+    'accounts',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -104,8 +107,24 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # React frontend URL
 ]
-
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+}
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),  # Set to 15 minutes or longer
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),     # Set to 7 days or longer
+    'ROTATE_REFRESH_TOKENS': False,                 # Do not rotate refresh tokens unless required
+    'BLACKLIST_AFTER_ROTATION': False,
+}
 ROOT_URLCONF = 'core.urls'
+
+AUTH_USER_MODEL = 'accounts.CustomUser'
+
 
 TEMPLATES = [
     {

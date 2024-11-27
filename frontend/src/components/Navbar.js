@@ -1,16 +1,27 @@
   import React, {useState} from 'react';
-  import { Link } from 'react-router-dom';
+  import { Link, useNavigate } from 'react-router-dom';
   import './Navbar.css';
+  import { logout } from '../actions/authActions';
+  import { useDispatch, useSelector } from 'react-redux';
+
 
   const Navbar = () => {
+    const dispatch = useDispatch();
+    const user = useSelector((state) => state.auth.user);
+    const auth = useSelector((state) => state.auth);
+
+    const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+
     const [showSubmenu, setShowSubmenu] = useState({
       asnad: false,
       tanzimat: false,
       karbar: false,
       notifications: false,
     });
-  
+
     const [showMenu, setShowMenu] = useState(false);
+    const navigate = useNavigate();
+
   
     const handleMouseEnter = (menu) => {
       setShowSubmenu((prevState) => ({ ...prevState, [menu]: true }));
@@ -26,6 +37,10 @@
   
     const closeMenu = () => {
       setShowMenu(false);
+    };
+    const handleLogout = () => {
+      dispatch (logout())
+      navigate('/login');
     };
 
     return (
@@ -129,7 +144,7 @@
   <path d="M26 21.6667C30.7865 21.6667 34.6667 17.7865 34.6667 13C34.6667 8.21353 30.7865 4.33333 26 4.33333C21.2136 4.33333 17.3334 8.21353 17.3334 13C17.3334 17.7865 21.2136 21.6667 26 21.6667Z" stroke="#6B6B6B" stroke-width="1.5"/>
   <path d="M43.329 39C43.3319 38.6447 43.3334 38.2835 43.3334 37.9167C43.3334 32.5325 35.5724 28.1667 26 28.1667C16.4277 28.1667 8.66669 32.5325 8.66669 37.9167C8.66669 43.3008 8.66669 47.6667 26 47.6667C30.8339 47.6667 34.32 47.3265 36.8334 46.7198" stroke="#6B6B6B" stroke-width="1.5" stroke-linecap="round"/>
 </svg>
-            <span>کاربر</span>
+<span>{isAuthenticated && user ? user.username : 'کاربر'}</span>
 
             {/* Submenu for User */}
             {showSubmenu.karbar && (
@@ -138,8 +153,11 @@
                   <Link to="/user/profile">پروفایل من</Link>
                 </li>
                 <li className="submenu-item">
-                  <Link to="/user/logout">خروج</Link>
-                </li>
+                                        {/* Attach Logout Handler */}
+                                        <button className="submenu-link logout-btn" onClick={handleLogout}>
+                                            خروج
+                                        </button>
+                                    </li>
               </ul>
             )}
           </li>

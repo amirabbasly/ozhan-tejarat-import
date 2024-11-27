@@ -41,6 +41,11 @@ const initialState = {
   saveMessage: '',
   ssdsshGUID: '',
   urlVCodeInt: '',
+  savingMultipleDeclarations: false,
+  saveMultipleDeclarationsProgress: { current: 0, total: 0 },
+  saveMultipleDeclarationsMessage: '',
+  saveMultipleDeclarationsError: '',
+  failedDeclarations: []
 };
 
 export const customsDeclarationReducer = (state = initialState, action) => {
@@ -213,6 +218,36 @@ export const customsDeclarationReducer = (state = initialState, action) => {
         savingMultipleDeclarations: false,
         saveMultipleDeclarationsError: action.payload,
         saveMultipleDeclarationsMessage: '',
+      };
+    case 'SAVE_MULTIPLE_DECLARATIONS_REQUEST':
+      return {
+        ...state,
+        savingMultipleDeclarations: true,
+        saveMultipleDeclarationsProgress: { current: 0, total: action.payload?.total || 0 },
+        saveMultipleDeclarationsError: '',
+        saveMultipleDeclarationsMessage: '',
+        failedDeclarations: [],
+      };
+    
+    case 'SAVE_MULTIPLE_DECLARATIONS_PROGRESS':
+      return {
+        ...state,
+        saveMultipleDeclarationsProgress: action.payload,
+      };
+    
+    case 'SAVE_MULTIPLE_DECLARATIONS_SUCCESS':
+      return {
+        ...state,
+        savingMultipleDeclarations: false,
+        saveMultipleDeclarationsMessage: action.payload.message,
+        failedDeclarations: action.payload.failedDeclarations || [],
+      };
+    
+    case 'SAVE_MULTIPLE_DECLARATIONS_FAILURE':
+      return {
+        ...state,
+        savingMultipleDeclarations: false,
+        saveMultipleDeclarationsError: action.payload,
       };
 
 

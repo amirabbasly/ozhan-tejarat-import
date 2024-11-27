@@ -105,6 +105,7 @@ const CottageList = () => {
                       checked={areAllSelected}
                     />
                   </th>
+                  <th> ردیف</th>
                   <th>شماره کوتاژ</th>
                   <th>تاریخ</th>
                   <th>شماره پرفورم</th>
@@ -114,7 +115,7 @@ const CottageList = () => {
                 </tr>
               </thead>
               <tbody>
-                {cottages.map((cottage) => {
+                {cottages.map((cottage, index) => {
                   const isChecked = selectedCottages.some(
                     (selectedCottage) => selectedCottage.id === cottage.id
                   );
@@ -132,6 +133,7 @@ const CottageList = () => {
                           onChange={(e) => handleSelectCottage(e, cottage)}
                         />
                       </td>
+                      <td>{index + 1}</td>
                       <td>{cottage.cottage_number}</td>
                       <td>{cottage.cottage_date}</td>
                       <td>{cottage.proforma}</td>

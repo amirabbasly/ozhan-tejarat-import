@@ -6,8 +6,17 @@ import {
 } from '../actions/cottageActions';
 import './CottageList.css';
 import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+
 
 const CottageList = () => {
+  const navigate = useNavigate ();
+  const auth = useSelector((state) => state.auth);
+  useEffect(() => {
+    if (auth.isAuthenticated===false) {
+        navigate('/');
+    }
+}, [auth.isAuthenticated, navigate]);
   const dispatch = useDispatch();
 
   // Access cottages state from Redux store
@@ -26,6 +35,17 @@ const CottageList = () => {
   useEffect(() => {
     dispatch(fetchCottages());
   }, [dispatch]);
+  useEffect(() => {
+    if (Object.keys(updatingCurrencyPrice || {}).length === 0) {
+      // Fetch updated cottages when all updates are complete
+      dispatch(fetchCottages());
+    }
+  }, [updatingCurrencyPrice, dispatch]);
+  useEffect(() => {
+    console.log('Error:', error);
+    console.log('Update Currency Price Error:', updateCurrencyPriceError);
+  }, [error, updateCurrencyPriceError]);
+  
 
   const handleSelectCottage = (event, cottage) => {
     const { checked } = event.target;
@@ -59,16 +79,30 @@ const CottageList = () => {
       alert('لطفاً حداقل یک کوتاژ را انتخاب کرده و نرخ ارز را وارد کنید.');
       return;
     }
-
-    selectedCottages.forEach((cottage) => {
-      dispatch(updateCottageCurrencyPrice(cottage.id, currencyPrice));
-    });
+  
+    // Create an array of promises from dispatching the update actions
+    const updatePromises = selectedCottages.map((cottage) =>
+      dispatch(updateCottageCurrencyPrice(cottage.id, currencyPrice))
+    );
+  
+    // Wait for all update actions to complete
+    Promise.all(updatePromises)
+      .then(() => {
+        // After all updates, fetch the cottages again
+        dispatch(fetchCottages());
+        alert('نرخ ارز برای اظهارنامه های انتخاب شده به‌روزرسانی شد.');
+      })
+      .catch((error) => {
+        console.error('Error updating currency price:', error);
+        alert('خطا در به‌روزرسانی نرخ ارز برای برخی از کوتاژها.');
+      });
   };
+  
 
   return (
     <div className="cottage-cont">
       <div className="cottage-list-container">
-        <h2>لیست کوتاژ ها</h2>
+        <h2>لیست اظهارنامه ها</h2>
 
         {/* Currency Price Section */}
         <div className="currency-price-section">
@@ -93,7 +127,7 @@ const CottageList = () => {
         {error && <p className="error">{error}</p>}
         {!loading && !error && (
           cottages.length === 0 ? (
-            <p className="no-data">هیچ کوتاژی موجود نیست.</p>
+            <p className="no-data">هیچ اظهارنامه ای موجود نیست.</p>
           ) : (
             <table className="cottage-table">
               <thead>
@@ -121,8 +155,8 @@ const CottageList = () => {
                   );
                   const isUpdating =
                     updatingCurrencyPrice && updatingCurrencyPrice[cottage.id];
-                  const updateError =
-                    updateCurrencyPriceError && updateCurrencyPriceError[cottage.id];
+                  const updateError = updateCurrencyPriceError && updateCurrencyPriceError[cottage.id];
+
 
                   return (
                     <tr key={cottage.id}>
@@ -137,12 +171,17 @@ const CottageList = () => {
                       <td>{cottage.cottage_number}</td>
                       <td>{cottage.cottage_date}</td>
                       <td>{cottage.proforma}</td>
-                      <td>{cottage.total_value}</td>
+                      <td>
+                        {new Intl.NumberFormat('fa-IR', ).format(cottage.total_value)}
+                      </td>
+
                       <td>
                         {isUpdating ? (
                           <span className="loading">در حال به‌روزرسانی...</span>
                         ) : updateError ? (
-                          <span className="error">{updateError}</span>
+                          <span className="error">
+                            {typeof updateError === 'string' ? updateError : JSON.stringify(updateError)}
+                          </span>
                         ) : cottage.currency_price ? (
                           `${cottage.currency_price} ریال`
                         ) : (

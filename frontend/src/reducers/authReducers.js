@@ -11,15 +11,25 @@ import {
     TOKEN_REFRESH_FAIL,
 } from '../actions/actionTypes';
 
+// Helper function to save tokens to localStorage
+const saveTokensToLocalStorage = (access_token, refresh_token) => {
+    localStorage.setItem('access_token', access_token);
+    localStorage.setItem('refresh_token', refresh_token);
+};
+
+// Helper function to clear tokens from localStorage
+const clearTokensFromLocalStorage = () => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+};
+
 const initialState = {
     token: localStorage.getItem('access_token'),
     refresh_token: localStorage.getItem('refresh_token'),
-    isAuthenticated: false,
-    loading: true,
-    user: null,
+    isAuthenticated: !!localStorage.getItem('access_token'), // True if token exists
+    loading: !localStorage.getItem('access_token'),
+    user: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null, // Parse user JSON
     error: null,
-    
-
 };
 
 const authReducer = (state = initialState, action) => {
@@ -27,11 +37,10 @@ const authReducer = (state = initialState, action) => {
 
     switch (type) {
         case REGISTER_SUCCESS:
-            return {
+            return {    
                 ...state,
-                isAuthenticated: false,
+                isAuthenticated: false, // User needs to log in after registration
                 loading: false,
-                // Optionally, handle registration success
             };
         case REGISTER_FAIL:
             return {
@@ -40,6 +49,7 @@ const authReducer = (state = initialState, action) => {
                 loading: false,
             };
         case LOGIN_SUCCESS:
+            saveTokensToLocalStorage(payload.access_token, payload.refresh_token);
             return {
                 ...state,
                 token: payload.access_token,
@@ -50,6 +60,7 @@ const authReducer = (state = initialState, action) => {
                 error: null,
             };
         case LOGIN_FAIL:
+            clearTokensFromLocalStorage();
             return {
                 ...state,
                 token: null,
@@ -60,6 +71,7 @@ const authReducer = (state = initialState, action) => {
                 error: payload,
             };
         case LOGOUT:
+            clearTokensFromLocalStorage();
             return {
                 ...initialState,
                 token: null,
@@ -70,6 +82,7 @@ const authReducer = (state = initialState, action) => {
                 error: null,
             };
         case TOKEN_REFRESH_SUCCESS:
+            saveTokensToLocalStorage(payload, state.refresh_token);
             return {
                 ...state,
                 token: payload,
@@ -77,6 +90,7 @@ const authReducer = (state = initialState, action) => {
                 loading: false,
             };
         case TOKEN_REFRESH_FAIL:
+            clearTokensFromLocalStorage();
             return {
                 ...state,
                 token: null,
@@ -87,6 +101,7 @@ const authReducer = (state = initialState, action) => {
                 error: payload,
             };
         case AUTH_ERROR:
+            clearTokensFromLocalStorage();
             return {
                 ...state,
                 token: null,
@@ -94,7 +109,7 @@ const authReducer = (state = initialState, action) => {
                 isAuthenticated: false,
                 loading: false,
                 user: null,
-                error: null,
+                error: payload || null,
             };
         default:
             return state;

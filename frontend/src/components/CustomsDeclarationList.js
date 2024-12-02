@@ -168,7 +168,11 @@ const CustomsDeclarationList = () => {
       {loading && <p className="loading">در حال بارگذاری...</p>}
 
       {/* Error Message */}
-      {error && <p className="error">{error}</p>}
+      {error && (
+  <p className="error">
+    {typeof error === 'string' ? error : JSON.stringify(error)}
+  </p>
+)}
 
       {/* Current Parameters */}
       {ssdsshGUID && urlVCodeInt && (
@@ -217,8 +221,13 @@ const CustomsDeclarationList = () => {
           )}
         </div>
       )}
-
-      {saveMultipleDeclarationsError && <p className="error">{saveMultipleDeclarationsError}</p>}
+{saveMultipleDeclarationsError && (
+  <p className="error">
+    {typeof saveMultipleDeclarationsError === 'string'
+      ? saveMultipleDeclarationsError
+      : JSON.stringify(saveMultipleDeclarationsError)}
+  </p>
+)}
 
       {/* Declarations Table */}
       {!loading && !error && declarations.length > 0 && (

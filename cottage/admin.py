@@ -1,10 +1,17 @@
 from django.contrib import admin
 from .models import Cottage, CottageGoods
+from jalali_date.admin import ModelAdminJalaliMixin, StackedInlineJalaliMixin, TabularInlineJalaliMixin	
+
+
+
 
 
 @admin.register(Cottage)
-class CottageAdmin(admin.ModelAdmin):
-    list_display = ("cottage_number", "cottage_date")
+class CottageAdmin(ModelAdminJalaliMixin, admin.ModelAdmin):
+
+    list_display = ('cottage_number', 'cottage_date', 'total_value')
+
+
 @admin.register(CottageGoods)
 class CottageGoodsAdmin(admin.ModelAdmin):
     list_display = ("cottage", "goodscode")

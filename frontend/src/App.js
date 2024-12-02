@@ -1,5 +1,8 @@
+// src/App.js
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+
+// Import your pages and components
 import Home from './pages/Home';
 import AddCottage from './pages/AddCottage';
 import CottageListPage from './pages/CottageListPage';
@@ -10,17 +13,22 @@ import CustomsDeclarationDetails from './components/CustomsDeclarationDetails';
 import CottageDetails from './pages/CottageDetails';
 import Login from './components/login';
 
+// Import Redux Provider and store
 import { Provider } from 'react-redux';
-import store from './store'; // Import the store you created
+import store from './store';
+
+// Import the PrivateRoute component
+import PrivateRoute from './components/PrivateRoute';
+
 import './App.css';
 
 function App() {
   return (
-    <Router>
-      <Provider store={store}>
+    <Provider store={store}>
+      <Router>
         <AppContent />
-      </Provider>
-    </Router>
+      </Router>
+    </Provider>
   );
 }
 
@@ -35,17 +43,70 @@ function AppContent() {
     <>
       {/* Conditionally render Navbar */}
       {!noNavbarRoutes.includes(location.pathname) && <Navbar />}
-      
+
       <main>
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/add-cottage" element={<AddCottage />} />
-          <Route path="/cottages" element={<CottageListPage />} />
-          <Route path="/import-prf" element={<ImportProforma />} />
-          <Route path="/declarations/:FullSerialNumber" element={<CustomsDeclarationDetails />} />
-          <Route path="/decl" element={<CustomsDeclarationList />} />
-          <Route path="/cottages/:cottageNumber" element={<CottageDetails />} />
+          {/* Public Route */}
           <Route path="/login" element={<Login />} />
+
+          {/* Protected Routes */}
+          <Route
+            path="/"
+            element={
+              <PrivateRoute>
+                <Home />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/add-cottage"
+            element={
+              <PrivateRoute>
+                <AddCottage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/cottages"
+            element={
+              <PrivateRoute>
+                <CottageListPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/import-prf"
+            element={
+              <PrivateRoute>
+                <ImportProforma />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/declarations/:FullSerialNumber"
+            element={
+              <PrivateRoute>
+                <CustomsDeclarationDetails />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/decl"
+            element={
+              <PrivateRoute>
+                <CustomsDeclarationList />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/cottages/:cottageNumber"
+            element={
+              <PrivateRoute>
+                <CottageDetails />
+              </PrivateRoute>
+            }
+          />
+          {/* Add more protected routes as needed */}
         </Routes>
       </main>
     </>

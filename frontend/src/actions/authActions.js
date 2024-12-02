@@ -1,6 +1,5 @@
 import axios from 'axios';
 // Import jwtDecode as jwt_decode using alias
-import { jwtDecode as jwt_decode } from 'jwt-decode';
 
 // Action Types
 import {
@@ -48,12 +47,11 @@ export const login = ({ email, password }) => async dispatch => {
         const { access_token, refresh_token, user } = res.data;
 
         // Decode the access token to get user info
-        const decoded = jwt_decode(access_token); // Using jwt_decode alias
 
         // Store tokens in localStorage
         localStorage.setItem('access_token', access_token);
         localStorage.setItem('refresh_token', refresh_token);
-
+        localStorage.setItem('user', JSON.stringify(user)); // Save as a string
         dispatch({
             type: LOGIN_SUCCESS,
             payload: { user, access_token, refresh_token },
@@ -71,7 +69,7 @@ export const logout = () => dispatch => {
     // Remove tokens from localStorage
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
-
+    localStorage.removeItem('user');
     dispatch({
         type: LOGOUT,
     });
@@ -95,7 +93,6 @@ export const refreshToken = () => async dispatch => {
 
         localStorage.setItem('access_token', access);
 
-        const decoded = jwt_decode(access); // Using jwt_decode alias
 
         dispatch({
             type: TOKEN_REFRESH_SUCCESS,

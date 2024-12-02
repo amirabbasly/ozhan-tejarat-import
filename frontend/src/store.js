@@ -4,7 +4,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { combineReducers } from 'redux';
 import { cottageReducer } from './reducers/cottageReducers';
 import { cottageDetailsReducer } from './reducers/cottageReducers'
-import performaReducer from './reducers/performaReducers';
+import { performaReducer, orderReducer} from './reducers/performaReducers';
 import { customsDeclarationReducer } from './reducers/customsDeclarationReducers';
 import { loadCustomsParams, saveCustomsParams } from './utils/localSotrage/localstorage';
 import authReducer from './reducers/authReducers';
@@ -14,6 +14,7 @@ const persistedParams = loadCustomsParams();
 // Combine reducers as usual
 const rootReducer = combineReducers({
   auth: authReducer,
+  order: orderReducer,
   performa: performaReducer,
   cottages: cottageReducer,
   customsDeclarations: customsDeclarationReducer,

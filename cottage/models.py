@@ -1,10 +1,11 @@
 from django.db import models
 from proforma.models import Performa
 from decimal import Decimal
+from django_jalali.db import models as jmodels
 
 class Cottage(models.Model):
     cottage_number = models.IntegerField(unique=True)
-    cottage_date = models.DateField()
+    cottage_date = jmodels.jDateField()
     proforma = models.ForeignKey(Performa, to_field='prf_order_no', on_delete=models.CASCADE, related_name='cottages')
     total_value = models.DecimalField(max_digits=15, decimal_places=2)
     quantity = models.PositiveIntegerField()
@@ -29,6 +30,8 @@ class Cottage(models.Model):
         for good in related_goods:
             good.recalculate_fields()
             good.save()
+
+
 
 class CottageGoods(models.Model):
     goodscode = models.CharField(unique=True,max_length=20)

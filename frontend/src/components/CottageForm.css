@@ -31,6 +31,14 @@
     font-size: 14px;
     width: 90%;
     margin-left: 3%;
+  }
+  .selectPrf{
+    direction: rtl;
+    flex: 1 1 calc(50% - 10px);
+    font-size: 14px;
+    width: 93.5%;
+    margin-left: 3%;
+    
 
   }
 
@@ -101,4 +109,27 @@ body {
     border: none;
     border-top: 1px solid #ddd;
   }
-    
+  .goods-section {
+    margin-top: 20px;
+  }
+  
+  .add-goods-button {
+    margin-bottom: 10px;
+  }
+  
+  .goods-form input {
+    margin-right: 10px;
+  }
+  
+  .goods-list ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .goods-list li {
+    background: #f9f9f9;
+    padding: 5px;
+    margin-bottom: 5px;
+    border: 1px solid #ddd;
+  }
+  

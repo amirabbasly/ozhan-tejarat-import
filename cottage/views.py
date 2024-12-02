@@ -64,6 +64,7 @@ class SaveCottageView(APIView):
             cottage_date = data.get('cottage_date')
             total_value = Decimal(data.get('total_value', '0'))
             quantity = data.get('quantity')
+            
 
             # Leave `currency_price` as None to allow user input later
             currency_price = None

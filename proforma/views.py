@@ -6,12 +6,10 @@ from django.db import transaction
 from django.utils import timezone
 
 from django.utils.dateparse import parse_datetime
-from .models import Performa, ProformaDetail, ProformaPayment, RequestStatus
+from .models import Performa
 from .serializers import (
     PerformaSerializer,
-    ProformaDetailSerializer,
-    ProformaPaymentSerializer,
-    RequestStatusSerializer
+
 )
 import requests
 import logging
@@ -25,13 +23,12 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 logger = logging.getLogger(__name__)
 
 class PerformaListView(APIView):
-
-
     def get(self, request):
+        # Retrieve all Performa instances
         performas = Performa.objects.all()
-        performa_serializer = PerformaSerializer(performa)
-        proforma_detail_serializer = ProformaDetailSerializer(proforma_details, many=True)
-
+        # Serialize the queryset
+        serializer = PerformaSerializer(performas, many=True)
+        # Return the serialized data
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class PerformaDetailView(APIView):

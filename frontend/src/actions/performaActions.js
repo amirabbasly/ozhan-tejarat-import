@@ -8,6 +8,9 @@ import {
     SAVE_SELECTED_PERFORMAS_REQUEST,
     SAVE_SELECTED_PERFORMAS_SUCCESS,
     SAVE_SELECTED_PERFORMAS_FAILURE,
+    FETCH_REGED_ORDERS_REQUEST,
+    FETCH_REGED_ORDERS_SUCCESS,
+    FETCH_REGED_ORDERS_FAILURE,
 } from './actionTypes';
 
 export const fetchPerformas = (formData) => async (dispatch) => {
@@ -25,6 +28,23 @@ export const fetchPerformas = (formData) => async (dispatch) => {
         });
     }
 };
+export const fetchOrders = () => async (dispatch) => {
+    dispatch({ type: FETCH_REGED_ORDERS_REQUEST });
+    try {
+        const response = await axiosInstance.get('performas/');
+        dispatch({
+            type: FETCH_REGED_ORDERS_SUCCESS,
+            payload: response.data,
+        });
+    } catch (error) {
+        dispatch({
+            type: FETCH_REGED_ORDERS_FAILURE,
+            payload: error.response ? error.response.data.error : 'An error occurred.',
+        });
+    }
+};
+
+
 
 export const saveSelectedPerformas = (selectedPerformas, ssdsshGUID, urlVCodeInt) => async (dispatch) => {
     dispatch({ type: SAVE_SELECTED_PERFORMAS_REQUEST });

@@ -261,7 +261,7 @@ export const saveData = (declaration, goods, ssdsshGUID, urlVCodeInt) => async (
         return date.toISOString().split('T')[0];
     };
 
-    const formattedCottageDate = formatDate(declaration.gcucustomsDeclarationRegistrationDate);
+    const formattedCottageDate = formatDate(declaration.gcuassessmentDateSH);
 
     const cottagePayload = {
         cottage_number: declaration.gcucustomsDeclarationSerialNumber,

@@ -85,19 +85,19 @@
                 <ul className="submenu">
                 <Link className='submenu-link' to="/add-cottage"> 
                   <li className="submenu-item">
-                    افزودن کوتاژ 
+                    افزودن اظهارنامه 
                   </li></Link>
                 <Link  className='submenu-link' to="/cottages">
                   <li className="submenu-item">
-                     کوتاژ ها 
+                  اظهارنامه ها
                   </li></Link>
                   <Link className='submenu-link' to="/import-prf">
                   <li className="submenu-item">
-                     دریافت پرفورم
+                     دریافت ثبت سفارش
                   </li></Link>
                   <Link className='submenu-link' to="/decl">
                   <li className="submenu-item">
-                     دریافت کوتاژ
+                     دریافت اظهارنامه
                   </li></Link>
                 </ul>
               )}

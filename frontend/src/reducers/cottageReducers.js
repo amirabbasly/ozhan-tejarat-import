@@ -10,6 +10,10 @@ import {
   UPDATE_COTTAGE_CURRENCY_PRICE_REQUEST,
   UPDATE_COTTAGE_CURRENCY_PRICE_SUCCESS,
   UPDATE_COTTAGE_CURRENCY_PRICE_FAILURE,
+  CREATE_COTTAGE_REQUEST,
+  CREATE_COTTAGE_SUCCESS,
+  CREATE_COTTAGE_FAILURE,
+  RESET_COTTAGE_CREATION,
   
 } from '../actions/actionTypes';
 
@@ -17,6 +21,11 @@ const initialCottagesState = {
   loading: false,
   cottages: [],
   error: '',
+  cottageCreation: {
+    loading: false,
+    success: false,
+    error: '',
+},
 };
 
 const initialCottageDetailsState = {
@@ -49,6 +58,44 @@ export const cottageReducer = (state = initialCottagesState, action) => {
         cottages: [],
         error: action.payload,
       };
+      case CREATE_COTTAGE_REQUEST:
+        return {
+            ...state,
+            cottageCreation: {
+                loading: true,
+                success: false,
+                error: '',
+            },
+        };
+    case CREATE_COTTAGE_SUCCESS:
+        return {
+            ...state,
+            cottageCreation: {
+                loading: false,
+                success: true,
+                error: '',
+            },
+            // Optionally, add the new cottage to performas
+            // performas: [...state.performas, action.payload],
+        };
+    case CREATE_COTTAGE_FAILURE:
+        return {
+            ...state,
+            cottageCreation: {
+                loading: false,
+                success: false,
+                error: action.payload,
+            },
+        };
+    case RESET_COTTAGE_CREATION:
+        return {
+            ...state,
+            cottageCreation: {
+                loading: false,
+                success: false,
+                error: '',
+            },
+        };
     default:
       return state;
   }

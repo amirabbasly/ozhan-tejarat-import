@@ -1,5 +1,9 @@
 /* CottageForm.css */
 
+body{
+  font-family: 'Vazirmatn', sans-serif;
+}
+
 .cottage-form {
     max-width: 650px;
     margin: 20px auto;
@@ -18,7 +22,7 @@
   .form-group {
     display: flex;
     flex-direction: column;
-
+    font-family: 'Vazirmatn', sans-serif;
     gap: 15px;
   }
   
@@ -38,8 +42,6 @@
     font-size: 14px;
     width: 93.5%;
     margin-left: 3%;
-    
-
   }
 
   .form-group input:focus {
@@ -72,8 +74,7 @@
 /* App.css */
 
 body {
-  
-    font-family: Arial, sans-serif;
+  font-family: 'Vazirmatn', sans-serif;
     background-color: #ffffff;
     margin: 0;
     padding: 0;
@@ -118,8 +119,18 @@ body {
   }
   
   .goods-form input {
-    margin-right: 10px;
+    margin: 20px 9px;
+    width: 27%;
+    direction: rtl;
+    flex: 1 1 calc(50% - 10px);
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
   }
+  .goods-form input:focus {
+  border-color: #007bff;
+  outline: none;}
   
   .goods-list ul {
     list-style-type: none;
@@ -132,4 +143,20 @@ body {
     margin-bottom: 5px;
     border: 1px solid #ddd;
   }
-  
+
+  @media (max-width:690px){
+
+    .goods-form input {
+      width: 40%;
+    }
+
+
+  }
+  @media (max-width:460px){
+
+    .goods-form input {
+      width:90%;
+    }
+
+
+  }

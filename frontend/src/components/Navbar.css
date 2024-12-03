@@ -213,3 +213,85 @@ body{
     display: flex;
   }
 }
+.submenu {
+  position: absolute;
+  top: 100%; /* Place submenu below the parent */
+  right: 0; /* Align to the right for RTL layout */
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  z-index: 1000;
+  min-width: 150px; /* Ensure submenu has a minimum width */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.submenu-item {
+  position: relative; /* Important for positioning sub-submenu */
+  padding: 10px 15px;
+  cursor: pointer;
+}
+
+.submenu-link {
+  text-decoration: none;
+  color: #222222;
+}
+.submenu-item a {
+  text-decoration: none;
+  color: #333;
+  display: block;
+}
+
+.submenu-item:hover {
+  background-color: #f0f0f0;
+}
+
+/* Sub-Submenu Styles */
+.sub-submenu {
+  position: absolute;
+  top: 0; /* Aligns with the parent submenu item */
+  right: 100%; /* Positions to the left of the parent item for RTL */
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  z-index: 1001; /* Ensure it appears above other elements */
+  min-width: 150px;
+  width: auto;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.sub-submenu .submenu-item {
+  padding: 10px 15px;
+  text-wrap: nowrap;
+}
+
+.sub-submenu .submenu-item:hover {
+  background-color: #e0e0e0;
+}
+
+/* Adjust submenu arrow indicator */
+.submenu-item > span::after {
+  content: '▸';
+  font-size: 12px;
+  margin-right: 5px;
+  transform: rotate(180deg); /* For RTL direction */
+}
+
+.submenu-item:hover > .sub-submenu {
+  display: block;
+}
+
+/* Hide sub-submenu by default */
+.sub-submenu {
+  display: none;
+}
+
+/* Show sub-submenu when parent is hovered (if you prefer CSS-only hover effect) */
+.submenu-item:hover > .sub-submenu {
+  display: block;
+}

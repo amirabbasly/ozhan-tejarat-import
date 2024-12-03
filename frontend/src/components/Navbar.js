@@ -8,7 +8,10 @@
   const Navbar = () => {
     const dispatch = useDispatch();
     const user = useSelector((state) => state.auth.user);
-    const auth = useSelector((state) => state.auth);
+    const [showSubSubmenu, setShowSubSubmenu] = useState({
+      'receive-order': false, 
+    });
+    
 
     const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
 
@@ -42,6 +45,14 @@
       dispatch (logout())
       navigate('/login');
     };
+    const handleSubmenuMouseEnter = (submenu) => {
+      setShowSubSubmenu((prevState) => ({ ...prevState, [submenu]: true }));
+    };
+    
+    const handleSubmenuMouseLeave = (submenu) => {
+      setShowSubSubmenu((prevState) => ({ ...prevState, [submenu]: false }));
+    };
+    
 
     return (
       <>
@@ -83,14 +94,49 @@
               {/* Submenu for Documents */}
               {showSubmenu.asnad && (
                 <ul className="submenu">
-                <Link className='submenu-link' to="/add-cottage"> 
-                  <li className="submenu-item">
-                    افزودن اظهارنامه 
-                  </li></Link>
-                <Link  className='submenu-link' to="/cottages">
-                  <li className="submenu-item">
-                  اظهارنامه ها
-                  </li></Link>
+                <li
+                  className="submenu-item"
+                  onMouseEnter={() => handleSubmenuMouseEnter('receive-order')}
+                  onMouseLeave={() => handleSubmenuMouseLeave('receive-order')}
+                >
+                  <span> ثبت سفارش ها</span>
+                  {/* Submenu within Submenu */}
+                  {showSubSubmenu['receive-order'] && (
+                    <ul className="sub-submenu">
+                      <Link className="submenu-link" to="/">
+                        <li className="submenu-item">ایجاد ثبت سفارش</li>
+                      </Link>
+                      <Link className="submenu-link" to="/reged-orders">
+                        <li className="submenu-item">لیست ثبت سفارش ها</li>
+                      </Link>
+                      <Link className="submenu-link" to="/import-prf">
+                        <li className="submenu-item">دریافت از سامانه</li>
+                      </Link>
+                    </ul>
+                  )}
+                </li>
+                <li
+                  className="submenu-item"
+                  onMouseEnter={() => handleSubmenuMouseEnter('receive-order')}
+                  onMouseLeave={() => handleSubmenuMouseLeave('receive-order')}
+                >
+                  <span>اظهارنامه ها</span>
+                  {/* Submenu within Submenu */}
+                  {showSubSubmenu['receive-order'] && (
+                    <ul className="sub-submenu">
+                      <Link className="submenu-link" to="/add-cottage">
+                        <li className="submenu-item">ایجاد اظهارنمه</li>
+                      </Link>
+                      <Link className="submenu-link" to="/cottages">
+                        <li className="submenu-item">لیست اظهارنامه ها</li>
+                      </Link>
+                      <Link className="submenu-link" to="/decl">
+                        <li className="submenu-item">دریافت از سامانه</li>
+                      </Link>
+
+                    </ul>
+                  )}
+                </li>
                   <Link className='submenu-link' to="/import-prf">
                   <li className="submenu-item">
                      دریافت ثبت سفارش

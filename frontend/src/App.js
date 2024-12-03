@@ -12,6 +12,7 @@ import CustomsDeclarationList from './components/CustomsDeclarationList';
 import CustomsDeclarationDetails from './components/CustomsDeclarationDetails';
 import CottageDetails from './pages/CottageDetails';
 import Login from './components/login';
+import RegedOrderList from './pages/RegedOrderList'
 
 // Import Redux Provider and store
 import { Provider } from 'react-redux';
@@ -71,6 +72,14 @@ function AppContent() {
             element={
               <PrivateRoute>
                 <CottageListPage />
+              </PrivateRoute>
+            }
+          />
+                    <Route
+            path="/reged-orders"
+            element={
+              <PrivateRoute>
+                <RegedOrderList />
               </PrivateRoute>
             }
           />

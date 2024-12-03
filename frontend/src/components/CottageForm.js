@@ -29,7 +29,7 @@ const CottageForm = () => {
 
   // Local state for goods
   const [goods, setGoods] = useState([]);
-  const [newGood, setNewGood] = useState({ name: '', quantity: '', price: '' });
+  const [newGood, setNewGood] = useState({ goodscode: '', quantity: '', goods_description: '', customs_value: '', import_rights: '', red_cersent: '', total_value: '', added_value: '', discount: ''  });
   const [showGoodsForm, setShowGoodsForm] = useState(false);
 
   // Fetch orders when the component mounts
@@ -50,17 +50,17 @@ const CottageForm = () => {
   // Add a new good to the goods list
   const addGood = () => {
     setGoods([...goods, newGood]);
-    setNewGood({ name: '', quantity: '', price: '' }); // Reset the goods form
+    setNewGood({  goodscode: '', quantity: '', goods_description: '', customs_value: '', import_rights: '', red_cersent: '', total_value: '', added_value: '', discount: ''}); // Reset the goods form
     setShowGoodsForm(false);
   };
 
-  // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
     const finalData = { ...formData, goods }; // Include goods in the submission
+    console.log('Final Data being sent:', finalData); // Add this line
     dispatch(createCottage(finalData));
   };
-
+  
   // Handle success or error messages
   useEffect(() => {
     if (cottageCreation.success) {
@@ -94,7 +94,7 @@ const CottageForm = () => {
 
   return (
     <form className="cottage-form" onSubmit={handleSubmit}>
-      <h2>کوتاژ جدید</h2>
+      <h2>اظهارنامه جدید</h2>
       <div className="form-group">
         <DatePicker
         className='selectPrf'
@@ -104,6 +104,7 @@ const CottageForm = () => {
           locale={persian_fa}
           format="YYYY-MM-DD"
           placeholder="تاریخ را انتخاب کنید"
+          required
         />
         <input
           type="number"
@@ -158,34 +159,84 @@ const CottageForm = () => {
           افزودن کالا
         </button>
         {showGoodsForm && (
-          <div className="goods-form">
-            <input
-              type="text"
-              name="name"
-              value={newGood.name}
-              onChange={handleGoodsChange}
-              placeholder="نام کالا"
-              required
-            />
-            <input
-              type="number"
-              name="quantity"
-              value={newGood.quantity}
-              onChange={handleGoodsChange}
-              placeholder="تعداد"
-              required
-            />
-            <input
-              type="number"
-              name="price"
-              value={newGood.price}
-              onChange={handleGoodsChange}
-              placeholder="قیمت"
-              required
-            />
-            <button type="button" onClick={addGood}>
-              افزودن
-            </button>
+      <div className="goods-form">
+      <input
+        type="number"
+        name="goodscode"
+        value={newGood.goodscode}
+        onChange={handleGoodsChange}
+        placeholder="کد کالا"
+        required
+      />
+      <input
+        type="number"
+        name="quantity"
+        value={newGood.quantity}
+        onChange={handleGoodsChange}
+        placeholder="تعداد"
+        required
+      />
+      <input
+        type="text"
+        name="goods_description"
+        value={newGood.goods_description}
+        onChange={handleGoodsChange}
+        placeholder="شرح تجاری"
+        required
+      />
+      <input
+        type="number"
+        name="customs_value"
+        value={newGood.customs_value}
+        onChange={handleGoodsChange}
+        placeholder="ارزش گمرکی"
+        required
+      />
+      <input
+        type="number"
+        name="import_rights"
+        value={newGood.import_rights}
+        onChange={handleGoodsChange}
+        placeholder="حقوق ورودی"
+        required
+      />
+      <input
+        type="number"
+        name="red_cersent"
+        value={newGood.red_cersent}
+        onChange={handleGoodsChange}
+        placeholder="حلال احمر"
+        required
+      />
+      <input
+        type="number"
+        name="total_value"
+        value={newGood.total_value}
+        onChange={handleGoodsChange}
+        placeholder="ارزش کالا"
+        required
+      />
+      <input
+        type="number"
+        name="added_value"
+        value={newGood.added_value}
+        onChange={handleGoodsChange}
+        placeholder="ارزش افزوده"
+        required
+      />
+      <input
+        type="number"
+        name="discount"
+        value={newGood.discount}
+        onChange={handleGoodsChange}
+        placeholder="تخفیف"
+        required
+      />
+      <button type="button" onClick={addGood}>
+        افزودن
+      </button>
+
+    
           </div>
         )}
         {goods.length > 0 && (
@@ -194,7 +245,7 @@ const CottageForm = () => {
             <ul>
               {goods.map((good, index) => (
                 <li key={index}>
-                  {good.name} - تعداد: {good.quantity} - قیمت: {good.price}
+           شرح کالا: {good.goods_description} تعداد: {good.quantity} 
                 </li>
               ))}
             </ul>

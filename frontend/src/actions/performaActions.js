@@ -11,6 +11,9 @@ import {
     FETCH_REGED_ORDERS_REQUEST,
     FETCH_REGED_ORDERS_SUCCESS,
     FETCH_REGED_ORDERS_FAILURE,
+    UPDATE_ORDER_STATUS_REQUEST,
+    UPDATE_ORDER_STATUS_SUCCESS,
+    UPDATE_ORDER_STATUS_FAILURE
 } from './actionTypes';
 
 export const fetchPerformas = (formData) => async (dispatch) => {
@@ -65,3 +68,23 @@ export const saveSelectedPerformas = (selectedPerformas, ssdsshGUID, urlVCodeInt
         });
     }
 };
+export const updateOrderStatus = (orderId, status) => async (dispatch) => {
+    dispatch({ type: UPDATE_ORDER_STATUS_REQUEST, payload: { orderId } });
+    try {
+      const response = await axiosInstance.patch(`orders/${orderId}/`, {
+        status,
+      });
+      dispatch({
+        type: UPDATE_ORDER_STATUS_SUCCESS,
+        payload: response.data,
+      });
+    } catch (error) {
+      dispatch({
+        type: UPDATE_ORDER_STATUS_FAILURE,
+        payload: {
+          orderId,
+          error: error.response ? error.response.data.error : 'An error occurred.',
+        },
+      });
+    }
+  };

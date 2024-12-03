@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from django.db import transaction
 from django.utils import timezone
-
+import jdatetime
 from django.utils.dateparse import parse_datetime
 from .models import Performa
 from .serializers import (
@@ -99,8 +99,8 @@ class GUIDApiView(APIView):
                 performa_list.append({
                     'prf_number': proforma_data.get('prfNumberStr'),
                     'prfVCodeInt': proforma_data.get('prfVCodeInt'),
-                    'prf_date': proforma_data.get('prfDate'),
-                    'prf_expire_date': proforma_data.get('prfExpireDate'),
+                    'prf_date': proforma_data.get('prfOrderDate'),
+                    'prf_expire_date': proforma_data.get('prfOrderExpireDate'),
                     'prf_total_price': proforma_data.get('prfTotalPriceMny'),
                     'prf_currency_type': proforma_data.get('prfCurrencyTypeStr'),
                     'prf_seller_name': proforma_data.get('prfSellerNameEnStr'),
@@ -120,6 +120,7 @@ class GUIDApiView(APIView):
         except Exception as e:
             logger.error(f"An unexpected error occurred: {e}")
             return Response({'error': 'An unexpected error occurred while processing the data.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 class SaveSelectedPerformas(APIView):
 
     def post(self, request):
@@ -127,30 +128,37 @@ class SaveSelectedPerformas(APIView):
         if not selected_performas:
             return Response({'error': 'No performas selected.'}, status=status.HTTP_400_BAD_REQUEST)
 
-
         try:
             with transaction.atomic():
                 for performa_data in selected_performas:
-                    # Parse and make timezone-aware
-                    try:
-                        prf_date_str = performa_data.get('prf_date')
-                        prf_date = parse(prf_date_str) if prf_date_str else None
-                        if prf_date:
-                            prf_date = timezone.make_aware(prf_date, timezone.get_default_timezone())
-                    except ValueError as e:
-                        logger.error(f"Error parsing prf_date '{prf_date_str}': {e}")
+                    # Log date strings
+                    prf_date_str = performa_data.get('prf_date')
+                    logger.debug(f"Received prf_date_str: {prf_date_str}")
+
+                    prf_expire_date_str = performa_data.get('prf_expire_date')
+                    logger.debug(f"Received prf_expire_date_str: {prf_expire_date_str}")
+
+                    # Parse date strings using the correct format
+                    if prf_date_str:
+                        try:
+                            # Parse Jalali date string 'YYYY/MM/DD' using jdatetime
+                            prf_date = jdatetime.datetime.strptime(prf_date_str, '%Y/%m/%d').date()
+                        except ValueError as e:
+                            logger.error(f"Error parsing prf_date '{prf_date_str}': {e}")
+                            prf_date = None
+                    else:
                         prf_date = None
 
-                    try:
-                        prf_expire_date_str = performa_data.get('prf_expire_date')
-                        prf_expire_date = parse(prf_expire_date_str) if prf_expire_date_str else None
-                        if prf_expire_date:
-                            prf_expire_date = timezone.make_aware(prf_expire_date, timezone.get_default_timezone())
-                    except ValueError as e:
-                        logger.error(f"Error parsing prf_expire_date '{prf_expire_date_str}': {e}")
+                    if prf_expire_date_str:
+                        try:
+                            prf_expire_date = jdatetime.datetime.strptime(prf_expire_date_str, '%Y/%m/%d').date()
+                        except ValueError as e:
+                            logger.error(f"Error parsing prf_expire_date '{prf_expire_date_str}': {e}")
+                            prf_expire_date = None
+                    else:
                         prf_expire_date = None
 
-                    # Create or update Performa instances with ssdsshGUID
+                    # Create or update Performa instances
                     proforma, created = Performa.objects.update_or_create(
                         prf_number=performa_data.get('prf_number'),
                         defaults={
@@ -163,11 +171,9 @@ class SaveSelectedPerformas(APIView):
                             'prf_seller_country': performa_data.get('prf_seller_country'),
                             'prf_order_no': performa_data.get('prf_order_no'),
                             'prf_status': performa_data.get('prf_status'),
-                            # Add other fields as needed
                         }
                     )
                     logger.info(f"Created or updated Performa: {proforma}")
-
 
             return Response({'message': 'Selected performas saved successfully.'}, status=status.HTTP_200_OK)
 

@@ -6,6 +6,7 @@ from .models import Cottage, CottageGoods
 from decimal import Decimal  # Import Decimal
 from proforma.models import Performa  # Import Performa model
 
+
 from .serializers import CottageSerializer, CustomsDeclarationInputSerializer, GreenCustomsDeclarationInputSerializer
 import requests
 import logging

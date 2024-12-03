@@ -1,4 +1,6 @@
 from django.db import models
+from django_jalali.db import models as jmodels
+
 
 def get_default_currency_type():
     return 94
@@ -11,8 +13,8 @@ class Performa(models.Model):
     prf_seller_name = models.CharField(max_length=255, default="asd")
     prf_seller_country = models.CharField(max_length=255, default="asd")
     prf_status = models.CharField(max_length=50, default="asd")
-    prf_date = models.DateTimeField(null=True, blank=True)  # Changed to DateTimeField for precise timestamps
-    prf_expire_date = models.DateTimeField(null=True, blank=True)  # Changed to DateTimeField
+    prf_date = jmodels.jDateField(null=True, blank=True)  # Changed to DateTimeField for precise timestamps
+    prf_expire_date = jmodels.jDateField(null=True, blank=True)  # Changed to DateTimeField
     prfVCodeInt = models.CharField(max_length=50, unique=True)  # Assuming this is a unique identifier
 
 

@@ -204,7 +204,7 @@ const ImportPf = () => {
                 <th>ردیف</th>
                 <th>شماره پیش فاکتور</th>
                 <th>شماره ثبت سفارش</th>
-                <th>تاریخ پرفورم</th>
+                <th>تاریخ اعتبار</th>
                 <th>نام فروشنده</th>
                 {/* Add other headers as needed */}
               </tr>
@@ -222,7 +222,7 @@ const ImportPf = () => {
                   <td>{index + 1}</td>
                   <td>{performa.prf_number}</td>
                   <td>{performa.prf_order_no}</td>
-                  <td>{performa.prf_date}</td>
+                  <td>{performa.prf_expire_date}</td>
                   <td>{performa.prf_seller_name}</td>
                   {/* Add other fields as needed */}
                 </tr>

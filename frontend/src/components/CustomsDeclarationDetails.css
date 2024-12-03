@@ -4,9 +4,10 @@
     padding: 20px;
     max-width: 800px;
     margin: 0 auto;
-    font-family: Arial, sans-serif;
+    font-family: 'Vazirmatn', sans-serif;
     background: #f7f7f7;
     border-radius: 8px;
+    margin-top: 50px;
 }
 
 .title {

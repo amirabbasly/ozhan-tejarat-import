@@ -203,6 +203,37 @@ class CottageViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_404_NOT_FOUND
             )
 
+    # New custom action to delete selected cottages
+    @action(detail=False, methods=['post'], url_path='delete-selected')
+    def delete_selected(self, request):
+        """
+        Custom action to delete selected cottages.
+        Expects a list of cottage IDs in the request data.
+        """
+        ids = request.data.get('ids', [])
+        if not ids:
+            return Response({'error': 'No IDs provided.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Validate IDs
+        if not isinstance(ids, list):
+            return Response({'error': 'IDs should be provided as a list.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Optionally, validate that the IDs are integers
+        try:
+            ids = [int(id) for id in ids]
+        except ValueError:
+            return Response({'error': 'Invalid IDs. IDs must be integers.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            cottages = Cottage.objects.filter(id__in=ids)
+            if not cottages.exists():
+                return Response({'error': 'No cottages found for the provided IDs.'}, status=status.HTTP_404_NOT_FOUND)
+            deleted_count = cottages.count()
+            cottages.delete()
+            return Response({'message': f'{deleted_count} cottages deleted.'}, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Error deleting cottages: {e}", exc_info=True)
+            return Response({'error': 'An error occurred while deleting cottages.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 logger = logging.getLogger(__name__)
 class CustomsDeclarationListView(APIView):
     def post(self, request):

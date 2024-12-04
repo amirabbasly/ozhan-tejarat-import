@@ -38,10 +38,7 @@ class JalaliDateField(serializers.Field):
 class CottageGoodsSerializer(serializers.ModelSerializer):
     class Meta:
         model = CottageGoods
-        fields = [
-            'goodscode', 'quantity', 'goods_description', 'customs_value',
-            'import_rights', 'red_cersent', 'total_value', 'added_value', 'discount'
-        ]
+        fields = '__all__'
 
 
 class CottageSerializer(serializers.ModelSerializer):
@@ -49,7 +46,6 @@ class CottageSerializer(serializers.ModelSerializer):
         queryset=Performa.objects.all(),
         slug_field='prf_order_no'
     )
-    goods = CottageGoodsSerializer(many=True, write_only=True)
     cottage_goods = CottageGoodsSerializer(many=True, read_only=True)
     
     # Override the cottage_date field to handle Jalali dates
@@ -59,7 +55,7 @@ class CottageSerializer(serializers.ModelSerializer):
         model = Cottage
         fields = [
             'cottage_number', 'cottage_date', 'proforma',
-            'total_value', 'quantity', 'currency_price', 'cottage_goods', 'id','goods'
+            'total_value', 'quantity', 'currency_price', 'cottage_goods', 'id'
         ]
         read_only_fields = ['final_price']
 
@@ -79,22 +75,15 @@ class CottageSerializer(serializers.ModelSerializer):
 
 
     def create(self, validated_data):
-        goods_data = validated_data.pop('goods', [])
-        cottage = Cottage.objects.create(**validated_data)
-        for good_data in goods_data:
-            CottageGoods.objects.create(cottage=cottage, **good_data)
+        cottage = Cottage(**validated_data)
+        cottage.save()
         return cottage
 
-
     def update(self, instance, validated_data):
-        goods_data = validated_data.pop('goods', [])
-        # Update cottage fields
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
-        instance.goods.all().delete()
-        for good_data in goods_data:
-            CottageGoods.objects.create(cottage=instance, **good_data)
+        return instance
         return instance
 class CustomsDeclarationInputSerializer(serializers.Serializer):
     ssdsshGUID = serializers.CharField()

@@ -1,13 +1,14 @@
 // src/components/CottageDetails.js
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchCottageDetails, updateCottageDetails } from '../actions/cottageActions';
+import { fetchCottageDetails, updateCottageDetails, deleteCottages } from '../actions/cottageActions';
 import { useParams } from 'react-router-dom';
 import './CottageDetails.css';
 import DatePicker from 'react-multi-date-picker';
 import DateObject from "react-date-object";
 import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
+import { useNavigate } from 'react-router-dom';
 
 const CottageDetails = () => {
     const [cottageId, setCottageId] = useState('');
@@ -16,6 +17,7 @@ const CottageDetails = () => {
     const cottageDetails = useSelector((state) => state.cottageDetails);
     const { loading, cottage, error } = cottageDetails;
 
+
     // State variables for each cottage field
     const [currencyPrice, setCurrencyPrice] = useState('');
     const [cottageNum, setCottageNum] = useState('');
@@ -23,6 +25,26 @@ const CottageDetails = () => {
     const [totalValue, setTotalValue] = useState('');
     const [quantity, setQuantity] = useState('');
     const [proforma, setProforma] = useState('');
+    const navigate = useNavigate();
+
+const handleDeleteCottage = () => {
+    if (!window.confirm('آیا از حذف این اظهارنامه اطمینان دارید؟')) {
+        return;
+    }
+
+    if (cottageId) {
+        dispatch(deleteCottages([cottageId]))
+            .then(() => {
+                alert('اظهارنامه با موفقیت حذف شد.');
+                navigate('/cottages'); // Redirect to the cottage list page
+            })
+            .catch((error) => {
+                console.error('Error deleting cottage:', error);
+                alert('خطا در حذف اظهارنامه.');
+            });
+    }
+};
+
 
     useEffect(() => {
         if (cottageNumber) {
@@ -179,6 +201,10 @@ const CottageDetails = () => {
                 </div>
 
                 <button onClick={handleDetailsSubmit}>ثبت</button>
+                <button onClick={handleDeleteCottage} className="delete-button">
+    حذف اظهارنامه
+</button>
+
             </div>
 
             <h2 className="goods-header">کالا ها</h2>

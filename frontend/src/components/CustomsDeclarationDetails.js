@@ -105,9 +105,7 @@ const CustomsDeclarationDetails = () => {
         </p>
         <p>
           <strong>تاریخ ارزیابی:</strong>{' '}
-          {declarationDetails.gcuassessmentDate
-            ? new Date(declarationDetails.gcuassessmentDate).toLocaleDateString('fa-IR')
-            : 'نامشخص'}
+          {declarationDetails.gcupreDeclarationDateSH || 'نامشخص'}
         </p>
         <p>
           <strong>نام بانک:</strong> {declarationDetails.gcubankName || 'نامشخص'}

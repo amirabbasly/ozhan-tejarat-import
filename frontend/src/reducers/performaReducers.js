@@ -10,6 +10,12 @@ import {
   FETCH_REGED_ORDERS_REQUEST,
   FETCH_REGED_ORDERS_SUCCESS,
   FETCH_REGED_ORDERS_FAILURE,
+  FETCH_PERFORMA_REQUEST,
+  FETCH_PERFORMA_SUCCESS,
+  FETCH_PERFORMA_FAILURE,
+  UPDATE_ORDER_STATUS_REQUEST,
+  UPDATE_ORDER_STATUS_SUCCESS,
+  UPDATE_ORDER_STATUS_FAILURE,  
 } from '../actions/actionTypes';
 
 // Initial state for performaReducer
@@ -19,7 +25,11 @@ const initialState = {
   error: '',
   message: '',
 };
-
+const detailsInitialState = {
+  order: null,
+  loading: false,
+  error: null,
+};
 // Initial state for orderReducer
 const orderInitialState = {
   loading: false,
@@ -27,7 +37,37 @@ const orderInitialState = {
   error: '',
   message: '',
 };
-
+export const regedOrderDetailsReducer = (state = detailsInitialState, action) => {
+  switch (action.type) {
+      case FETCH_PERFORMA_REQUEST:
+      case UPDATE_ORDER_STATUS_REQUEST:
+          return {
+              ...state,
+              loading: true,
+              error: null,
+          };
+      case FETCH_PERFORMA_SUCCESS:
+          return {
+              ...state,
+              order: action.payload,
+              loading: false,
+          };
+      case UPDATE_ORDER_STATUS_SUCCESS:
+          return {
+              ...state,
+              loading: false,
+          };
+      case FETCH_PERFORMA_FAILURE:
+      case UPDATE_ORDER_STATUS_FAILURE:
+          return {
+              ...state,
+              loading: false,
+              error: action.payload,
+          };
+      default:
+          return state;
+  }
+};
 // Reducer for registered orders
 const orderReducer = (state = orderInitialState, action) => {
   switch (action.type) {

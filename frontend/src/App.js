@@ -12,8 +12,8 @@ import CustomsDeclarationList from './components/CustomsDeclarationList';
 import CustomsDeclarationDetails from './components/CustomsDeclarationDetails';
 import CottageDetails from './pages/CottageDetails';
 import Login from './components/login';
-import RegedOrderList from './pages/RegedOrderList'
-
+import RegedOrderList from './pages/RegedOrderList';
+import RegedOrderDetails from './components/RegedOrderDetails';
 // Import Redux Provider and store
 import { Provider } from 'react-redux';
 import store from './store';
@@ -104,6 +104,14 @@ function AppContent() {
             element={
               <PrivateRoute>
                 <CustomsDeclarationList />
+              </PrivateRoute>
+            }
+          />
+           <Route
+            path="/order-details/:prf_order_no"
+            element={
+              <PrivateRoute>
+                <RegedOrderDetails />
               </PrivateRoute>
             }
           />

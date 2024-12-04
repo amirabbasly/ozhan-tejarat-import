@@ -270,7 +270,7 @@ const CustomsDeclarationList = () => {
                   <td>{index + 1}</td>
                   <td>{item.NationalCode || 'نامشخص'}</td>
                   <td>{item.FullSerialNumber || 'نامشخص'}</td>
-                  <td>{item.gcupreDeclarationDate || 'نامشخص'}</td>
+                  <td>{item.gcupreDeclarationDateSH || 'نامشخص'}</td>
                   <td>{item.EntranceCustomsName || 'نامشخص'}</td>
                   <td>{item.gcutotalCurrencyValue || 'نامشخص'}</td>
                   <td>{item.curNameStr || 'نامشخص'}</td>

@@ -35,17 +35,10 @@ class PerformaDetailView(APIView):
     def get(self, request, prf_order_no):
         try:
             performa = Performa.objects.get(prf_order_no=prf_order_no)
-            request = RequestStatus.objects.filter(performa=performa)
-            proforma_details = ProformaDetail.objects.filter(performa=performa)
             # Serialize the data
             performa_serializer = PerformaSerializer(performa)
-            proforma_detail_serializer = ProformaDetailSerializer(proforma_details, many=True)
-            Request_status_serializer = RequestStatusSerializer(request, many=True)
-            # Combine and return the data
             return Response({
                 'performa': performa_serializer.data,
-                'proforma_details': proforma_detail_serializer.data,
-                'request_status': Request_status_serializer.data,
             }, status=status.HTTP_200_OK)
         except Performa.DoesNotExist:
             return Response({'error': 'Performa not found'}, status=status.HTTP_404_NOT_FOUND)
@@ -180,3 +173,71 @@ class SaveSelectedPerformas(APIView):
         except Exception as e:
             logger.error(f"Error saving selected performas: {e}")
             return Response({'error': 'An error occurred while saving the selected performas.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+class UpdatePerformaView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, prf_order_no):
+        try:
+            performa = Performa.objects.get(prf_order_no=prf_order_no)
+        except Performa.DoesNotExist:
+            logger.error(f"Performa with order number {prf_order_no} not found.")
+            return Response({'error': 'Performa not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Parsing dates for updating
+        data = request.data.copy()
+        date_fields = ['prf_date', 'prf_expire_date']
+        for field in date_fields:
+            if field in data and data[field]:
+                date_str = data[field]
+                try:
+                    # Parse Jalali date string and convert to Gregorian
+                    jalali_date = jdatetime.datetime.strptime(date_str, '%Y-%m-%d').date()
+                    gregorian_date = jalali_date.togregorian()
+                    data[field] = gregorian_date
+                except (ValueError, TypeError) as e:
+                    logger.error(f"Error parsing {field} '{date_str}': {e}")
+                    return Response({f'error': f'Invalid date format for {field}. Expected YYYY/MM/DD.'}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                data[field] = None
+
+        # Update using the serializer
+        serializer = PerformaSerializer(performa, data=data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            logger.info(f"Updated Performa with order number {prf_order_no}")
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            logger.error(f"Validation error while updating Performa order number {prf_order_no}: {serializer.errors}")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+class PerformaDeleteView(APIView):
+    """
+    View to delete one or more Performa instances.
+    """
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request):
+        """
+        Delete one or multiple Performa instances.
+        Expects a list of `prf_order_no` in the request body.
+        """
+        try:
+            performa_ids = request.data.get('prf_order_no_list', [])
+
+            if not isinstance(performa_ids, list) or not performa_ids:
+                return Response({'error': 'Please provide a valid list of `prf_order_no`.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Fetch and delete the specified performas
+            performas = Performa.objects.filter(prf_order_no__in=performa_ids)
+            if not performas.exists():
+                return Response({'error': 'No matching performas found for the provided IDs.'}, status=status.HTTP_404_NOT_FOUND)
+
+            deleted_count, _ = performas.delete()
+            logger.info(f"Deleted {deleted_count} Performa instances.")
+
+            return Response({'message': f'{deleted_count} performas deleted successfully.'}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            logger.error(f"Error deleting performas: {e}", exc_info=True)
+            return Response({'error': 'An error occurred while deleting performas.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

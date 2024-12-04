@@ -13,7 +13,14 @@ import {
     FETCH_REGED_ORDERS_FAILURE,
     UPDATE_ORDER_STATUS_REQUEST,
     UPDATE_ORDER_STATUS_SUCCESS,
-    UPDATE_ORDER_STATUS_FAILURE
+    UPDATE_ORDER_STATUS_FAILURE,    
+    FETCH_PERFORMA_REQUEST,
+    FETCH_PERFORMA_SUCCESS,
+    FETCH_PERFORMA_FAILURE,
+    DELETE_PERFORMAS_REQUEST,
+    DELETE_PERFORMAS_SUCCESS,
+    DELETE_PERFORMAS_FAILURE
+
 } from './actionTypes';
 
 export const fetchPerformas = (formData) => async (dispatch) => {
@@ -68,12 +75,10 @@ export const saveSelectedPerformas = (selectedPerformas, ssdsshGUID, urlVCodeInt
         });
     }
 };
-export const updateOrderStatus = (orderId, status) => async (dispatch) => {
+export const updateOrderStatus = (orderId, formData) => async (dispatch) => {
     dispatch({ type: UPDATE_ORDER_STATUS_REQUEST, payload: { orderId } });
     try {
-      const response = await axiosInstance.patch(`orders/${orderId}/`, {
-        status,
-      });
+      const response = await axiosInstance.patch(`orders/${orderId}/`, formData);
       dispatch({
         type: UPDATE_ORDER_STATUS_SUCCESS,
         payload: response.data,
@@ -87,4 +92,38 @@ export const updateOrderStatus = (orderId, status) => async (dispatch) => {
         },
       });
     }
-  };
+};
+
+  export const fetchOrderById = (prfOrderNo) => async (dispatch) => {
+    dispatch({ type: FETCH_PERFORMA_REQUEST });
+    try {
+        const response = await axiosInstance.get(`performas/${prfOrderNo}/`);
+        dispatch({
+            type: FETCH_PERFORMA_SUCCESS,
+            payload: response.data.performa,
+        });
+    } catch (error) {
+        dispatch({
+            type: FETCH_PERFORMA_FAILURE,
+            payload: error.response ? error.response.data.error : 'An error occurred.',
+        });
+    }
+};
+
+export const deletePerformas = (prfOrderNoList) => async (dispatch) => {
+    dispatch({ type: DELETE_PERFORMAS_REQUEST });
+    try {
+        await axiosInstance.delete('performas/delete/', {
+            data: { prf_order_no_list: prfOrderNoList },
+        });
+        dispatch({
+            type: DELETE_PERFORMAS_SUCCESS,
+            payload: prfOrderNoList, // Return the deleted order numbers
+        });
+    } catch (error) {
+        dispatch({
+            type: DELETE_PERFORMAS_FAILURE,
+            payload: error.response ? error.response.data.error : 'An error occurred.',
+        });
+    }
+};

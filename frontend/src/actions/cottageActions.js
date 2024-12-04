@@ -17,6 +17,9 @@ import {
     CREATE_COTTAGE_REQUEST,
     CREATE_COTTAGE_SUCCESS,
     CREATE_COTTAGE_FAILURE,
+    DELETE_COTTAGES_REQUEST,
+    DELETE_COTTAGES_SUCCESS,
+    DELETE_COTTAGES_FAILURE,
 } from './actionTypes';
 
 // Synchronous Action Creators
@@ -129,3 +132,30 @@ export const updateCottageDetails = (cottageId, updatedCottage, cottageNumber) =
         });
     }
 };
+export const deleteCottages = (ids) => async (dispatch) => {
+    dispatch({ type: DELETE_COTTAGES_REQUEST });
+  
+    try {
+      const response = await axiosInstance.post('cottages/delete-selected/', {
+        ids: ids,
+      });
+  
+      dispatch({
+        type: DELETE_COTTAGES_SUCCESS,
+        payload: response.data,
+      });
+  
+      // Optionally, you can dispatch fetchCottages() here to refresh the list
+      // dispatch(fetchCottages());
+    } catch (error) {
+      const errorMsg =
+        error.response && error.response.data
+          ? error.response.data.error || JSON.stringify(error.response.data)
+          : error.message || 'An error occurred.';
+      dispatch({
+        type: DELETE_COTTAGES_FAILURE,
+        payload: errorMsg,
+      });
+      throw error; // Re-throw the error so that the component can handle it
+    }
+  };

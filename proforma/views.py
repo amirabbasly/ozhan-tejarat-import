@@ -241,3 +241,41 @@ class PerformaDeleteView(APIView):
         except Exception as e:
             logger.error(f"Error deleting performas: {e}", exc_info=True)
             return Response({'error': 'An error occurred while deleting performas.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+class PerformaCreateView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            # Parse the data from the request
+            data = request.data.copy()
+
+            # Parse Jalali dates and convert to Gregorian if present
+            date_fields = ['prf_date', 'prf_expire_date']
+            for field in date_fields:
+                if field in data and data[field]:
+                    date_str = data[field]
+                    try:
+                        # Parse Jalali date string and convert to Gregorian
+                        jalali_date = jdatetime.datetime.strptime(date_str, '%Y-%m-%d').date()
+                        gregorian_date = jalali_date.togregorian()
+                        data[field] = gregorian_date
+                    except (ValueError, TypeError) as e:
+                        logger.error(f"Error parsing {field} '{date_str}': {e}")
+                        return Response({f'error': f'Invalid date format for {field}. Expected YYYY/MM/DD.'}, status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    data[field] = None
+
+            # Validate and save the Performa instance using the serializer
+            serializer = PerformaSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                logger.info(f"Created new Performa: {serializer.data}")
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            else:
+                logger.error(f"Validation error while creating Performa: {serializer.errors}")
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            logger.error(f"Error creating Performa: {e}", exc_info=True)
+            return Response({'error': 'An error occurred while creating the Performa.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

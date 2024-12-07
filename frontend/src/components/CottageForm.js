@@ -28,7 +28,7 @@ const CottageForm = () => {
   });
 
   // Local state for goods
-  const [goods, setGoods] = useState([]);
+  const [cottage_goods, setGoods] = useState([]);
   const [newGood, setNewGood] = useState({ goodscode: '', quantity: '', goods_description: '', customs_value: '', import_rights: '', red_cersent: '', total_value: '', added_value: '', discount: ''  });
   const [showGoodsForm, setShowGoodsForm] = useState(false);
 
@@ -49,14 +49,14 @@ const CottageForm = () => {
 
   // Add a new good to the goods list
   const addGood = () => {
-    setGoods([...goods, newGood]);
+    setGoods([...cottage_goods, newGood]);
     setNewGood({  goodscode: '', quantity: '', goods_description: '', customs_value: '', import_rights: '', red_cersent: '', total_value: '', added_value: '', discount: ''}); // Reset the goods form
     setShowGoodsForm(false);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const finalData = { ...formData, goods }; // Include goods in the submission
+    const finalData = { ...formData, cottage_goods }; // Include goods in the submission
     console.log('Final Data being sent:', finalData); // Add this line
     dispatch(createCottage(finalData));
   };
@@ -239,11 +239,11 @@ const CottageForm = () => {
     
           </div>
         )}
-        {goods.length > 0 && (
+        {cottage_goods.length > 0 && (
           <div className="goods-list">
             <h3>کالاهای اضافه شده</h3>
             <ul>
-              {goods.map((good, index) => (
+              {cottage_goods.map((good, index) => (
                 <li key={index}>
            شرح کالا: {good.goods_description} تعداد: {good.quantity} 
                 </li>

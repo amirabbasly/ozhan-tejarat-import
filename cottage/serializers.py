@@ -36,6 +36,7 @@ class JalaliDateField(serializers.Field):
             raise serializers.ValidationError('Invalid date object.')
 
 class CottageGoodsSerializer(serializers.ModelSerializer):
+    cottage = serializers.PrimaryKeyRelatedField(read_only=True)
     class Meta:
         model = CottageGoods
         fields = '__all__'
@@ -46,7 +47,7 @@ class CottageSerializer(serializers.ModelSerializer):
         queryset=Performa.objects.all(),
         slug_field='prf_order_no'
     )
-    cottage_goods = CottageGoodsSerializer(many=True, read_only=True)
+    cottage_goods = CottageGoodsSerializer(many=True, read_only=False)
     
     # Override the cottage_date field to handle Jalali dates
     cottage_date = serializers.CharField()
@@ -72,12 +73,19 @@ class CottageSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError({'cottage_date': 'Invalid date format. Expected YYYY-MM-DD in Jalali calendar.'})
         return super().to_internal_value(data)
 
-
-
     def create(self, validated_data):
-        cottage = Cottage(**validated_data)
-        cottage.save()
+        # Pop the cottage_goods data from validated_data
+        cottage_goods_data = validated_data.pop('cottage_goods', [])
+
+        # Create the Cottage object
+        cottage = Cottage.objects.create(**validated_data)
+
+        # Now create the CottageGoods instances and associate them with the Cottage
+        for cottage_good_data in cottage_goods_data:
+            CottageGoods.objects.create(cottage=cottage, **cottage_good_data)
+
         return cottage
+
 
     def update(self, instance, validated_data):
         for attr, value in validated_data.items():

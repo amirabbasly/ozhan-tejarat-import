@@ -15,7 +15,11 @@ import {
   FETCH_PERFORMA_FAILURE,
   UPDATE_ORDER_STATUS_REQUEST,
   UPDATE_ORDER_STATUS_SUCCESS,
-  UPDATE_ORDER_STATUS_FAILURE,  
+  UPDATE_ORDER_STATUS_FAILURE,
+  ADD_PERFORMA_REQUEST,
+  ADD_PERFORMA_SUCCESS,
+  ADD_PERFORMA_FAILURE, 
+  RESET_ADD_PERFORMA  
 } from '../actions/actionTypes';
 
 // Initial state for performaReducer
@@ -36,6 +40,11 @@ const orderInitialState = {
   orders: [],
   error: '',
   message: '',
+  orderCreation: {
+    loading: false,
+    success: false,
+    error: '',
+},
 };
 export const regedOrderDetailsReducer = (state = detailsInitialState, action) => {
   switch (action.type) {
@@ -92,6 +101,45 @@ const orderReducer = (state = orderInitialState, action) => {
         loading: false,
         error: action.payload,
       };
+      case ADD_PERFORMA_REQUEST:
+        return {
+            ...state,
+            orderCreation: {
+                loading: true,
+                success: false,
+                error: '',
+            },
+        };
+    case ADD_PERFORMA_SUCCESS:
+        return {
+            ...state,
+            orderCreation: {
+                loading: false,
+                success: true,
+                error: '',
+            },
+            // Optionally, add the new cottage to performas
+            // performas: [...state.performas, action.payload],
+        };
+    case ADD_PERFORMA_FAILURE:
+        return {
+            ...state,
+            orderCreation: {
+                loading: false,
+                success: false,
+                error: action.payload,
+            },
+        };
+
+    case RESET_ADD_PERFORMA:
+        return {
+            ...state,
+            orderCreation: {
+                loading: false,
+                success: false,
+                error: '',
+            },
+        };
     default:
       return state;
   }

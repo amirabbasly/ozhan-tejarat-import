@@ -19,7 +19,10 @@ import {
     FETCH_PERFORMA_FAILURE,
     DELETE_PERFORMAS_REQUEST,
     DELETE_PERFORMAS_SUCCESS,
-    DELETE_PERFORMAS_FAILURE
+    DELETE_PERFORMAS_FAILURE,
+    ADD_PERFORMA_REQUEST,
+    ADD_PERFORMA_SUCCESS,
+    ADD_PERFORMA_FAILURE,
 
 } from './actionTypes';
 
@@ -124,6 +127,22 @@ export const deletePerformas = (prfOrderNoList) => async (dispatch) => {
         dispatch({
             type: DELETE_PERFORMAS_FAILURE,
             payload: error.response ? error.response.data.error : 'An error occurred.',
+        });
+    }
+};
+
+export const createOrder = (cottageData) => async (dispatch) => {
+    dispatch({ type: ADD_PERFORMA_REQUEST });
+    try {
+        const response = await axiosInstance.post('new-performa/', cottageData);
+        dispatch({
+            type: ADD_PERFORMA_SUCCESS,
+            payload: response.data,
+        });
+    } catch (error) {
+        dispatch({
+            type: ADD_PERFORMA_FAILURE,
+            payload: error.response.data ,
         });
     }
 };

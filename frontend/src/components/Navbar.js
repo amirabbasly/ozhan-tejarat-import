@@ -103,7 +103,7 @@
                   {/* Submenu within Submenu */}
                   {showSubSubmenu['receive-order'] && (
                     <ul className="sub-submenu">
-                      <Link className="submenu-link" to="/">
+                      <Link className="submenu-link" to="/add-order">
                         <li className="submenu-item">ایجاد ثبت سفارش</li>
                       </Link>
                       <Link className="submenu-link" to="/reged-orders">

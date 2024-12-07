@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchOrderById, updateOrderStatus } from '../actions/performaActions';
+import { fetchOrderById, updateOrderStatus, deletePerformas } from '../actions/performaActions';
 import { useLocation, useNavigate } from 'react-router-dom';
 import './RegedOrderDetails.css';
 import DatePicker from 'react-multi-date-picker';
@@ -15,6 +15,7 @@ const RegedOrderDetails = () => {
   const { order, loading, error } = OrderDetails;
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState({});
+
 
   // Extract prfOrderNo from the URL manually
   const prfOrderNo = location.pathname.split('/').pop();
@@ -59,6 +60,21 @@ const RegedOrderDetails = () => {
     } catch (error) {
       console.error('Error updating the order:', error);
     }
+  };
+  const handleDeleteOrder = () => {
+    if (!window.confirm('آیا از حذف سفارش فعلی اطمینان دارید؟')) {
+      return;
+    }
+
+    dispatch(deletePerformas([prfOrderNo]))
+      .then(() => {
+        alert('سفارش با موفقیت حذف شد.');
+        navigate('/reged-orders'); // Redirect to the orders list page
+      })
+      .catch((error) => {
+        console.error('Error deleting the order:', error);
+        alert('خطا در حذف سفارش.');
+      });
   };
   
   if (loading) {
@@ -170,10 +186,17 @@ const RegedOrderDetails = () => {
       </div>
       <div className="order-buttons">
         {editMode ? (
-          <button className="save-button" onClick={handleSaveClick}>ذخیره</button>
+          <button className="primary-button" onClick={handleSaveClick}>ذخیره</button>
         ) : (
-          <button className="edit-button" onClick={handleEditClick}>ویرایش</button>
+          <button className="primary-button" onClick={handleEditClick}>ویرایش</button>
         )}
+        <button
+          onClick={handleDeleteOrder}
+          className="delete-button"
+        >
+          حذف سفارش
+        </button>
+
       </div>
     </div>
   );

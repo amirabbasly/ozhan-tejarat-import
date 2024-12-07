@@ -20,6 +20,7 @@ body{
   }
   
   .form-group {
+    direction: rtl;
     display: flex;
     flex-direction: column;
     font-family: 'Vazirmatn', sans-serif;
@@ -42,6 +43,7 @@ body{
     font-size: 14px;
     width: 93.5%;
     margin-left: 3%;
+
   }
 
   .form-group input:focus {
@@ -143,6 +145,16 @@ body {
     margin-bottom: 5px;
     border: 1px solid #ddd;
   }
+
+  .error-input {
+    border: 1px solid red;
+    background-color: #ffe6e6;
+  }
+
+.add-error{
+  color: red;
+  font-size: 12px;
+}
 
   @media (max-width:690px){
 

@@ -62,24 +62,30 @@ border-top: 1px solid #a4a4a4;
   font-size: 18px;
 }
 .filter-container {
+  flex-wrap: wrap;
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
 }
 
+
 .search-input {
-  width: 40%;
-  padding: 10px;
   border: 1px solid #ccc;
   border-radius: 4px;
 }
+.filter-container input {
+  padding: 10px;
+  margin-bottom: 30px;
+  width: 250px;
+}
 
 .filter-select {
-  width: 25%;
-  padding: 10px;
+ width: 273px;
+ padding: 10px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  margin-bottom: 30px;
 }
 
 .search-input:focus,
@@ -99,4 +105,13 @@ border-top: 1px solid #a4a4a4;
 .delete-button:disabled {
   background-color: #bdc3c7;
   cursor: not-allowed;
+}
+.c-price-input{
+  padding: 10px;
+  width: auto;
+  margin-bottom: 30px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-bottom: 30px;
+  width: 250px;
 }

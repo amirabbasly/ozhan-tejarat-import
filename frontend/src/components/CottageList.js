@@ -225,8 +225,8 @@ const CottageList = () => {
 
         {/* Currency Price Section */}
         <div className="currency-price-section">
-          <label htmlFor="currencyPrice">نرخ ارز:</label>
           <input
+          className='c-price-input'
             type="number"
             id="currencyPrice"
             value={currencyPrice}
@@ -235,18 +235,19 @@ const CottageList = () => {
           />
         </div>
         <button
+        className="primary-button"
           onClick={handleApplyCurrencyPrice}
           disabled={selectedCottages.length === 0 || !currencyPrice}
         >
           ثبت نرخ ارز برای کوتاژهای انتخاب شده
         </button>
         <button
-  onClick={handleDeleteSelectedCottages}
-  disabled={selectedCottages.length === 0}
-  className="delete-button"
->
-  حذف کوتاژهای انتخاب شده
-</button>
+          onClick={handleDeleteSelectedCottages}
+          disabled={selectedCottages.length === 0}
+          className="delete-button"
+        >
+          حذف کوتاژهای انتخاب شده
+        </button>
 
 
         {loading && <p className="loading">در حال بارگذاری...</p>}

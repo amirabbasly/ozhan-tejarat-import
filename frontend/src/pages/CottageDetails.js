@@ -16,6 +16,8 @@ const CottageDetails = () => {
     const { cottageNumber } = useParams();
     const cottageDetails = useSelector((state) => state.cottageDetails);
     const { loading, cottage, error } = cottageDetails;
+    const [isEditing, setIsEditing] = useState(false); // Tracks if in edit mode
+
 
 
     // State variables for each cottage field
@@ -46,7 +48,8 @@ const handleDeleteCottage = () => {
 };
 
 
-    useEffect(() => {
+
+useEffect(() => {
         if (cottageNumber) {
             dispatch(fetchCottageDetails(cottageNumber));
         }
@@ -75,44 +78,25 @@ const handleDeleteCottage = () => {
         }
     }, [cottage]);
 
-    // Handlers for input changes
-    const handleCurrencyPriceChange = (e) => {
-        setCurrencyPrice(e.target.value);
-    };
 
-    const handleCottageNumChange = (e) => {
-        setCottageNum(e.target.value);
-    };
-
-    const handleCottageDateChange = (date) => {
-        setCottageDate(date);
-    };
-
-    const handleTotalValueChange = (e) => {
-        setTotalValue(e.target.value);
-    };
-
-    const handleQuantityChange = (e) => {
-        setQuantity(e.target.value);
-    };
-
-    const handleProformaChange = (e) => {
-        setProforma(e.target.value);
-    };
 
     const handleDetailsSubmit = () => {
-        if (cottageId) {
-          const updatedCottage = {
-            cottage_number: cottageNum,
-            cottage_date: cottageDate ? cottageDate.format("YYYY-MM-DD") : null,
-            total_value: totalValue,
-            quantity: quantity,
-            proforma: proforma,
-            currency_price: currencyPrice,
-          };
-          dispatch(updateCottageDetails(cottageId, updatedCottage, cottageNumber));
+        if (isEditing) {
+            if (cottageId) {
+                const updatedCottage = {
+                    cottage_number: cottageNum,
+                    cottage_date: cottageDate ? cottageDate.format("YYYY-MM-DD") : null,
+                    total_value: totalValue,
+                    quantity: quantity,
+                    proforma: proforma,
+                    currency_price: currencyPrice,
+                };
+                dispatch(updateCottageDetails(cottageId, updatedCottage, cottageNumber));
+            }
         }
-      };
+        setIsEditing((prev) => !prev); // Toggle edit mode
+    };
+
       
 
     if (loading) {
@@ -130,96 +114,111 @@ const handleDeleteCottage = () => {
 
     return (
         <div className="cottage-details-container">
-            <h1 className="header">جزئیات اظهارنامه</h1>
-            <div className="cottage-info">
-                <div className="input-group">
-                    <label htmlFor="cottageNum"><strong>شماره کوتاژ :</strong></label>
-                    <input
-                        type="text"
-                        id="cottageNum"
-                        value={cottageNum}
-                        onChange={handleCottageNumChange}
-                        placeholder="Enter cottage number"
-                    />
-                </div>
+        <h1 className="header">جزئیات اظهارنامه</h1>
+        <div className="cottage-info">
+            <div className="input-group">
+                <label htmlFor="cottageNum"><strong>شماره کوتاژ :</strong></label>
 
-                <div className="input-group">
-                    <label htmlFor="cottageDate"><strong>تاریخ :</strong></label>
+                    <span className="readonly-text">{cottageNum}</span>
+                
+            </div>
+
+            <div className="input-group">
+                <label htmlFor="cottageDate"><strong>تاریخ :</strong></label>
+                {isEditing ? (
                     <DatePicker
                         id="cottageDate"
                         value={cottageDate}
-                        onChange={handleCottageDateChange}
+                        onChange={setCottageDate}
                         calendar={persian}
                         locale={persian_fa}
                         format="YYYY/MM/DD"
-                        placeholder="تاریخ را انتخاب کنید"
+                        className="editable-datepicker"
                     />
-                </div>
+                ) : (
+                    <span className="readonly-text">{cottageDate ? cottageDate.format("YYYY/MM/DD") : 'N/A'}</span>
+                )}
+            </div>
 
-                <div className="input-group">
-                    <label htmlFor="totalValue"><strong>ارزش کل :</strong></label>
+            <div className="input-group">
+                <label htmlFor="totalValue"><strong>ارزش کل :</strong></label>
+                {isEditing ? (
                     <input
                         type="number"
                         id="totalValue"
                         value={totalValue}
-                        onChange={handleTotalValueChange}
-                        placeholder="Enter total value"
+                        onChange={(e) => setTotalValue(e.target.value)}
+                        className="editable-input"
                     />
-                </div>
+                ) : (
+                    <span className="readonly-text">{totalValue}</span>
+                )}
+            </div>
 
-                <div className="input-group">
-                    <label htmlFor="quantity"><strong>تعداد کالا ها :</strong></label>
+            <div className="input-group">
+                <label htmlFor="quantity"><strong>تعداد کالا ها :</strong></label>
+                {isEditing ? (
                     <input
                         type="number"
                         id="quantity"
                         value={quantity}
-                        onChange={handleQuantityChange}
-                        placeholder="Enter quantity"
+                        onChange={(e) => setQuantity(e.target.value)}
+                        className="editable-input"
                     />
-                </div>
+                ) : (
+                    <span className="readonly-text">{quantity}</span>
+                )}
+            </div>
 
-                <div className="input-group">
-                    <label htmlFor="proforma"><strong>شماره ثبت سفارش :</strong></label>
-                    <input
-                        type="text"
-                        id="proforma"
-                        value={proforma}
-                        onChange={handleProformaChange}
-                        placeholder="Enter proforma number"
-                    />
-                </div>
+            <div className="input-group">
+                <label htmlFor="proforma"><strong>شماره ثبت سفارش :</strong></label>
 
-                <div className="input-group">
-                    <label htmlFor="currencyPrice"><strong>نرخ ارز :</strong></label>
+                    <span className="readonly-text">{proforma}</span>
+               
+            </div>
+
+            <div className="input-group">
+                <label htmlFor="currencyPrice"><strong>نرخ ارز :</strong></label>
+                {isEditing ? (
                     <input
                         type="number"
                         id="currencyPrice"
+                        placeholder='نرخ ارز را وارد کنید'
                         value={currencyPrice}
-                        onChange={handleCurrencyPriceChange}
-                        placeholder="Enter currency price"
+                        onChange={(e) => setCurrencyPrice(e.target.value)}
+                        className="editable-input"
                     />
-                </div>
+                ) : (
+                        <span className="readonly-text">{currencyPrice || 'نرخ ارز را وارد کنید'}</span>
+                )}
+            </div>
 
-                <button onClick={handleDetailsSubmit}>ثبت</button>
-                <button onClick={handleDeleteCottage} className="delete-button">
-    حذف اظهارنامه
-</button>
+            <button onClick={handleDetailsSubmit} className="primary-button">
+                {isEditing ? 'ذخیره' : 'ویرایش'}
+            </button>
 
+            <button onClick={handleDeleteCottage} className="delete-button">
+                حذف اظهارنامه
+            </button>
             </div>
 
             <h2 className="goods-header">کالا ها</h2>
             {cottage.cottage_goods && cottage.cottage_goods.length > 0 ? (
+                <div className='goods-table-container'>
                 <table className="goods-table">
                     <thead>
                         <tr>
                             <th>ردیف</th>
-                            <th>کد کالا</th>
                             <th>ارزش گمرکی</th>
+                            <th>حقوق ورودی</th>
+                            <th>ارزش کل ارزی</th>
+                            <th>ارزش افزوده</th>
+                            <th>حلال احمر</th>
                             <th>حواله ریالی</th>
                             <th>حواله + حقوق</th>
                             <th>سایر هزینه ها</th>
                             <th>بهای تمام شده</th>
-                            <th>Quantity</th>
+                            <th>تعداد</th>
                             <th>شرح کالا</th>
                         </tr>
                     </thead>
@@ -227,8 +226,11 @@ const handleDeleteCottage = () => {
                         {cottage.cottage_goods.map((good, index) => (
                             <tr key={good.id}>
                                 <td>{index + 1}</td>
-                                <td>{good.goodscode}</td>
                                 <td>{new Intl.NumberFormat('fa-IR').format(good.customs_value)}</td>
+                                <td>{new Intl.NumberFormat('fa-IR').format(good.import_rights)}</td>
+                                <td>{new Intl.NumberFormat('fa-IR').format(good.total_value)}</td>
+                                <td>{new Intl.NumberFormat('fa-IR').format(good.added_value)}</td>
+                                <td>{new Intl.NumberFormat('fa-IR').format(good.red_cersent)}</td>
                                 <td>{new Intl.NumberFormat('fa-IR').format(good.riali)}</td>
                                 <td>{new Intl.NumberFormat('fa-IR').format(good.hhhg)}</td>
                                 <td>{new Intl.NumberFormat('fa-IR').format(good.other_expense)}</td>
@@ -239,6 +241,7 @@ const handleDeleteCottage = () => {
                         ))}
                     </tbody>
                 </table>
+                </div>
             ) : (
                 <p className="no-goods">No goods found for this cottage.</p>
             )}

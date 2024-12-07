@@ -161,9 +161,12 @@ const ImportPf = () => {
           >
             پاک کردن پارامترها
           </button>
+          
         </div>
       </form>
-
+      <button onClick={handleSendSelected} className="save-selected-button" disabled={loading}>
+            {loading ? 'در حال ذخیره...' : 'ذخیره موارد انتخاب‌شده'}
+          </button>
       {/* Loading Indicator */}
       {loading && <p className="loading">در حال بارگذاری...</p>}
 
@@ -229,9 +232,7 @@ const ImportPf = () => {
               ))}
             </tbody>
           </table>
-          <button onClick={handleSendSelected} className="save-selected-button" disabled={loading}>
-            {loading ? 'در حال ذخیره...' : 'ذخیره موارد انتخاب‌شده'}
-          </button>
+
         </div>
       )}
     </div>

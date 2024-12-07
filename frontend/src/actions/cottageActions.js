@@ -128,7 +128,7 @@ export const updateCottageDetails = (cottageId, updatedCottage, cottageNumber) =
     } catch (error) {
         dispatch({
             type: CREATE_COTTAGE_FAILURE,
-            payload: error.response ? error.response.data.error : 'An error occurred.',
+            payload: error.response.data ,
         });
     }
 };

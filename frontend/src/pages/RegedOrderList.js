@@ -140,33 +140,31 @@ const RegedOrderList = () => {
             ))}
           </select>
           <DatePicker
-  value={endDate}
-  onChange={setEndDate}
-  calendar={persian}
-  locale={persian_fa}
-  format="YYYY/MM/DD"
-  placeholder="تاریخ پایان"
-  className="date-picker"
-/>
-          <DatePicker
-  value={startDate}
-  onChange={setStartDate}
-  calendar={persian}
-  locale={persian_fa}
-  format="YYYY/MM/DD"
-  placeholder="تاریخ شروع"
-  className="date-picker"
-/>
-<button
-  onClick={handleDeleteSelectedOrders}
-  disabled={selectedOrders.length === 0}
-  className="delete-button"
->
-  حذف سفارش‌های انتخاب شده
-</button>
-
-
-        </div>
+            value={endDate}
+            onChange={setEndDate}
+            calendar={persian}
+            locale={persian_fa}
+            format="YYYY/MM/DD"
+            placeholder="تاریخ پایان"
+            className="date-picker"
+          />
+                    <DatePicker
+            value={startDate}
+            onChange={setStartDate}
+            calendar={persian}
+            locale={persian_fa}
+            format="YYYY/MM/DD"
+            placeholder="تاریخ شروع"
+            className="date-picker"
+          />
+          <button
+            onClick={handleDeleteSelectedOrders}
+            disabled={selectedOrders.length === 0}
+            className="delete-button"
+          >
+          حذف
+          </button>
+    </div>
 
         {loading && <p className="loading">در حال بارگذاری...</p>}
         {error && <p className="error">{error}</p>}

@@ -1,7 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import CottageViewSet, CustomsDeclarationListView, GreenCustomsDeclarationView, SaveCottageView, SaveCottageGoodsView, FetchGoodsAPIView,FetchCustomsDutyInformationAPIView
-
+from .views import CottageViewSet, CustomsDeclarationListView, GreenCustomsDeclarationView, SaveCottageView, SaveCottageGoodsView, FetchGoodsAPIView,FetchCustomsDutyInformationAPIView 
 router = DefaultRouter()
 router.register(r'cottages', CottageViewSet)
 
@@ -13,8 +12,5 @@ urlpatterns = [
     path('save-cottage-goods/', SaveCottageGoodsView.as_view(), name='save_cottage_goods'),
     path('fetch-goods/', FetchGoodsAPIView.as_view(), name='fetch_goods'),
     path('fetch-customs-duty-info/', FetchCustomsDutyInformationAPIView.as_view(), name='fetch_customs_duty_info'),
-
-
-
-
+    
 ]

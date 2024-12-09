@@ -91,6 +91,11 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
+        'cottage': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
     },
 }  
 
@@ -134,6 +139,8 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # React frontend URL
 ]
+CORS_ALLOW_CREDENTIALS = True
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -151,6 +158,8 @@ SIMPLE_JWT = {
 ROOT_URLCONF = 'core.urls'
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
+CSRF_TRUSTED_ORIGINS = ['http://localhost:3000']
+
 
 
 TEMPLATES = [

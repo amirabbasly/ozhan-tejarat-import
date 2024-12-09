@@ -5,12 +5,16 @@ from rest_framework.decorators import action
 from .models import Cottage, CottageGoods
 from decimal import Decimal  # Import Decimal
 from proforma.models import Performa  # Import Performa model
-
-
+from django.http import HttpResponse, JsonResponse
+from urllib.parse import urljoin
+from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.middleware.csrf import get_token
 from .serializers import CottageSerializer, CustomsDeclarationInputSerializer, GreenCustomsDeclarationInputSerializer
 import requests
 import logging
 from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
 
 
 class FetchGoodsAPIView(APIView):
@@ -385,3 +389,4 @@ class GreenCustomsDeclarationView(APIView):
         except Exception as e:
             logger.error(f"Unexpected error: {e}", exc_info=True)
             return Response({'error': 'An unexpected error occurred on the server.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+

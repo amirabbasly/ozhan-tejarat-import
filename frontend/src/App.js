@@ -14,7 +14,8 @@ import CottageDetails from './pages/CottageDetails';
 import Login from './components/login';
 import RegedOrderList from './pages/RegedOrderList';
 import RegedOrderDetails from './components/RegedOrderDetails';
-import AddOrder from './pages/AddOrder'
+import AddOrder from './pages/AddOrder';
+import EplLogin from './pages/EplLogin'
 // Import Redux Provider and store
 import { Provider } from 'react-redux';
 import store from './store';
@@ -105,6 +106,14 @@ function AppContent() {
             element={
               <PrivateRoute>
                 <CustomsDeclarationList />
+              </PrivateRoute>
+            }
+          />
+                    <Route
+            path="/epl"
+            element={
+              <PrivateRoute>
+                <EplLogin />
               </PrivateRoute>
             }
           />

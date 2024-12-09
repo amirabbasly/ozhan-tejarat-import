@@ -96,6 +96,8 @@ const CottageForm = () => {
     <form className="cottage-form" onSubmit={handleSubmit}>
       <h2>اظهارنامه جدید</h2>
       <div className="form-group">
+      <span>تاریخ</span>
+
         <DatePicker
         className='selectPrf'
           value={formData.cottage_date}
@@ -106,6 +108,7 @@ const CottageForm = () => {
           placeholder="تاریخ را انتخاب کنید"
           required
         />
+        <span>شماره کوتاژ</span>
         <input
           type="number"
           name="cottage_number"
@@ -114,6 +117,7 @@ const CottageForm = () => {
           placeholder="شماره کوتاژ"
           required
         />
+        <span>شماره ثبت سفارش</span>
         <Select
           name="proforma"
           className='selectPrf'
@@ -125,6 +129,7 @@ const CottageForm = () => {
           placeholder={loading ? 'در حال بارگذاری...' : error ? 'خطا در بارگذاری' : 'انتخاب سفارش'}
           noOptionsMessage={() => (!loading && !error ? 'سفارشی موجود نیست' : 'در حال بارگذاری...')}
         />
+        <span>ارزش کل</span>
         <input
           type="number"
           name="total_value"
@@ -133,6 +138,7 @@ const CottageForm = () => {
           placeholder="ارزش کل"
           required
         />
+        <span>تعداد کالا</span>
         <input
           type="number"
           name="quantity"
@@ -141,6 +147,7 @@ const CottageForm = () => {
           placeholder="تعداد کالا"
           required
         />
+        <span>نرخ ارز</span>
         <input
           type="number"
           name="currency_price"

@@ -20,6 +20,9 @@ import {
     DELETE_COTTAGES_REQUEST,
     DELETE_COTTAGES_SUCCESS,
     DELETE_COTTAGES_FAILURE,
+    UPDATE_GOOD_REQUEST,
+    UPDATE_GOOD_SUCCESS,
+    UPDATE_GOOD_FAILURE,
 } from './actionTypes';
 
 // Synchronous Action Creators
@@ -159,3 +162,16 @@ export const deleteCottages = (ids) => async (dispatch) => {
       throw error; // Re-throw the error so that the component can handle it
     }
   };
+
+  export const updateGood = (goodId, goodData) => async (dispatch) => {
+    dispatch({ type: UPDATE_GOOD_REQUEST });
+    try {
+        const response = await axiosInstance.put(`/cottage-goods/${goodId}/`, goodData);
+        dispatch({ type: UPDATE_GOOD_SUCCESS, payload: response.data });
+    } catch (error) {
+        dispatch({
+            type: UPDATE_GOOD_FAILURE,
+            payload: error.response?.data?.error || 'Failed to update good.',
+        });
+    }
+};

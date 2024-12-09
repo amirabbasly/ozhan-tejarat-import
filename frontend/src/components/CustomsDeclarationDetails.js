@@ -223,7 +223,7 @@ const CustomsDeclarationDetails = () => {
       {saveError && <p className="error">{saveError}</p>}
 
       {/* Back Link */}
-      <Link to="/" className="back-link">
+      <Link to="/decl" className="back-link">
         بازگشت به لیست
       </Link>
     </div>

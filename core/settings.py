@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'cottage',
     'jalali_date',
     'accounts',
+    'representation',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -92,6 +93,11 @@ LOGGING = {
             'propagate': True,
         },
         'cottage': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'representation': {
             'handlers': ['console', 'file'],
             'level': 'DEBUG',
             'propagate': True,
@@ -191,6 +197,8 @@ DATABASES = {
     }
 }
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 # Password validation

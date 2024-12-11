@@ -351,61 +351,57 @@ export const saveData = (declaration, goods, ssdsshGUID, urlVCodeInt) => async (
         dispatch(saveDataFailure(errorMsg));
     }
 };
-
-// Save Multiple Declarations
 export const saveMultipleDeclarations = (declarations, ssdsshGUID, urlVCodeInt) => async (dispatch, getState) => {
-    dispatch(saveMultipleDeclarationsRequest());
+    dispatch(saveMultipleDeclarationsRequest({ total: declarations.length }));
 
     let failedDeclarations = [];
     let savedCount = 0;
 
-    try {
-        for (const [index, declaration] of declarations.entries()) {
-            try {
-                // Fetch declaration details
-                await dispatch(fetchDeclarationDetails(declaration.FullSerialNumber, ssdsshGUID, urlVCodeInt));
-
-                const { declarationDetails } = getState().customsDeclarations;
-
-                // Fetch goods for the declaration
-                await dispatch(fetchGoods(declarationDetails.gcuVcodeInt, ssdsshGUID, urlVCodeInt));
-
-                const { goods } = getState().customsDeclarations;
-
-                // Save data to the database
-                await dispatch(saveData(declarationDetails, goods, ssdsshGUID, urlVCodeInt));
-
-                savedCount++;
-            } catch (error) {
-                failedDeclarations.push(declaration.FullSerialNumber);
-                console.error(`Error saving declaration: ${declaration.FullSerialNumber}`, error);
+    for (const [index, declaration] of declarations.entries()) {
+        try {
+            // Fetch declaration details
+            await dispatch(fetchDeclarationDetails(declaration.FullSerialNumber, ssdsshGUID, urlVCodeInt));
+            const stateAfterDetails = getState().customsDeclarations;
+            if (stateAfterDetails.errorDeclarationDetails) {
+                throw new Error(`Failed to fetch details: ${stateAfterDetails.errorDeclarationDetails}`);
             }
 
-            // Dispatch progress update
-            dispatch(saveMultipleDeclarationsProgress(index + 1, declarations.length));
+            // Fetch goods
+            await dispatch(fetchGoods(stateAfterDetails.declarationDetails.gcuVcodeInt, ssdsshGUID, urlVCodeInt));
+            const stateAfterGoods = getState().customsDeclarations;
+            if (stateAfterGoods.errorGoods) {
+                throw new Error(`Failed to fetch goods: ${stateAfterGoods.errorGoods}`);
+            }
+
+            // Save data
+            await dispatch(saveData(stateAfterGoods.declarationDetails, stateAfterGoods.goods, ssdsshGUID, urlVCodeInt));
+            const finalState = getState().customsDeclarations;
+            if (finalState.saveError) {
+                throw new Error(`مورد ذخیره نشد: ${finalState.saveError}`);
+            }
+
+            // If everything succeeded
+            savedCount++;
+        } catch (error) {
+            // Store both the declaration serial and the reason it failed
+            failedDeclarations.push({
+                FullSerialNumber: declaration.FullSerialNumber,
+                reason: error.message || 'An unknown error occurred.'
+            });
+            console.error(`Error saving declaration: ${declaration.FullSerialNumber}`, error);
         }
 
-        // Finalize with success or partial success
-        if (failedDeclarations.length > 0) {
-            dispatch(
-                saveMultipleDeclarationsSuccess({
-                    message: `${savedCount}/${declarations.length} declarations saved successfully.`,
-                    failedDeclarations,
-                })
-            );
-        } else {
-            dispatch(
-                saveMultipleDeclarationsSuccess({
-                    message: 'All declarations saved successfully.',
-                })
-            );
-        }
-    } catch (error) {
-        console.error('Error during bulk save:', error);
-        const errorMsg =
-            error.response && error.response.data
-                ? error.response.data.ErrorDesc || JSON.stringify(error.response.data)
-                : 'Error saving declarations.';
-        dispatch(saveMultipleDeclarationsFailure(errorMsg));
+        // Update progress
+        dispatch(saveMultipleDeclarationsProgress(index + 1, declarations.length));
     }
+
+    // Construct the final message
+    let message;
+    if (savedCount === declarations.length) {
+        message = 'All declarations saved successfully.';
+    } else {
+        message = `${savedCount}/${declarations.length} اضهارنامه های ثبت شده. ${failedDeclarations.length} ثبت نشده.`;
+    }
+
+    dispatch(saveMultipleDeclarationsSuccess({ message, failedDeclarations }));
 };

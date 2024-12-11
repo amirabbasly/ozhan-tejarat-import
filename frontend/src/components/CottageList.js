@@ -241,6 +241,7 @@ const CottageList = () => {
         >
           ثبت نرخ ارز برای کوتاژهای انتخاب شده
         </button>
+        
         <button
           onClick={handleDeleteSelectedCottages}
           disabled={selectedCottages.length === 0}

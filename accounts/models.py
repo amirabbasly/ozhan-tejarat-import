@@ -31,6 +31,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         ('admin', 'Admin'),
         ('editor', 'Editor'),
         ('viewer', 'Viewer'),
+        ('accountent', 'Accountent'),
     ]
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='viewer')
     is_active = models.BooleanField(default=True)

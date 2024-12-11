@@ -7,6 +7,7 @@ import { cottageDetailsReducer } from './reducers/cottageReducers'
 import { performaReducer, orderReducer, regedOrderDetailsReducer} from './reducers/performaReducers';
 import { customsDeclarationReducer } from './reducers/customsDeclarationReducers';
 import { loadCustomsParams, saveCustomsParams } from './utils/localSotrage/localstorage';
+import { representationReducer } from './reducers/representationReducers';
 import authReducer from './reducers/authReducers';
 // Load initial parameters from localStorage
 const persistedParams = loadCustomsParams();
@@ -19,7 +20,8 @@ const rootReducer = combineReducers({
   performa: performaReducer,
   cottages: cottageReducer,
   customsDeclarations: customsDeclarationReducer,
-  cottageDetails: cottageDetailsReducer
+  cottageDetails: cottageDetailsReducer,
+  representations: representationReducer,
 });
 
 // Configure the store with preloaded state

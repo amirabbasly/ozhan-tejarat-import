@@ -22,6 +22,9 @@ const CottageDetails = () => {
 
     // State variables for each cottage field
     const [currencyPrice, setCurrencyPrice] = useState('');
+    const [rafeeTaahod, setRafeeTaahod] = useState('');
+    const [ docsRecieved, setDocsRecieved ] = useState('');
+    const [ rewatch, setRewatch ] = useState('');
     const [cottageNum, setCottageNum] = useState('');
     const [cottageDate, setCottageDate] = useState(null);
     const [totalValue, setTotalValue] = useState('');
@@ -63,6 +66,9 @@ useEffect(() => {
             setTotalValue(cottage.total_value || '');
             setQuantity(cottage.quantity || '');
             setProforma(cottage.proforma || '');
+            setRafeeTaahod(cottage.rafee_taahod === true ? 'true' : 'false'); // Ensure proper boolean handling
+            setDocsRecieved(cottage.docs_recieved === true ? 'true' : 'false');
+            setRewatch(cottage.rewatch === true ? 'true' : 'false');
 
             if (cottage.cottage_date) {
                 const dateObject = new DateObject({
@@ -90,6 +96,9 @@ useEffect(() => {
                     quantity: quantity,
                     proforma: proforma,
                     currency_price: currencyPrice,
+                    rafee_taahod: rafeeTaahod,
+                    docs_recieved: docsRecieved,
+                    rewatch: rewatch,
                 };
                 dispatch(updateCottageDetails(cottageId, updatedCottage, cottageNumber));
             }
@@ -192,7 +201,55 @@ useEffect(() => {
                         <span className="readonly-text">{currencyPrice || 'نرخ ارز را وارد کنید'}</span>
                 )}
             </div>
-
+            <div className="input-group">
+                <label htmlFor="rafeeTaahod"><strong>رفع تعهد :</strong></label>
+                {isEditing ? (
+                    <input
+                        type="checkbox"
+                        id="rafeeTaahod"
+                        checked={rafeeTaahod === 'true'} // Ensure proper boolean handling
+                        onChange={(e) => setRafeeTaahod(e.target.checked ? 'true' : 'false')}
+                        className="editable-checkbox"
+                    />
+                ) : (
+                    <span className="readonly-text">
+                        {rafeeTaahod === 'true' ? 'بله' : 'خیر'} {/* Display in Persian */}
+                    </span>
+                )}
+            </div>
+            <div className="input-group">
+                <label htmlFor="docsRecieved"><strong>اخذ مدارک :</strong></label>
+                {isEditing ? (
+                    <input
+                        type="checkbox"
+                        id="docsRecieved"
+                        checked={docsRecieved === 'true'} // Ensure proper boolean handling
+                        onChange={(e) => setDocsRecieved(e.target.checked ? 'true' : 'false')}
+                        className="editable-checkbox"
+                    />
+                ) : (
+                    <span className="readonly-text">
+                        {docsRecieved === 'true' ? 'بله' : 'خیر'} {/* Display in Persian */}
+                    </span>
+                )}
+            </div>
+            <div className="input-group">
+                <label htmlFor="rewatch"><strong>بازبینی :</strong></label>
+                {isEditing ? (
+                    <input
+                        type="checkbox"
+                        id="docsRecieved"
+                        checked={rewatch === 'true'} // Ensure proper boolean handling
+                        onChange={(e) => setRewatch(e.target.checked ? 'true' : 'false')}
+                        className="editable-checkbox"
+                    />
+                ) : (
+                    <span className="readonly-text">
+                        {rewatch === 'true' ? 'بله' : 'خیر'} {/* Display in Persian */}
+                    </span>
+                )}
+            </div>
+            
             <button onClick={handleDetailsSubmit} className="primary-button">
                 {isEditing ? 'ذخیره' : 'ویرایش'}
             </button>

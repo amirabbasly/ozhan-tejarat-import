@@ -19,6 +19,7 @@ import {
   SAVE_MULTIPLE_DECLARATIONS_REQUEST,
   SAVE_MULTIPLE_DECLARATIONS_SUCCESS,
   SAVE_MULTIPLE_DECLARATIONS_FAILURE,
+  SAVE_MULTIPLE_DECLARATIONS_PROGRESS,
   SET_CUSTOMS_PARAMS,
   CLEAR_CUSTOMS_PARAMS,
 } from '../actions/actionTypes';
@@ -202,54 +203,39 @@ export const customsDeclarationReducer = (state = initialState, action) => {
       return {
         ...state,
         savingMultipleDeclarations: true,
+        saveMultipleDeclarationsProgress: { current: 0, total: action.payload?.total || 0 }, // Set total dynamically
         saveMultipleDeclarationsError: '',
         saveMultipleDeclarationsMessage: '',
       };
-    case SAVE_MULTIPLE_DECLARATIONS_SUCCESS:
-      return {
-        ...state,
-        savingMultipleDeclarations: false,
-        saveMultipleDeclarationsError: '',
-        saveMultipleDeclarationsMessage: action.payload,
-      };
+      case SAVE_MULTIPLE_DECLARATIONS_SUCCESS:
+        return {
+            ...state,
+            savingMultipleDeclarations: false,
+            saveMultipleDeclarationsMessage: action.payload.message,
+            failedDeclarations: action.payload.failedDeclarations || [],
+        };
+    
     case SAVE_MULTIPLE_DECLARATIONS_FAILURE:
-      return {
-        ...state,
-        savingMultipleDeclarations: false,
-        saveMultipleDeclarationsError: action.payload,
-        saveMultipleDeclarationsMessage: '',
-      };
-    case 'SAVE_MULTIPLE_DECLARATIONS_REQUEST':
-      return {
-        ...state,
-        savingMultipleDeclarations: true,
-        saveMultipleDeclarationsProgress: { current: 0, total: action.payload?.total || 0 },
-        saveMultipleDeclarationsError: '',
-        saveMultipleDeclarationsMessage: '',
-        failedDeclarations: [],
-      };
+        return {
+            ...state,
+            savingMultipleDeclarations: false,
+            saveMultipleDeclarationsError: action.payload.error || '',
+            failedDeclarations: [
+                ...state.failedDeclarations,
+                ...(action.payload.failedDeclarations || []),
+            ],
+        };
     
-    case 'SAVE_MULTIPLE_DECLARATIONS_PROGRESS':
-      return {
-        ...state,
-        saveMultipleDeclarationsProgress: action.payload,
-      };
-    
-    case 'SAVE_MULTIPLE_DECLARATIONS_SUCCESS':
-      return {
-        ...state,
-        savingMultipleDeclarations: false,
-        saveMultipleDeclarationsMessage: action.payload.message,
-        failedDeclarations: action.payload.failedDeclarations || [],
-      };
-    
-    case 'SAVE_MULTIPLE_DECLARATIONS_FAILURE':
-      return {
-        ...state,
-        savingMultipleDeclarations: false,
-        saveMultipleDeclarationsError: action.payload,
-      };
-
+      
+    case SAVE_MULTIPLE_DECLARATIONS_PROGRESS:
+        return {
+          ...state,
+          saveMultipleDeclarationsProgress: {
+            current: action.payload.current || 0,
+            total: action.payload.total || 1, // Avoid division by zero
+          },
+        };
+      
 
     default:
       return state;

@@ -21,7 +21,7 @@ const CustomsDeclarationList = () => {
     savingMultipleDeclarations,
     saveMultipleDeclarationsError,
     saveMultipleDeclarationsMessage,
-    savingMultipleDeclarationsProgress = { current: 0, total: 0 },
+    saveMultipleDeclarationsProgress = { current: 0, total: 0 },
     failedDeclarations = [],
   } = customsDeclarations;
 
@@ -35,11 +35,11 @@ const CustomsDeclarationList = () => {
   // Debugging: Log Redux state
   useEffect(() => {
     console.log('Declarations:', declarations);
-    console.log('Saving Progress:', savingMultipleDeclarationsProgress);
+    console.log('Saving Progress:', saveMultipleDeclarationsProgress);
     console.log('Failed Declarations:', failedDeclarations);
     console.log('Save Message:', saveMultipleDeclarationsMessage);
     console.log('Save Message Type:', typeof saveMultipleDeclarationsMessage);
-  }, [declarations, savingMultipleDeclarationsProgress, failedDeclarations, saveMultipleDeclarationsMessage]);
+  }, [declarations, saveMultipleDeclarationsProgress, failedDeclarations, saveMultipleDeclarationsMessage]);
 
   // Handle individual declaration selection
   const handleSelectDeclaration = (event, declaration) => {
@@ -104,6 +104,7 @@ const CustomsDeclarationList = () => {
     }
     dispatch(saveMultipleDeclarations(selectedDeclarations, ssdsshGUID, urlVCodeInt));
   };
+  
 
   return (
     <div className="customs-declaration-container">
@@ -190,18 +191,20 @@ const CustomsDeclarationList = () => {
         disabled={selectedDeclarations.length === 0 || savingMultipleDeclarations}
       >
         {savingMultipleDeclarations
-          ? `در حال ذخیره (${savingMultipleDeclarationsProgress.current}/${savingMultipleDeclarationsProgress.total})`
+          ? `در حال ذخیره (${saveMultipleDeclarationsProgress.current}/${saveMultipleDeclarationsProgress.total})`
           : 'ذخیره اظهارنامه‌های انتخاب‌شده'}
       </button>
 
       {/* Progress Bar */}
       {savingMultipleDeclarations && (
         <div className="progress-container">
-          <progress
-            value={savingMultipleDeclarationsProgress.current || 0}
-            max={savingMultipleDeclarationsProgress.total || selectedDeclarations.length || 1} // Prevent max=0
-          />
-          <p>{`در حال ذخیره ${savingMultipleDeclarationsProgress.current || 0}/${savingMultipleDeclarationsProgress.total || selectedDeclarations.length || 0}`}</p>
+<progress
+  value={saveMultipleDeclarationsProgress.current || 0}
+  max={saveMultipleDeclarationsProgress.total || 1} // Prevent max=0
+/>
+
+
+          <p>{`در حال ذخیره ${saveMultipleDeclarationsProgress.current || 0}/${saveMultipleDeclarationsProgress.total || selectedDeclarations.length || 0}`}</p>
         </div>
       )}
 
@@ -210,15 +213,18 @@ const CustomsDeclarationList = () => {
         <div>
           <p className="save-message">{saveMultipleDeclarationsMessage}</p>
           {failedDeclarations.length > 0 && (
-            <div>
-              <h3>موارد ذخیره نشده:</h3>
-              <ul>
-                {failedDeclarations.map((serial) => (
-                  <li key={serial}>Declaration Serial: {serial}</li>
-                ))}
-              </ul>
-            </div>
-          )}
+  <div>
+    <h3>موارد ذخیره نشده:</h3>
+    <ul>
+      {failedDeclarations.map((item) => (
+        <li key={item.FullSerialNumber}>
+          شماره کوتاژ: {item.FullSerialNumber} - دلیل: {item.reason}
+        </li>
+      ))}
+    </ul>
+  </div>
+)}
+
         </div>
       )}
 {saveMultipleDeclarationsError && (
@@ -228,6 +234,11 @@ const CustomsDeclarationList = () => {
       : JSON.stringify(saveMultipleDeclarationsError)}
   </p>
 )}
+
+
+
+
+
 
       {/* Declarations Table */}
       {!loading && !error && declarations.length > 0 && (

@@ -109,7 +109,7 @@ class SaveCottageView(APIView):
             return Response({'message': 'Cottage and goods saved successfully!'}, status=status.HTTP_201_CREATED)
 
         except Performa.DoesNotExist:
-            return Response({'error': 'Proforma not found.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'ثبت سفارش یافت نشد.'}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

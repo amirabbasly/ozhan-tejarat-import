@@ -15,7 +15,8 @@ import Login from './components/login';
 import RegedOrderList from './pages/RegedOrderList';
 import RegedOrderDetails from './components/RegedOrderDetails';
 import AddOrder from './pages/AddOrder';
-import EplLogin from './pages/EplLogin'
+import RepresentationList from './components/RepresentationList';
+import RepresentationForm from './components/RepresentationForm';
 // Import Redux Provider and store
 import { Provider } from 'react-redux';
 import store from './store';
@@ -109,14 +110,6 @@ function AppContent() {
               </PrivateRoute>
             }
           />
-                    <Route
-            path="/epl"
-            element={
-              <PrivateRoute>
-                <EplLogin />
-              </PrivateRoute>
-            }
-          />
             <Route
             path="/add-order"
             element={
@@ -138,6 +131,22 @@ function AppContent() {
             element={
               <PrivateRoute>
                 <CottageDetails />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/representations"
+            element={
+              <PrivateRoute>
+                <RepresentationList />
+              </PrivateRoute>
+            }
+          />
+                    <Route
+            path="/add-representation"
+            element={
+              <PrivateRoute>
+                <RepresentationForm />
               </PrivateRoute>
             }
           />

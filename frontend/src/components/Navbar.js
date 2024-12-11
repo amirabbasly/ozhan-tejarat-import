@@ -137,10 +137,24 @@
                     </ul>
                   )}
                 </li>
-                  <Link className='submenu-link' to="/import-prf">
-                  <li className="submenu-item">
-                     دریافت ثبت سفارش
-                  </li></Link>
+                <li
+                  className="submenu-item"
+                  onMouseEnter={() => handleSubmenuMouseEnter('receive-order')}
+                  onMouseLeave={() => handleSubmenuMouseLeave('receive-order')}
+                >
+                  <span>وکالت نامه ها</span>
+                  {/* Submenu within Submenu */}
+                  {showSubSubmenu['receive-order'] && (
+                    <ul className="sub-submenu">
+                      <Link className="submenu-link" to="/add-representation">
+                        <li className="submenu-item">ایجاد وکالتنامه</li>
+                      </Link>
+                      <Link className="submenu-link" to="/representations">
+                        <li className="submenu-item">لیست وکالتنامه ها</li>
+                      </Link>
+                    </ul>
+                  )}
+                </li>
                   <Link className='submenu-link' to="/decl">
                   <li className="submenu-item">
                      دریافت اظهارنامه

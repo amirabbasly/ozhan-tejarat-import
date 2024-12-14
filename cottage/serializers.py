@@ -56,7 +56,7 @@ class CottageSerializer(serializers.ModelSerializer):
         model = Cottage
         fields = [
             'cottage_number', 'cottage_date', 'proforma',
-            'total_value', 'quantity', 'currency_price','rafee_taahod' ,'docs_recieved' ,'rewatch' , 'cottage_goods', 'id'
+            'total_value', 'quantity', 'currency_price','cottage_customer','cottage_status','rafee_taahod' ,'docs_recieved' ,'rewatch' , 'cottage_goods', 'id'
         ]
         read_only_fields = ['final_price']
 

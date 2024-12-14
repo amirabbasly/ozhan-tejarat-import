@@ -122,19 +122,45 @@ export const updateCottageDetails = (cottageId, updatedCottage, cottageNumber) =
   };
   export const createCottage = (cottageData) => async (dispatch) => {
     dispatch({ type: CREATE_COTTAGE_REQUEST });
+  
     try {
-        const response = await axiosInstance.post('cottages/', cottageData);
-        dispatch({
-            type: CREATE_COTTAGE_SUCCESS,
-            payload: response.data,
-        });
+      const formData = new FormData();
+  
+      // Append fields to FormData
+      Object.keys(cottageData).forEach((key) => {
+        if (key === 'cottage_goods') {
+          // Serialize each good as a JSON string before appending
+          cottageData[key].forEach((item, index) => {
+            formData.append(`cottage_goods[${index}]`, JSON.stringify(item)); // Serialize as JSON string
+          });
+        } else {
+          formData.append(key, cottageData[key]);
+        }
+      });
+  
+      // Append file if available
+      if (cottageData.documents) {
+        formData.append('documents', cottageData.documents);
+      }
+  
+      const response = await axiosInstance.post('/cottages/', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+  
+      dispatch({
+        type: CREATE_COTTAGE_SUCCESS,
+        payload: response.data,
+      });
     } catch (error) {
-        dispatch({
-            type: CREATE_COTTAGE_FAILURE,
-            payload: error.response.data ,
-        });
+      dispatch({
+        type: CREATE_COTTAGE_FAILURE,
+        payload: error.response ? error.response.data : error.message,
+      });
     }
-};
+  };
+  
 export const deleteCottages = (ids) => async (dispatch) => {
     dispatch({ type: DELETE_COTTAGES_REQUEST });
   

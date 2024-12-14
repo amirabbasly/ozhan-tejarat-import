@@ -25,7 +25,15 @@ const CottageForm = () => {
     total_value: '',
     quantity: '',
     currency_price: '',
+    rewatch: '',
+    docs_recieved: '',
+    rafee_taahod: '',
+    cottage_customer:'',
+    cottage_status:'',
   });
+  const handleFileChange = (e) => {
+    setFormData({ ...formData, documents: e.target.files[0] });
+};
 
   // Local state for goods
   const [cottage_goods, setGoods] = useState([]);
@@ -56,10 +64,16 @@ const CottageForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const finalData = { ...formData, cottage_goods }; // Include goods in the submission
-    console.log('Final Data being sent:', finalData); // Add this line
+    if (!cottage_goods.length) {
+        alert('حداقل یک کالا باید اضافه شود.');
+        return;
+    }
+    const finalData = { ...formData, cottage_goods };
+    console.log(finalData); // Log the data to ensure it's correctly structured
     dispatch(createCottage(finalData));
-  };
+    
+};
+
   
   // Handle success or error messages
   useEffect(() => {
@@ -72,6 +86,11 @@ const CottageForm = () => {
         total_value: '',
         quantity: '',
         currency_price: '',
+        rewatch: '',
+        docs_recieved: '',
+        rafee_taahod: '',
+        cottage_customer:'',
+        cottage_status:'',
       });
       setGoods([]); // Clear goods
       dispatch({ type: RESET_COTTAGE_CREATION });
@@ -155,6 +174,52 @@ const CottageForm = () => {
           onChange={handleChange}
           placeholder="نرخ ارز"
         />
+        <span>مشتری</span>
+        <input
+          type="text"
+          name="cottage_customer"
+          value={formData.cottage_customer}
+          onChange={handleChange}
+          placeholder="نام مشتری"
+        />
+        <span>وضعیت</span>
+        <input
+          type="text"
+          name="cottage_status"
+          value={formData.cottage_status}
+          onChange={handleChange}
+          placeholder="وضعیت"
+        />
+                <span>رفع تعهد</span>
+                <input
+              type="checkbox"
+              name="rafee_taahod"
+              checked={formData.rafee_taahod}
+              onChange={(e) => setFormData({ ...formData, rafee_taahod: e.target.checked })}
+            />
+             <span>بازبینی</span>
+                <input
+              type="checkbox"
+              name="rewatch"
+              checked={formData.rewatch}
+              onChange={(e) => setFormData({ ...formData, rewatch: e.target.checked })}
+            />
+               <span>دریافت مدارک</span>
+                <input
+              type="checkbox"
+              name="docs_recieved"
+              checked={formData.docs_recieved}
+              onChange={(e) => setFormData({ ...formData, docs_recieved: e.target.checked })}
+            />
+             <span>آپلود مدارک</span>
+                <input
+              name="documents"
+              type="file"
+              onChange={handleFileChange}
+            />
+
+
+
       </div>
       {/* Goods Section */}
       <div className="goods-section">

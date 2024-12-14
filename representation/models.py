@@ -20,3 +20,16 @@ class Representation(models.Model):
 
     def __str__(self):
         return f"Representation by {self.representor} for {self.representi}"
+
+class Check(models.Model):
+    issuer = models.CharField(max_length=255)
+    check_code = models.BigIntegerField(unique=True)
+    date = models.CharField(max_length=255)
+    value = models.BigIntegerField()
+    issued_for = models.CharField(max_length=255)
+    bank = models.CharField(max_length=255)
+    is_paid = models.BooleanField(default=False)
+    document = models.FileField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Check by {self.issuer} for {self.issued_for}"

@@ -17,6 +17,7 @@ import RegedOrderDetails from './components/RegedOrderDetails';
 import AddOrder from './pages/AddOrder';
 import RepresentationList from './components/RepresentationList';
 import RepresentationForm from './components/RepresentationForm';
+import CheckList from './components/ChecksList';
 // Import Redux Provider and store
 import { Provider } from 'react-redux';
 import store from './store';
@@ -139,6 +140,14 @@ function AppContent() {
             element={
               <PrivateRoute>
                 <RepresentationList />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/checks"
+            element={
+              <PrivateRoute>
+                <CheckList />
               </PrivateRoute>
             }
           />

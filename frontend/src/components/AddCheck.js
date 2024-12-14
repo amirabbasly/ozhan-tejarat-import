@@ -11,16 +11,11 @@ const RepresentationForm = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate(); // initialize navigate
     const [formData, setFormData] = useState({
-        representi: '',
-        representor: '',
-        applicant: '',
-        start_date: '',
+        issuer: '',
+        value: '',
+        issued_for: '',
+        bank: '',
         end_date: '',
-        another_deligation: false,
-        representor_dismissal: false,
-        representation_summary: '',
-        doc_number: '',
-        verification_code: '',
         file: null,
     });
 

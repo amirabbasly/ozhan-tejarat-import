@@ -9,6 +9,7 @@ import DateObject from "react-date-object";
 import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
 import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 const CottageDetails = () => {
     const [cottageId, setCottageId] = useState('');
@@ -30,6 +31,8 @@ const CottageDetails = () => {
     const [totalValue, setTotalValue] = useState('');
     const [quantity, setQuantity] = useState('');
     const [proforma, setProforma] = useState('');
+    const [status, setStatus] = useState('');
+    const [customer, setCustomer] = useState('');
     const navigate = useNavigate();
 
 const handleDeleteCottage = () => {
@@ -66,6 +69,8 @@ useEffect(() => {
             setTotalValue(cottage.total_value || '');
             setQuantity(cottage.quantity || '');
             setProforma(cottage.proforma || '');
+            setStatus(cottage.cottage_status || '');
+            setCustomer(cottage.cottage_customer || '');
             setRafeeTaahod(cottage.rafee_taahod === true ? 'true' : 'false'); // Ensure proper boolean handling
             setDocsRecieved(cottage.docs_recieved === true ? 'true' : 'false');
             setRewatch(cottage.rewatch === true ? 'true' : 'false');
@@ -94,6 +99,8 @@ useEffect(() => {
                     cottage_date: cottageDate ? cottageDate.format("YYYY-MM-DD") : null,
                     total_value: totalValue,
                     quantity: quantity,
+                    cottage_status: status,
+                    cottage_customer: customer,
                     proforma: proforma,
                     currency_price: currencyPrice,
                     rafee_taahod: rafeeTaahod,
@@ -178,11 +185,41 @@ useEffect(() => {
                     <span className="readonly-text">{quantity}</span>
                 )}
             </div>
+            <div className="input-group">
+                <label htmlFor="customer"><strong>نام مشتری :</strong></label>
+                {isEditing ? (
+                    <input
+                        type="text"
+                        id="customer"
+                        placeholder=' نام مشتری را وارد کنید'
+                        value={customer}
+                        onChange={(e) => setCustomer(e.target.value)}
+                        className="editable-input"
+                    />
+                ) : (
+                        <span className="readonly-text">{customer || ' نام مشتری را وارد کنید'}</span>
+                )}
+            </div>
+            <div className="input-group">
+                <label htmlFor="status"><strong>وضعیت :</strong></label>
+                {isEditing ? (
+                    <input
+                        type="text"
+                        id="status"
+                        placeholder=' وضعیت را وارد کنید'
+                        value={status}
+                        onChange={(e) => setStatus(e.target.value)}
+                        className="editable-input"
+                    />
+                ) : (
+                        <span className="readonly-text">{status || ' وضعیت را وارد کنید'}</span>
+                )}
+            </div>
 
             <div className="input-group">
                 <label htmlFor="proforma"><strong>شماره ثبت سفارش :</strong></label>
 
-                    <span className="readonly-text">{proforma}</span>
+                    <span className="readonly-text"><Link to={`/order-details/${proforma}`}>{proforma}</Link></span>
                
             </div>
 
@@ -201,6 +238,7 @@ useEffect(() => {
                         <span className="readonly-text">{currencyPrice || 'نرخ ارز را وارد کنید'}</span>
                 )}
             </div>
+            
             <div className="input-group">
                 <label htmlFor="rafeeTaahod"><strong>رفع تعهد :</strong></label>
                 {isEditing ? (

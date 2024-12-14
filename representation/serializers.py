@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Representation
+from .models import Representation, Check
 
 class RepresentationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -15,3 +15,12 @@ class RepresentationSerializer(serializers.ModelSerializer):
         if value and value.content_type not in valid_mime_types:
             raise serializers.ValidationError('Only PDF, JPEG, or PNG files are allowed.')
         return value
+
+class CheckSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Check
+        fields = '__all__'
+        extra_kwargs = {
+            'file': {'required': False, 'allow_null':True},
+        }
+    

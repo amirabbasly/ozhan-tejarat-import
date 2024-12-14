@@ -10,10 +10,12 @@ class Cottage(models.Model):
     total_value = models.DecimalField(max_digits=15, decimal_places=2)
     quantity = models.PositiveIntegerField()
     currency_price = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
+    cottage_customer = models.CharField(max_length=55,null=True, blank=True)
     cottage_status = models.CharField(max_length=55,null=True, blank=True)
     rafee_taahod = models.BooleanField(default=False)
     docs_recieved = models.BooleanField(default=False)
     rewatch = models.BooleanField(default=False)
+    documents = models.FileField(null=True,blank=True)
 
     def __str__(self):
         return f"Cottage {self.cottage_number} - {self.proforma}"

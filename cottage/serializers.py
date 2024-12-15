@@ -51,14 +51,28 @@ class CottageSerializer(serializers.ModelSerializer):
     
     # Override the cottage_date field to handle Jalali dates
     cottage_date = serializers.CharField()
+    documents = serializers.SerializerMethodField()  # Use SerializerMethodField for full URL
 
     class Meta:
         model = Cottage
         fields = [
             'cottage_number', 'cottage_date', 'proforma',
-            'total_value', 'quantity', 'currency_price','cottage_customer','cottage_status','rafee_taahod' ,'docs_recieved' ,'rewatch' , 'cottage_goods', 'id'
+            'total_value', 'quantity', 'currency_price', 'cottage_customer',
+            'cottage_status', 'rafee_taahod', 'documents', 'docs_recieved',
+            'rewatch', 'cottage_goods', 'id'
         ]
         read_only_fields = ['final_price']
+
+    def get_documents(self, obj):
+        """
+        Generate the full URL for the documents field.
+        """
+        request = self.context.get('request')
+        if obj.documents and request:
+            return request.build_absolute_uri(obj.documents.url)
+        elif obj.documents:
+            return f"{settings.MEDIA_URL}{obj.documents}"
+        return None
 
     def to_internal_value(self, data):
         # Convert Jalali date to Gregorian before validation
@@ -86,12 +100,10 @@ class CottageSerializer(serializers.ModelSerializer):
 
         return cottage
 
-
     def update(self, instance, validated_data):
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
-        return instance
         return instance
 class CustomsDeclarationInputSerializer(serializers.Serializer):
     ssdsshGUID = serializers.CharField()

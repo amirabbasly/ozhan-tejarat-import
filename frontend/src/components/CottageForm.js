@@ -74,6 +74,7 @@ const CottageForm = () => {
     
 };
 
+
   
   // Handle success or error messages
   useEffect(() => {

@@ -23,7 +23,7 @@ const RepresentationList = () => {
     }, [dispatch]);
 
     const handleDelete = (id) => {
-        if (window.confirm('Are you sure you want to delete this representation?')) {
+        if (window.confirm('Are you sure you want to delete this check?')) {
             dispatch(deleteCheck(id));
         }
     };
@@ -58,14 +58,14 @@ const RepresentationList = () => {
     
         // Append fields except file
         Object.keys(editFormData).forEach((key) => {
-            if (key !== 'file') {
+            if (key !== 'document') {
                 formData.append(key, editFormData[key]);
             }
         });
     
         // Append the file only if it's actually a File object
         if (editFormData.file && editFormData.file instanceof File) {
-            formData.append('file', editFormData.file);
+            formData.append('document', editFormData.file);
         }
     
         try {
@@ -87,6 +87,7 @@ const RepresentationList = () => {
             <table>
                 <thead>
                     <tr>
+                        <th>کد چک</th>
                         <th>صادر کننده</th>
                         <th>مبلغ</th>
                         <th>در وجه</th>
@@ -101,6 +102,14 @@ const RepresentationList = () => {
                     {checks.map((rep) =>
                         editingId === rep.id ? (
                             <tr key={rep.id}>
+                                <td>
+                                    <input
+                                        type="text"
+                                        name="check_code"
+                                        value={editFormData.check_code || ''}
+                                        onChange={handleChange}
+                                    />
+                                </td>
                                 <td>
                                     <input
                                         type="text"
@@ -170,6 +179,7 @@ const RepresentationList = () => {
                             </tr>
                         ) : (
                             <tr key={rep.id}>
+                                <td>{rep.check_code}</td>
                                 <td>{rep.issuer}</td>
                                 <td>{rep.value}</td>
                                 <td>{rep.issued_for}</td>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { createRepresentation } from '../actions/representationActions';
+import { createCheck } from '../actions/representationActions';
 import './CottageForm.css'; // Include your CSS file for styling
 import DatePicker from 'react-multi-date-picker';
 import persian from "react-date-object/calendars/persian";
@@ -11,12 +11,14 @@ const RepresentationForm = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate(); // initialize navigate
     const [formData, setFormData] = useState({
+        check_code: '',
         issuer: '',
         value: '',
         issued_for: '',
         bank: '',
-        end_date: '',
-        file: null,
+        date: '',
+        is_paid:'',
+        document: null,
     });
 
     const handleChange = (e) => {
@@ -26,17 +28,14 @@ const RepresentationForm = () => {
             [name]: type === 'checkbox' ? checked : value,
         });
     };
-    const handleStartDateChange = (value) => {
-        setFormData({ ...formData, start_date: value?.format("YYYY-MM-DD") });
+    const handleDateChange = (value) => {
+        setFormData({ ...formData, date: value?.format("YYYY-MM-DD") });
     };
     
-    const handleEndDateChange = (value) => {
-        setFormData({ ...formData, end_date: value?.format("YYYY-MM-DD") });
-    };
     
 
     const handleFileChange = (e) => {
-        setFormData({ ...formData, file: e.target.files[0] });
+        setFormData({ ...formData, document: e.target.files[0] });
     };
 
     const handleSubmit = (e) => {
@@ -45,24 +44,24 @@ const RepresentationForm = () => {
     
         // Append all fields except file
         Object.keys(formData).forEach((key) => {
-            if (key !== 'file') {
+            if (key !== 'document') {
                 data.append(key, formData[key]);
             }
         });
     
         // Append the file only if it's actually selected
-        if (formData.file && formData.file instanceof File) {
-            data.append('file', formData.file);
+        if (formData.document && formData.document instanceof File) {
+            data.append('document', formData.document);
         }
 
         // Dispatch the create action and then navigate
-        dispatch(createRepresentation(data))
+        dispatch(createCheck(data))
             .then(() => {
-                alert('وکالتنامه با موفقیت ایجاد شد!');
-                navigate('/representations');
+                alert('چک با موفقیت ایجاد شد!');
+                navigate('/checks');
             })
             .catch(err => {
-                console.error("Error creating representation:", err);
+                alert("Error creating representation:", err);
                 // handle error if needed
             });
     };
@@ -70,148 +69,108 @@ const RepresentationForm = () => {
 
     return (
         <form className="cottage-form" onSubmit={handleSubmit}>
-            <h2 className="form-title">افزودن وکالت‌نامه</h2>
-            
+            <h2 className="form-title">افزودن چک</h2>
+
             <div className="form-group">
-                <label className="form-label" htmlFor="representi">موکل:</label>
+                <label className="form-label" htmlFor="check_code"> کد چک:</label>
                 <input
                     className="form-input"
-                    id="representi"
-                    name="representi"
-                    placeholder="نام موکل را وارد کنید"
-                    value={formData.representi}
+                    id="check_code"
+                    name="check_code"
+                    placeholder="کد چک را وارد کنید"
+                    value={formData.check_code}
                     onChange={handleChange}
                     required
                 />
             </div>
             
             <div className="form-group">
-                <label className="form-label" htmlFor="representor">وکیل:</label>
+                <label className="form-label" htmlFor="issuer">صادر کننده:</label>
                 <input
                     className="form-input"
-                    id="representor"
-                    name="representor"
-                    placeholder="نام وکیل را وارد کنید"
-                    value={formData.representor}
+                    id="issuer"
+                    name="issuer"
+                    placeholder="نام صادر کننده چک را وارد کنید"
+                    value={formData.issuer}
                     onChange={handleChange}
                     required
                 />
             </div>
             
             <div className="form-group">
-                <label className="form-label" htmlFor="applicant">درخواست دهنده:</label>
+                <label className="form-label" htmlFor="issued_for">در وجه:</label>
                 <input
                     className="form-input"
-                    id="applicant"
-                    name="applicant"
-                    placeholder="نام درخواست دهنده را وارد کنید"
-                    value={formData.applicant}
+                    id="issued_for"
+                    name="issued_for"
+                    placeholder="نام صاحب امتیاز را وارد کنید"
+                    value={formData.issued_for}
+                    onChange={handleChange}
+                    required
+                />
+            </div>
+            <div className="form-group">
+                <label className="form-label" htmlFor="bank">بانک:</label>
+                <input
+                    className="form-input"
+                    id="bank"
+                    name="bank"
+                    placeholder="نام بانک را وارد کنید"
+                    value={formData.bank}
                     onChange={handleChange}
                     required
                 />
             </div>
             
             <div className="form-group">
-                <label className="form-label" htmlFor="start_date">تاریخ شروع:</label>
+                <label className="form-label" htmlFor="value">ارزش:</label>
+                <input
+                    className="form-input"
+                    type='number'
+                    id="value"
+                    name="value"
+                    placeholder="مبلغ چک را وارد کنید"
+                    value={formData.value}
+                    onChange={handleChange}
+                    required
+                />
+            </div>
+            
+            <div className="form-group">
+                <label className="form-label" htmlFor="date">تاریخ چک:</label>
                 <DatePicker
                 className="form-input"
-                id="start_date"
-                name="start_date"
+                id="date"
+                name="date"
                 calendar={persian}
                 locale={persian_fa}
-                value={formData.start_date}
-                onChange={handleStartDateChange}
+                value={formData.date}
+                onChange={handleDateChange}
                 required
                 />
             </div>
-            
-            <div className="form-group">
-                <label className="form-label" htmlFor="end_date">تاریخ پایان:</label>
-                <DatePicker
-                className="form-input"
-                id="end_date"
-                name="end_date"
-                calendar={persian}
-                locale={persian_fa}
-                value={formData.end_date}
-                onChange={handleEndDateChange}
-                required
-                />
-            </div>
-            
             <div className="form-group checkbox-group">
-                <label className="form-label" htmlFor="another_deligation">توکل به غیر:</label>
+                <label className="form-label" htmlFor="is_paid">پاس شده:</label>
                 <input
                     className="form-checkbox"
-                    id="another_deligation"
-                    name="another_deligation"
+                    id="is_paid"
+                    name="is_paid"
                     type="checkbox"
-                    checked={formData.another_deligation}
+                    checked={formData.is_paid}
                     onChange={handleChange}
 
                 />
             </div>
             
-            <div className="form-group checkbox-group">
-                <label className="form-label" htmlFor="representor_dismissal">عزل وکیل:</label>
-                <input
-                    className="form-checkbox"
-                    id="representor_dismissal"
-                    name="representor_dismissal"
-                    type="checkbox"
-                    checked={formData.representor_dismissal}
-                    onChange={handleChange}
-
-                />
-            </div>
+            
+          
             
             <div className="form-group">
-                <label className="form-label" htmlFor="representation_summary">خلاصه وکالت:</label>
+                <label className="form-label" htmlFor="document">فایل:</label>
                 <input
-                    className="form-textarea"
-                    id="representation_summary"
-                    name="representation_summary"
-                    placeholder="خلاصه‌ای از وکالت را وارد کنید"
-                    value={formData.representation_summary}
-                    onChange={handleChange}
-                    required
-                />
-            </div>
-            
-            <div className="form-group">
-                <label className="form-label" htmlFor="doc_number">شماره سند:</label>
-                <input
-                    type='number'
-                    className="form-input"
-                    id="doc_number"
-                    name="doc_number"
-                    placeholder="شماره سند را وارد کنید"
-                    value={formData.doc_number}
-                    onChange={handleChange}
-                    required
-                />
-            </div>
-            
-            <div className="form-group">
-                <label className="form-label" htmlFor="verification_code">کد تصدیق:</label>
-                <input
-                    type='number'
-                    className="form-input"
-                    id="verification_code"
-                    name="verification_code"
-                    placeholder="کد تصدیق را وارد کنید"
-                    value={formData.verification_code}
-                    onChange={handleChange}
-                    required
-                />
-            </div>
-            
-            <div className="form-group">
-                <label className="form-label" htmlFor="file">فایل:</label>
-                <input
-                    className="form-input-file"
-                    id="file"
-                    name="file"
+                    className="form-input-document"
+                    id="document"
+                    name="document"
                     type="file"
                     onChange={handleFileChange}
                 />

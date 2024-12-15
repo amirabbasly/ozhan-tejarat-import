@@ -15,6 +15,8 @@ import requests
 import logging
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework.decorators import api_view
+from django.core.files.storage import default_storage
 
 
 class FetchGoodsAPIView(APIView):
@@ -193,6 +195,7 @@ class FetchCustomsDutyInformationAPIView(APIView):
 class CottageViewSet(viewsets.ModelViewSet):
     queryset = Cottage.objects.all()
     serializer_class = CottageSerializer
+    
 
     # Custom action to get a cottage by number (read-only)
     @action(detail=False, methods=['get'], url_path='by-number/(?P<cottage_number>[^/.]+)')
@@ -206,6 +209,7 @@ class CottageViewSet(viewsets.ModelViewSet):
                 {"error": "Cottage not found."},
                 status=status.HTTP_404_NOT_FOUND
             )
+
 
     # New custom action to delete selected cottages
     @action(detail=False, methods=['post'], url_path='delete-selected')
@@ -309,6 +313,26 @@ class CustomsDeclarationListView(APIView):
         except Exception as e:
             logger.error(f"Unexpected Error: {e}", exc_info=True)
             return Response({'error': 'An unexpected error occurred on the server.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+@api_view(['POST'])
+def upload_file(request, cottage_id):
+    if request.method == 'POST':
+        if 'file' not in request.FILES:
+            return JsonResponse({'error': 'No file provided.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        file = request.FILES['file']
+
+        # Handle file storage (e.g., saving to a specific path)
+        file_path = default_storage.save(f'/uploads/cottage_{cottage_id}/{file.name}', file)
+
+        # Associate the file with the cottage instance
+        try:
+            cottage = Cottage.objects.get(id=cottage_id)
+            cottage.documents = file_path  # Set the file path
+            cottage.save()
+
+            return JsonResponse({'file_path': file_path}, status=status.HTTP_201_CREATED)
+        except Cottage.DoesNotExist:
+            return JsonResponse({'error': 'Cottage not found.'}, status=status.HTTP_404_NOT_FOUND)
 
 class GreenCustomsDeclarationView(APIView):
     """

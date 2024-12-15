@@ -32,6 +32,7 @@ const CottageDetails = () => {
     const [quantity, setQuantity] = useState('');
     const [proforma, setProforma] = useState('');
     const [status, setStatus] = useState('');
+    const [documents, setDocuments] = useState('');
     const [customer, setCustomer] = useState('');
     const navigate = useNavigate();
 
@@ -69,6 +70,7 @@ useEffect(() => {
             setTotalValue(cottage.total_value || '');
             setQuantity(cottage.quantity || '');
             setProforma(cottage.proforma || '');
+            setDocuments(cottage.documents || '');
             setStatus(cottage.cottage_status || '');
             setCustomer(cottage.cottage_customer || '');
             setRafeeTaahod(cottage.rafee_taahod === true ? 'true' : 'false'); // Ensure proper boolean handling
@@ -287,6 +289,21 @@ useEffect(() => {
                     </span>
                 )}
             </div>
+            <div className="input-group">
+                <label htmlFor="documents"><strong>مدارک :</strong></label>
+                {isEditing ? (
+                    <input
+                        type="fle"
+                        id="status"
+                        placeholder=' وضعیت را وارد کنید'
+                        value={status}
+                        onChange={(e) => setStatus(e.target.value)}
+                        className="editable-input"
+                    />
+                ) : (
+                        <span className="readonly-text"><Link to={documents}>{documents || ' وضعیت را وارد کنید'}</Link></span>
+                )}
+            </div>
             
             <button onClick={handleDetailsSubmit} className="primary-button">
                 {isEditing ? 'ذخیره' : 'ویرایش'}
@@ -296,6 +313,7 @@ useEffect(() => {
                 حذف اظهارنامه
             </button>
             </div>
+            
 
             <h2 className="goods-header">کالا ها</h2>
             {cottage.cottage_goods && cottage.cottage_goods.length > 0 ? (

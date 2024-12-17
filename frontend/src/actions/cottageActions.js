@@ -121,43 +121,60 @@ export const updateCottageDetails = (cottageId, updatedCottage, cottageNumber) =
     }
   };
   // Function to upload files separately
-const uploadFile = async (file, cottageId) => {
-  const formData = new FormData();
-  formData.append('file', file);
+// cottageActions.js
 
+export const uploadFile = (fileData, cottageId) => async (dispatch) => {
+  dispatch({ type: 'UPLOAD_FILE_REQUEST' });
   try {
-    const response = await axiosInstance.post(`/cottages/${cottageId}/upload/`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+      const formData = new FormData();
+      formData.append('file', fileData); // Assuming `fileData` is a single file or you adjust for multiple files
+      formData.append('cottage_id', cottageId);
 
-    console.log('File uploaded successfully:', response.data);
-    return response.data; // You can save the file URL or other data if needed
+      const response = await axiosInstance.post(`cottages/${cottageId}/upload/`, formData, {
+          headers: {
+              'Content-Type': 'multipart/form-data',
+          },
+      });
+
+      dispatch({
+          type: 'UPLOAD_FILE_SUCCESS',
+          payload: response.data,
+      });
   } catch (error) {
-    console.error('Error uploading file:', error);
-    throw error;
+      dispatch({
+          type: 'UPLOAD_FILE_FAILURE',
+          payload: error.response.data,
+      });
   }
 };
 
-  export const createCottage = (cottageData) => async (dispatch) => {
-    dispatch({ type: CREATE_COTTAGE_REQUEST });
-    try {
-        const response = await axiosInstance.post('cottages/', cottageData);
-        dispatch({
-            type: CREATE_COTTAGE_SUCCESS,
-            payload: response.data,
-        });
-        if (cottageData.documents) {
-          await uploadFile(cottageData.documents, response.data.id); // Assuming response contains the created cottage ID
-        }
-    } catch (error) {
-        dispatch({
-            type: CREATE_COTTAGE_FAILURE,
-            payload: error.response.data ,
-        });
-    }
+export const createCottage = (cottageData) => async (dispatch) => {
+  dispatch({ type: 'CREATE_COTTAGE_REQUEST' });
+
+  try {
+      // Step 1: Create the cottage
+      const response = await axiosInstance.post('cottages/', cottageData);
+
+      // Dispatch success action for cottage creation
+      dispatch({
+          type: 'CREATE_COTTAGE_SUCCESS',
+          payload: response.data,
+      });
+
+      // Step 2: Upload documents if provided
+      if (cottageData.documents) {
+          // Dispatch the uploadFile action
+          await dispatch(uploadFile(cottageData.documents, response.data.id));
+      }
+  } catch (error) {
+      // Handle failure
+      dispatch({
+          type: 'CREATE_COTTAGE_FAILURE',
+          payload: error.response?.data || error.message,
+      });
+  }
 };
+
 export const deleteCottages = (ids) => async (dispatch) => {
     dispatch({ type: DELETE_COTTAGES_REQUEST });
   

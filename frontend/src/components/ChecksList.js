@@ -64,8 +64,8 @@ const RepresentationList = () => {
         });
     
         // Append the file only if it's actually a File object
-        if (editFormData.file && editFormData.file instanceof File) {
-            formData.append('document', editFormData.file);
+        if (editFormData.document && editFormData.document instanceof File) {
+            formData.append('document', editFormData.document);
         }
     
         try {

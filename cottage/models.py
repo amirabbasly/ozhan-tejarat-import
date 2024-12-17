@@ -15,7 +15,7 @@ class Cottage(models.Model):
     rafee_taahod = models.BooleanField(default=False)
     docs_recieved = models.BooleanField(default=False)
     rewatch = models.BooleanField(default=False)
-    documents = models.FileField(null=True,blank=True)
+    documents = models.FileField(null=True,blank=True, )
 
     def __str__(self):
         return f"Cottage {self.cottage_number} - {self.proforma}"
@@ -87,4 +87,9 @@ class CottageGoods(models.Model):
         self.final_price = self.calculate_final_price()
         super().save(*args, **kwargs)
 
+class ExportedCottages(models.Model):
+    cottage_number = models.CharField(max_length=55)
+    cottage_date = models.CharField(max_length=55)
+    cottage_value = models.CharField(max_length=55)
+    cottage_currency = models.CharField(max_length=55)
         

@@ -8,7 +8,6 @@ from proforma.models import Performa  # Import Performa model
 from django.http import HttpResponse, JsonResponse
 from urllib.parse import urljoin
 from django.views.decorators.http import require_http_methods
-from django.views.decorators.csrf import ensure_csrf_cookie
 from django.middleware.csrf import get_token
 from .serializers import CottageSerializer, CustomsDeclarationInputSerializer, GreenCustomsDeclarationInputSerializer
 import requests
@@ -17,7 +16,9 @@ from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 from django.core.files.storage import default_storage
-
+from django.utils.text import slugify
+import os
+import uuid
 
 class FetchGoodsAPIView(APIView):
     def post(self, request):
@@ -320,9 +321,20 @@ def upload_file(request, cottage_id):
             return JsonResponse({'error': 'No file provided.'}, status=status.HTTP_400_BAD_REQUEST)
 
         file = request.FILES['file']
+        
+        # Get the original filename and file extension
+        original_filename = file.name
+        file_extension = os.path.splitext(original_filename)[1]  # Extract the file extension
+        
+        # Ensure the file name is safe (no path traversal)
+        safe_filename = original_filename.replace(" ", "_")  # Replace spaces with underscores, if necessary
 
-        # Handle file storage (e.g., saving to a specific path)
-        file_path = default_storage.save(f'/uploads/cottage_{cottage_id}/{file.name}', file)
+        # Construct the file path within the cottage directory
+        cottage_directory = os.path.join('uploads', 'cottages', str(cottage_id))
+        file_path = os.path.join(cottage_directory, safe_filename)
+
+        # Save the file using Django's default storage
+        file_path = default_storage.save(file_path, file)
 
         # Associate the file with the cottage instance
         try:
@@ -333,7 +345,6 @@ def upload_file(request, cottage_id):
             return JsonResponse({'file_path': file_path}, status=status.HTTP_201_CREATED)
         except Cottage.DoesNotExist:
             return JsonResponse({'error': 'Cottage not found.'}, status=status.HTTP_404_NOT_FOUND)
-
 class GreenCustomsDeclarationView(APIView):
     """
     API view to handle requests for Green Customs Declarations.

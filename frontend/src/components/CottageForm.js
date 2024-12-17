@@ -25,9 +25,9 @@ const CottageForm = () => {
     total_value: '',
     quantity: '',
     currency_price: '',
-    rewatch: '',
-    docs_recieved: '',
-    rafee_taahod: '',
+    rewatch: false,  // Set default to false
+    docs_recieved: false,  // Set default to false
+    rafee_taahod: false, 
     cottage_customer:'',
     cottage_status:'',
   });
@@ -87,9 +87,9 @@ const CottageForm = () => {
         total_value: '',
         quantity: '',
         currency_price: '',
-        rewatch: '',
-        docs_recieved: '',
-        rafee_taahod: '',
+        rewatch: false,  // Set default to false
+        docs_recieved: false,  // Set default to false
+        rafee_taahod: false, 
         cottage_customer:'',
         cottage_status:'',
       });
@@ -196,22 +196,22 @@ const CottageForm = () => {
               type="checkbox"
               name="rafee_taahod"
               checked={formData.rafee_taahod}
-              onChange={(e) => setFormData({ ...formData, rafee_taahod: e.target.checked })}
+              onChange={(e) => setFormData({ ...formData, rafee_taahod: e.target.checked ? true : false })}
             />
              <span>بازبینی</span>
                 <input
               type="checkbox"
               name="rewatch"
               checked={formData.rewatch}
-              onChange={(e) => setFormData({ ...formData, rewatch: e.target.checked })}
-            />
+              onChange={(e) => setFormData({ ...formData, rewatch: e.target.checked ? true : false })}
+              />
                <span>دریافت مدارک</span>
                 <input
               type="checkbox"
               name="docs_recieved"
               checked={formData.docs_recieved}
-              onChange={(e) => setFormData({ ...formData, docs_recieved: e.target.checked })}
-            />
+              onChange={(e) => setFormData({ ...formData, docs_recieved: e.target.checked ? true : false })}
+              />
              <span>آپلود مدارک</span>
                 <input
               name="documents"

@@ -1,7 +1,7 @@
 // src/components/CottageDetails.js
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchCottageDetails, updateCottageDetails, deleteCottages } from '../actions/cottageActions';
+import { fetchCottageDetails, updateCottageDetails, deleteCottages, uploadFile } from '../actions/cottageActions';
 import { useParams } from 'react-router-dom';
 import './CottageDetails.css';
 import DatePicker from 'react-multi-date-picker';
@@ -53,8 +53,6 @@ const handleDeleteCottage = () => {
             });
     }
 };
-
-
 
 useEffect(() => {
         if (cottageNumber) {
@@ -110,6 +108,7 @@ useEffect(() => {
                     rewatch: rewatch,
                 };
                 dispatch(updateCottageDetails(cottageId, updatedCottage, cottageNumber));
+                dispatch(uploadFile(documents, cottageId))
             }
         }
         setIsEditing((prev) => !prev); // Toggle edit mode
@@ -293,15 +292,14 @@ useEffect(() => {
                 <label htmlFor="documents"><strong>مدارک :</strong></label>
                 {isEditing ? (
                     <input
-                        type="fle"
-                        id="status"
-                        placeholder=' وضعیت را وارد کنید'
-                        value={status}
-                        onChange={(e) => setStatus(e.target.value)}
+                        type="file"
+                        id="documents"
+                        placeholder=' مدارک را اضافه کنید'
+                        onChange={(e) => setDocuments(e.target.files[0])}
                         className="editable-input"
                     />
                 ) : (
-                        <span className="readonly-text"><Link to={documents}>{documents || ' وضعیت را وارد کنید'}</Link></span>
+                        <span className="readonly-text"><Link to={documents}>{ 'دانلود' || ' مدارک را اضافه کنید'}</Link></span>
                 )}
             </div>
             

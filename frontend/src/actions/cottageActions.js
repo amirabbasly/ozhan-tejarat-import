@@ -106,9 +106,9 @@ export const updateCottageDetails = (cottageId, updatedCottage, cottageNumber) =
   
     } catch (error) {
       const errorMsg =
-        error.response && error.response.data.detail
-          ? error.response.data.detail
-          : error.message;
+            error.response && error.response.data
+                ? JSON.stringify(error.response.data) // Convert object to string if necessary
+                : error.message || 'Something went wrong';
   
       dispatch({
         type: COTTAGE_UPDATE_FAILURE,

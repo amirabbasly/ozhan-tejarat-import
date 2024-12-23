@@ -121,10 +121,21 @@ useEffect(() => {
     }
 
     if (error) {
-        const errorMessage = typeof error === 'object' ? error.detail || JSON.stringify(error) : error;
-        return <div className="error">Error: {errorMessage}</div>;
-    }
-
+        const errorMessage =
+          typeof error === 'object'
+            ? (error.detail && error.detail.total_value) || JSON.stringify(error)
+            : error;
+        
+        return (
+          <div className="error-message">
+            <p>خطا:</p>
+            <p>{errorMessage}</p>
+            <button onClick={() => dispatch(fetchCottageDetails(cottageNumber))}>
+                    تلاش دوباره
+                </button>
+          </div>
+        );
+      }
     if (!cottage) {
         return <div className="no-details">No cottage details found.</div>;
     }
@@ -354,7 +365,7 @@ useEffect(() => {
                 </table>
                 </div>
             ) : (
-                <p className="no-goods">No goods found for this cottage.</p>
+                <p className="no-goods">کالایی یافت نشد</p>
             )}
         </div>
     );

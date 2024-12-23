@@ -49,7 +49,6 @@ class GUIDApiView(APIView):
    # Ensure the user is authenticated
     def post(self, request):
         ssdsshGUID = request.data.get('ssdsshGUID')
-        pageSize = request.data.get('pageSize', 10)
         urlVCodeInt = request.data.get('urlVCodeInt')
 
         if not ssdsshGUID:
@@ -63,10 +62,10 @@ class GUIDApiView(APIView):
             }
             first_api_payload = {
                 "withComboData": "true",
-                "pState": "9",
+                "pState": "",
                 "ptxtSearch": "",
                 "pStartIndex": "0",
-                "pPageSize": pageSize,
+                "pPageSize": "2000",
                 "pSortBy": "",
                 "PrfVCodeInt": 0,
                 "prfplbVCodeInt": "",
@@ -88,21 +87,25 @@ class GUIDApiView(APIView):
             # Collect data to return to the frontend
             performa_list = []
             for proforma_data in first_result.get('PerformaList', []):
-                # Prepare the data as needed
-                performa_list.append({
-                    'prf_number': proforma_data.get('prfNumberStr'),
-                    'prfVCodeInt': proforma_data.get('prfVCodeInt'),
-                    'prf_date': proforma_data.get('prfOrderDate'),
-                    'prf_expire_date': proforma_data.get('prfOrderExpireDate'),
-                    'prf_total_price': proforma_data.get('prfTotalPriceMny'),
-                    'prf_currency_type': proforma_data.get('prfCurrencyTypeStr'),
-                    'prf_seller_name': proforma_data.get('prfSellerNameEnStr'),
-                    'prf_seller_country': proforma_data.get('prfCountryNameStr'),
-                    'prf_order_no': proforma_data.get('prfOrderNoStr'),
-                    'prf_status': proforma_data.get('prfStatusStr'),
-                    # Add other fields as needed
-                })
-
+                prf_order_no = proforma_data.get('prfOrderNoStr')
+                
+                # Only include records where 'prfOrderNoStr' is present and not empty
+                if prf_order_no:
+                    performa_list.append({
+                        'prf_number': proforma_data.get('prfNumberStr'),
+                        'prfVCodeInt': proforma_data.get('prfVCodeInt'),
+                        'prf_date': proforma_data.get('prfOrderDate'),
+                        'prf_expire_date': proforma_data.get('prfOrderExpireDate'),
+                        'prf_total_price': proforma_data.get('prfTotalPriceMny'),
+                        'prf_currency_type': proforma_data.get('prfCurrencyTypeStr'),
+                        'prf_seller_name': proforma_data.get('prfSellerNameEnStr'),
+                        'prf_seller_country': proforma_data.get('prfCountryNameStr'),
+                        'prf_order_no': prf_order_no,
+                        'prf_status': proforma_data.get('prfStatusStr'),
+                        # Add other fields as needed
+                    })
+                else:
+                    logger.debug(f"Skipped record without 'prfOrderNoStr': {proforma_data}")
             # Return the collected data to the frontend
             return Response({'performas': performa_list}, status=status.HTTP_200_OK)
 

@@ -135,19 +135,7 @@ const ImportPf = () => {
           />
         </div>
 
-        <div className="form-group">
-          <label htmlFor="pageSize">PageSize:</label>
-          <input
-            type="number"
-            id="pageSize"
-            name="pageSize"
-            value={formData.pageSize}
-            onChange={handleChange}
-            placeholder="تعداد موارد هر صفحه (مثال: 10)"
-            min="1"
-            required
-          />
-        </div>
+
 
         <div className="form-actions">
           <button type="submit" className="submit-button" disabled={loading}>

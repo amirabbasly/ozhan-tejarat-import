@@ -1,13 +1,14 @@
-from django.db import models
+from django.db import models, transaction
 from proforma.models import Performa
 from decimal import Decimal
 from django_jalali.db import models as jmodels
+from django.core.exceptions import ValidationError
 
 class Cottage(models.Model):
     cottage_number = models.IntegerField(unique=True)
     cottage_date = jmodels.jDateField()
     proforma = models.ForeignKey(Performa, to_field='prf_order_no', on_delete=models.CASCADE, related_name='cottages')
-    total_value = models.DecimalField(max_digits=15, decimal_places=2)
+    total_value = models.DecimalField(max_digits=20, decimal_places=2)
     quantity = models.PositiveIntegerField()
     currency_price = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
     cottage_customer = models.CharField(max_length=55,null=True, blank=True)
@@ -17,18 +18,39 @@ class Cottage(models.Model):
     rewatch = models.BooleanField(default=False)
     documents = models.FileField(null=True,blank=True, )
 
+
     def __str__(self):
         return f"Cottage {self.cottage_number} - {self.proforma}"
+    def clean(self):
+        super().clean()
+        existing_total = self.proforma.cottages.exclude(pk=self.pk).aggregate(
+            total=models.Sum('total_value')
+        )['total'] or Decimal('0.00')
 
+        new_total = existing_total + self.total_value
+
+        if new_total > self.proforma.prf_total_price:
+            raise ValidationError({
+                'total_value': f"Adding this cottage exceeds the Performa's total price. "
+                               f"Current total: {existing_total}, Attempted addition: {self.total_value}, "
+                               f"Performa total: {self.proforma.prf_total_price}."
+            })
     def save(self, *args, **kwargs):
+        with transaction.atomic():
+            # Lock the related proforma for concurrency safety
+            proforma = Performa.objects.select_for_update().get(prf_order_no=self.proforma.prf_order_no)
+
+            # Save the cottage
+            super().save(*args, **kwargs)
+
+            # Update the proforma to recalculate remaining_total and exceeded_amount
+            proforma.save()
         # Check if currency_price is being updated
         if self.pk:
             old_instance = Cottage.objects.get(pk=self.pk)
             if old_instance.currency_price != self.currency_price:
                 # Recalculate all related CottageGoods
                 self.recalculate_goods()
-
-        super().save(*args, **kwargs)
 
     def recalculate_goods(self):
         # Recalculate all related goods when the currency_price changes

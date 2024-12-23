@@ -1,6 +1,6 @@
 from django.db import models
 from django_jalali.db import models as jmodels
-
+from decimal import Decimal
 
 def get_default_currency_type():
     return 94
@@ -13,10 +13,27 @@ class Performa(models.Model):
     prf_seller_name = models.CharField(max_length=255, default="asd")
     prf_seller_country = models.CharField(max_length=255, default="asd")
     prf_status = models.CharField(max_length=50, default="asd")
-    prf_date = jmodels.jDateField(null=True, blank=True)  # Changed to DateTimeField for precise timestamps
-    prf_expire_date = jmodels.jDateField(null=True, blank=True)  # Changed to DateTimeField
+    prf_date = jmodels.jDateField(null=True, blank=True)
+    prf_expire_date = jmodels.jDateField(null=True, blank=True)
     prfVCodeInt = models.CharField(max_length=50, unique=True)  # Assuming this is a unique identifier
+    remaining_total = models.DecimalField(max_digits=20, decimal_places=2, default=0)
 
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            # If creating a new Performa, remaining_total is prf_total_price
+            self.remaining_total = self.prf_total_price
+        else:
+            # Recalculate remaining_total based on related Cottages
+            total_allocated = self.cottages.aggregate(
+                total=models.Sum('total_value')
+            )['total'] or Decimal('0.00')
+            self.remaining_total = self.prf_total_price - total_allocated
+        super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.prf_order_no
+        return f"Performa {self.prf_order_no}"
+
+    @property
+    def total_cottage_value(self):
+        return self.cottages.aggregate(total=models.Sum('total_value'))['total'] or Decimal('0.00')

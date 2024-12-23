@@ -2,7 +2,9 @@ from rest_framework import serializers
 from .models import Cottage, CottageGoods
 from proforma.models import Performa
 import jdatetime
+from decimal import Decimal
 from django.conf import settings
+from django.db import models
 class JalaliDateField(serializers.Field):
     """
     Custom serializer field to handle Jalali (Persian) dates.
@@ -41,7 +43,7 @@ class CottageGoodsSerializer(serializers.ModelSerializer):
     class Meta:
         model = CottageGoods
         fields = '__all__'
-
+        read_only_fields = ['id']
 
 class CottageSerializer(serializers.ModelSerializer):
     proforma = serializers.SlugRelatedField(
@@ -53,6 +55,7 @@ class CottageSerializer(serializers.ModelSerializer):
     # Override the cottage_date field to handle Jalali dates
     cottage_date = serializers.CharField()
     documents = serializers.SerializerMethodField()  # Use SerializerMethodField for full URL
+   
 
     class Meta:
         model = Cottage
@@ -62,7 +65,7 @@ class CottageSerializer(serializers.ModelSerializer):
             'cottage_status', 'rafee_taahod', 'documents', 'docs_recieved',
             'rewatch', 'cottage_goods', 'id'
         ]
-        read_only_fields = ['final_price']
+        read_only_fields = ['final_price','id']
 
     def get_documents(self, obj):
         """
@@ -116,3 +119,21 @@ class GreenCustomsDeclarationInputSerializer(serializers.Serializer):
     FullSerilaNumber = serializers.CharField(max_length=50)
     ssdsshGUID = serializers.UUIDField()
     urlVCodeInt = serializers.IntegerField()
+class CottageSaveSerializer(serializers.ModelSerializer):
+    proforma = serializers.SlugRelatedField(
+        queryset=Performa.objects.all(),
+        slug_field='prf_order_no'
+    )    
+    # Override the cottage_date field to handle Jalali dates
+    cottage_date = serializers.CharField()
+    documents = serializers.SerializerMethodField()  # Use SerializerMethodField for full URL
+
+    class Meta:
+        model = Cottage
+        fields = [
+            'cottage_number', 'cottage_date', 'proforma',
+            'total_value', 'quantity', 'currency_price', 'cottage_customer',
+            'cottage_status', 'rafee_taahod', 'documents', 'docs_recieved',
+            'rewatch', 'id'
+        ]
+        read_only_fields = ['final_price','id']

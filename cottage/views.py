@@ -9,7 +9,7 @@ from django.http import HttpResponse, JsonResponse
 from urllib.parse import urljoin
 from django.views.decorators.http import require_http_methods
 from django.middleware.csrf import get_token
-from .serializers import CottageSerializer, CustomsDeclarationInputSerializer, GreenCustomsDeclarationInputSerializer
+from .serializers import CottageSerializer, CustomsDeclarationInputSerializer, GreenCustomsDeclarationInputSerializer, CottageSaveSerializer
 import requests
 import logging
 from django.conf import settings
@@ -63,12 +63,18 @@ class FetchGoodsAPIView(APIView):
             return Response({'error': 'Error fetching goods from external API'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class SaveCottageView(APIView):
+    serializer_class = CottageSerializer
+
     def post(self, request):
         data = request.data  # Data from the frontend
+        serializer = CottageSaveSerializer(data=data)
+        if not serializer.is_valid():
+            logger.debug(f"Invalid data in SaveCottageView: {serializer.errors}")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         try:
             # Extract and validate main cottage data
             cottage_number = data.get('cottage_number')
-            proforma_number = data.get('proforma_number')
+            proforma_number = data.get('proforma')
             cottage_date = data.get('cottage_date')
             total_value = Decimal(data.get('total_value', '0'))
             quantity = data.get('quantity')

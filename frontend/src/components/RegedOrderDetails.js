@@ -136,6 +136,14 @@ const RegedOrderDetails = () => {
         )}
       </div>
       <div className="order-field">
+        <label>باقیمانده سفارش:</label>
+        {
+                      order.remaining_total > 0
+                        ? `باقی مانده : ${new Intl.NumberFormat('fa-IR').format(order.remaining_total)}`
+                        : `مابع تفاوت : ${new Intl.NumberFormat('fa-IR').format(Math.abs(order.remaining_total))}`
+                    }
+      </div>
+      <div className="order-field">
         <label>کشور فروشنده:</label>
         {editMode ? (
           <input

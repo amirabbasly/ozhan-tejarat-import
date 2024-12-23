@@ -269,7 +269,7 @@ export const saveData = (declaration, goods, ssdsshGUID, urlVCodeInt) => async (
 
     const cottagePayload = {
         cottage_number: declaration.gcucustomsDeclarationSerialNumber,
-        proforma_number: declaration.OrderRegistrationNumber,
+        proforma: declaration.OrderRegistrationNumber,
         cottage_date: formattedCottageDate,
         total_value: declaration.gcutotalCurrencyValue,
         quantity: declaration.gcucommodityItemQuantity,

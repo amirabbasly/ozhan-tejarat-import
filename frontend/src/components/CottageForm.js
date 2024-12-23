@@ -97,7 +97,7 @@ const CottageForm = () => {
       dispatch({ type: RESET_COTTAGE_CREATION });
     }
     if (cottageCreation.error) {
-      alert('Failed to create cottage: ' + cottageCreation.error);
+      alert('Failed to create cottage: ' + cottageCreation.error && cottageCreation.error.total_value);
       dispatch({ type: RESET_COTTAGE_CREATION });
     }
   }, [cottageCreation, dispatch]);

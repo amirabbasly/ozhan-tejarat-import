@@ -195,6 +195,7 @@ const RegedOrderList = () => {
                   <th>تاریخ اعتبار سفارش</th>
                   <th>فروشنده</th>
                   <th>مبلغ کل</th>
+                  <th>باقیمانده</th>
                   <th>وضعیت</th>
                   <th></th>
                 </tr>
@@ -203,19 +204,19 @@ const RegedOrderList = () => {
                 {filteredOrders.map((order, index) => (
                   <tr key={order.id}>
                     <td>
-  <input
-    type="checkbox"
-    checked={selectedOrders.includes(order.prf_order_no)}
-    onChange={(e) => {
-      const isChecked = e.target.checked;
-      setSelectedOrders((prev) =>
-        isChecked
-          ? [...prev, order.prf_order_no]
-          : prev.filter((id) => id !== order.prf_order_no)
-      );
-    }}
-  />
-</td>
+                    <input
+                      type="checkbox"
+                      checked={selectedOrders.includes(order.prf_order_no)}
+                      onChange={(e) => {
+                        const isChecked = e.target.checked;
+                        setSelectedOrders((prev) =>
+                          isChecked
+                            ? [...prev, order.prf_order_no]
+                            : prev.filter((id) => id !== order.prf_order_no)
+                        );
+                      }}
+                    />
+                  </td>
 
                     <td>{index + 1}</td>
                     <td>{order.prf_order_no}</td>
@@ -225,6 +226,14 @@ const RegedOrderList = () => {
                     <td>
                       {new Intl.NumberFormat('fa-IR').format(order.prf_total_price)}
                     </td>
+                    <td>
+                    {
+                      order.remaining_total > 0
+                        ? `باقی مانده : ${new Intl.NumberFormat('fa-IR').format(order.remaining_total)}`
+                        : `مابع تفاوت : ${new Intl.NumberFormat('fa-IR').format(Math.abs(order.remaining_total))}`
+                    }
+                  </td>
+
                     <td>{order.prf_status || '—'}</td>
                     <td>
                       <Link to={`/order-details/${order.prf_order_no}`}>جزئیات</Link>

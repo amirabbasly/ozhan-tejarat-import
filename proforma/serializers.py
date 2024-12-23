@@ -21,5 +21,6 @@ class PerformaSerializer(serializers.ModelSerializer):
             'prf_date',  # Writable field
             'prf_expire_date',  # Writable field
             'prfVCodeInt',
+            'remaining_total'
         ]
 

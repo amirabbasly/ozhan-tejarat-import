@@ -119,6 +119,8 @@ class GreenCustomsDeclarationInputSerializer(serializers.Serializer):
     FullSerilaNumber = serializers.CharField(max_length=50)
     ssdsshGUID = serializers.UUIDField()
     urlVCodeInt = serializers.IntegerField()
+# serializers.py
+
 class CottageSaveSerializer(serializers.ModelSerializer):
     proforma = serializers.SlugRelatedField(
         queryset=Performa.objects.all(),
@@ -137,3 +139,6 @@ class CottageSaveSerializer(serializers.ModelSerializer):
             'rewatch', 'id'
         ]
         read_only_fields = ['final_price','id']
+    
+
+    # Remove the create and update methods

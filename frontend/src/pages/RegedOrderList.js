@@ -228,7 +228,7 @@ const RegedOrderList = () => {
                     </td>
                     <td>
                     {
-                      order.remaining_total > 0
+                      order.remaining_total > -1
                         ? `باقی مانده : ${new Intl.NumberFormat('fa-IR').format(order.remaining_total)}`
                         : `مابع تفاوت : ${new Intl.NumberFormat('fa-IR').format(Math.abs(order.remaining_total))}`
                     }

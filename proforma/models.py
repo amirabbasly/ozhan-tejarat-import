@@ -8,6 +8,8 @@ def get_default_currency_type():
 class Performa(models.Model):
     prf_order_no = models.CharField(max_length=100, default="asd", unique=True)
     prf_number = models.CharField(max_length=100, unique=True, default="asd")
+    prf_freight_price = models.DecimalField(max_digits=15, decimal_places=2, default=1)
+    FOB = models.DecimalField(max_digits=15, decimal_places=2, default=1)
     prf_total_price = models.DecimalField(max_digits=15, decimal_places=2, default=1)
     prf_currency_type = models.CharField(max_length=100, default="asd")  # Consider using a ForeignKey for currency types
     prf_seller_name = models.CharField(max_length=255, default="asd")

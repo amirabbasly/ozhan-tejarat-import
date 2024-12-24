@@ -19,6 +19,8 @@ from django.core.files.storage import default_storage
 from django.utils.text import slugify
 import os
 import uuid
+from django.db import transaction
+
 
 class FetchGoodsAPIView(APIView):
     def post(self, request):
@@ -63,65 +65,60 @@ class FetchGoodsAPIView(APIView):
             return Response({'error': 'Error fetching goods from external API'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class SaveCottageView(APIView):
-    serializer_class = CottageSerializer
+    serializer_class = CottageSaveSerializer
 
     def post(self, request):
-        data = request.data  # Data from the frontend
-        serializer = CottageSaveSerializer(data=data)
+        data = request.data
+        cottage_number = data.get('cottage_number')
+
+        try:
+            # Attempt to retrieve the existing Cottage
+            instance = Cottage.objects.get(cottage_number=cottage_number)
+            serializer = CottageSaveSerializer(instance, data=data)
+            is_update = True
+        except Cottage.DoesNotExist:
+            # Cottage does not exist; proceed to create a new one
+            serializer = CottageSaveSerializer(data=data)
+            is_update = False
+
         if not serializer.is_valid():
             logger.debug(f"Invalid data in SaveCottageView: {serializer.errors}")
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
         try:
-            # Extract and validate main cottage data
-            cottage_number = data.get('cottage_number')
-            proforma_number = data.get('proforma')
-            cottage_date = data.get('cottage_date')
-            total_value = Decimal(data.get('total_value', '0'))
-            quantity = data.get('quantity')
-            
+            with transaction.atomic():
+                # Save the Cottage instance (create or update)
+                cottage = serializer.save()
 
-            # Leave `currency_price` as None to allow user input later
-            currency_price = None
+                # Handle CottageGoods
+                goods_data = data.get('goods', [])
+                for good in goods_data:
+                    CottageGoods.objects.update_or_create(
+                        goodscode=good.get('goodscode'),
+                        cottage=cottage,
+                        defaults={
+                            'customs_value': Decimal(good.get('customs_value', '0')),
+                            'import_rights': Decimal(good.get('import_rights', '0')),
+                            'red_cersent': Decimal(good.get('red_cersent', '0')),
+                            'total_value': Decimal(good.get('total_value', '0')),
+                            'added_value': Decimal(good.get('added_value', '0')),
+                            'discount': Decimal(good.get('discount', '0')),
+                            'quantity': good.get('quantity', 0),
+                            'goods_description': good.get('goods_description', ''),
+                            # Add other fields as necessary
+                        }
+                    )
 
-            # Check if Proforma exists
-            proforma = Performa.objects.get(prf_order_no=proforma_number)
-
-            # Create or update the Cottage instance
-            cottage, created = Cottage.objects.update_or_create(
-                cottage_number=cottage_number,
-                defaults={
-                    'cottage_date': cottage_date,
-                    'proforma': proforma,
-                    'total_value': total_value,
-                    'currency_price': currency_price,
-                    'quantity': quantity,
-                }
-            )
-
-            # Process goods if available
-            goods_data = data.get('goods', [])
-            for good in goods_data:
-                CottageGoods.objects.update_or_create(
-                    goodscode=good.get('goodscode'),
-                    cottage=cottage,
-                    defaults={
-                        'customs_value': Decimal(good.get('customs_value', '0')),
-                        'import_rights': Decimal(good.get('import_rights', '0')),
-                        'red_cersent': Decimal(good.get('red_cersent', '0')),
-                        'total_value': Decimal(good.get('total_value', '0')),
-                        'added_value': Decimal(good.get('added_value', '0')),
-                        'discount': Decimal(good.get('discount', '0')),
-                        'quantity': good.get('quantity', 0),
-                    }
-                )
-
-            return Response({'message': 'Cottage and goods saved successfully!'}, status=status.HTTP_201_CREATED)
+            if is_update:
+                return Response({'message': 'Cottage updated successfully!'}, status=status.HTTP_200_OK)
+            else:
+                return Response({'message': 'Cottage created successfully!'}, status=status.HTTP_201_CREATED)
 
         except Performa.DoesNotExist:
-            return Response({'ثبت سفارش یافت نشد.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Proforma not found.'}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+            logger.error(f"Error in SaveCottageView: {e}", exc_info=True)
+            return Response({'error': 'An unexpected error occurred.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class SaveCottageGoodsView(APIView):
     """

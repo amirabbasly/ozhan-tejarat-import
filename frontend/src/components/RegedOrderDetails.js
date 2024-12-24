@@ -6,6 +6,7 @@ import './RegedOrderDetails.css';
 import DatePicker from 'react-multi-date-picker';
 import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
+import { Link } from 'react-router-dom';
 
 const RegedOrderDetails = () => {
   const location = useLocation();
@@ -110,10 +111,37 @@ const RegedOrderDetails = () => {
         )}
       </div>
       <div className="order-field">
+        <label>FOB:</label>
+        {editMode ? (
+          <input
+            type="number"
+            name="FOB"
+            value={formData.FOB || ''}
+            onChange={handleInputChange}
+          />
+        ) : (
+          <span>{order.FOB}</span>
+        )}
+      </div>
+      <div className="order-field">
+        <label>کرایه حمل:</label>
+        {editMode ? (
+          <input
+            type="number"
+            name="prf_freight_price"
+            value={formData.prf_freight_price || ''}
+            onChange={handleInputChange}
+          />
+        ) : (
+          <span>{order.prf_freight_price}</span>
+        )}
+      </div>
+      
+      <div className="order-field">
         <label>قیمت کل:</label>
         {editMode ? (
           <input
-            type="text"
+            type="number"
             name="prf_total_price"
             value={formData.prf_total_price || ''}
             onChange={handleInputChange}
@@ -138,7 +166,7 @@ const RegedOrderDetails = () => {
       <div className="order-field">
         <label>باقیمانده سفارش:</label>
         {
-                      order.remaining_total > 0
+                      order.remaining_total > -1
                         ? `باقی مانده : ${new Intl.NumberFormat('fa-IR').format(order.remaining_total)}`
                         : `مابع تفاوت : ${new Intl.NumberFormat('fa-IR').format(Math.abs(order.remaining_total))}`
                     }
@@ -189,7 +217,7 @@ const RegedOrderDetails = () => {
   )}
 </div>
       <div className="order-field">
-        <label>کد پروفرما:</label>
+        <label>شماره پرونده:</label>
         <span>{formData.prfVCodeInt}</span>
       </div>
       <div className="order-buttons">
@@ -206,6 +234,41 @@ const RegedOrderDetails = () => {
         </button>
 
       </div>
+      <hr />
+      <div className="cottages-container">
+        <h3>لیست کوتاژها</h3>
+        {order.cottages && order.cottages.length > 0 ? (
+          <table className="cottages-table">
+            <thead>
+              <tr>
+                <th>شماره کوتاژ</th>
+                <th>تاریخ کوتاژ</th>
+                <th>مبلغ کوتاژ</th>
+                <th>وضعیت</th>
+                <th>جزئیات</th>
+              </tr>
+            </thead>
+            <tbody>
+              {order.cottages.map((cottage) => (
+                <tr key={cottage.cottage_number}>
+                  <td>{cottage.cottage_number}</td>
+                  <td>{cottage.cottage_date}</td>
+                  <td>{new Intl.NumberFormat('fa-IR').format(cottage.total_value)}</td>
+                  <td>{cottage.cottage_status || 'نامشخص'}</td>
+                  <td>
+                    <Link to={`/cottages/${cottage.cottage_number}`} className="cottage-link">
+                      مشاهده
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p>هیچ کوتاژی ثبت نشده است.</p>
+        )}
+      </div>
+
     </div>
   );
 };

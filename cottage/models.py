@@ -68,13 +68,13 @@ class CottageGoods(models.Model):
     import_rights = models.DecimalField(max_digits=20, decimal_places=2)
     quantity = models.PositiveIntegerField(null=True, blank=True) 
     red_cersent = models.DecimalField(max_digits=20, decimal_places=2)
-    total_value = models.DecimalField(max_digits=15, decimal_places=2)
+    total_value = models.DecimalField(max_digits=20, decimal_places=2)
     added_value = models.DecimalField(max_digits=20, decimal_places=2)
     discount = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True, default=0)
-    riali = models.IntegerField( blank=True, editable=False, default=0)
+    riali = models.DecimalField(max_digits=20, decimal_places=2 ,blank=True, editable=False, default=0)
     hhhg = models.DecimalField(max_digits=20, decimal_places=2, blank=True, editable=False, default=0)
     other_expense = models.DecimalField(max_digits=20, decimal_places=2, blank=True, editable=False, default=0)
-    final_price = models.IntegerField(blank=True, editable=False, default=0)
+    final_price = models.DecimalField(max_digits=20, decimal_places=2,blank=True, editable=False, default=0)
     goods_description = models.CharField(null=True, blank=True, max_length=500)
 
     def calculate_riali(self):

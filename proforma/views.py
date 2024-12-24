@@ -9,9 +9,11 @@ from django.utils.dateparse import parse_datetime
 from .models import Performa
 from .serializers import (
     PerformaSerializer,
+    PerformaListSerializer,
 
 )
 import requests
+from decimal import Decimal, InvalidOperation
 import logging
 import json
 from datetime import datetime
@@ -27,7 +29,7 @@ class PerformaListView(APIView):
         # Retrieve all Performa instances
         performas = Performa.objects.all()
         # Serialize the queryset
-        serializer = PerformaSerializer(performas, many=True)
+        serializer = PerformaListSerializer(performas, many=True)
         # Return the serialized data
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -96,12 +98,15 @@ class GUIDApiView(APIView):
                         'prfVCodeInt': proforma_data.get('prfVCodeInt'),
                         'prf_date': proforma_data.get('prfOrderDate'),
                         'prf_expire_date': proforma_data.get('prfOrderExpireDate'),
+                        'prf_freight_price': proforma_data.get('prfFreightCostMny'),
                         'prf_total_price': proforma_data.get('prfTotalPriceMny'),
+                        'FOB': proforma_data.get('prfTotalPriceMny')- proforma_data.get('prfFreightCostMny'),
                         'prf_currency_type': proforma_data.get('prfCurrencyTypeStr'),
                         'prf_seller_name': proforma_data.get('prfSellerNameEnStr'),
                         'prf_seller_country': proforma_data.get('prfCountryNameStr'),
                         'prf_order_no': prf_order_no,
                         'prf_status': proforma_data.get('prfStatusStr'),
+                        
                         # Add other fields as needed
                     })
                 else:
@@ -138,7 +143,7 @@ class SaveSelectedPerformas(APIView):
                     if prf_date_str:
                         try:
                             # Parse Jalali date string 'YYYY/MM/DD' using jdatetime
-                            prf_date = jdatetime.datetime.strptime(prf_date_str, '%Y/%m/%d').date()
+                            prf_date = jdatetime.datetime.strptime(prf_date_str, '%Y/%m/%d').date().togregorian()
                         except ValueError as e:
                             logger.error(f"Error parsing prf_date '{prf_date_str}': {e}")
                             prf_date = None
@@ -147,12 +152,31 @@ class SaveSelectedPerformas(APIView):
 
                     if prf_expire_date_str:
                         try:
-                            prf_expire_date = jdatetime.datetime.strptime(prf_expire_date_str, '%Y/%m/%d').date()
+                            prf_expire_date = jdatetime.datetime.strptime(prf_expire_date_str, '%Y/%m/%d').date().togregorian()
                         except ValueError as e:
                             logger.error(f"Error parsing prf_expire_date '{prf_expire_date_str}': {e}")
                             prf_expire_date = None
                     else:
                         prf_expire_date = None
+
+                    # Convert monetary fields to Decimal
+                    try:
+                        prf_freight_price = Decimal(str(performa_data.get('prf_freight_price', '0')))
+                    except (InvalidOperation, TypeError) as e:
+                        logger.error(f"Error converting prf_freight_price '{performa_data.get('prf_freight_price')}': {e}")
+                        prf_freight_price = Decimal('0.00')
+
+                    try:
+                        prf_total_price = Decimal(str(performa_data.get('prf_total_price', '0')))
+                    except (InvalidOperation, TypeError) as e:
+                        logger.error(f"Error converting prf_total_price '{performa_data.get('prf_total_price')}': {e}")
+                        prf_total_price = Decimal('0.00')
+
+                    try:
+                        FOB = Decimal(str(performa_data.get('FOB', '0')))
+                    except (InvalidOperation, TypeError) as e:
+                        logger.error(f"Error converting FOB '{performa_data.get('FOB')}': {e}")
+                        FOB = Decimal('0.00')
 
                     # Create or update Performa instances
                     proforma, created = Performa.objects.update_or_create(
@@ -160,8 +184,10 @@ class SaveSelectedPerformas(APIView):
                         defaults={
                             'prfVCodeInt': performa_data.get('prfVCodeInt'),
                             'prf_date': prf_date,
+                            'prf_freight_price': prf_freight_price,
+                            'FOB': FOB,
                             'prf_expire_date': prf_expire_date,
-                            'prf_total_price': performa_data.get('prf_total_price'),
+                            'prf_total_price': prf_total_price,
                             'prf_currency_type': performa_data.get('prf_currency_type'),
                             'prf_seller_name': performa_data.get('prf_seller_name'),
                             'prf_seller_country': performa_data.get('prf_seller_country'),
@@ -174,7 +200,7 @@ class SaveSelectedPerformas(APIView):
             return Response({'message': 'Selected performas saved successfully.'}, status=status.HTTP_200_OK)
 
         except Exception as e:
-            logger.error(f"Error saving selected performas: {e}")
+            logger.error(f"Error saving selected performas: {e}", exc_info=True)
             return Response({'error': 'An error occurred while saving the selected performas.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 class UpdatePerformaView(APIView):
     authentication_classes = [JWTAuthentication]

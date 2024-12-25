@@ -1,6 +1,8 @@
 // src/actions/cottageActions.js
 
 import axiosInstance from '../utils/axiosInstance';
+import axios from 'axios';
+
 import {
     FETCH_COTTAGES_REQUEST,
     FETCH_COTTAGES_SUCCESS,
@@ -149,7 +151,7 @@ export const uploadFile = (fileData, cottageId) => async (dispatch) => {
 };
 
 export const createCottage = (cottageData) => async (dispatch) => {
-  dispatch({ type: 'CREATE_COTTAGE_REQUEST' });
+  dispatch({ type: CREATE_COTTAGE_REQUEST });
 
   try {
       // Step 1: Create the cottage
@@ -157,7 +159,7 @@ export const createCottage = (cottageData) => async (dispatch) => {
 
       // Dispatch success action for cottage creation
       dispatch({
-          type: 'CREATE_COTTAGE_SUCCESS',
+          type: CREATE_COTTAGE_SUCCESS,
           payload: response.data,
       });
 
@@ -169,7 +171,7 @@ export const createCottage = (cottageData) => async (dispatch) => {
   } catch (error) {
       // Handle failure
       dispatch({
-          type: 'CREATE_COTTAGE_FAILURE',
+          type: CREATE_COTTAGE_FAILURE,
           payload: error.response?.data || error.message,
       });
   }
@@ -203,10 +205,10 @@ export const deleteCottages = (ids) => async (dispatch) => {
     }
   };
 
-  export const updateGood = (goodId, goodData) => async (dispatch) => {
+  export const updateCottageGoods = (good) => async (dispatch) => {
     dispatch({ type: UPDATE_GOOD_REQUEST });
     try {
-        const response = await axiosInstance.put(`/cottage-goods/${goodId}/`, goodData);
+        const response = await axiosInstance.put(`/cottage-goods/${good.id}/`, good);
         dispatch({ type: UPDATE_GOOD_SUCCESS, payload: response.data });
     } catch (error) {
         dispatch({
@@ -215,5 +217,4 @@ export const deleteCottages = (ids) => async (dispatch) => {
         });
     }
 };
-
 

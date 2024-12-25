@@ -22,6 +22,7 @@ import AddCheck from './components/AddCheck'
 // Import Redux Provider and store
 import { Provider } from 'react-redux';
 import store from './store';
+import Forbidden from './components/Forbidden';
 
 // Import the PrivateRoute component
 import PrivateRoute from './components/PrivateRoute';
@@ -54,6 +55,7 @@ function AppContent() {
         <Routes>
           {/* Public Route */}
           <Route path="/login" element={<Login />} />
+          <Route path="/forbidden" element={<Forbidden />} />
 
           {/* Protected Routes */}
           <Route
@@ -91,7 +93,7 @@ function AppContent() {
           <Route
             path="/import-prf"
             element={
-              <PrivateRoute>
+              <PrivateRoute requiredRole="admin">
                 <ImportProforma />
               </PrivateRoute>
             }
@@ -107,7 +109,7 @@ function AppContent() {
           <Route
             path="/decl"
             element={
-              <PrivateRoute>
+              <PrivateRoute requiredRole="admin">
                 <CustomsDeclarationList />
               </PrivateRoute>
             }

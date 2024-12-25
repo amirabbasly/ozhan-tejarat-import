@@ -22,6 +22,8 @@ const AddOrder = () => {
     prf_number: '',
     prf_date: '',
     prf_expire_date: '',
+    prf_freight_price:'',
+    FOB:'',
     prf_total_price: '',
     prf_seller_name:'',
     prf_seller_country: '',
@@ -71,6 +73,8 @@ const AddOrder = () => {
         prf_number: '',
         prf_date: '',
         prf_expire_date: '',
+        prf_freight_price:'',
+        FOB:'',
         prf_total_price: '',
         prf_seller_name:'',
         prf_seller_country: '',
@@ -164,6 +168,25 @@ const AddOrder = () => {
           required
         />
         {errors.prf_number && <div className="add-error">{errors.prf_number[0]}</div>}
+
+        <span>FOB</span>
+        <input
+          type="number"
+          name="FOB"
+          value={formData.FOB}
+          onChange={handleChange}
+          placeholder="FOB"
+          required
+        />
+        <span>کرایه حمل</span>
+        <input
+          type="number"
+          name="prf_freight_price"
+          value={formData.prf_freight_price}
+          onChange={handleChange}
+          placeholder="کرایه حمل"
+          required
+        />
 
         <span>ارزش کل</span>
         <input

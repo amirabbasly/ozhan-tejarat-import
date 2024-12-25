@@ -9,7 +9,7 @@ from django.http import HttpResponse, JsonResponse
 from urllib.parse import urljoin
 from django.views.decorators.http import require_http_methods
 from django.middleware.csrf import get_token
-from .serializers import CottageSerializer, CustomsDeclarationInputSerializer, GreenCustomsDeclarationInputSerializer, CottageSaveSerializer
+from .serializers import CottageSerializer,CottageGoodsSerializer ,CustomsDeclarationInputSerializer, GreenCustomsDeclarationInputSerializer, CottageSaveSerializer
 import requests
 import logging
 from django.conf import settings
@@ -20,9 +20,11 @@ from django.utils.text import slugify
 import os
 import uuid
 from django.db import transaction
+from accounts.permissions import IsAdmin, IsEditor , IsViewer
 
 
 class FetchGoodsAPIView(APIView):
+    permission_classes = [IsAdmin]
     def post(self, request):
         """
         Fetch goods for a given declaration using the external API.
@@ -65,6 +67,7 @@ class FetchGoodsAPIView(APIView):
             return Response({'error': 'Error fetching goods from external API'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class SaveCottageView(APIView):
+    permission_classes = [IsAdmin]
     serializer_class = CottageSaveSerializer
 
     def post(self, request):
@@ -121,6 +124,7 @@ class SaveCottageView(APIView):
             return Response({'error': 'An unexpected error occurred.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class SaveCottageGoodsView(APIView):
+    permission_classes = [IsAdmin]
     """
     API endpoint to save goods for a cottage instance.
     """
@@ -157,6 +161,7 @@ class SaveCottageGoodsView(APIView):
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 class FetchCustomsDutyInformationAPIView(APIView):
+    permission_classes = [IsAdmin]
     """
     Fetch customs duty information for a specific goods item using the external API.
     """
@@ -248,6 +253,7 @@ class CottageViewSet(viewsets.ModelViewSet):
             return Response({'error': 'An error occurred while deleting cottages.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 logger = logging.getLogger(__name__)
 class CustomsDeclarationListView(APIView):
+    permission_classes = [IsAdmin]
     def post(self, request):
         # Initialize the serializer with the incoming data
         serializer = CustomsDeclarationInputSerializer(data=request.data)
@@ -352,7 +358,7 @@ class GreenCustomsDeclarationView(APIView):
     """
     API view to handle requests for Green Customs Declarations.
     """
-
+    permission_classes = [IsAdmin]
     def post(self, request):
         # Validate incoming data
         serializer = GreenCustomsDeclarationInputSerializer(data=request.data)
@@ -428,3 +434,11 @@ class GreenCustomsDeclarationView(APIView):
             logger.error(f"Unexpected error: {e}", exc_info=True)
             return Response({'error': 'An unexpected error occurred on the server.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+class CottageGoodsViewSet(viewsets.ModelViewSet):
+    queryset = CottageGoods.objects.all()
+    serializer_class = CottageGoodsSerializer
+
+    # Add custom logic or actions if needed
+    def perform_create(self, serializer):
+        # Example: Add additional validations or default values
+        serializer.save()

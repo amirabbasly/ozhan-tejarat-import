@@ -21,20 +21,7 @@ class Cottage(models.Model):
 
     def __str__(self):
         return f"Cottage {self.cottage_number} - {self.proforma}"
-    def clean(self):
-        super().clean()
-        existing_total = self.proforma.cottages.exclude(pk=self.pk).aggregate(
-            total=models.Sum('total_value')
-        )['total'] or Decimal('0.00')
 
-        new_total = existing_total + self.total_value
-
-        if new_total > self.proforma.prf_total_price:
-            raise ValidationError({
-                'total_value': f"Adding this cottage exceeds the Performa's total price. "
-                               f"Current total: {existing_total}, Attempted addition: {self.total_value}, "
-                               f"Performa total: {self.proforma.prf_total_price}."
-            })
     def save(self, *args, **kwargs):
         with transaction.atomic():
             # Lock the related proforma for concurrency safety
@@ -73,7 +60,7 @@ class CottageGoods(models.Model):
     discount = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True, default=0)
     riali = models.DecimalField(max_digits=20, decimal_places=2 ,blank=True, editable=False, default=0)
     hhhg = models.DecimalField(max_digits=20, decimal_places=2, blank=True, editable=False, default=0)
-    other_expense = models.DecimalField(max_digits=20, decimal_places=2, blank=True, editable=False, default=0)
+    other_expense = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True, default=None)
     final_price = models.DecimalField(max_digits=20, decimal_places=2,blank=True, editable=False, default=0)
     goods_description = models.CharField(null=True, blank=True, max_length=500)
 
@@ -87,15 +74,16 @@ class CottageGoods(models.Model):
             (self.discount or Decimal(0)) +
             (self.riali or Decimal(0))
         )
-
     def calculate_other_expense(self):
-        return (self.hhhg or Decimal(0)) * Decimal('1.5') / Decimal('100')
+        # Calculate only if `other_expense` is not manually set
+        if self.other_expense is None:
+            return (self.hhhg or Decimal(0)) * Decimal('1.5') / Decimal('100')
+        return self.other_expense
 
     def calculate_final_price(self):
         return (self.hhhg or Decimal(0)) + (self.other_expense or Decimal(0))
 
     def recalculate_fields(self):
-        """Method to recalculate all necessary fields for this good."""
         self.riali = self.calculate_riali()
         self.hhhg = self.calculate_hhhg()
         self.other_expense = self.calculate_other_expense()

@@ -11,8 +11,7 @@
     const [showSubSubmenu, setShowSubSubmenu] = useState({
       'receive-order': false, 
     });
-    
-
+    const { role } = useSelector((state) => state.auth.user);
     const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
 
     const [showSubmenu, setShowSubmenu] = useState({
@@ -109,9 +108,11 @@
                       <Link className="submenu-link" to="/reged-orders">
                         <li className="submenu-item">لیست ثبت سفارش ها</li>
                       </Link>
+                      {role === 'admin' && (
                       <Link className="submenu-link" to="/import-prf">
                         <li className="submenu-item">دریافت از سامانه</li>
                       </Link>
+                      )}
                     </ul>
                   )}
                 </li>
@@ -130,9 +131,10 @@
                       <Link className="submenu-link" to="/cottages">
                         <li className="submenu-item">لیست اظهارنامه ها</li>
                       </Link>
+                      {role === 'admin' && (
                       <Link className="submenu-link" to="/decl">
                         <li className="submenu-item">دریافت از سامانه</li>
-                      </Link>
+                      </Link>)}
 
                     </ul>
                   )}

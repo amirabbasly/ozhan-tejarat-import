@@ -21,6 +21,7 @@ from dateutil import parser  # Added import for parser
 from dateutil.parser import parse
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from accounts.permissions import IsAdmin, IsEditor , IsViewer
 
 logger = logging.getLogger(__name__)
 
@@ -48,6 +49,7 @@ class PerformaDetailView(APIView):
             logger.error(f"Error retrieving details for Performa ID {id}: {e}")
             return Response({'error': 'An error occurred while retrieving details.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 class GUIDApiView(APIView):
+    permission_classes = [IsAdmin]
    # Ensure the user is authenticated
     def post(self, request):
         ssdsshGUID = request.data.get('ssdsshGUID')

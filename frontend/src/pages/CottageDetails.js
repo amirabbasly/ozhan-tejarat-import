@@ -10,6 +10,7 @@ import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
+import CottageGoodsList from '../components/CottageGoodsList';
 
 const CottageDetails = () => {
     const [cottageId, setCottageId] = useState('');
@@ -326,44 +327,7 @@ useEffect(() => {
 
             <h2 className="goods-header">کالا ها</h2>
             {cottage.cottage_goods && cottage.cottage_goods.length > 0 ? (
-                <div className='goods-table-container'>
-                <table className="goods-table">
-                    <thead>
-                        <tr>
-                            <th>ردیف</th>
-                            <th>ارزش گمرکی</th>
-                            <th>حقوق ورودی</th>
-                            <th>ارزش کل ارزی</th>
-                            <th>ارزش افزوده</th>
-                            <th>حلال احمر</th>
-                            <th>حواله ریالی</th>
-                            <th>حواله + حقوق</th>
-                            <th>سایر هزینه ها</th>
-                            <th>بهای تمام شده</th>
-                            <th>تعداد</th>
-                            <th>شرح کالا</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {cottage.cottage_goods.map((good, index) => (
-                            <tr key={good.id}>
-                                <td>{index + 1}</td>
-                                <td>{new Intl.NumberFormat('fa-IR').format(good.customs_value)}</td>
-                                <td>{new Intl.NumberFormat('fa-IR').format(good.import_rights)}</td>
-                                <td>{new Intl.NumberFormat('fa-IR').format(good.total_value)}</td>
-                                <td>{new Intl.NumberFormat('fa-IR').format(good.added_value)}</td>
-                                <td>{new Intl.NumberFormat('fa-IR').format(good.red_cersent)}</td>
-                                <td>{new Intl.NumberFormat('fa-IR').format(good.riali)}</td>
-                                <td>{new Intl.NumberFormat('fa-IR').format(good.hhhg)}</td>
-                                <td>{new Intl.NumberFormat('fa-IR').format(good.other_expense)}</td>
-                                <td>{new Intl.NumberFormat('fa-IR').format(good.final_price)}</td>
-                                <td>{new Intl.NumberFormat('fa-IR').format(good.quantity)}</td>
-                                <td>{good.goods_description}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-                </div>
+                <CottageGoodsList goods={cottage.cottage_goods} />
             ) : (
                 <p className="no-goods">کالایی یافت نشد</p>
             )}

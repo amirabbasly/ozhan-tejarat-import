@@ -1,37 +1,304 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import './Home.css';
 
+// 1) Import the chart components and Chart.js modules
+import { Pie, Bar, Line, Doughnut } from 'react-chartjs-2';import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  PointElement,
+  LineElement,
+} from 'chart.js';
 
+// 2) Register Chart.js components
 
-import "./Home.css"
+ChartJS.register(
+        ArcElement,
+        Tooltip,
+        Legend,
+        CategoryScale,
+        LinearScale,
+        BarElement,
+        Title,
+        PointElement,
+        LineElement
+      );
+
 const Home = () => {
+  // Store the selected year for each card
+  const [selectedYears, setSelectedYears] = useState({
+    order: new Date().getFullYear(),
+    declaration: new Date().getFullYear(),
+    checks: new Date().getFullYear(),
+    representation: new Date().getFullYear(),
+    cottageBarYear: new Date().getFullYear(),
+  });
+
+  // Handle year change for a specific card
+  const handleYearChange = (cardKey, year) => {
+    setSelectedYears((prev) => ({
+      ...prev,
+      [cardKey]: year,
+    }));
+  };
+
+  // Pie chart data for Checks (example)
+  const checksData = {
+    labels: ['چک‌های پاس‌شده', 'چک‌های پاس‌نشده'],
+    datasets: [
+      {
+        label: 'آمار چک‌ها',
+        data: [15, 8],
+        backgroundColor: ['#36A2EB', '#FF6384'],
+        hoverBackgroundColor: ['#36A2EB80', '#FF638480'],
+      },
+    ],
+  };
+
+  // Jalali months array
+  const jalaliMonths = [
+    'فروردین',
+    'اردیبهشت',
+    'خرداد',
+    'تیر',
+    'مرداد',
+    'شهریور',
+    'مهر',
+    'آبان',
+    'آذر',
+    'دی',
+    'بهمن',
+    'اسفند',
+  ];
+
+  // Example: Line chart data for "Orders" - total value each month
+  const ordersLineData = {
+    labels: jalaliMonths,
+    datasets: [
+      {
+        label: 'ارزش سفارش‌ها',
+        data: [1200, 2000, 1700, 2200, 3200, 2800, 3900, 4200, 3600, 3000, 2500, 4100],
+        fill: false,
+        borderColor: 'rgb(75, 192, 192)',
+        tension: 0.2,
+      },
+    ],
+  };
+
+  const ordersLineOptions = {
+    responsive: true,
+    plugins: {
+      title: {
+        display: true,
+        text: `ارزش سفارش‌ها در سال ${selectedYears.order}`,
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+      },
+    },
+  };
+
+  // Bar chart data & options for “Cottages”
+  const barData = {
+    labels: jalaliMonths,
+    datasets: [
+      {
+        label: 'مجموع ارزش کوتاژها',
+        data: [120, 90, 150, 80, 100, 160, 140, 200, 180, 75, 60, 95],
+        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+      },
+    ],
+  };
+
+  const barOptions = {
+    responsive: true,
+    plugins: {
+      title: {
+        display: true,
+        text: `مجموع ارزش کوتاژها در سال ${selectedYears.cottageBarYear}`,
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+      },
+    },
+  };
+    const representationDoughnutData = {
+    labels: ['وکالت فعال', 'وکالت غیرفعال'],
+    datasets: [
+      {
+        data: [7, 3],
+        backgroundColor: ['#36A2EB', '#FF6384'],
+        hoverBackgroundColor: ['#36A2EB80', '#FF638480'],
+      },
+    ],
+  };
+
+  const representationDoughnutOptions = {
+    responsive: true,
+    plugins: {
+      title: {
+        display: true,
+        text: 'وکالت‌نامه‌ها (فعال در مقابل غیرفعال)',
+      },
+    },
+  };
 
   return (
-    <div className='home'>
+    <div className="dashboard">
+      {/* Header Section */}
+      <header className="dashboard-header">
+        <h1>داشبورد مدرن</h1>
+        <p>مروری سریع بر سامانه</p>
+      </header>
 
+      {/* Cards Section */}
+      <div className="cards-container">
+        {/* Order Card */}
+        <div className="static-card">
+          <h2>ثبت سفارش</h2>
+          <div className="card-year-selector">
+            <label htmlFor="order-year">انتخاب سال:</label>
+            <select
+              id="order-year"
+              value={selectedYears.order}
+              onChange={(e) => handleYearChange('order', e.target.value)}
+            >
+              {Array.from({ length: 10 }, (_, i) => {
+                const year = new Date().getFullYear() - i;
+                return (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+          <p>سفارش‌های سال {selectedYears.order}</p>
+          <ul>
+            <li>تعداد کل سفارش‌ها: 150</li>
+            <li>ارزش کل سفارش‌ها: 12,500,000 ریال</li>
+          </ul>
+
+          {/* Add the Line chart for monthly order values */}
+          <div style={{ width: '400px', margin: '20px auto' }}>
+            <Line data={ordersLineData} options={ordersLineOptions} />
+          </div>
+
+          <button className="action-btn">مشاهده سفارش‌ها</button>
+        </div>
+
+        {/* Checks Card */}
+        <div className="static-card">
+          <h2>چک‌ها</h2>
+          <div className="card-year-selector">
+            <label htmlFor="checks-year">انتخاب سال:</label>
+            <select
+              id="checks-year"
+              value={selectedYears.checks}
+              onChange={(e) => handleYearChange('checks', e.target.value)}
+            >
+              {Array.from({ length: 10 }, (_, i) => {
+                const year = new Date().getFullYear() - i;
+                return (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+          <p>چک‌های سال {selectedYears.checks}</p>
+          <ul>
+            <li>تعداد کل چک‌ها: 23</li>
+          </ul>
+          <div style={{ width: '200px', margin: 'auto' }}>
+            <Pie data={checksData} />
+          </div>
+          <button className="action-btn">مشاهده چک‌ها</button>
+        </div>
+
+        {/* Representation Card */}
+        <div className="static-card">
+          <h2>وکالت</h2>
+          <div className="card-year-selector">
+            <label htmlFor="representation-year">انتخاب سال:</label>
+            <select
+              id="representation-year"
+              value={selectedYears.representation}
+              onChange={(e) => handleYearChange('representation', e.target.value)}
+            >
+              {Array.from({ length: 10 }, (_, i) => {
+                const year = new Date().getFullYear() - i;
+                return (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+          <p>وکالت‌نامه‌های سال {selectedYears.representation}</p>
+          <ul>
+            <li>تعداد کل وکالت‌نامه‌ها: 10</li>
+          </ul>
+
+          {/* Doughnut Chart for وکالت‌نامه‌ها */}
+          <div style={{ width: '200px', margin: 'auto' }}>
+            <Doughnut data={representationDoughnutData} options={representationDoughnutOptions} />
+          </div>
+
+          <button className="action-btn">مشاهده وکالت‌نامه‌ها</button>
+        </div>
         
-    <div className="home-container">
-    <Link className='shortcut settings ' to="/">
-        <p> تنظیمات</p>
-        <svg xmlns="http://www.w3.org/2000/svg" width="136" height="135" viewBox="0 0 136 135" fill="none">
-<path d="M68 84.375C77.3198 84.375 84.875 76.8198 84.875 67.5C84.875 58.1802 77.3198 50.625 68 50.625C58.6802 50.625 51.125 58.1802 51.125 67.5C51.125 76.8198 58.6802 84.375 68 84.375Z" stroke="white" stroke-width="8.4375"/>
-<path d="M77.9282 12.105C75.8638 11.25 73.2426 11.25 68.0001 11.25C62.7576 11.25 60.1363 11.25 58.072 12.105C56.7061 12.6704 55.4651 13.4994 54.4198 14.5447C53.3745 15.59 52.5455 16.831 51.9801 18.1969C51.4626 19.4512 51.2545 20.9194 51.1757 23.0513C51.1391 24.5921 50.7122 26.0985 49.9351 27.4295C49.1579 28.7605 48.0559 29.8726 46.732 30.6619C45.3865 31.4143 43.8721 31.8132 42.3306 31.821C40.789 31.8289 39.2707 31.4456 37.9176 30.7069C36.0276 29.7056 34.6607 29.1544 33.3051 28.9744C30.3481 28.5855 27.3578 29.3867 24.9913 31.2019C23.2251 32.5687 21.9088 34.8356 19.2876 39.375C16.6663 43.9144 15.3501 46.1812 15.0632 48.4031C14.8699 49.8682 14.9671 51.3569 15.3493 52.7844C15.7315 54.2119 16.3912 55.55 17.2907 56.7225C18.1232 57.8025 19.2876 58.7081 21.0932 59.8444C23.7538 61.515 25.4638 64.3612 25.4638 67.5C25.4638 70.6388 23.7538 73.485 21.0932 75.15C19.2876 76.2919 18.1176 77.1975 17.2907 78.2775C16.3912 79.45 15.7315 80.7881 15.3493 82.2156C14.9671 83.6431 14.8699 85.1318 15.0632 86.5969C15.3557 88.8131 16.6663 91.0856 19.282 95.625C21.9088 100.164 23.2195 102.431 24.9913 103.798C26.1638 104.698 27.502 105.357 28.9294 105.74C30.3569 106.122 31.8457 106.219 33.3107 106.026C34.6607 105.846 36.0276 105.294 37.9176 104.293C39.2707 103.554 40.789 103.171 42.3306 103.179C43.8721 103.187 45.3865 103.586 46.732 104.338C49.4488 105.913 51.0632 108.81 51.1757 111.949C51.2545 114.086 51.457 115.549 51.9801 116.803C52.5455 118.169 53.3745 119.41 54.4198 120.455C55.4651 121.501 56.7061 122.33 58.072 122.895C60.1363 123.75 62.7576 123.75 68.0001 123.75C73.2426 123.75 75.8638 123.75 77.9282 122.895C79.2941 122.33 80.5351 121.501 81.5804 120.455C82.6257 119.41 83.4547 118.169 84.0201 116.803C84.5376 115.549 84.7457 114.086 84.8245 111.949C84.937 108.81 86.5513 105.907 89.2682 104.338C90.6137 103.586 92.128 103.187 93.6696 103.179C95.2112 103.171 96.7295 103.554 98.0826 104.293C99.9726 105.294 101.339 105.846 102.689 106.026C104.155 106.219 105.643 106.122 107.071 105.74C108.498 105.357 109.836 104.698 111.009 103.798C112.781 102.437 114.091 100.164 116.713 95.625C119.334 91.0856 120.65 88.8188 120.937 86.5969C121.13 85.1318 121.033 83.6431 120.651 82.2156C120.269 80.7881 119.609 79.45 118.709 78.2775C117.877 77.1975 116.713 76.2919 114.907 75.1556C113.59 74.3535 112.499 73.2304 111.734 71.8915C110.97 70.5526 110.558 69.0416 110.536 67.5C110.536 64.3612 112.246 61.515 114.907 59.85C116.713 58.7081 117.883 57.8025 118.709 56.7225C119.609 55.55 120.269 54.2119 120.651 52.7844C121.033 51.3569 121.13 49.8682 120.937 48.4031C120.644 46.1869 119.334 43.9144 116.718 39.375C114.091 34.8356 112.781 32.5687 111.009 31.2019C109.836 30.3024 108.498 29.6427 107.071 29.2605C105.643 28.8783 104.155 28.7811 102.689 28.9744C101.339 29.1544 99.9726 29.7056 98.077 30.7069C96.7246 31.4446 95.2073 31.8273 93.6668 31.8195C92.1263 31.8116 90.613 31.4133 89.2682 30.6619C87.9443 29.8726 86.8423 28.7605 86.0651 27.4295C85.2879 26.0985 84.8611 24.5921 84.8245 23.0513C84.7457 20.9138 84.5432 19.4512 84.0201 18.1969C83.4547 16.831 82.6257 15.59 81.5804 14.5447C80.5351 13.4994 79.2941 12.6704 77.9282 12.105Z" stroke="white" stroke-width="8.4375"/>
-</svg>
-</Link> 
+        {/* Declaration Card */}
+        <div className="static-card">
+          <h2>اظهارنامه</h2>
+          <div className="card-year-selector">
+            <label htmlFor="declaration-year">انتخاب سال:</label>
+            <select
+              id="declaration-year"
+              value={selectedYears.declaration}
+              onChange={(e) => handleYearChange('declaration', e.target.value)}
+            >
+              {Array.from({ length: 10 }, (_, i) => {
+                const year = new Date().getFullYear() - i;
+                return (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+          <p>اظهارنامه‌های سال {selectedYears.declaration}</p>
+          <ul>
+            <li>تعداد کل اظهارنامه‌ها: 75</li>
+            <li>ارزش کل: 8,300,000 ریال</li>
+          </ul>
 
-        <Link className='shortcut finance' to="/add-cottage"> <p> مالی </p> <svg xmlns="http://www.w3.org/2000/svg" width="136" height="135" viewBox="0 0 136 135" fill="none">
-<path d="M68 86.2481C74.2156 86.2481 79.25 82.0519 79.25 76.8769C79.25 71.7019 74.2156 67.5 68 67.5C61.7844 67.5 56.75 63.3037 56.75 58.1231C56.75 52.9481 61.7844 48.7519 68 48.7519M68 86.2481C61.7844 86.2481 56.75 82.0519 56.75 76.8769M68 86.2481V90M68 48.7519V45M68 48.7519C74.2156 48.7519 79.25 52.9481 79.25 58.1231" stroke="white" stroke-width="6.25" stroke-linecap="round"/>
-<path d="M96.125 18.7763C87.5781 13.8303 77.8748 11.2337 68 11.25C36.9331 11.25 11.75 36.4331 11.75 67.5C11.75 76.5 13.865 85.005 17.6169 92.5481C18.6181 94.5506 18.95 96.84 18.3706 99.0056L15.0237 111.527C14.6923 112.766 14.6926 114.071 15.0246 115.31C15.3567 116.549 16.0088 117.678 16.9155 118.586C17.8222 119.493 18.9517 120.146 20.1905 120.479C21.4292 120.811 22.7338 120.813 23.9731 120.482L36.4944 117.129C38.6678 116.58 40.967 116.846 42.9575 117.878C50.7366 121.751 59.31 123.761 68 123.75C99.0669 123.75 124.25 98.5669 124.25 67.5C124.25 57.2569 121.511 47.6438 116.724 39.375" stroke="white" stroke-width="6.25" stroke-linecap="round"/>
-</svg></Link> 
+          {/* Move the Bar Chart here */}
+          <div style={{ margin: '20px auto', width: '100%' }}>
+            <div className="card-year-selector" style={{ marginBottom: '10px' }}>
 
+            </div>
+            <div style={{ width: '600px', margin: 'auto' }}>
+              <Bar data={barData} options={barOptions} />
+            </div>
+          </div>
+          
+          <button className="action-btn">مشاهده اظهارنامه‌ها</button>
+        </div>
 
-        <Link className='shortcut documents' to="/cottages"><p> همه اسناد</p><svg xmlns="http://www.w3.org/2000/svg" width="136" height="135" viewBox="0 0 136 135" fill="none">
-<path d="M17.375 78.75V56.25C17.375 35.0381 17.375 24.4294 23.9675 17.8425C30.56 11.2556 41.1631 11.25 62.375 11.25H73.625C94.8369 11.25 105.446 11.25 112.032 17.8425C115.711 21.5156 117.337 26.4375 118.051 33.75M118.625 56.25V78.75C118.625 99.9619 118.625 110.571 112.032 117.157C105.44 123.744 94.8369 123.75 73.625 123.75H62.375C41.1631 123.75 30.5544 123.75 23.9675 117.157C20.2887 113.484 18.6631 108.562 17.9487 101.25M45.5 78.75H73.625M45.5 56.25H51.125M90.5 56.25H68" stroke="white" stroke-width="6.25" stroke-linecap="round"/>
-</svg></Link>
-
-       
-
-    </div>
+      </div>
     </div>
   );
 };

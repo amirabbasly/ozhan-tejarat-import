@@ -1,69 +1,111 @@
-.shortcut{
-    display: flex;
-    flex-direction: column-reverse;
-    justify-content: center;
-    align-items: center;
-    width: 25%;
-    height: 35vh;
-    margin-right: 4.17%;
-    margin-left: 4.17%;
-    border-radius: 17px;
-    box-shadow: -4px 4px 5.3px 0px rgba(0, 0, 0, 0.25);
-    text-decoration: none;
-    color: #fff;
-    font-size: 32px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+/* Home.css */
 
-}
-.short-icon {
-    font-size: 60px;
-    color: #fff;
-    margin-bottom: 5px;
+/* Overall Dashboard */
+.dashboard {
+    font-family: 'Vazirmatn', sans-serif;
+    background-color: #f9fafb; /* Light background */
+    color: #374151;           /* Dark text */
+    min-height: 100vh;
+    box-sizing: border-box;
+    padding: 20px 40px;
+    display: flex;
+    flex-direction: column;
   }
-.shortcut:hover{
-filter: drop-shadow(-7px 7px 5.3px rgba(0, 0, 0, 0.25));
-transform: translateY(-3px);
-}
-.settings{
-    
-    background-color: #EF625E;
-}
-.settings:hover{
-    background-color: #e7443e;
-}
-.finance{
-background-color: #93D893;
-}
-.finance:hover{
-    background-color: #6cd16c;
-    }
-
-.documents{
-    background-color: #70ADD9;
-}
-.documents:hover{
-    background-color: #469AD7;
-}
-
-.home-container{
-    margin-top: 200px;
-    width: 80%;
-    margin-left: 10%;
-    height: 50vh;
-
+  
+  /* Header Section */
+  .dashboard-header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  
+  .dashboard-header h1 {
+    font-size: 2rem;
+    color: #111827; /* Darker text */
+  }
+  
+  .dashboard-header p {
+    color: #6b7280; /* Medium gray */
+  }
+  
+  /* Cards Container */
+  .cards-container {
     display: flex;
-    flex-direction: row;
-}
-
-@media (max-width: 768px) {
-    .home-container{
-        height: auto;
-        margin-top: 100px;
-        flex-direction: column-reverse;
-    }
-    .shortcut{
-        width: 100%;
-        
-        margin: 50px 0px;
-    }
-}
+    justify-content: space-between;
+    flex-wrap: wrap; /* Wrap cards on smaller screens */
+    gap: 16px;
+  }
+  
+  /* Static Cards */
+  .static-card {
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    padding: 20px;
+    width: 600px; /* Fixed width */
+    flex: 2; /* Equal spacing in flex container */
+  }
+  
+  .static-card h2 {
+    font-size: 1.25rem;
+    margin-bottom: 8px;
+    color: #1f2937; /* Slightly darker for contrast */
+  }
+  
+  .static-card p {
+    font-size: 1rem;
+    color: #4b5563; /* Subtle gray */
+    margin-bottom: 16px;
+  }
+  
+  .static-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .static-card ul li {
+    font-size: 0.95rem;
+    color: #4b5563;
+    margin-bottom: 8px;
+  }
+  
+  /* Year Selector */
+  .card-year-selector {
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .card-year-selector label {
+    font-size: 0.9rem;
+    color: #374151;
+  }
+  
+  .card-year-selector select {
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 1rem;
+    color: #374151;
+    background-color: #ffffff;
+  }
+  
+  /* Buttons Inside Cards */
+  .action-btn {
+    margin-top: 12px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    background-color: #3b82f6; /* Blue button */
+    color: #ffffff;
+    font-size: 0.875rem;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  
+  .action-btn:hover {
+    background-color: #2563eb;
+  }
+  

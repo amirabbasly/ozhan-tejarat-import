@@ -1,26 +1,37 @@
 /* Shared Styles */
 .navbar-container {
   width: 50%;
-  background-color: #ECECEC;
-  height: 70px;
-  margin-top: 50px;
+  background-color: #fbfbfb;
+  height: 60px;
+  margin-top: 0px;
   display: flex;
   justify-content: flex-start;
 }
 
 .navbar-container2 {
   width: 50%;
-  background-color: #ECECEC;
-  margin-top: 50px;
+  background-color: #fbfbfb;
+  margin-top: 0px;
   display: flex;
   justify-content: flex-start;
-  height: 70px;
+  height: 60px;
 }
+  body {
+    padding-top: 60px; /* Matches the navbar height to push the content below */
+  } 
 
 .nacbar-container-cont {
-  align-items: center;
-  display: none;
+  position: fixed;         /* Fix it to the viewport */
+  top: 0;                  /* Stick to the top */
+  left: 0;                 /* Make sure it starts from the left edge */
+  width: 100%;             /* Make it full width */
+  z-index: 999;            /* Keep it on top of other elements */
+  display: none;           /* Preserve your flex layout */
   flex-direction: row-reverse;
+  background-color: #fafafa; /* Give it a background so it’s visible */
+  align-items: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Optional: Adds a shadow for better visibility */
+  /* Remove display: none; if present */
 }
 
 .navbar {
@@ -209,6 +220,10 @@ body{
   text-decoration: none;
   color: #fff;
   font-size: 1.5rem;
+}
+.navbar-header {
+  position: fixed;
+  top: 0;
 }
 @media (min-width: 768px) {
   .navbar-header {

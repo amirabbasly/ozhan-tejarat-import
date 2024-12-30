@@ -5,6 +5,10 @@ from .models import Performa
 from cottage.models import Cottage
 
 
+class PerformaYearSumSerializer(serializers.Serializer):
+    year = serializers.IntegerField()
+    total_price = serializers.DecimalField(max_digits=20, decimal_places=2)
+
 class CottagePSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cottage
@@ -30,7 +34,6 @@ class PerformaSerializer(serializers.ModelSerializer):
             'FOB',
             'prf_total_price',
             'prf_currency_type',
-            'prf_seller_name',
             'prf_seller_country',
             'prf_status',
             'prf_date',  # Writable field
@@ -51,7 +54,6 @@ class PerformaListSerializer(serializers.ModelSerializer):
             'prf_number',
             'prf_total_price',
             'prf_currency_type',
-            'prf_seller_name',
             'prf_seller_country',
             'prf_status',
             'prf_date',  # Writable field

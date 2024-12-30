@@ -35,6 +35,7 @@ const CottageDetails = () => {
     const [status, setStatus] = useState('');
     const [documents, setDocuments] = useState('');
     const [customer, setCustomer] = useState('');
+    const [refrenceNumber, setRefrenceNumber] = useState('');
     const navigate = useNavigate();
 
 const handleDeleteCottage = () => {
@@ -66,6 +67,7 @@ useEffect(() => {
             setCottageId(cottage.id || '');
             setCurrencyPrice(cottage.currency_price || '');
             setCottageNum(cottage.cottage_number || '');
+            setRefrenceNumber(cottage.refrence_number || '');
             setTotalValue(cottage.total_value || '');
             setQuantity(cottage.quantity || '');
             setProforma(cottage.proforma || '');
@@ -167,6 +169,12 @@ useEffect(() => {
                 ) : (
                     <span className="readonly-text">{cottageDate ? cottageDate.format("YYYY/MM/DD") : 'N/A'}</span>
                 )}
+            </div>
+            <div className="input-group">
+                <label htmlFor="cottageNum"><strong>شماره ساتا :</strong></label>
+
+                    <span className="readonly-text">{refrenceNumber}</span>
+                
             </div>
 
             <div className="input-group">

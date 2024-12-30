@@ -21,6 +21,23 @@ import os
 import uuid
 from django.db import transaction
 from accounts.permissions import IsAdmin, IsEditor , IsViewer
+from collections import defaultdict
+from .utils import get_cottage_combined_data
+
+
+class CottageCombinedDataView(APIView):
+    def get(self, request):
+        # Get the selected year from query params
+        selected_year = request.query_params.get('year')
+        if selected_year:
+            # Validate the year if provided
+            if not selected_year.isdigit():
+                raise ValidationError({"error": "A valid year must be provided."})
+            selected_year = int(selected_year)
+
+        # Get combined data (with or without monthly data)
+        data = get_cottage_combined_data(selected_year)
+        return Response(data)
 
 
 class FetchGoodsAPIView(APIView):
@@ -267,6 +284,7 @@ class CustomsDeclarationListView(APIView):
         ssdsshGUID = str(validated_data['ssdsshGUID'])  # Convert UUID to string if necessary
         urlVCodeInt = validated_data['urlVCodeInt']
         page_size = validated_data['PageSize']
+        start_index = validated_data['StartIndex']
         
         # Build the payload with user-provided values
         payload = {
@@ -280,7 +298,7 @@ class CustomsDeclarationListView(APIView):
             "OrderRegistrationNumber": "",
             "PageSize": page_size,  # User-provided
             "PateNumber": "",
-            "StartIndex": 0,
+            "StartIndex": start_index, # User-provided
             "ToDeclarationDate": None,
             "gcudeclarationStatus": "",
             "gculCReferenceNumber": "",
@@ -442,3 +460,72 @@ class CottageGoodsViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         # Example: Add additional validations or default values
         serializer.save()
+class ExportCustomsDeclarationListView(APIView):
+    permission_classes = [IsAdmin]
+    def post(self, request):
+        # Initialize the serializer with the incoming data
+        serializer = CustomsDeclarationInputSerializer(data=request.data)
+        if not serializer.is_valid():
+            # If validation fails, return errors to the user
+            logger.debug(f"Invalid input data: {serializer.errors}")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Extract validated data
+        validated_data = serializer.validated_data
+        ssdsshGUID = str(validated_data['ssdsshGUID'])  # Convert UUID to string if necessary
+        urlVCodeInt = validated_data['urlVCodeInt']
+        page_size = validated_data['PageSize']
+        start_index = validated_data['StartIndex']
+        
+        # Build the payload with user-provided values
+        payload = {
+            "Count": 0,
+            "DeclarationType": 1,
+            "FullSerialNumber": "",
+            "NationalCode": "",
+            "OrderRegistrationNumber": "",
+            "PageSize": page_size,  # User-provided
+            "PateNumber": "",
+            "StartIndex": start_index, # User-provided
+            "gcudeclarationStatus": "",
+            "gculCReferenceNumber": "",
+            "ssdsshGUID": ssdsshGUID,  # User-provided
+            "urlVCodeInt": urlVCodeInt  # User-provided
+        }
+
+        # Add additional filters from the request data if necessary
+        # Example:
+        # if 'someFilter' in request.data:
+        #     payload['someFilter'] = request.data['someFilter']
+
+        # Log payload for debugging
+        logger.debug(f"Payload sent to NTSW API: {payload}")
+
+        try:
+            # Make the API call
+            response = requests.post(
+                'https://www.ntsw.ir/users/Ac/Gateway/FacadeRest/api/Export/GetAllCustomizeCustomsDeclaration',
+                json=payload,
+                headers={'Content-Type': 'application/json'},
+                timeout=30
+            )
+            response.raise_for_status()
+
+            # Parse the response
+            data = response.json()
+            logger.debug(f"Response received from NTSW API: {data}")
+
+            if data.get('ErrorCode') != 0:
+                error_desc = data.get('ErrorDesc', 'Unknown error occurred.')
+                logger.error(f"NTSW API Error: {error_desc}")
+                return Response({'error': error_desc}, status=status.HTTP_400_BAD_REQUEST)
+
+            return Response(data, status=status.HTTP_200_OK)
+
+        except requests.exceptions.RequestException as e:
+            logger.error(f"RequestException: {e}")
+            return Response({'error': 'Error fetching data from NTSW API'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            logger.error(f"Unexpected Error: {e}", exc_info=True)
+            return Response({'error': 'An unexpected error occurred on the server.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+

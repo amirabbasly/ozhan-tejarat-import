@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Cottage, CottageGoods
+from .models import Cottage, CottageGoods, ExportedCottages
 from jalali_date.admin import ModelAdminJalaliMixin, StackedInlineJalaliMixin, TabularInlineJalaliMixin	
 
 
@@ -19,4 +19,7 @@ class CottageGoodsAdmin(admin.ModelAdmin):
 
 
 
+@admin.register(ExportedCottages)
+class ExportedCottageAdmin(ModelAdminJalaliMixin, admin.ModelAdmin):
 
+    list_display = ('cottage_number', 'cottage_date', 'total_value')

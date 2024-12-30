@@ -8,6 +8,7 @@ class Cottage(models.Model):
     cottage_number = models.IntegerField(unique=True)
     cottage_date = jmodels.jDateField()
     proforma = models.ForeignKey(Performa, to_field='prf_order_no', on_delete=models.CASCADE, related_name='cottages')
+    refrence_number = models.CharField(null=True, blank=True)
     total_value = models.DecimalField(max_digits=20, decimal_places=2)
     quantity = models.PositiveIntegerField()
     currency_price = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
@@ -16,7 +17,7 @@ class Cottage(models.Model):
     rafee_taahod = models.BooleanField(default=False)
     docs_recieved = models.BooleanField(default=False)
     rewatch = models.BooleanField(default=False)
-    documents = models.FileField(null=True,blank=True, )
+    documents = models.FileField(null=True,blank=True )
 
 
     def __str__(self):
@@ -32,12 +33,10 @@ class Cottage(models.Model):
 
             # Update the proforma to recalculate remaining_total and exceeded_amount
             proforma.save()
-        # Check if currency_price is being updated
+
+        # Always recalculate related CottageGoods after saving Cottage
         if self.pk:
-            old_instance = Cottage.objects.get(pk=self.pk)
-            if old_instance.currency_price != self.currency_price:
-                # Recalculate all related CottageGoods
-                self.recalculate_goods()
+            self.recalculate_goods()
 
     def recalculate_goods(self):
         # Recalculate all related goods when the currency_price changes
@@ -53,7 +52,7 @@ class CottageGoods(models.Model):
     cottage = models.ForeignKey(Cottage, related_name='cottage_goods', on_delete=models.CASCADE)
     customs_value = models.DecimalField(max_digits=20, decimal_places=2)
     import_rights = models.DecimalField(max_digits=20, decimal_places=2)
-    quantity = models.PositiveIntegerField(null=True, blank=True) 
+    quantity = models.DecimalField(max_digits=10, decimal_places=3, null=True, blank=True) 
     red_cersent = models.DecimalField(max_digits=20, decimal_places=2)
     total_value = models.DecimalField(max_digits=20, decimal_places=2)
     added_value = models.DecimalField(max_digits=20, decimal_places=2)
@@ -98,8 +97,10 @@ class CottageGoods(models.Model):
         super().save(*args, **kwargs)
 
 class ExportedCottages(models.Model):
-    cottage_number = models.CharField(max_length=55)
-    cottage_date = models.CharField(max_length=55)
-    cottage_value = models.CharField(max_length=55)
-    cottage_currency = models.CharField(max_length=55)
-        
+    full_serial_number = models.CharField(unique=True)
+    cottage_number = models.CharField(unique=True)
+    cottage_date = jmodels.jDateField()
+    total_value = models.DecimalField(max_digits=20, decimal_places=2)
+    quantity = models.PositiveIntegerField()
+    currency_price = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
+    declaration_status = models.CharField(max_length=55,null=True, blank=True)

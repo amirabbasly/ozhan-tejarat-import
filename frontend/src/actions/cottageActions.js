@@ -1,7 +1,7 @@
 // src/actions/cottageActions.js
 
 import axiosInstance from '../utils/axiosInstance';
-import axios from 'axios';
+
 
 import {
     FETCH_COTTAGES_REQUEST,

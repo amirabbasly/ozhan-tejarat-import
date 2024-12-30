@@ -30,7 +30,6 @@ const RegedOrderList = () => {
   // States for search, filters, and date range
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
-  const [sellerFilter, setSellerFilter] = useState('');
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [filteredOrders, setFilteredOrders] = useState([]);
@@ -51,8 +50,7 @@ const RegedOrderList = () => {
       const matchesStatus =
         statusFilter === '' || (order.prf_status && order.prf_status === statusFilter);
   
-      const matchesSeller =
-        sellerFilter === '' || (order.prf_seller_name && order.prf_seller_name === sellerFilter);
+
   
       // Parse order date into DateObject
       const orderDate = new DateObject({
@@ -72,11 +70,11 @@ const RegedOrderList = () => {
         matchesDate = matchesDate && orderDate.unix <= endDate.unix;
       }
   
-      return matchesSearchTerm && matchesStatus && matchesSeller && matchesDate;
+      return matchesSearchTerm && matchesStatus && matchesDate;
     });
   
     setFilteredOrders(filtered);
-  }, [orders, searchTerm, statusFilter, sellerFilter, startDate, endDate]);
+  }, [orders, searchTerm, statusFilter, startDate, endDate]);
   
   
   const handleSearchChange = (e) => {
@@ -87,9 +85,7 @@ const RegedOrderList = () => {
     setStatusFilter(e.target.value);
   };
 
-  const handleSellerChange = (e) => {
-    setSellerFilter(e.target.value);
-  };
+
   const handleDeleteSelectedOrders = () => {
     if (!window.confirm('آیا از حذف سفارش‌های انتخاب شده اطمینان دارید؟')) {
         return;
@@ -131,14 +127,7 @@ const RegedOrderList = () => {
               </option>
             ))}
           </select>
-          <select value={sellerFilter} onChange={handleSellerChange} className="filter-select">
-            <option value="">همه فروشنده‌ها</option>
-            {[...new Set(orders.map((order) => order.prf_seller_name))].map((seller, index) => (
-              <option key={index} value={seller}>
-                {seller}
-              </option>
-            ))}
-          </select>
+
           <DatePicker
             value={endDate}
             onChange={setEndDate}
@@ -193,7 +182,6 @@ const RegedOrderList = () => {
                   <th>شماره سفارش</th>
                   <th>تاریخ سفارش</th>
                   <th>تاریخ اعتبار سفارش</th>
-                  <th>فروشنده</th>
                   <th>مبلغ کل</th>
                   <th>باقیمانده</th>
                   <th>وضعیت</th>
@@ -222,7 +210,6 @@ const RegedOrderList = () => {
                     <td>{order.prf_order_no}</td>
                     <td>{order.prf_date}</td>
                     <td>{order.prf_expire_date}</td>
-                    <td>{order.prf_seller_name}</td>
                     <td>
                       {new Intl.NumberFormat('fa-IR').format(order.prf_total_price)}
                     </td>

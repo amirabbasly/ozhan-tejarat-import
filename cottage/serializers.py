@@ -60,7 +60,7 @@ class CottageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cottage
         fields = [
-            'cottage_number', 'cottage_date', 'proforma',
+            'cottage_number', 'cottage_date', 'proforma','refrence_number',
             'total_value', 'quantity', 'currency_price', 'cottage_customer',
             'cottage_status', 'rafee_taahod', 'documents', 'docs_recieved',
             'rewatch', 'cottage_goods', 'id'
@@ -113,6 +113,7 @@ class CustomsDeclarationInputSerializer(serializers.Serializer):
     ssdsshGUID = serializers.CharField()
     urlVCodeInt = serializers.IntegerField()
     PageSize = serializers.IntegerField(min_value=1, max_value=10000) 
+    StartIndex =  serializers.IntegerField(min_value=0, max_value=10000) 
 
 
 class GreenCustomsDeclarationInputSerializer(serializers.Serializer):
@@ -133,7 +134,7 @@ class CottageSaveSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cottage
         fields = [
-            'cottage_number', 'cottage_date', 'proforma',
+            'cottage_number', 'cottage_date', 'proforma','refrence_number',
             'total_value', 'quantity', 'currency_price', 'cottage_customer',
             'cottage_status', 'rafee_taahod', 'documents', 'docs_recieved',
             'rewatch', 'id'

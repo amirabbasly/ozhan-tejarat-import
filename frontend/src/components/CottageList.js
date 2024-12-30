@@ -299,7 +299,7 @@ const CottageList = () => {
                       <td>{cottage.cottage_date}</td>
                       <td>{cottage.proforma}</td>
                       <td>
-                        {new Intl.NumberFormat('fa-IR').format(cottage.total_value)}
+                        {cottage.total_value}
                       </td>
                       <td>
                         {isUpdating ? (

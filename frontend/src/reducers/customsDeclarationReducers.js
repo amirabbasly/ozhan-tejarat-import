@@ -22,6 +22,9 @@ import {
   SAVE_MULTIPLE_DECLARATIONS_PROGRESS,
   SET_CUSTOMS_PARAMS,
   CLEAR_CUSTOMS_PARAMS,
+  FETCH_EXPORT_DECLARATIONS_REQUEST,
+  FETCH_EXPORT_DECLARATIONS_SUCCESS,
+  FETCH_EXPORT_DECLARATIONS_FAILURE,
 } from '../actions/actionTypes';
 
 const initialState = {
@@ -47,6 +50,16 @@ const initialState = {
   saveMultipleDeclarationsMessage: '',
   saveMultipleDeclarationsError: '',
   failedDeclarations: []
+};
+const initialStateExport = {
+  declarations: [],
+  declarationDetails: null,
+  goods: [],
+  customsDutyInfo: {}, // { ggsVcodeInt: dutyInfo }
+  loading: false,
+  saveMessage: '',
+  ssdsshGUID: '',
+  urlVCodeInt: '',
 };
 
 export const customsDeclarationReducer = (state = initialState, action) => {
@@ -236,6 +249,36 @@ export const customsDeclarationReducer = (state = initialState, action) => {
           },
         };
       
+
+    default:
+      return state;
+  }
+};
+
+export const customsExportDeclarationReducer = (state = initialStateExport, action) => {
+  switch (action.type) {
+    // Fetch Declarations
+    case FETCH_DECLARATIONS_REQUEST:
+      return {
+        ...state,
+        loadingDeclarations: true,
+        errorDeclarations: '',
+        declarations: [],
+      };
+    case FETCH_DECLARATIONS_SUCCESS:
+      return {
+        ...state,
+        loadingDeclarations: false,
+        declarations: action.payload,
+        errorDeclarations: '',
+      };
+    case FETCH_DECLARATIONS_FAILURE:
+      return {
+        ...state,
+        loadingDeclarations: false,
+        declarations: [],
+        errorDeclarations: action.payload,
+      };
 
     default:
       return state;

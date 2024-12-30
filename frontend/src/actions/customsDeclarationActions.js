@@ -21,6 +21,9 @@ import {
     SAVE_MULTIPLE_DECLARATIONS_SUCCESS,
     SAVE_MULTIPLE_DECLARATIONS_FAILURE,
     SAVE_MULTIPLE_DECLARATIONS_PROGRESS,
+    FETCH_EXPORT_DECLARATIONS_REQUEST,
+    FETCH_EXPORT_DECLARATIONS_SUCCESS,
+    FETCH_EXPORT_DECLARATIONS_FAILURE,
 } from './actionTypes';
 
 // Synchronous Action Creators
@@ -35,6 +38,19 @@ export const fetchDeclarationsSuccess = (declarations) => ({
 
 export const fetchDeclarationsFailure = (error) => ({
     type: FETCH_DECLARATIONS_FAILURE,
+    payload: error,
+});
+export const fetchExportDeclarationsRequest = () => ({
+    type: FETCH_EXPORT_DECLARATIONS_REQUEST,
+});
+
+export const fetchExportDeclarationsSuccess = (declarations) => ({
+    type: FETCH_EXPORT_DECLARATIONS_SUCCESS,
+    payload: declarations,
+});
+
+export const fetchExportDeclarationsFailure = (error) => ({
+    type: FETCH_EXPORT_DECLARATIONS_FAILURE,
     payload: error,
 });
 
@@ -122,12 +138,14 @@ export const saveMultipleDeclarationsProgress = (current, total) => ({
 // Asynchronous Action Creators
 
 // Fetch Declarations
-export const fetchDeclarations = (ssdsshGUID, urlVCodeInt, pageSize) => async (dispatch) => {
+export const fetchDeclarations = (ssdsshGUID, urlVCodeInt, pageSize, startIndex) => async (dispatch) => {
     dispatch(fetchDeclarationsRequest());
     const payload = {
         ssdsshGUID,
         urlVCodeInt: parseInt(urlVCodeInt, 10),
         PageSize: parseInt(pageSize, 10),
+        StartIndex: parseInt(startIndex, 10),
+
     };
 
     try {
@@ -273,6 +291,7 @@ export const saveData = (declaration, goods, ssdsshGUID, urlVCodeInt) => async (
         cottage_date: formattedCottageDate,
         total_value: declaration.gcutotalCurrencyValue,
         quantity: declaration.gcucommodityItemQuantity,
+        refrence_number: declaration.gculCReferenceNumber,
     };
 
     try {
@@ -404,4 +423,34 @@ export const saveMultipleDeclarations = (declarations, ssdsshGUID, urlVCodeInt) 
     }
 
     dispatch(saveMultipleDeclarationsSuccess({ message, failedDeclarations }));
+};
+export const fetchExportDeclarations = (ssdsshGUID, urlVCodeInt, pageSize, startIndex) => async (dispatch) => {
+    dispatch(fetchDeclarationsRequest());
+    const payload = {
+        ssdsshGUID,
+        urlVCodeInt: parseInt(urlVCodeInt, 10),
+        PageSize: parseInt(pageSize, 10),
+        StartIndex: parseInt(startIndex, 10),
+
+    };
+
+    try {
+        const response = await axiosInstance.post('export-customs-declarations/', payload);
+
+        if (response.data.ErrorCode === 0) {
+            const declarations = Array.isArray(response.data.CustomizeCustomsDeclarationList)
+                ? response.data.CustomizeCustomsDeclarationList
+                : [];
+            dispatch(fetchExportDeclarationsSuccess(declarations));
+        } else {
+            const errorMessage = response.data.ErrorDesc || 'An error occurred.';
+            dispatch(fetchExportDeclarationsFailure(errorMessage));
+        }
+    } catch (error) {
+        const errorMsg =
+            error.response && error.response.data
+                ? error.response.data.ErrorDesc || error.response.data
+                : 'Failed to connect to the server.';
+        dispatch(fetchExportDeclarationsFailure(errorMsg));
+    }
 };

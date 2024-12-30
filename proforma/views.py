@@ -10,6 +10,7 @@ from .models import Performa
 from .serializers import (
     PerformaSerializer,
     PerformaListSerializer,
+    PerformaYearSumSerializer
 
 )
 import requests
@@ -22,8 +23,31 @@ from dateutil.parser import parse
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from accounts.permissions import IsAdmin, IsEditor , IsViewer
+from django.db.models import Sum
+from collections import defaultdict
+from rest_framework.exceptions import ValidationError
+from .utils import get_performa_combined_data
+
 
 logger = logging.getLogger(__name__)
+
+
+
+
+class PerformaCombinedDataView(APIView):
+    def get(self, request):
+        # Get the selected year from query params
+        selected_year = request.query_params.get('year')
+
+        if selected_year:
+            # Validate the year if provided
+            if not selected_year.isdigit():
+                raise ValidationError({"error": "A valid year must be provided."})
+            selected_year = int(selected_year)
+
+        # Get combined data (with or without monthly data)
+        data = get_performa_combined_data(selected_year)
+        return Response(data)
 
 class PerformaListView(APIView):
     def get(self, request):
@@ -50,7 +74,7 @@ class PerformaDetailView(APIView):
             return Response({'error': 'An error occurred while retrieving details.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 class GUIDApiView(APIView):
     permission_classes = [IsAdmin]
-   # Ensure the user is authenticated
+
     def post(self, request):
         ssdsshGUID = request.data.get('ssdsshGUID')
         urlVCodeInt = request.data.get('urlVCodeInt')
@@ -58,13 +82,12 @@ class GUIDApiView(APIView):
         if not ssdsshGUID:
             return Response({'error': 'Please enter a valid ssdsshGUID.'}, status=status.HTTP_400_BAD_REQUEST)
 
+        if not urlVCodeInt:
+            return Response({'error': 'Please enter a valid urlVCodeInt.'}, status=status.HTTP_400_BAD_REQUEST)
+
         try:
-            # First API Call: NTSW_ProformaList
-            first_api_url = "https://www.ntsw.ir/users/Ac/Gateway/FacadeRest/api/Proforma/NTSW_ProformaList"
-            first_api_headers = {
-                "Content-Type": "application/json",
-            }
-            first_api_payload = {
+            # API payload and headers
+            api_payload = {
                 "withComboData": "true",
                 "pState": "",
                 "ptxtSearch": "",
@@ -77,23 +100,32 @@ class GUIDApiView(APIView):
                 "urlVCodeInt": urlVCodeInt,
                 "ssdsshGUID": ssdsshGUID
             }
+            api_headers = {"Content-Type": "application/json"}
 
-            # Make the first API request
-            first_response = requests.post(first_api_url, headers=first_api_headers, json=first_api_payload, timeout=10)
-            first_response.raise_for_status()
-            first_data = first_response.json()
-            first_result = first_data.get('Result')
+            # Make API request
+            response = requests.post(
+                "https://www.ntsw.ir/users/Ac/Gateway/FacadeRest/api/Proforma/NTSW_ProformaList",
+                headers=api_headers,
+                json=api_payload,
+                timeout=10
+            )
+            response.raise_for_status()
+            data = response.json()
 
-            if not first_result or 'PerformaList' not in first_result:
-                logger.error(f"API Response without 'PerformaList': {json.dumps(first_data, ensure_ascii=False, indent=2)}")
-                return Response({'error': "No 'PerformaList' found in the API response"}, status=status.HTTP_400_BAD_REQUEST)
+            # Extract and transform data
+            result = data.get('Result', {})
+            performa_list_raw = result.get('PerformaList', [])
 
-            # Collect data to return to the frontend
+            # Filter out records where activity is "غیر فعال - ابطال"
+            performa_list_filtered = [
+                item for item in performa_list_raw
+                if item.get('prfActiveStatusStr') != 'غیر فعال - ابطال'
+            ]
+
             performa_list = []
-            for proforma_data in first_result.get('PerformaList', []):
+            for proforma_data in performa_list_filtered:
                 prf_order_no = proforma_data.get('prfOrderNoStr')
-                
-                # Only include records where 'prfOrderNoStr' is present and not empty
+
                 if prf_order_no:
                     performa_list.append({
                         'prf_number': proforma_data.get('prfNumberStr'),
@@ -102,17 +134,22 @@ class GUIDApiView(APIView):
                         'prf_expire_date': proforma_data.get('prfOrderExpireDate'),
                         'prf_freight_price': proforma_data.get('prfFreightCostMny'),
                         'prf_total_price': proforma_data.get('prfTotalPriceMny'),
-                        'FOB': proforma_data.get('prfTotalPriceMny')- proforma_data.get('prfFreightCostMny'),
+                        'FOB': proforma_data.get('prfTotalPriceMny') - proforma_data.get('prfFreightCostMny'),
                         'prf_currency_type': proforma_data.get('prfCurrencyTypeStr'),
-                        'prf_seller_name': proforma_data.get('prfSellerNameEnStr'),
                         'prf_seller_country': proforma_data.get('prfCountryNameStr'),
+                        'registrant': proforma_data.get('registrant'),
                         'prf_order_no': prf_order_no,
                         'prf_status': proforma_data.get('prfStatusStr'),
-                        
+                        'activity': proforma_data.get('prfActiveStatusStr'),
                         # Add other fields as needed
                     })
                 else:
                     logger.debug(f"Skipped record without 'prfOrderNoStr': {proforma_data}")
+
+            # Log if no records found after filtering
+            if not performa_list:
+                logger.info("No valid performas (excluding 'غیر فعال - ابطال') found in the API response.")
+
             # Return the collected data to the frontend
             return Response({'performas': performa_list}, status=status.HTTP_200_OK)
 
@@ -123,6 +160,7 @@ class GUIDApiView(APIView):
         except Exception as e:
             logger.error(f"An unexpected error occurred: {e}")
             return Response({'error': 'An unexpected error occurred while processing the data.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class SaveSelectedPerformas(APIView):
 
@@ -191,10 +229,10 @@ class SaveSelectedPerformas(APIView):
                             'prf_expire_date': prf_expire_date,
                             'prf_total_price': prf_total_price,
                             'prf_currency_type': performa_data.get('prf_currency_type'),
-                            'prf_seller_name': performa_data.get('prf_seller_name'),
                             'prf_seller_country': performa_data.get('prf_seller_country'),
                             'prf_order_no': performa_data.get('prf_order_no'),
                             'prf_status': performa_data.get('prf_status'),
+                            'registrant': performa_data.get('registrant'),
                         }
                     )
                     logger.info(f"Created or updated Performa: {proforma}")

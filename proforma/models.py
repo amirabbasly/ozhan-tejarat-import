@@ -2,6 +2,9 @@ from django.db import models
 from django_jalali.db import models as jmodels
 from decimal import Decimal
 
+
+
+
 def get_default_currency_type():
     return 94
 
@@ -11,14 +14,14 @@ class Performa(models.Model):
     prf_freight_price = models.DecimalField(max_digits=20, decimal_places=2, default=1)
     FOB = models.DecimalField(max_digits=20, decimal_places=2, default=1)
     prf_total_price = models.DecimalField(max_digits=20, decimal_places=2, default=1)
-    prf_currency_type = models.CharField(max_length=100, default="asd")  # Consider using a ForeignKey for currency types
-    prf_seller_name = models.CharField(max_length=255, default="asd")
+    prf_currency_type = models.CharField(max_length=100, default="asd")
     prf_seller_country = models.CharField(max_length=255, default="asd")
     prf_status = models.CharField(max_length=50, default="asd")
     prf_date = jmodels.jDateField(null=True, blank=True)
     prf_expire_date = jmodels.jDateField(null=True, blank=True)
     prfVCodeInt = models.CharField(max_length=50, unique=True)
     remaining_total = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+    registrant = models.CharField(max_length=100)
 
 
     def save(self, *args, **kwargs):

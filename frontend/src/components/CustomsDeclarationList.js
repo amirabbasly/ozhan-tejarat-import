@@ -30,7 +30,8 @@ const CustomsDeclarationList = () => {
   const [areAllSelected, setAreAllSelected] = useState(false);
   const [guidInput, setGuidInput] = useState(ssdsshGUID || '');
   const [codeInput, setCodeInput] = useState(urlVCodeInt || '');
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(100);
+  const [startIndex, setStartIndex] = useState(0);
 
   // Debugging: Log Redux state
   useEffect(() => {
@@ -81,7 +82,7 @@ const CustomsDeclarationList = () => {
     }
 
     dispatch(setCustomsParams(guidInput.trim(), codeInput.trim()));
-    dispatch(fetchDeclarations(guidInput.trim(), codeInput.trim(), pageSize));
+    dispatch(fetchDeclarations(guidInput.trim(), codeInput.trim(), pageSize, startIndex));
   };
 
   // Clear parameters
@@ -137,7 +138,7 @@ const CustomsDeclarationList = () => {
         </div>
 
         <div className="form-group">
-          <label htmlFor="pageSize">PageSize:</label>
+          <label htmlFor="pageSize">سایز صفحه:</label>
           <input
             type="number"
             id="pageSize"
@@ -147,6 +148,19 @@ const CustomsDeclarationList = () => {
             min="1"
             max="10000"
             placeholder="تعداد موارد هر صفحه (مثال: 100)"
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="pageSize">نقطه شروع:</label>
+          <input
+            type="number"
+            id="startIndex"
+            value={startIndex}
+            onChange={(e) => setStartIndex(e.target.value)}
+            required
+            min="0"
+            max="10000"
+            placeholder="نقطه شروع (مثال: 0)"
           />
         </div>
 

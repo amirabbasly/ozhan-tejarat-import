@@ -97,19 +97,7 @@ const RegedOrderDetails = () => {
         <label>شماره سفارش:</label>
         <span>{formData.prf_order_no}</span>
       </div>
-      <div className="order-field">
-        <label>نام فروشنده:</label>
-        {editMode ? (
-          <input
-            type="text"
-            name="prf_seller_name"
-            value={formData.prf_seller_name || ''}
-            onChange={handleInputChange}
-          />
-        ) : (
-          <span>{order.prf_seller_name}</span>
-        )}
-      </div>
+
       <div className="order-field">
         <label>FOB:</label>
         {editMode ? (

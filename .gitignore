@@ -7,3 +7,12 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+
+# Ignore Python cache files
+**/__pycache__/
+*.py[cod]
+cottage/__pycache__/
+
+proforma/__pycache__/
+
+accounts/__pycache__/

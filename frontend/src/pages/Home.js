@@ -1,8 +1,13 @@
-import React, { useState } from 'react';
+// src/pages/Home.jsx
+import React, { useState, useEffect } from 'react';
 import './Home.css';
+import { useDispatch, useSelector } from 'react-redux';
+import LineChartComponent from '../components/LineChartComponent';
+import BarChartComponent from '../components/BarChartComponent'; // Import the new component
 
-// 1) Import the chart components and Chart.js modules
-import { Pie, Bar, Line, Doughnut } from 'react-chartjs-2';import {
+// Import the chart components and Chart.js modules
+import { Pie, Doughnut } from 'react-chartjs-2';
+import {
   Chart as ChartJS,
   ArcElement,
   Tooltip,
@@ -14,40 +19,54 @@ import { Pie, Bar, Line, Doughnut } from 'react-chartjs-2';import {
   PointElement,
   LineElement,
 } from 'chart.js';
-
-// 2) Register Chart.js components
+import {fetchCotDashboard, fetchPrfDashboard } from '../actions/dashboardActions'
 
 ChartJS.register(
-        ArcElement,
-        Tooltip,
-        Legend,
-        CategoryScale,
-        LinearScale,
-        BarElement,
-        Title,
-        PointElement,
-        LineElement
-      );
+  ArcElement,
+  Tooltip,
+  Legend,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  PointElement,
+  LineElement
+);
 
 const Home = () => {
   // Store the selected year for each card
   const [selectedYears, setSelectedYears] = useState({
-    order: new Date().getFullYear(),
-    declaration: new Date().getFullYear(),
-    checks: new Date().getFullYear(),
-    representation: new Date().getFullYear(),
-    cottageBarYear: new Date().getFullYear(),
+    order: 'all',
+    declaration: 'all',
+    checks: 'all',
+    representation: 'all',
+    cottageBarYear: 'all',
   });
 
-  // Handle year change for a specific card
-  const handleYearChange = (cardKey, year) => {
-    setSelectedYears((prev) => ({
-      ...prev,
-      [cardKey]: year,
+  const dispatch = useDispatch();
+
+  const handleYearChange = (cardType, year) => {
+    setSelectedYears((prevSelectedYears) => ({
+      ...prevSelectedYears,
+      [cardType]: year,
     }));
+
+    // Dispatch different actions based on cardType
+    if (cardType === 'order') {
+      dispatch(fetchPrfDashboard(year === 'all' ? 'all' : year));
+    } else if (cardType === 'declaration') {
+      dispatch(fetchCotDashboard(year === 'all' ? 'all' : year));
+    }
+    // Add more conditions if you have other cardTypes
   };
 
-  // Pie chart data for Checks (example)
+  useEffect(() => {
+    // Initial data fetch for all cards
+    dispatch(fetchPrfDashboard(selectedYears.order));
+    dispatch(fetchCotDashboard(selectedYears.declaration));
+    // Dispatch other actions if needed
+  }, [dispatch, selectedYears.order, selectedYears.declaration]);
+
   const checksData = {
     labels: ['چک‌های پاس‌شده', 'چک‌های پاس‌نشده'],
     datasets: [
@@ -76,62 +95,12 @@ const Home = () => {
     'اسفند',
   ];
 
-  // Example: Line chart data for "Orders" - total value each month
-  const ordersLineData = {
-    labels: jalaliMonths,
-    datasets: [
-      {
-        label: 'ارزش سفارش‌ها',
-        data: [1200, 2000, 1700, 2200, 3200, 2800, 3900, 4200, 3600, 3000, 2500, 4100],
-        fill: false,
-        borderColor: 'rgb(75, 192, 192)',
-        tension: 0.2,
-      },
-    ],
-  };
+  const { prf_summary, cot_summary, loading, error } = useSelector(
+    (state) => state.dashboard
+  );
 
-  const ordersLineOptions = {
-    responsive: true,
-    plugins: {
-      title: {
-        display: true,
-        text: `ارزش سفارش‌ها در سال ${selectedYears.order}`,
-      },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-      },
-    },
-  };
-
-  // Bar chart data & options for “Cottages”
-  const barData = {
-    labels: jalaliMonths,
-    datasets: [
-      {
-        label: 'مجموع ارزش کوتاژها',
-        data: [120, 90, 150, 80, 100, 160, 140, 200, 180, 75, 60, 95],
-        backgroundColor: 'rgba(75, 192, 192, 0.6)',
-      },
-    ],
-  };
-
-  const barOptions = {
-    responsive: true,
-    plugins: {
-      title: {
-        display: true,
-        text: `مجموع ارزش کوتاژها در سال ${selectedYears.cottageBarYear}`,
-      },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-      },
-    },
-  };
-    const representationDoughnutData = {
+  // Representation Doughnut Chart Data & Options
+  const representationDoughnutData = {
     labels: ['وکالت فعال', 'وکالت غیرفعال'],
     datasets: [
       {
@@ -152,6 +121,8 @@ const Home = () => {
     },
   };
 
+  const years = prf_summary?.yearly_data?.map((item) => item.year) || [];
+
   return (
     <div className="dashboard">
       {/* Header Section */}
@@ -165,35 +136,30 @@ const Home = () => {
         {/* Order Card */}
         <div className="static-card">
           <h2>ثبت سفارش</h2>
-          <div className="card-year-selector">
-            <label htmlFor="order-year">انتخاب سال:</label>
-            <select
-              id="order-year"
-              value={selectedYears.order}
-              onChange={(e) => handleYearChange('order', e.target.value)}
-            >
-              {Array.from({ length: 10 }, (_, i) => {
-                const year = new Date().getFullYear() - i;
-                return (
-                  <option key={year} value={year}>
-                    {year}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
-          <p>سفارش‌های سال {selectedYears.order}</p>
-          <ul>
-            <li>تعداد کل سفارش‌ها: 150</li>
-            <li>ارزش کل سفارش‌ها: 12,500,000 ریال</li>
-          </ul>
 
-          {/* Add the Line chart for monthly order values */}
-          <div style={{ width: '400px', margin: '20px auto' }}>
-            <Line data={ordersLineData} options={ordersLineOptions} />
-          </div>
+          {loading ? (
+            <p>در حال بارگذاری...</p>
+          ) : error ? (
+            <p style={{ color: 'red' }}>خطا: {error}</p>
+          ) : (
+            <LineChartComponent
+              prf_summary={prf_summary}
+              selectedYear={selectedYears.order}
+              onYearChange={(year) => handleYearChange('order', year)}
+            />
+          )}
+        </div>
 
-          <button className="action-btn">مشاهده سفارش‌ها</button>
+        {/* Declaration Card */}
+        <div className="static-card">
+          <h2>اظهارنامه</h2>
+          {/* Integrate the BarChartComponent */}
+          <BarChartComponent
+            cot_summary={cot_summary}
+            selectedYear={selectedYears.declaration}
+            onYearChange={(year) => handleYearChange('declaration', year)}
+          />
+
         </div>
 
         {/* Checks Card */}
@@ -206,6 +172,8 @@ const Home = () => {
               value={selectedYears.checks}
               onChange={(e) => handleYearChange('checks', e.target.value)}
             >
+              <option value="all">همه سال‌ها</option>
+
               {Array.from({ length: 10 }, (_, i) => {
                 const year = new Date().getFullYear() - i;
                 return (
@@ -220,7 +188,7 @@ const Home = () => {
           <ul>
             <li>تعداد کل چک‌ها: 23</li>
           </ul>
-          <div style={{ width: '200px', margin: 'auto' }}>
+          <div style={{ width: '400px', height: '300px', margin: 'auto' }}>
             <Pie data={checksData} />
           </div>
           <button className="action-btn">مشاهده چک‌ها</button>
@@ -236,14 +204,12 @@ const Home = () => {
               value={selectedYears.representation}
               onChange={(e) => handleYearChange('representation', e.target.value)}
             >
-              {Array.from({ length: 10 }, (_, i) => {
-                const year = new Date().getFullYear() - i;
-                return (
-                  <option key={year} value={year}>
-                    {year}
-                  </option>
-                );
-              })}
+              <option value="all">همه سال‌ها</option>
+              {years.map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
             </select>
           </div>
           <p>وکالت‌نامه‌های سال {selectedYears.representation}</p>
@@ -252,52 +218,12 @@ const Home = () => {
           </ul>
 
           {/* Doughnut Chart for وکالت‌نامه‌ها */}
-          <div style={{ width: '200px', margin: 'auto' }}>
+          <div style={{ width: '400px', height: '300px', margin: 'auto' }}>
             <Doughnut data={representationDoughnutData} options={representationDoughnutOptions} />
           </div>
 
           <button className="action-btn">مشاهده وکالت‌نامه‌ها</button>
         </div>
-        
-        {/* Declaration Card */}
-        <div className="static-card">
-          <h2>اظهارنامه</h2>
-          <div className="card-year-selector">
-            <label htmlFor="declaration-year">انتخاب سال:</label>
-            <select
-              id="declaration-year"
-              value={selectedYears.declaration}
-              onChange={(e) => handleYearChange('declaration', e.target.value)}
-            >
-              {Array.from({ length: 10 }, (_, i) => {
-                const year = new Date().getFullYear() - i;
-                return (
-                  <option key={year} value={year}>
-                    {year}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
-          <p>اظهارنامه‌های سال {selectedYears.declaration}</p>
-          <ul>
-            <li>تعداد کل اظهارنامه‌ها: 75</li>
-            <li>ارزش کل: 8,300,000 ریال</li>
-          </ul>
-
-          {/* Move the Bar Chart here */}
-          <div style={{ margin: '20px auto', width: '100%' }}>
-            <div className="card-year-selector" style={{ marginBottom: '10px' }}>
-
-            </div>
-            <div style={{ width: '600px', margin: 'auto' }}>
-              <Bar data={barData} options={barOptions} />
-            </div>
-          </div>
-          
-          <button className="action-btn">مشاهده اظهارنامه‌ها</button>
-        </div>
-
       </div>
     </div>
   );

@@ -5,9 +5,10 @@ import { combineReducers } from 'redux';
 import { cottageReducer } from './reducers/cottageReducers';
 import { cottageDetailsReducer } from './reducers/cottageReducers'
 import { performaReducer, orderReducer, regedOrderDetailsReducer} from './reducers/performaReducers';
-import { customsDeclarationReducer } from './reducers/customsDeclarationReducers';
+import { customsDeclarationReducer, customsExportDeclarationReducer } from './reducers/customsDeclarationReducers';
 import { loadCustomsParams, saveCustomsParams } from './utils/localSotrage/localstorage';
 import { representationReducer, checkReducer } from './reducers/representationReducers';
+import { dashboardReducer } from './reducers/dashboardReducers'
 import authReducer from './reducers/authReducers';
 // Load initial parameters from localStorage
 const persistedParams = loadCustomsParams();
@@ -20,9 +21,11 @@ const rootReducer = combineReducers({
   performa: performaReducer,
   cottages: cottageReducer,
   customsDeclarations: customsDeclarationReducer,
+  customsExportDeclarations: customsExportDeclarationReducer,
   cottageDetails: cottageDetailsReducer,
   representations: representationReducer,
   checks: checkReducer,
+  dashboard: dashboardReducer,
 });
 
 // Configure the store with preloaded state

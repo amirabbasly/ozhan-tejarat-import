@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Cottage, CottageGoods
+from .models import Cottage, CottageGoods, ExportedCottages
 from proforma.models import Performa
 import jdatetime
 from decimal import Decimal
@@ -143,3 +143,8 @@ class CottageSaveSerializer(serializers.ModelSerializer):
     
 
     # Remove the create and update methods
+class ExportedCottagesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ExportedCottages
+        fields = '__all__'
+        read_only_fields = ['id']

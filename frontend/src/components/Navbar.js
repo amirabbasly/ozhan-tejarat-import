@@ -3,6 +3,7 @@
   import './Navbar.css';
   import { logout } from '../actions/authActions';
   import { useDispatch, useSelector } from 'react-redux';
+  import NotificationsDropdown from '../components/NotificationsDropdown'; // Adjust path as needed
 
 
   const Navbar = () => {
@@ -144,6 +145,29 @@
                   onMouseEnter={() => handleSubmenuMouseEnter('receive-order')}
                   onMouseLeave={() => handleSubmenuMouseLeave('receive-order')}
                 >
+                  <span>اظهارنامه های صادراتی</span>
+                  {/* Submenu within Submenu */}
+                  {showSubSubmenu['receive-order'] && (
+                    <ul className="sub-submenu">
+                      <Link className="submenu-link" to="/add-cottage">
+                        <li className="submenu-item">ایجاد اظهارنمه</li>
+                      </Link>
+                      <Link className="submenu-link" to="/cottages">
+                        <li className="submenu-item">لیست اظهارنامه ها</li>
+                      </Link>
+                      {role === 'admin' && (
+                      <Link className="submenu-link" to="/export-decl">
+                        <li className="submenu-item">دریافت از سامانه</li>
+                      </Link>)}
+
+                    </ul>
+                  )}
+                </li>
+                <li
+                  className="submenu-item"
+                  onMouseEnter={() => handleSubmenuMouseEnter('receive-order')}
+                  onMouseLeave={() => handleSubmenuMouseLeave('receive-order')}
+                >
                   <span>چک ها</span>
                   {/* Submenu within Submenu */}
                   {showSubSubmenu['receive-order'] && (
@@ -213,20 +237,20 @@
               )}
             </li>
           </ul>
-  </div>
-  <div className="navbar-container2">
+          </div>
+          <div className="navbar-container2">
 
-    {/* User */}
-    <li
-            className="nav-item-left"
-            onMouseEnter={() => handleMouseEnter('karbar')}
-            onMouseLeave={() => handleMouseLeave('karbar')}
-          >
-           <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 52 52" fill="none">
-  <path d="M26 21.6667C30.7865 21.6667 34.6667 17.7865 34.6667 13C34.6667 8.21353 30.7865 4.33333 26 4.33333C21.2136 4.33333 17.3334 8.21353 17.3334 13C17.3334 17.7865 21.2136 21.6667 26 21.6667Z" stroke="#6B6B6B" stroke-width="1.5"/>
-  <path d="M43.329 39C43.3319 38.6447 43.3334 38.2835 43.3334 37.9167C43.3334 32.5325 35.5724 28.1667 26 28.1667C16.4277 28.1667 8.66669 32.5325 8.66669 37.9167C8.66669 43.3008 8.66669 47.6667 26 47.6667C30.8339 47.6667 34.32 47.3265 36.8334 46.7198" stroke="#6B6B6B" stroke-width="1.5" stroke-linecap="round"/>
-</svg>
-<span>{isAuthenticated && user ? user.username : 'کاربر'}</span>
+            {/* User */}
+            <li
+                    className="nav-item-left"
+                    onMouseEnter={() => handleMouseEnter('karbar')}
+                    onMouseLeave={() => handleMouseLeave('karbar')}
+                  >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 52 52" fill="none">
+          <path d="M26 21.6667C30.7865 21.6667 34.6667 17.7865 34.6667 13C34.6667 8.21353 30.7865 4.33333 26 4.33333C21.2136 4.33333 17.3334 8.21353 17.3334 13C17.3334 17.7865 21.2136 21.6667 26 21.6667Z" stroke="#6B6B6B" stroke-width="1.5"/>
+          <path d="M43.329 39C43.3319 38.6447 43.3334 38.2835 43.3334 37.9167C43.3334 32.5325 35.5724 28.1667 26 28.1667C16.4277 28.1667 8.66669 32.5325 8.66669 37.9167C8.66669 43.3008 8.66669 47.6667 26 47.6667C30.8339 47.6667 34.32 47.3265 36.8334 46.7198" stroke="#6B6B6B" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span>{isAuthenticated && user ? user.username : 'کاربر'}</span>
 
             {/* Submenu for User */}
             {showSubmenu.karbar && (
@@ -235,11 +259,11 @@
                   <Link to="/user/profile">پروفایل من</Link>
                 </li>
                 <li className="submenu-item">
-                                        {/* Attach Logout Handler */}
-                                        <button className="submenu-link logout-btn" onClick={handleLogout}>
-                                            خروج
-                                        </button>
-                                    </li>
+                    {/* Attach Logout Handler */}
+                     <button className="submenu-link logout-btn" onClick={handleLogout}>
+                      خروج
+                      </button>
+                 </li>
               </ul>
             )}
           </li>
@@ -251,21 +275,14 @@
             onMouseLeave={() => handleMouseLeave('notifications')}
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="150" height="50" viewBox="0 0 50 50" fill="none">
-<path d="M25 12.5V20.8333M15.625 39.5833C16.9896 43.225 20.6708 45.8333 25 45.8333C25.5097 45.8333 26.0097 45.7986 26.5 45.7292M34.375 39.5833C33.8107 41.0705 32.8772 42.3897 31.6625 43.4167M18.9729 5.57083C20.8466 4.64383 22.9095 4.16323 25 4.16666C32.7646 4.16666 39.0625 10.7 39.0625 18.7604V20.2292C39.06 21.9824 39.5603 23.6996 40.5042 25.1771L42.8125 28.7687C44.9188 32.05 43.3104 36.5104 39.6458 37.5479C30.0702 40.2597 19.9298 40.2597 10.3542 37.5479C6.68959 36.5104 5.08126 32.05 7.18751 28.7708L9.49584 25.1771C10.4397 23.6996 10.94 21.9824 10.9375 20.2292V18.7604C10.9375 16.5229 11.4229 14.4021 12.2917 12.5062" stroke="#6B6B6B" stroke-width="1.5" stroke-linecap="round"/>
-</svg>
+          <path d="M25 12.5V20.8333M15.625 39.5833C16.9896 43.225 20.6708 45.8333 25 45.8333C25.5097 45.8333 26.0097 45.7986 26.5 45.7292M34.375 39.5833C33.8107 41.0705 32.8772 42.3897 31.6625 43.4167M18.9729 5.57083C20.8466 4.64383 22.9095 4.16323 25 4.16666C32.7646 4.16666 39.0625 10.7 39.0625 18.7604V20.2292C39.06 21.9824 39.5603 23.6996 40.5042 25.1771L42.8125 28.7687C44.9188 32.05 43.3104 36.5104 39.6458 37.5479C30.0702 40.2597 19.9298 40.2597 10.3542 37.5479C6.68959 36.5104 5.08126 32.05 7.18751 28.7708L9.49584 25.1771C10.4397 23.6996 10.94 21.9824 10.9375 20.2292V18.7604C10.9375 16.5229 11.4229 14.4021 12.2917 12.5062" stroke="#6B6B6B" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
             <span>اعلان‌ها</span>
 
-            {/* Submenu for Notifications */}
+             {/* Replace the static submenu with our notifications dropdown */}
             {showSubmenu.notifications && (
-              <ul className="submenu">
-                <li className="submenu-item">
-                  <Link to="/notifications/all">مشاهده همه</Link>
-                </li>
-                <li className="submenu-item">
-                  <Link to="/notifications/settings">تنظیمات اعلان‌ها</Link>
-                </li>
-              </ul>
-            )}
+              <NotificationsDropdown />
+             )}
           </li>
         </div>
       </div>

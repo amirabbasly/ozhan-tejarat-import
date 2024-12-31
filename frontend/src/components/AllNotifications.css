@@ -1,0 +1,88 @@
+/* src/components/AllNotifications.css */
+
+.all-notifications-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 1rem;
+  }
+  
+  .all-notifications-container h1 {
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+  
+  .error {
+    color: red;
+    font-weight: bold;
+  }
+  
+  .notifications-list {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .notification-item {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+    padding: 0.75rem 1rem;
+  }
+  
+  /* Mark unread notifications in bold */
+  .notification-item.unread {
+    font-weight: bold;
+  }
+  
+  /* If you want read items to have reduced opacity, use: */
+  .notification-item.read {
+    opacity: 0.8;
+  }
+  
+  /* Type-based background and text colors */
+  .notification-info {
+    background-color: #cff4fc; /* light blue */
+    color: #055160;            /* teal text */
+  }
+  
+  .notification-success {
+    background-color: #d1e7dd; /* light green */
+    color: #0f5132;            /* dark green text */
+  }
+  
+  .notification-warning {
+    background-color: #fff3cd; /* light yellow */
+    color: #664d03;            /* brownish text */
+  }
+  
+  .notification-error {
+    background-color: #f8d7da; /* light red */
+    color: #842029;            /* dark red text */
+  }
+  
+  /* Icon spacing */
+  .notification-icon {
+    margin-right: 0.8rem;
+    font-size: 1.2rem;
+  }
+  
+  /* Notification message text */
+  .notification-message {
+    flex: 1;
+  }
+  
+  /* Mark as Read button */
+  .notification-item button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 0.3rem 0.6rem;
+    cursor: pointer;
+  }
+  
+  .notification-item button:hover {
+    background-color: #0056b3;
+  }
+  

@@ -9,7 +9,7 @@ from django.http import HttpResponse, JsonResponse
 from urllib.parse import urljoin
 from django.views.decorators.http import require_http_methods
 from django.middleware.csrf import get_token
-from .serializers import CottageSerializer,CottageGoodsSerializer ,CustomsDeclarationInputSerializer, GreenCustomsDeclarationInputSerializer, CottageSaveSerializer
+from .serializers import CottageSerializer,CottageGoodsSerializer ,CustomsDeclarationInputSerializer, GreenCustomsDeclarationInputSerializer, CottageSaveSerializer, ExportedCottagesSerializer
 import requests
 import logging
 from django.conf import settings
@@ -529,3 +529,12 @@ class ExportCustomsDeclarationListView(APIView):
             logger.error(f"Unexpected Error: {e}", exc_info=True)
             return Response({'error': 'An unexpected error occurred on the server.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+
+class ExportedCottagesViewSet(viewsets.ModelViewSet):
+    queryset = CottageGoods.objects.all()
+    serializer_class = ExportedCottagesSerializer
+
+    # Add custom logic or actions if needed
+    def perform_create(self, serializer):
+        serializer.save()

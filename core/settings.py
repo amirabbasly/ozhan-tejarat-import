@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'cottage',
     'jalali_date',
     'accounts',
+    'notifications',
     'representation',
     'django.contrib.contenttypes',
     'django.contrib.sessions',

@@ -9,6 +9,7 @@ import { customsDeclarationReducer, customsExportDeclarationReducer } from './re
 import { loadCustomsParams, saveCustomsParams } from './utils/localSotrage/localstorage';
 import { representationReducer, checkReducer } from './reducers/representationReducers';
 import { dashboardReducer } from './reducers/dashboardReducers'
+import { notificationsReducer } from './reducers/notificationsReducer';
 import authReducer from './reducers/authReducers';
 // Load initial parameters from localStorage
 const persistedParams = loadCustomsParams();
@@ -26,6 +27,7 @@ const rootReducer = combineReducers({
   representations: representationReducer,
   checks: checkReducer,
   dashboard: dashboardReducer,
+  notifications: notificationsReducer,
 });
 
 // Configure the store with preloaded state
@@ -60,6 +62,7 @@ const store = configureStore({
 // Subscribe to store updates to persist parameters
 store.subscribe(() => {
   const { ssdsshGUID, urlVCodeInt } = store.getState().customsDeclarations;
+  
   saveCustomsParams({ ssdsshGUID, urlVCodeInt });
 });
 

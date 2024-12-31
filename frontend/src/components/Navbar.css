@@ -73,6 +73,7 @@
 }
 .nav-item-left:nth-child(odd) {
   margin-left: 40px;
+  margin-right: 30px;
 }
 
 .nav-icon {

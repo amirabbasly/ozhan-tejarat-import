@@ -52,14 +52,12 @@ const initialState = {
   failedDeclarations: []
 };
 const initialStateExport = {
-  declarations: [],
-  declarationDetails: null,
-  goods: [],
-  customsDutyInfo: {}, // { ggsVcodeInt: dutyInfo }
+  exportDeclarations: [],
+  exportDeclarationsDetails: null,
+  exportGoods: [],
+  customsDutyInfo: {},
   loading: false,
   saveMessage: '',
-  ssdsshGUID: '',
-  urlVCodeInt: '',
 };
 
 export const customsDeclarationReducer = (state = initialState, action) => {
@@ -258,25 +256,25 @@ export const customsDeclarationReducer = (state = initialState, action) => {
 export const customsExportDeclarationReducer = (state = initialStateExport, action) => {
   switch (action.type) {
     // Fetch Declarations
-    case FETCH_DECLARATIONS_REQUEST:
+    case FETCH_EXPORT_DECLARATIONS_REQUEST:
       return {
         ...state,
         loadingDeclarations: true,
         errorDeclarations: '',
-        declarations: [],
+        exportDeclarations: [],
       };
-    case FETCH_DECLARATIONS_SUCCESS:
+    case FETCH_EXPORT_DECLARATIONS_SUCCESS:
       return {
         ...state,
         loadingDeclarations: false,
-        declarations: action.payload,
+        exportDeclarations: action.payload,
         errorDeclarations: '',
       };
-    case FETCH_DECLARATIONS_FAILURE:
+    case FETCH_EXPORT_DECLARATIONS_FAILURE:
       return {
         ...state,
         loadingDeclarations: false,
-        declarations: [],
+        exportDeclarations: [],
         errorDeclarations: action.payload,
       };
 

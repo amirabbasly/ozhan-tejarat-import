@@ -138,7 +138,7 @@ const AddExportCottages = () => {
                     className="form-input"
                     id="remaining_total"
                     name="remaining_total"
-                    placeholder=" مانده اظهارنامه را وارد کنید"
+                    placeholder="مانده اظهارنامه را وارد کنید"
                     value={formData.remaining_total}
                     onChange={handleChange}
                     required

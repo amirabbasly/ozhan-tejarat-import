@@ -14,6 +14,9 @@ import {
   CREATE_COTTAGE_SUCCESS,
   CREATE_COTTAGE_FAILURE,
   RESET_COTTAGE_CREATION,
+  FETCH_EXPORT_COTTAGE_REQUEST,
+  FETCH_EXPORT_COTTAGE_SUCCESS,
+  FETCH_EXPORT_COTTAGE_FAILURE,
   
 } from '../actions/actionTypes';
 
@@ -26,6 +29,11 @@ const initialCottagesState = {
     success: false,
     error: '',
 },
+};
+const initialExportState = {
+  loading: false,
+  cottages: [],
+  error: '',
 };
 
 const initialCottageDetailsState = {
@@ -114,5 +122,34 @@ export const cottageDetailsReducer = (state = initialCottageDetailsState, action
           return { ...state, loading: false, error: action.payload };
       default:
           return state;
+  }
+};
+
+// Cottage List Reducer
+export const exportCottageReducer = (state = initialExportState, action) => {
+  switch (action.type) {
+    case FETCH_EXPORT_COTTAGE_REQUEST:
+      return {
+        ...state,
+        loading: true,
+        error: '',
+      };
+    case FETCH_EXPORT_COTTAGE_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        cottages: action.payload,
+        error: '',
+      };
+    case FETCH_EXPORT_COTTAGE_FAILURE:
+      return {
+        ...state,
+        loading: false,
+        cottages: [],
+        error: action.payload,
+      };
+
+    default:
+      return state;
   }
 };

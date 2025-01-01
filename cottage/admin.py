@@ -20,6 +20,6 @@ class CottageGoodsAdmin(admin.ModelAdmin):
 
 
 @admin.register(ExportedCottages)
-class ExportedCottageAdmin(ModelAdminJalaliMixin, admin.ModelAdmin):
-
-    list_display = ('cottage_number', 'cottage_date', 'total_value')
+class ExportedCottageAdmin(admin.ModelAdmin):
+    list_display = ('cottage_date', 'total_value')
+    

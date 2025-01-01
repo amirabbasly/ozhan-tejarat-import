@@ -98,9 +98,7 @@ class CottageGoods(models.Model):
 
 class ExportedCottages(models.Model):
     full_serial_number = models.CharField(unique=True)
-    cottage_number = models.IntegerField(unique=True)
-    customs_code = models.IntegerField
-    cottage_date = jmodels.jDateField()
+    cottage_date = models.CharField(max_length=55)
     total_value = models.DecimalField(max_digits=20, decimal_places=2)
     quantity = models.PositiveIntegerField()
     currency_type = models.CharField(max_length=55, default="USD")

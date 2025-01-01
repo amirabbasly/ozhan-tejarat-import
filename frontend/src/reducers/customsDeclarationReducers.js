@@ -53,11 +53,15 @@ const initialState = {
 };
 const initialStateExport = {
   exportDeclarations: [],
-  exportDeclarationsDetails: null,
-  exportGoods: [],
-  customsDutyInfo: {},
-  loading: false,
-  saveMessage: '',
+  loadingDeclarations: false,
+  errorDeclarations: '',
+
+  // For saving multiple (export) declarations:
+  savingMultipleDeclarations: false,
+  saveMultipleDeclarationsError: '',
+  saveMultipleDeclarationsMessage: '',
+  saveMultipleDeclarationsProgress: { current: 0, total: 0 },
+  failedDeclarations: [],
 };
 
 export const customsDeclarationReducer = (state = initialState, action) => {
@@ -253,9 +257,13 @@ export const customsDeclarationReducer = (state = initialState, action) => {
   }
 };
 
+// Still in your reducers file
+// The same file where you have `customsExportDeclarationReducer`:
+
 export const customsExportDeclarationReducer = (state = initialStateExport, action) => {
   switch (action.type) {
-    // Fetch Declarations
+
+    // === 1) Fetching Export Declarations ===
     case FETCH_EXPORT_DECLARATIONS_REQUEST:
       return {
         ...state,
@@ -263,6 +271,7 @@ export const customsExportDeclarationReducer = (state = initialStateExport, acti
         errorDeclarations: '',
         exportDeclarations: [],
       };
+
     case FETCH_EXPORT_DECLARATIONS_SUCCESS:
       return {
         ...state,
@@ -270,12 +279,54 @@ export const customsExportDeclarationReducer = (state = initialStateExport, acti
         exportDeclarations: action.payload,
         errorDeclarations: '',
       };
+
     case FETCH_EXPORT_DECLARATIONS_FAILURE:
       return {
         ...state,
         loadingDeclarations: false,
         exportDeclarations: [],
         errorDeclarations: action.payload,
+      };
+
+    // === 2) Saving Multiple Export Declarations (PROGRESS, SUCCESS, FAILURE) ===
+    case SAVE_MULTIPLE_DECLARATIONS_REQUEST:
+      return {
+        ...state,
+        savingMultipleDeclarations: true,
+        // Use payload.total if you send { total: x } in the request action
+        saveMultipleDeclarationsProgress: { current: 0, total: action.payload?.total || 0 },
+        saveMultipleDeclarationsError: '',
+        saveMultipleDeclarationsMessage: '',
+        failedDeclarations: [],
+      };
+
+    case SAVE_MULTIPLE_DECLARATIONS_PROGRESS:
+      return {
+        ...state,
+        saveMultipleDeclarationsProgress: {
+          current: action.payload.current || 0,
+          total: action.payload.total || state.saveMultipleDeclarationsProgress.total || 1,
+        },
+      };
+
+    case SAVE_MULTIPLE_DECLARATIONS_SUCCESS:
+      return {
+        ...state,
+        savingMultipleDeclarations: false,
+        saveMultipleDeclarationsMessage: action.payload.message || '',
+        failedDeclarations: action.payload.failedDeclarations || [],
+      };
+
+    case SAVE_MULTIPLE_DECLARATIONS_FAILURE:
+      return {
+        ...state,
+        savingMultipleDeclarations: false,
+        saveMultipleDeclarationsError: action.payload.error || 'خطای نامشخص در ذخیره',
+        // If partial success occurred, we might combine previous failedDeclarations with new ones
+        failedDeclarations: [
+          ...state.failedDeclarations,
+          ...(action.payload.failedDeclarations || []),
+        ],
       };
 
     default:

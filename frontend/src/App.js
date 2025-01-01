@@ -21,6 +21,8 @@ import CheckList from './components/ChecksList';
 import AddCheck from './components/AddCheck'
 import ExportCustomsDecList from './components/ExportCustomsDecList'
 import AllNotifications from './components/AllNotifications';
+import ExportCottageList from './components/ExportCottagesList';
+import AddExportCottages from './components/AddExportCottages';
 // Import Redux Provider and store
 import { Provider } from 'react-redux';
 import store from './store';
@@ -89,6 +91,14 @@ function AppContent() {
             element={
               <PrivateRoute>
                 <CottageListPage />
+              </PrivateRoute>
+            }
+          />
+                    <Route
+            path="/export-cottages"
+            element={
+              <PrivateRoute>
+                <ExportCottageList />
               </PrivateRoute>
             }
           />
@@ -177,6 +187,14 @@ function AppContent() {
             element={
               <PrivateRoute>
                 <AddCheck />
+              </PrivateRoute>
+            }
+          />
+                              <Route
+            path="/add-export"
+            element={
+              <PrivateRoute>
+                <AddExportCottages />
               </PrivateRoute>
             }
           />

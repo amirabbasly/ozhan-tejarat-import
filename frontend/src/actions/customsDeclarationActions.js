@@ -425,7 +425,7 @@ export const saveMultipleDeclarations = (declarations, ssdsshGUID, urlVCodeInt) 
     dispatch(saveMultipleDeclarationsSuccess({ message, failedDeclarations }));
 };
 export const fetchExportDeclarations = (ssdsshGUID, urlVCodeInt, pageSize, startIndex) => async (dispatch) => {
-    dispatch(fetchDeclarationsRequest());
+    dispatch(fetchExportDeclarationsRequest());
     const payload = {
         ssdsshGUID,
         urlVCodeInt: parseInt(urlVCodeInt, 10),
@@ -452,5 +452,84 @@ export const fetchExportDeclarations = (ssdsshGUID, urlVCodeInt, pageSize, start
                 ? error.response.data.ErrorDesc || error.response.data
                 : 'Failed to connect to the server.';
         dispatch(fetchExportDeclarationsFailure(errorMsg));
+    }
+};
+// New Action Creator: Save Multiple Declarations
+export const saveSelectedDeclarations = (ssdsshGUID, urlVCodeInt, selectedDeclarations) => async (dispatch) => {
+    // We start by dispatching a "request" to let Redux know we're saving
+    dispatch(saveMultipleDeclarationsRequest());
+    const total = selectedDeclarations.length;
+    let current = 0;
+
+    const failedDeclarations = [];
+    const successMessages = [];
+
+
+    // Iterate over each selected declaration
+    for (const declaration of selectedDeclarations) {
+        try {
+            // Build the payload for the second API
+            const payload = {
+                ssdsshGUID,
+                urlVcodeInt: parseInt(urlVCodeInt, 10),
+                fullSerialNumber: declaration.FullSerialNumber,
+                total_value: declaration.gcutotalCurrencyValue,
+                cottage_date: declaration.gcupreDeclarationDate,
+                quantity: declaration.gcuCommodityItemQuantity,
+                currency_type: declaration.curNameStr,
+                status: declaration.gcudeclarationStatus,
+
+            };
+
+         // Make the POST request using axiosInstance
+            // e.g., your backend route: 'fetch-cotage-remain-amount/'
+            const response = await axiosInstance.post('fetch-cotage-remain-amount/', payload);
+
+            // You can shape the success message as you wish
+            successMessages.push({
+                FullSerialNumber: declaration.FullSerialNumber,
+                message: response.data?.message || 'اظهارنامه با موفقیت ذخیره شد',
+            });
+        } catch (error) {
+            // On error, store the reason and the FullSerialNumber
+            let reason = 'خطای ناشناخته';
+            if (error.response && error.response.data) {
+                // If backend sent an error message
+                reason = error.response.data.error 
+                    || error.response.data.ErrorDesc 
+                    || JSON.stringify(error.response.data);
+            } else if (error.message) {
+                // Generic error message from axios
+                reason = error.message;
+            }
+
+            failedDeclarations.push({
+                FullSerialNumber: declaration.FullSerialNumber,
+                reason,
+            });
+        }
+
+        current += 1;
+        // Dispatch progress after each item
+        dispatch(saveMultipleDeclarationsProgress(current, total));
+    }
+
+    // If any failures occurred, we do partial or complete failure
+    if (failedDeclarations.length > 0) {
+        dispatch(
+            saveMultipleDeclarationsFailure({
+                // You can store partial success data if needed
+                failedDeclarations,
+                successMessages, // optional, if you want to show partial success
+            })
+        );
+    } else {
+        // If everything succeeded
+        dispatch(
+            saveMultipleDeclarationsSuccess({
+                message: 'تمام اظهارنامه‌ها با موفقیت ذخیره شدند.',
+                successMessages,
+            })
+        );
     }
 };

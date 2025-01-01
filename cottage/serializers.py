@@ -148,3 +148,13 @@ class ExportedCottagesSerializer(serializers.ModelSerializer):
         model = ExportedCottages
         fields = '__all__'
         read_only_fields = ['id']
+
+class FetchCotageRemainAmountSerializer(serializers.Serializer):
+    ssdsshGUID = serializers.UUIDField()
+    urlVcodeInt = serializers.IntegerField()
+    fullSerialNumber = serializers.CharField(max_length=50)
+    total_value = serializers.CharField(max_length=50)
+    cottage_date = serializers.CharField(max_length=50)
+    quantity = serializers.CharField(max_length=50)
+    currency_type = serializers.CharField(max_length=50)
+    status = serializers.CharField(max_length=50)

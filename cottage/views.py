@@ -2,14 +2,14 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import action
-from .models import Cottage, CottageGoods
+from .models import Cottage, CottageGoods, ExportedCottages
 from decimal import Decimal  # Import Decimal
 from proforma.models import Performa  # Import Performa model
 from django.http import HttpResponse, JsonResponse
 from urllib.parse import urljoin
 from django.views.decorators.http import require_http_methods
 from django.middleware.csrf import get_token
-from .serializers import CottageSerializer,CottageGoodsSerializer ,CustomsDeclarationInputSerializer, GreenCustomsDeclarationInputSerializer, CottageSaveSerializer, ExportedCottagesSerializer
+from .serializers import CottageSerializer,CottageGoodsSerializer ,CustomsDeclarationInputSerializer, GreenCustomsDeclarationInputSerializer, CottageSaveSerializer, ExportedCottagesSerializer, FetchCotageRemainAmountSerializer
 import requests
 import logging
 from django.conf import settings
@@ -493,11 +493,6 @@ class ExportCustomsDeclarationListView(APIView):
             "urlVCodeInt": urlVCodeInt  # User-provided
         }
 
-        # Add additional filters from the request data if necessary
-        # Example:
-        # if 'someFilter' in request.data:
-        #     payload['someFilter'] = request.data['someFilter']
-
         # Log payload for debugging
         logger.debug(f"Payload sent to NTSW API: {payload}")
 
@@ -529,12 +524,167 @@ class ExportCustomsDeclarationListView(APIView):
             logger.error(f"Unexpected Error: {e}", exc_info=True)
             return Response({'error': 'An unexpected error occurred on the server.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+class FetchCotageRemainAmountView(APIView):
+    """
+    API View to fetch CotageRemainAmount from the second external API and save/update ExportedCottages.
+    """
+    permission_classes = [IsAdmin]  # Restrict access to admin users; adjust as needed
 
+    def post(self, request):
+        # 1. Validate Input Data
+        serializer = FetchCotageRemainAmountSerializer(data=request.data)
+        if not serializer.is_valid():
+            logger.debug(f"Invalid input data: {serializer.errors}")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        validated_data = serializer.validated_data
+        ssdsshGUID = validated_data['ssdsshGUID']
+        urlVcodeInt = validated_data['urlVcodeInt']
+        full_serial_number = validated_data['fullSerialNumber']
+        total_value = validated_data['total_value']
+        cottage_date = validated_data['cottage_date']
+        quantity = validated_data['quantity']
+        currency_type = validated_data['currency_type']
+        declaration_status = validated_data['status']
+        
+        # 2. Split FullSerialNumber into CustomCode and CotageCode
+        try:
+            custom_code, cotage_code = full_serial_number.split('-')
+        except ValueError:
+            logger.warning(f"Invalid FullSerialNumber format: {full_serial_number}")
+            return Response({
+                "error": "Invalid FullSerialNumber format. Expected 'CustomCode-CotageCode'."
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # 3. Prepare Payload for Second API
+        second_api_payload = {
+            "CotageCode": cotage_code,
+            "CustomCode": custom_code,
+            "InquiryType": 0,
+            "OriginalCaller": 0,
+            "SessionID": str(ssdsshGUID),  
+            "nationalcode": None,
+            "urlVCodeInt": urlVcodeInt
+        }
+        
+        logger.debug(f"Sending payload to second API: {second_api_payload}")
+        
+        # 4. Call the Second External API
+        try:
+            second_api_response = requests.post(
+                "https://www.ntsw.ir/users/ac/gateway/facaderest/api/ObligationEliminate/CotageInquiry",
+                json=second_api_payload,
+                headers={"Content-Type": "application/json"},
+                timeout=30
+            )
+            second_api_response.raise_for_status()
+            second_data = second_api_response.json()
+            logger.debug(f"Response from second API: {second_data}")
+        except requests.RequestException as e:
+            logger.error(f"Second API RequestException for FullSerialNumber={full_serial_number}: {e}")
+            return Response({
+                "error": "Error calling the second API."
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except ValueError as e:
+            # JSON decoding failed
+            logger.error(f"JSON decode error from second API for FullSerialNumber={full_serial_number}: {e}")
+            return Response({
+                "error": "Invalid JSON response from the second API."
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            logger.error(f"Unexpected error calling second API for FullSerialNumber={full_serial_number}: {e}", exc_info=True)
+            return Response({
+                "error": "Unexpected server error calling the second API."
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        # 5. Check for Errors in Second API Response
+        if second_data.get("ErrorCode") != 0:
+            error_desc = second_data.get("ErrorDesc", "Unknown error from second API.")
+            logger.error(f"Second API Error for FullSerialNumber={full_serial_number}: {error_desc}")
+            return Response({
+                "error": error_desc
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # 6. Extract CotageRemainAmount
+        cotage_info = second_data.get("CotageInformation", {})
+        cotage_remain_amount = cotage_info.get("CotageRemainAmount")
+        
+        if cotage_remain_amount is None:
+            logger.warning(f"CotageRemainAmount not found for FullSerialNumber: {full_serial_number}")
+            return Response({
+                "error": "CotageRemainAmount not found in second API response."
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        # 7. Save or Update Data to ExportedCottages Model
+        exported_cottage, created = ExportedCottages.objects.update_or_create(
+            full_serial_number=full_serial_number,
+            defaults={
+
+                "remaining_total": cotage_remain_amount,
+                "declaration_status": declaration_status,
+                "currency_type": currency_type,
+                "total_value": total_value,
+                "cottage_date": cottage_date,
+                "quantity": quantity,
+            }
+        )
+        
+        if created:
+            logger.info(f"ExportedCottages entry created: {exported_cottage}")
+            message = "ExportedCottages entry successfully created."
+            status_code = status.HTTP_201_CREATED
+        else:
+            logger.info(f"ExportedCottages entry updated: {exported_cottage}")
+            message = "ExportedCottages entry successfully updated."
+            status_code = status.HTTP_200_OK
+        
+        # 8. Construct Response to Client
+        response_data = {
+            "id": exported_cottage.id,
+            "full_serial_number": exported_cottage.full_serial_number,
+            "remaining_total": exported_cottage.remaining_total,
+            "quantity": exported_cottage.quantity,
+            "message": message
+        }
+        
+        return Response(response_data, status=status_code)
 
 class ExportedCottagesViewSet(viewsets.ModelViewSet):
-    queryset = CottageGoods.objects.all()
+    queryset = ExportedCottages.objects.all()
     serializer_class = ExportedCottagesSerializer
 
     # Add custom logic or actions if needed
     def perform_create(self, serializer):
         serializer.save()
+
+    # New custom action to delete selected cottages
+    @action(detail=False, methods=['post'], url_path='delete-selected')
+    def delete_selected(self, request):
+        """
+        Custom action to delete selected cottages.
+        Expects a list of cottage IDs in the request data.
+        """
+        ids = request.data.get('ids', [])
+        if not ids:
+            return Response({'error': 'No IDs provided.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Validate IDs
+        if not isinstance(ids, list):
+            return Response({'error': 'IDs should be provided as a list.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Optionally, validate that the IDs are integers
+        try:
+            ids = [int(id) for id in ids]
+        except ValueError:
+            return Response({'error': 'Invalid IDs. IDs must be integers.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            cottages = ExportedCottages.objects.filter(id__in=ids)
+            if not cottages.exists():
+                return Response({'error': 'No cottages found for the provided IDs.'}, status=status.HTTP_404_NOT_FOUND)
+            deleted_count = cottages.count()
+            cottages.delete()
+            return Response({'message': f'{deleted_count} cottages deleted.'}, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Error deleting cottages: {e}", exc_info=True)
+            return Response({'error': 'An error occurred while deleting cottages.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

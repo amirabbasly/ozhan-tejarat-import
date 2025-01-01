@@ -25,9 +25,9 @@ import {
     UPDATE_GOOD_REQUEST,
     UPDATE_GOOD_SUCCESS,
     UPDATE_GOOD_FAILURE,
-    CREATE_EXPORT_COTTAGE_REQUEST,
-    CREATE_EXPORT_COTTAGE_SUCCESS,
-    CREATE_EXPORT_COTTAGE_FAILURE,
+    FETCH_EXPORT_COTTAGE_REQUEST,
+    FETCH_EXPORT_COTTAGE_SUCCESS,
+    FETCH_EXPORT_COTTAGE_FAILURE,
 } from './actionTypes';
 
 // Synchronous Action Creators
@@ -42,6 +42,20 @@ export const fetchCottagesSuccess = (cottages) => ({
 
 export const fetchCottagesFailure = (error) => ({
     type: FETCH_COTTAGES_FAILURE,
+    payload: error,
+});
+// Synchronous Action Creators
+export const fetchExportCottagesRequest = () => ({
+    type:  FETCH_EXPORT_COTTAGE_REQUEST,
+});
+
+export const fetchExportCottagesSuccess = (cottages) => ({
+    type: FETCH_EXPORT_COTTAGE_SUCCESS,
+    payload: cottages,
+});
+
+export const fetchExportCottagesFailure = (error) => ({
+    type: FETCH_EXPORT_COTTAGE_FAILURE,
     payload: error,
 });
 
@@ -220,4 +234,69 @@ export const deleteCottages = (ids) => async (dispatch) => {
         });
     }
 };
-
+export const fetchExportCottages = () => async (dispatch) => {
+    dispatch(fetchExportCottagesRequest());
+    try {
+        const response = await axiosInstance.get('exported-cottage/');
+        dispatch(fetchExportCottagesSuccess(response.data));
+    } catch (error) {
+        const errorMsg =
+            error.response && error.response.data
+                ? error.response.data
+                : error.message;
+        dispatch(fetchExportCottagesFailure(errorMsg));
+    }
+};
+export const deleteExportCottages = (ids) => async (dispatch) => {
+    dispatch({ type: DELETE_COTTAGES_REQUEST });
+  
+    try {
+      const response = await axiosInstance.post('exported-cottage/delete-selected/', {
+        ids: ids,
+      });
+  
+      dispatch({
+        type: DELETE_COTTAGES_SUCCESS,
+        payload: response.data,
+      });
+  
+      // Optionally, you can dispatch fetchCottages() here to refresh the list
+      // dispatch(fetchCottages());
+    } catch (error) {
+      const errorMsg =
+        error.response && error.response.data
+          ? error.response.data.error || JSON.stringify(error.response.data)
+          : error.message || 'An error occurred.';
+      dispatch({
+        type: DELETE_COTTAGES_FAILURE,
+        payload: errorMsg,
+      });
+      throw error; // Re-throw the error so that the component can handle it
+    }
+  };
+  export const createExportCottage = (cottageData) => async (dispatch) => {
+    dispatch({ type: CREATE_COTTAGE_REQUEST });
+  
+    try {
+        // Step 1: Create the cottage
+        const response = await axiosInstance.post('exported-cottage/', cottageData);
+  
+        // Dispatch success action for cottage creation
+        dispatch({
+            type: CREATE_COTTAGE_SUCCESS,
+            payload: response.data,
+        });
+  
+        // Step 2: Upload documents if provided
+        if (cottageData.documents) {
+            // Dispatch the uploadFile action
+            await dispatch(uploadFile(cottageData.documents, response.data.id));
+        }
+    } catch (error) {
+        // Handle failure
+        dispatch({
+            type: CREATE_COTTAGE_FAILURE,
+            payload: error.response?.data || error.message,
+        });
+    }
+  };

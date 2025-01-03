@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   fetchExportCottages,
-  updateCottageCurrencyPrice,
   deleteExportCottages, // Import the deleteCottages action
 } from '../actions/cottageActions';
 
@@ -49,17 +48,6 @@ const ExportCottageList = () => {
     dispatch(fetchExportCottages());
   }, [dispatch]);
 
-  useEffect(() => {
-    if (Object.keys(updatingCurrencyPrice || {}).length === 0) {
-      // Fetch updated cottages when all updates are complete
-      dispatch(fetchExportCottages());
-    }
-  }, [updatingCurrencyPrice, dispatch]);
-
-  useEffect(() => {
-    console.log('Error:', error);
-    console.log('Update Currency Price Error:', updateCurrencyPriceError);
-  }, [error, updateCurrencyPriceError]);
 
   // Filtering logic
   useEffect(() => {
@@ -100,9 +88,6 @@ const ExportCottageList = () => {
     setSearchTerm(e.target.value);
   };
 
-  const handleProformaChange = (e) => {
-    setProformaFilter(e.target.value);
-  };
 
   // Existing selection and currency price functions
   const handleSelectCottage = (event, cottage) => {
@@ -131,31 +116,7 @@ const ExportCottageList = () => {
       setSelectedCottages([]);
     }
   };
-
-  const handleApplyCurrencyPrice = () => {
-    if (selectedCottages.length === 0 || !currencyPrice) {
-      alert('لطفاً حداقل یک کوتاژ را انتخاب کرده و نرخ ارز را وارد کنید.');
-      return;
-    }
-
-    // Create an array of promises from dispatching the update actions
-    const updatePromises = selectedCottages.map((cottage) =>
-      dispatch(updateCottageCurrencyPrice(cottage.id, currencyPrice))
-    );
-
-    // Wait for all update actions to complete
-    Promise.all(updatePromises)
-      .then(() => {
-        // After all updates, fetch the cottages again
-        dispatch(fetchExportCottages());
-        alert('نرخ ارز برای اظهارنامه های انتخاب شده به‌روزرسانی شد.');
-      })
-      .catch((error) => {
-        console.error('Error updating currency price:', error);
-        alert('خطا در به‌روزرسانی نرخ ارز برای برخی از کوتاژها.');
-      });
-  };
-  const handleDeleteSelectedCottages = () => {
+const handleDeleteSelectedCottages = () => {
     if (selectedCottages.length === 0) {
       alert('لطفاً حداقل یک کوتاژ را انتخاب کنید.');
       return;
@@ -195,14 +156,7 @@ const ExportCottageList = () => {
             onChange={handleSearchChange}
             className="search-input"
           />
-          <select value={proformaFilter} onChange={handleProformaChange} className="filter-select">
-            <option value="">همه پروفرم‌ها</option>
-            {[...new Set(cottages.map((cottage) => cottage.proforma))].map((proforma, index) => (
-              <option key={index} value={proforma}>
-                {proforma}
-              </option>
-            ))}
-          </select>
+
           <DatePicker
             value={startDate}
             onChange={setStartDate}
@@ -234,13 +188,6 @@ const ExportCottageList = () => {
             placeholder="نرخ ارز را وارد کنید"
           />
         </div>
-        <button
-        className="primary-button"
-          onClick={handleApplyCurrencyPrice}
-          disabled={selectedCottages.length === 0 || !currencyPrice}
-        >
-          ثبت نرخ ارز برای کوتاژهای انتخاب شده
-        </button>
         
         <button
           onClick={handleDeleteSelectedCottages}
@@ -317,7 +264,7 @@ const ExportCottageList = () => {
                         {cottage.remaining_total}
                       </td>
                       <td>
-                        <Link to={`/cottages/${cottage.cottage_number}`}>جزئیات</Link>
+                        <Link to={`/export-cottages/${cottage.full_serial_number}`}>جزئیات</Link>
                       </td>
                     </tr>
                   );

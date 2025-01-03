@@ -28,6 +28,10 @@ import {
     FETCH_EXPORT_COTTAGE_REQUEST,
     FETCH_EXPORT_COTTAGE_SUCCESS,
     FETCH_EXPORT_COTTAGE_FAILURE,
+    FETCH_EXPORT_COTTAGE_DETAILS_REQUEST,
+    FETCH_EXPORT_COTTAGE_DETAILS_SUCCESS,
+    FETCH_EXPORT_COTTAGE_DETAILS_FAILURE,
+    
 } from './actionTypes';
 
 // Synchronous Action Creators
@@ -300,3 +304,17 @@ export const deleteExportCottages = (ids) => async (dispatch) => {
         });
     }
   };
+  export const fetchExportCottageDetails = (fullSerialNumber) => async (dispatch) => {
+    dispatch({ type: FETCH_EXPORT_COTTAGE_DETAILS_REQUEST });
+
+    try {
+        const response = await axiosInstance.get(`exported-cottage/by-number/${fullSerialNumber}/`);
+        dispatch({ type: FETCH_EXPORT_COTTAGE_DETAILS_SUCCESS, payload: response.data });
+    } catch (error) {
+        const errorMsg =
+            error.response && error.response.data
+                ? error.response.data
+                : error.message;
+        dispatch({ type: FETCH_EXPORT_COTTAGE_DETAILS_FAILURE, payload: errorMsg });
+    }
+};

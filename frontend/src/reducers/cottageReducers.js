@@ -17,6 +17,9 @@ import {
   FETCH_EXPORT_COTTAGE_REQUEST,
   FETCH_EXPORT_COTTAGE_SUCCESS,
   FETCH_EXPORT_COTTAGE_FAILURE,
+  FETCH_EXPORT_COTTAGE_DETAILS_REQUEST,
+  FETCH_EXPORT_COTTAGE_DETAILS_SUCCESS,
+  FETCH_EXPORT_COTTAGE_DETAILS_FAILURE,
   
 } from '../actions/actionTypes';
 
@@ -151,5 +154,17 @@ export const exportCottageReducer = (state = initialExportState, action) => {
 
     default:
       return state;
+  }
+};
+export const exportedCottageDetailsReducer = (state = initialCottageDetailsState, action) => {
+  switch (action.type) {
+      case FETCH_EXPORT_COTTAGE_DETAILS_REQUEST:
+          return { ...state, loading: true, error: '' };
+      case FETCH_EXPORT_COTTAGE_DETAILS_SUCCESS:
+          return { ...state, loading: false, cottage: action.payload, error: '' };
+      case FETCH_EXPORT_COTTAGE_DETAILS_FAILURE:
+          return { ...state, loading: false, error: action.payload };
+      default:
+          return state;
   }
 };

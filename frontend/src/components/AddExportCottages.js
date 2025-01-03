@@ -6,6 +6,7 @@ import DatePicker from 'react-multi-date-picker';
 import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
 import { useNavigate } from 'react-router-dom'; // import useNavigate
+import Select from 'react-select';
 
 const AddExportCottages = () => {
     const dispatch = useDispatch();
@@ -18,42 +19,79 @@ const AddExportCottages = () => {
         currency_type:'',
         currency_price:'',
         remaining_total:'',
+        declaration_status:''
     });
 
-    const handleChange = (e) => {
-        const { name, value, type, checked } = e.target;
-        setFormData({
-            ...formData,
-            [name]: type === 'checkbox' ? checked : value,
-        });
-    };
+const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    let formattedValue = value;
+
+    if (name === "full_serial_number") {
+        // حذف تمام کاراکترهای غیر عددی و غیر خط تیره
+        formattedValue = value.replace(/[^\d-]/g, '');
+
+        // جدا کردن ارقام قبل و بعد از خط تیره
+        const parts = formattedValue.split('-');
+
+        // بخش قبل از خط تیره باید حداکثر ۴ رقم باشد
+        if (parts[0].length > 4) {
+            parts[0] = parts[0].slice(0, 4);
+        }
+
+        // بخش بعد از خط تیره باید حداکثر ۱۰ رقم باشد (یا هر تعداد دلخواه شما)
+        if (parts[1] && parts[1].length > 10) { 
+            parts[1] = parts[1].slice(0, 10);
+        }
+
+        // افزودن خط تیره بعد از ۴ رقم
+        if (parts[0].length === 4 && !formattedValue.includes('-')) {
+            formattedValue = `${parts[0]}-`;
+        } else {
+            formattedValue = parts.join('-');
+        }
+    }
+
+    setFormData({
+        ...formData,
+        [name]: formattedValue,
+    });
+
+    // اگر نیاز به مدیریت خطا دارید، می‌توانید اینجا اضافه کنید
+};
+
     const handleDateChange = (value) => {
         setFormData({ ...formData, cottage_date: value?.format("YYYY-MM-DD") });
     };
     
-    
-
-    const handleFileChange = (e) => {
-        setFormData({ ...formData, document: e.target.files[0] });
+    const options = [
+        { value: 'تایید شده' , label: 'تایید شده' },
+        { value: 'در حال بررسی', label: 'در حال بررسی' },
+        { value: 'رد شده', label: 'رد شده' },
+    ];
+    const currencyTypeOptions = [
+        { value: 'usd', label: 'دلار آمریکا' },
+        { value: 'eur', label: 'یورو' },
+        { value: 'irr', label: 'ریال ایران' },
+    ];
+    const handleSelectChange = (selectedOption, actionMeta) => {
+        const { name } = actionMeta;
+        setFormData({
+            ...formData,
+            [name]: selectedOption.value,
+        });
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
         const data = new FormData();
-    
+
         // Append all fields except file
         Object.keys(formData).forEach((key) => {
             if (key !== 'document') {
                 data.append(key, formData[key]);
             }
         });
-    
-        // Append the file only if it's actually selected
-        if (formData.document && formData.document instanceof File) {
-            data.append('document', formData.document);
-        }
 
-        // Dispatch the create action and then navigate
         dispatch(createExportCottage(data))
             .then(() => {
                 alert('اظهارنامه صادراتی با موفقیت ایجاد شد!');
@@ -61,27 +99,29 @@ const AddExportCottages = () => {
             })
             .catch(err => {
                 alert("خطا:", err);
-                // handle error if needed
             });
     };
     
 
     return (
         <form className="cottage-form" onSubmit={handleSubmit}>
-            <h2 className="form-title">افزودن چک</h2>
+            <h2 className="form-title">افزودن اظهارنامه صادراتی</h2>
 
             <div className="form-group">
-                <label className="form-label" htmlFor="full_serial_number"> سریال اظهار کامل:</label>
-                <input
-                    className="form-input"
-                    id="full_serial_number"
-                    name="full_serial_number"
-                    placeholder="سریال اظهار کامل را وارد کنید"
-                    value={formData.full_serial_number}
-                    onChange={handleChange}
-                    required
-                />
-            </div>
+    <label className="form-label" htmlFor="full_serial_number">سریال اظهار کامل:</label>
+    <input
+        className="form-input"
+        id="full_serial_number"
+        name="full_serial_number"
+        placeholder="XXXX-XXXXXX"
+        value={formData.full_serial_number}
+        onChange={handleChange}
+        required
+        pattern="\d{4}-\d{6,}" // الگوی مورد نظر
+        title="لطفاً سریال را به فرمت ۴ رقم-۶ رقم یا بیشتر وارد کنید (مثال: 1234-567890)"
+    />
+</div>
+
             
             <div className="form-group">
                 <label className="form-label" htmlFor="quantity">تعداد کالاها:</label>
@@ -121,17 +161,17 @@ const AddExportCottages = () => {
                 />
             </div>
             <div className="form-group">
-                <label className="form-label" htmlFor="currency_type"> نوع ارز:</label>
-                <input
-                    className="form-input"
-                    id="currency_type"
+                <label className="form-label" htmlFor="currency_type">نوع ارز:</label>
+                <Select
                     name="currency_type"
-                    placeholder="نوع ارز را وارد کنید"
-                    value={formData.currency_type}
-                    onChange={handleChange}
-                    required
+                    className="selectPrf"
+                    value={currencyTypeOptions.find(option => option.value === formData.currency_type)}
+                    onChange={handleSelectChange}
+                    options={currencyTypeOptions}
+                    placeholder="انتخاب نوع ارز"
                 />
             </div>
+
             <div className="form-group">
                 <label className="form-label" htmlFor="remaining_total"> مانده:</label>
                 <input
@@ -144,9 +184,18 @@ const AddExportCottages = () => {
                     required
                 />
             </div>
-
-
-            
+         
+            <div className="form-group">
+                <label className="form-label" htmlFor="declaration_status">وضعیت:</label>
+                <Select
+                    name="declaration_status"
+                    className="selectPrf"
+                    value={options.find(option => option.value === formData.declaration_status)}
+                    onChange={handleSelectChange}
+                    options={options}
+                    placeholder="انتخاب وضعیت"
+                />
+            </div>
 
             <div className="form-group">
                 <label className="form-label" htmlFor="cottage_date">تاریخ اظهار:</label>

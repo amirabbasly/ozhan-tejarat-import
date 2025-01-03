@@ -127,7 +127,7 @@ const Home = () => {
     <div className="dashboard">
       {/* Header Section */}
       <header className="dashboard-header">
-        <h1>داشبورد مدرن</h1>
+        <h1>داشبورد مدیریت</h1>
         <p>مروری سریع بر سامانه</p>
       </header>
 

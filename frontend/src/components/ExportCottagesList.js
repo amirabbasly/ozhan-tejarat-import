@@ -29,17 +29,13 @@ const ExportCottageList = () => {
     cottages,
     loading,
     error,
-    updatingCurrencyPrice,
-    updateCurrencyPriceError,
   } = useSelector((state) => state.exportCottages);
 
   const [selectedCottages, setSelectedCottages] = useState([]);
   const [areAllSelected, setAreAllSelected] = useState(false);
-  const [currencyPrice, setCurrencyPrice] = useState('');
 
   // States for search, filters, and date range
   const [searchTerm, setSearchTerm] = useState('');
-  const [proformaFilter, setProformaFilter] = useState('');
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [filteredCottages, setFilteredCottages] = useState([]);
@@ -54,11 +50,10 @@ const ExportCottageList = () => {
     const filtered = cottages.filter((cottage) => {
       const matchesSearchTerm =
         searchTerm.trim() === '' ||
-        cottage.cottage_number.toString().includes(searchTerm) ||
+        cottage.full_serial_number.toString().includes(searchTerm) ||
         (cottage.proforma && cottage.proforma.includes(searchTerm));
 
-      const matchesProforma =
-        proformaFilter === '' || (cottage.proforma && cottage.proforma === proformaFilter);
+
 
       // Parse cottage_date into DateObject
       const cottageDate = new DateObject({
@@ -78,11 +73,11 @@ const ExportCottageList = () => {
         matchesDate = matchesDate && cottageDate.unix <= endDate.unix;
       }
 
-      return matchesSearchTerm && matchesProforma && matchesDate;
+      return matchesSearchTerm && matchesDate;
     });
 
     setFilteredCottages(filtered);
-  }, [cottages, searchTerm, proformaFilter, startDate, endDate]);
+  }, [cottages, searchTerm, startDate, endDate]);
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
@@ -177,17 +172,7 @@ const handleDeleteSelectedCottages = () => {
           />
         </div>
 
-        {/* Currency Price Section */}
-        <div className="currency-price-section">
-          <input
-          className='c-price-input'
-            type="number"
-            id="currencyPrice"
-            value={currencyPrice}
-            onChange={(e) => setCurrencyPrice(e.target.value)}
-            placeholder="نرخ ارز را وارد کنید"
-          />
-        </div>
+
         
         <button
           onClick={handleDeleteSelectedCottages}
@@ -228,9 +213,7 @@ const handleDeleteSelectedCottages = () => {
                   const isChecked = selectedCottages.some(
                     (selectedCottage) => selectedCottage.id === cottage.id
                   );
-                  const isUpdating =
-                    updatingCurrencyPrice && updatingCurrencyPrice[cottage.id];
-                  const updateError = updateCurrencyPriceError && updateCurrencyPriceError[cottage.id];
+
 
                   return (
                     <tr key={cottage.id}>
@@ -248,17 +231,7 @@ const handleDeleteSelectedCottages = () => {
                         {cottage.total_value}
                       </td>
                       <td>
-                        {isUpdating ? (
-                          <span className="loading">در حال به‌روزرسانی...</span>
-                        ) : updateError ? (
-                          <span className="error">
-                            {typeof updateError === 'string' ? updateError : JSON.stringify(updateError)}
-                          </span>
-                        ) : cottage.currency_price ? (
-                          `${cottage.currency_price} ریال`
-                        ) : (
-                          '—'
-                        )}
+                        {cottage.currency_price}
                       </td>
                       <td>
                         {cottage.remaining_total}

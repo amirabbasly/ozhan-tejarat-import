@@ -23,6 +23,8 @@ import ExportCustomsDecList from './components/ExportCustomsDecList'
 import AllNotifications from './components/AllNotifications';
 import ExportCottageList from './components/ExportCottagesList';
 import AddExportCottages from './components/AddExportCottages';
+import ExportedCottageDetails from './pages/ExportedCottageDetails';
+import Chatbots from './components/ChatBot';
 // Import Redux Provider and store
 import { Provider } from 'react-redux';
 import store from './store';
@@ -134,6 +136,14 @@ function AppContent() {
               </PrivateRoute>
             }
           />
+                    <Route
+            path="/chatbot"
+            element={
+              <PrivateRoute requiredRole="admin">
+                <Chatbots />
+              </PrivateRoute>
+            }
+          />
            <Route
             path="/export-decl"
             element={
@@ -163,6 +173,14 @@ function AppContent() {
             element={
               <PrivateRoute>
                 <CottageDetails />
+              </PrivateRoute>
+            }
+          />
+                    <Route
+            path="/export-cottages/:fullSerialNumber"
+            element={
+              <PrivateRoute>
+                <ExportedCottageDetails />
               </PrivateRoute>
             }
           />

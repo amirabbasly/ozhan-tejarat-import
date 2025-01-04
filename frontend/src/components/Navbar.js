@@ -199,9 +199,9 @@
                     </ul>
                   )}
                 </li>
-                  <Link className='submenu-link' to="/decl">
+                  <Link className='submenu-link' to="/chatbot">
                   <li className="submenu-item">
-                     دریافت اظهارنامه
+                     مشاور هوش مصنوعی
                   </li></Link>
                 </ul>
 

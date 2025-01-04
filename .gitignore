@@ -14,5 +14,5 @@ venv.bak/
 cottage/__pycache__/
 
 proforma/__pycache__/
-
+django.log
 accounts/__pycache__/

@@ -16,6 +16,9 @@ import {
     COTTAGE_UPDATE_REQUEST,
     COTTAGE_UPDATE_SUCCESS,
     COTTAGE_UPDATE_FAILURE,
+    EXPORT_COTTAGE_UPDATE_REQUEST,
+    EXPORT_COTTAGE_UPDATE_SUCCESS,
+    EXPORT_COTTAGE_UPDATE_FAILURE,
     CREATE_COTTAGE_REQUEST,
     CREATE_COTTAGE_SUCCESS,
     CREATE_COTTAGE_FAILURE,
@@ -143,8 +146,6 @@ export const updateCottageDetails = (cottageId, updatedCottage, cottageNumber) =
       });
     }
   };
-  // Function to upload files separately
-// cottageActions.js
 
 export const uploadFile = (fileData, cottageId) => async (dispatch) => {
   dispatch({ type: 'UPLOAD_FILE_REQUEST' });
@@ -318,3 +319,34 @@ export const deleteExportCottages = (ids) => async (dispatch) => {
         dispatch({ type: FETCH_EXPORT_COTTAGE_DETAILS_FAILURE, payload: errorMsg });
     }
 };
+export const updateExportCottageDetails = (cottageId, updatedCottage, fullSerialNumber) => async (dispatch) => {
+    try {
+      dispatch({ type: EXPORT_COTTAGE_UPDATE_REQUEST });
+  
+      const { data } = await axiosInstance.patch(`/exported-cottage/${cottageId}/`, updatedCottage);
+  
+      dispatch({
+        type: EXPORT_COTTAGE_UPDATE_SUCCESS,
+        payload: data,
+      });
+  
+      // Fetch the updated cottage details
+      const response = await axiosInstance.get(`exported-cottage/by-number/${fullSerialNumber}/`);
+      dispatch({ type: FETCH_EXPORT_COTTAGE_DETAILS_SUCCESS, payload: response.data });
+  
+    } catch (error) {
+      const errorMsg =
+            error.response && error.response.data
+                ? JSON.stringify(error.response.data) // Convert object to string if necessary
+                : error.message || 'Something went wrong';
+  
+      dispatch({
+        type: COTTAGE_UPDATE_FAILURE,
+        payload: errorMsg,
+      });
+      dispatch({
+        type: FETCH_COTTAGE_DETAILS_FAILURE,
+        payload: errorMsg,
+      });
+    }
+  };

@@ -23,8 +23,40 @@ from django.db import transaction
 from accounts.permissions import IsAdmin, IsEditor , IsViewer
 from collections import defaultdict
 from .utils import get_cottage_combined_data
+from openai import OpenAI
 
+client = OpenAI(
+    api_key="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",  # This is the default and can be omitted
+)
+class ChatbotAPIView(APIView):
+    """
+    APIView to handle chatbot queries using OpenAI's ChatCompletion API.
+    """
 
+    def post(self, request, *args, **kwargs):
+        # Get the user input from the request
+        user_input = request.data.get('message', '')
+
+        if not user_input:
+            return Response({"error": "Message is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Call OpenAI's ChatCompletion API
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",  # Or use "gpt-4" for GPT-4
+                messages=[
+                    {"role": "system", "content": "You are a helpful assistant specialized in iranian customs laws."},
+                    {"role": "user", "content": user_input},
+                ],
+                max_tokens=150,
+                temperature=0.7,
+            )
+            # Extract the chatbot's response
+            bot_reply = response['choices'][0]['message']['content']
+            return Response({"reply": bot_reply}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 class CottageCombinedDataView(APIView):
     def get(self, request):
         # Get the selected year from query params

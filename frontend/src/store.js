@@ -29,7 +29,7 @@ const rootReducer = combineReducers({
   dashboard: dashboardReducer,
   notifications: notificationsReducer,
   exportCottages: exportCottageReducer,
-  expotedCottageDetails: exportedCottageDetailsReducer,
+  exportedCottageDetails: exportedCottageDetailsReducer,
 });
 
 // Configure the store with preloaded state

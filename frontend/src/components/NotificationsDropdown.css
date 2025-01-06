@@ -18,9 +18,18 @@
     display: flex;
     align-items: center;
   }
+  .notification-item:last-child {
+    border-bottom: none;
+  }
   
   .notification-item.unread {
     font-weight: bold;
+  }
+  .hidden-notifications {
+    padding: 8px;
+    text-align: center;
+    color: #555;
+    font-style: italic;
   }
   
   /* Notification type-based classes */

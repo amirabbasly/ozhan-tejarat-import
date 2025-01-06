@@ -7,6 +7,9 @@ import {
     MARK_NOTIFICATION_READ_REQUEST,
     MARK_NOTIFICATION_READ_SUCCESS,
     MARK_NOTIFICATION_READ_FAILURE,
+    MARK_ALL_NOTIFICATION_READ_REQUEST,
+    MARK_ALL_NOTIFICATION_READ_SUCCESS,
+    MARK_ALL_NOTIFICATION_READ_FAILURE,
   } from '../actions/notificationActions';
   
   const initialState = {
@@ -52,6 +55,11 @@ import {
               : notification
           ),
         };
+        case MARK_ALL_NOTIFICATION_READ_SUCCESS:
+          return {
+            ...state,
+            items: state.items.map((notif) => ({ ...notif, is_read: true })),
+          };
       case MARK_NOTIFICATION_READ_FAILURE:
         return {
           ...state,

@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import {
   fetchNotifications,
   markNotificationAsRead,
+  markAllNotificationAsRead,
 } from '../actions/notificationActions';
 import './AllNotifications.css'; // We'll define CSS for styling
 
@@ -18,7 +19,9 @@ const AllNotifications = () => {
   useEffect(() => {
     dispatch(fetchNotifications());
   }, [dispatch]);
-
+  const handleMarkAllAsRead = () => {
+    dispatch(markAllNotificationAsRead());
+  };
   const handleMarkAsRead = (id) => {
     dispatch(markNotificationAsRead(id));
   };
@@ -66,7 +69,15 @@ const AllNotifications = () => {
                 </button>
               )}
             </li>
+            
           ))}
+               <button
+                className="mark-as-read-button"
+                onClick={() => handleMarkAllAsRead()}
+                aria-label="Mark as read"
+              >
+                خواندن همه
+              </button>
         </ul>
       )}
     </div>

@@ -646,13 +646,18 @@ class FetchCotageRemainAmountView(APIView):
             return Response({
                 "error": "CotageRemainAmount not found in second API response."
             }, status=status.HTTP_404_NOT_FOUND)
-        
+        try:
+           cotage_remain_dec = Decimal(cotage_remain_amount)
+        except (ValueError, TypeError, InvalidOperation):
+            logger.error(f"Invalid CotageRemainAmount format: {cotage_remain_amount}")
+            return Response({"error": "Invalid CotageRemainAmount format."},
+                    status=status.HTTP_400_BAD_REQUEST) 
         # 7. Save or Update Data to ExportedCottages Model
         exported_cottage, created = ExportedCottages.objects.update_or_create(
             full_serial_number=full_serial_number,
             defaults={
 
-                "remaining_total": cotage_remain_amount,
+                "remaining_total": cotage_remain_dec,
                 "declaration_status": declaration_status,
                 "currency_type": currency_type,
                 "total_value": total_value,

@@ -74,7 +74,7 @@
   
   /* Mark as Read button */
   .notification-item button {
-    background-color: #007bff;
+    background-color:#4676aa;
     color: #fff;
     border: none;
     border-radius: 4px;
@@ -83,6 +83,6 @@
   }
   
   .notification-item button:hover {
-    background-color: #0056b3;
+    background-color: #8d8d8d;
   }
   

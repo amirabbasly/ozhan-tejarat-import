@@ -6,8 +6,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   fetchNotifications,
   markNotificationAsRead,
+  markAllNotificationAsRead,
 } from '../actions/notificationActions';
 import './NotificationsDropdown.css'; // We'll define CSS here
+
+const MAX_DISPLAY = 4; // Maximum number of notifications to display
 
 const NotificationsDropdown = () => {
   const dispatch = useDispatch();
@@ -15,27 +18,44 @@ const NotificationsDropdown = () => {
     (state) => state.notifications
   );
 
-  function truncateMessage(text, maxLength = 10) {
+  // Helper function to truncate messages
+  const truncateMessage = (text, maxLength = 15) => {
     if (!text) return '';
     if (text.length <= maxLength) return text;
     return text.substring(0, maxLength) + '...';
-  }
+  };
+
   useEffect(() => {
     // Only fetch if we haven't fetched them yet
     if (!hasFetched) {
       dispatch(fetchNotifications());
     }
   }, [dispatch, hasFetched]);
-  // Mark as read handler
+
+  // Handler to mark a notification as read
   const handleMarkAsRead = (id) => {
     dispatch(markNotificationAsRead(id));
   };
+  const handleMarkAllAsRead = () => {
+    dispatch(markAllNotificationAsRead());
+  };
 
-  // Show only UNREAD notifications
+  // Filter UNREAD notifications
   const unreadNotifications = notifications.filter((notif) => !notif.is_read);
 
+  // Determine displayed and hidden notifications
+  const displayedNotifications = unreadNotifications.slice(0, MAX_DISPLAY);
+  const hiddenNotificationsCount =
+    unreadNotifications.length > MAX_DISPLAY
+      ? unreadNotifications.length - MAX_DISPLAY
+      : 0;
+
   if (loading) {
-    return <div className="notifications-dropdown">در حال بارگیری اعلان‌ها...</div>;
+    return (
+      <div className="notifications-dropdown">
+        در حال بارگیری اعلان‌ها...
+      </div>
+    );
   }
 
   if (error) {
@@ -49,30 +69,54 @@ const NotificationsDropdown = () => {
   return (
     <div className="notifications-dropdown">
       {unreadNotifications.length === 0 ? (
-        <div className="no-notifications">هیچ اعلانی خوانده‌نشده وجود ندارد</div>
+        <div className="hidden-notifications">
+          هیچ اعلان خوانده‌ نشده ای وجود ندارد
+        </div>
       ) : (
-        unreadNotifications.map((notif) => (
-          <div
-            key={notif.id}
-            // Dynamically assign a class based on the notification type
-            className={`notification-item unread notification-${notif.type}`}
-          >
-            {/* Optionally display an icon depending on type */}
-            <span className="notification-icon">
-              {notif.type === 'success' && <span>✔️</span>}
-              {notif.type === 'warning' && <span>⚠️</span>}
-              {notif.type === 'error' && <span>❌</span>}
-              {notif.type === 'info' && <span>ℹ️</span>}
-            </span>
+        <>
+          {displayedNotifications.map((notif) => (
+            <div
+              key={notif.id}
+              className={`notification-item unread notification-${notif.type}`}
+            >
+              {/* Optional icon based on notification type */}
+              <span className="notification-icon">
+                {notif.type === 'success' && <span>✔️</span>}
+                {notif.type === 'warning' && <span>⚠️</span>}
+                {notif.type === 'error' && <span>❌</span>}
+                {notif.type === 'info' && <span>ℹ️</span>}
+              </span>
 
-            <p className="notification-message">
-              {truncateMessage(notif.message, 15)}
-            </p>
+              <p className="notification-message">
+                {truncateMessage(notif.message, 15)}
+              </p>
 
-            <button onClick={() => handleMarkAsRead(notif.id)}>خوانده شد</button>
-          </div>
-        ))
+              <button
+                className="mark-as-read-button"
+                onClick={() => handleMarkAsRead(notif.id)}
+                aria-label="Mark as read"
+              >
+                خوانده شد
+              </button>
+            </div>
+          ))}
+
+          {hiddenNotificationsCount > 0 && (
+            <div className="hidden-notifications">
+              و {hiddenNotificationsCount} اعلان خوانده‌نشده دیگر
+            </div>
+          )}
+                    <button
+                className="mark-as-read-button"
+                onClick={() => handleMarkAllAsRead()}
+                aria-label="Mark as read"
+              >
+                خواندن همه
+              </button>
+        </>
       )}
+
+
       <Link to="/notifications/all" className="view-all-link">
         مشاهده همه اعلانات
       </Link>

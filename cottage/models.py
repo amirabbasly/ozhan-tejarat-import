@@ -38,6 +38,15 @@ class Cottage(models.Model):
         if self.pk:
             self.recalculate_goods()
 
+    def delete(self, *args, **kwargs):
+        with transaction.atomic():
+            proforma = Performa.objects.select_for_update().get(prf_order_no=self.proforma.prf_order_no)
+            super().delete(*args, **kwargs)
+            # Re-save the proforma to update the remain totals
+            proforma.save()
+        if self.pk:
+            self.recalculate_goods()
+
     def recalculate_goods(self):
         # Recalculate all related goods when the currency_price changes
         related_goods = self.cottage_goods.all()
@@ -95,6 +104,8 @@ class CottageGoods(models.Model):
         self.other_expense = self.calculate_other_expense()
         self.final_price = self.calculate_final_price()
         super().save(*args, **kwargs)
+    
+    
 
 class ExportedCottages(models.Model):
     full_serial_number = models.CharField(unique=True)

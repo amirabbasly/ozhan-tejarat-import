@@ -277,7 +277,7 @@ const CustomsDeclarationList = () => {
                 <th>کشور</th>
                 <th>وضعیت اظهارنامه</th>
                 <th>شماره ثبت سفارش</th>
-                <th>شماره ارجاع</th>
+                <th>کد ساتا</th>
                 <th>تعداد اقلام</th>
                 <th></th>
               </tr>

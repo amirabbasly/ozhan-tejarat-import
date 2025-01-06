@@ -11,6 +11,10 @@ export const MARK_NOTIFICATION_READ_REQUEST = 'MARK_NOTIFICATION_READ_REQUEST';
 export const MARK_NOTIFICATION_READ_SUCCESS = 'MARK_NOTIFICATION_READ_SUCCESS';
 export const MARK_NOTIFICATION_READ_FAILURE = 'MARK_NOTIFICATION_READ_FAILURE';
 
+export const MARK_ALL_NOTIFICATION_READ_REQUEST = 'MARK_ALL_NOTIFICATION_READ_REQUEST';
+export const MARK_ALL_NOTIFICATION_READ_SUCCESS = 'MARK_ALL_NOTIFICATION_READ_SUCCESS';
+export const MARK_ALL_NOTIFICATION_READ_FAILURE = 'MARK_ALL_NOTIFICATION_READ_FAILURE';
+
 // Fetch notifications
 export const fetchNotifications = () => {
   return async (dispatch) => {
@@ -38,6 +42,21 @@ export const markNotificationAsRead = (notificationId) => {
     } catch (error) {
       dispatch({
         type: MARK_NOTIFICATION_READ_FAILURE,
+        payload: error.message || 'Failed to mark notification as read',
+      });
+    }
+  };
+};
+// Mark notification as read
+export const markAllNotificationAsRead = () => {
+  return async (dispatch) => {
+    dispatch({ type: MARK_ALL_NOTIFICATION_READ_REQUEST });
+    try {
+      await axiosInstance.post(`/notifications/read-all/`);
+      dispatch({ type: MARK_ALL_NOTIFICATION_READ_SUCCESS });
+    } catch (error) {
+      dispatch({
+        type: MARK_ALL_NOTIFICATION_READ_FAILURE,
         payload: error.message || 'Failed to mark notification as read',
       });
     }

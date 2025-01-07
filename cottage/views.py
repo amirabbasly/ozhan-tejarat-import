@@ -24,6 +24,8 @@ from accounts.permissions import IsAdmin, IsEditor , IsViewer
 from collections import defaultdict
 from .utils import get_cottage_combined_data
 from openai import OpenAI
+from rest_framework.parsers import MultiPartParser, FormParser
+from openpyxl import load_workbook
 
 client = OpenAI(
     api_key="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",  # This is the default and can be omitted
@@ -737,3 +739,79 @@ class ExportedCottagesViewSet(viewsets.ModelViewSet):
                 {"error": "Cottage not found."},
                 status=status.HTTP_404_NOT_FOUND
             )
+class ImportExportedCottagesView(APIView):
+    """
+    DRF view to handle Excel file uploads with Persian headings.
+    """
+    parser_classes = (MultiPartParser, FormParser,)  # allow file uploads
+
+    # We define the exact Persian headings we expect in row 1 -> map them to model fields
+    EXPECTED_HEADINGS = {
+        'شماره سریال کامل': 'full_serial_number',
+        'تاریخ': 'cottage_date',
+        'ارزش کل': 'total_value',
+        'تعداد': 'quantity',
+        'نوع ارز': 'currency_type',
+        'قیمت ارز': 'currency_price',
+        'وضعیت اظهار': 'declaration_status',
+        'مقدار باقی‌مانده': 'remaining_total',
+    }
+
+    def post(self, request, format=None):
+        excel_file = request.FILES.get('file')
+        if not excel_file:
+            return Response({"error": "No file provided."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            workbook = load_workbook(excel_file, data_only=True)
+            sheet = workbook.active  # or workbook["SheetName"] if needed
+
+            # 1) Validate heading row
+            heading_row = [cell.value for cell in sheet[1]]  # First row as list
+            if len(heading_row) < len(self.EXPECTED_HEADINGS):
+                return Response({"error": "The file has fewer columns than expected."}, status=400)
+
+            # Build a map from column index -> model field name
+            # Example: col_map[0] = 'full_serial_number'
+            col_map = {}
+            for col_index, heading in enumerate(heading_row):
+                if heading in self.EXPECTED_HEADINGS:
+                    col_map[col_index] = self.EXPECTED_HEADINGS[heading]
+
+            # Check we found all required headings
+            if len(col_map) < len(self.EXPECTED_HEADINGS):
+                missing_headings = set(self.EXPECTED_HEADINGS.keys()) - set(heading_row)
+                return Response({
+                    "error": f"Missing required headings: {', '.join(missing_headings)}"
+                }, status=400)
+
+            # 2) Iterate from row 2 onward
+            for row in sheet.iter_rows(min_row=2, values_only=True):
+                # Skip empty rows (all None)
+                if all(value is None for value in row):
+                    continue
+
+                # Prepare a dict to hold the row's data for model fields
+                data_for_model = {}
+
+                # For each column in our row, see if col_map has a field name
+                for col_index, cell_value in enumerate(row):
+                    if col_index in col_map:
+                        field_name = col_map[col_index]
+                        data_for_model[field_name] = cell_value
+
+                # If 'full_serial_number' is the unique key, we can update_or_create
+                full_serial = data_for_model.get('full_serial_number')
+                if not full_serial:
+                    # If the row doesn't have a full_serial_number, skip or handle error
+                    continue
+
+                ExportedCottages.objects.update_or_create(
+                    full_serial_number=full_serial,
+                    defaults=data_for_model
+                )
+
+            return Response({"success": "Cottages imported successfully."})
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

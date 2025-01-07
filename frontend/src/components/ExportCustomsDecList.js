@@ -8,6 +8,7 @@ import {
 } from '../actions/customsDeclarationActions';
 import { setCustomsParams, clearCustomsParams } from '../actions/customsParamsAction';
 import './CustomsDeclarationList.css'; // Import the CSS file
+import ImportExcelCottages from './ImportExportedCottages';
 
 const ExportCustomsDecList = () => {
     const dispatch = useDispatch();
@@ -198,7 +199,7 @@ const ExportCustomsDecList = () => {
                     <p><strong>URL VCode Int:</strong> {urlVCodeInt}</p>
                 </div>
             )}
-
+<ImportExcelCottages />
             {/* Save Selected Button */}
             <button
                 className="save-selected-button"

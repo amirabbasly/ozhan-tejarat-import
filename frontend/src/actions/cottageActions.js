@@ -350,3 +350,25 @@ export const updateExportCottageDetails = (cottageId, updatedCottage, fullSerial
       });
     }
   };
+
+  // actions/performaActions.js
+export const importExportedCottagesAction = (file) => async (dispatch) => {
+  dispatch({ type: 'IMPORT_EXPORTED_COTTAGES_REQUEST' });
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    const response = await axiosInstance.post('/import-exported-cottages/', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    dispatch({ type: 'IMPORT_EXPORTED_COTTAGES_SUCCESS', payload: response.data.success });
+  } catch (error) {
+    dispatch({
+      type: 'IMPORT_EXPORTED_COTTAGES_FAILURE',
+      payload: error.response?.data?.error || 'An error occurred during import.',
+    });
+  }
+};

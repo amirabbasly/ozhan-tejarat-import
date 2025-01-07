@@ -19,7 +19,11 @@ import {
   ADD_PERFORMA_REQUEST,
   ADD_PERFORMA_SUCCESS,
   ADD_PERFORMA_FAILURE, 
-  RESET_ADD_PERFORMA  
+  RESET_ADD_PERFORMA,
+  IMPORT_PERFORMA_REQUEST,
+  IMPORT_PERFORMA_SUCCESS,
+  IMPORT_PERFORMA_FAILURE,
+
 } from '../actions/actionTypes';
 
 // Initial state for performaReducer
@@ -28,6 +32,11 @@ const initialState = {
   performas: [],
   error: '',
   message: '',
+};
+const initialImportState = {
+  loading: false,
+  success: null,
+  error: null,
 };
 const detailsInitialState = {
   order: null,
@@ -182,6 +191,18 @@ const performaReducer = (state = initialState, action) => {
         loading: false,
         error: action.payload,
       };
+    default:
+      return state;
+  }
+};
+export const importReducer = (state = initialImportState, action) => {
+  switch (action.type) {
+    case IMPORT_PERFORMA_REQUEST:
+      return { ...state, loading: true, success: null, error: null };
+    case IMPORT_PERFORMA_SUCCESS:
+      return { ...state, loading: false, success: action.payload, error: null };
+    case IMPORT_PERFORMA_FAILURE:
+      return { ...state, loading: false, success: null, error: action.payload };
     default:
       return state;
   }

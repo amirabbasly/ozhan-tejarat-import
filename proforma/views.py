@@ -13,6 +13,7 @@ from .serializers import (
     PerformaYearSumSerializer
 
 )
+from rest_framework.parsers import MultiPartParser
 import requests
 from decimal import Decimal, InvalidOperation
 import logging
@@ -26,7 +27,9 @@ from accounts.permissions import IsAdmin, IsEditor , IsViewer
 from django.db.models import Sum
 from collections import defaultdict
 from rest_framework.exceptions import ValidationError
-from .utils import get_performa_combined_data
+from .utils import get_performa_combined_data, import_performa_from_excel
+import os
+from django.conf import settings
 
 
 logger = logging.getLogger(__name__)
@@ -348,3 +351,36 @@ class PerformaCreateView(APIView):
         except Exception as e:
             logger.error(f"Error creating Performa: {e}", exc_info=True)
             return Response({'error': 'An error occurred while creating the Performa.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+class PerformaImportView(APIView):
+    parser_classes = [MultiPartParser]
+
+    def post(self, request, *args, **kwargs):
+        file = request.FILES.get('file', None)
+        if not file:
+            return Response({"error": "No file provided."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Save the uploaded file to a temporary directory
+            temp_dir = os.path.join(settings.BASE_DIR, 'tmp')
+            os.makedirs(temp_dir, exist_ok=True)  # Ensure the directory exists
+            temp_file_path = os.path.join(temp_dir, file.name)
+
+            with open(temp_file_path, 'wb+') as temp_file:
+                for chunk in file.chunks():
+                    temp_file.write(chunk)
+
+            # Import Performa data
+            import_performa_from_excel(temp_file_path)
+
+            # Clean up: Delete the file after processing
+            os.remove(temp_file_path)
+
+            return Response({"Data imported successfully."}, status=status.HTTP_200_OK)
+
+        except ValueError as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            # Log detailed error for debugging
+            logger.error(f"Unexpected error during import: {str(e)}")
+            return Response({"error": "An error occurred during import."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

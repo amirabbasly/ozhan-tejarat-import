@@ -1,4 +1,3 @@
-import axios from 'axios';
 // Import jwtDecode as jwt_decode using alias
 
 // Action Types
@@ -12,11 +11,12 @@ import {
     TOKEN_REFRESH_SUCCESS,
     TOKEN_REFRESH_FAIL,
 } from './actionTypes';
+import axiosInstance from '../utils/axiosInstance';
 
 // Register User
 export const register = ({ email, username, password }) => async dispatch => {
     try {
-        const res = await axios.post('http://localhost:8000/api/accounts/register/', {
+        const res = await axiosInstance.post('/accounts/register/', {
             email,
             username,
             password,
@@ -39,7 +39,7 @@ export const register = ({ email, username, password }) => async dispatch => {
 // Login User
 export const login = ({ email, password }) => async dispatch => {
     try {
-        const res = await axios.post('http://localhost:8000/api/accounts/login/', {
+        const res = await axiosInstance.post('/accounts/login/', {
             email,
             password,
         });
@@ -85,7 +85,7 @@ export const refreshToken = () => async dispatch => {
     }
 
     try {
-        const res = await axios.post('http://localhost:8000/api/accounts/token/refresh/', {
+        const res = await axiosInstance.post('/accounts/token/refresh/', {
             refresh: refresh_token,
         });
 

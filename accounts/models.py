@@ -25,15 +25,19 @@ class CustomUserManager(BaseUserManager):
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=50)
-    first_name = models.CharField(max_length=50, null=True)
-    last_name = models.CharField(max_length=50, null=True)
+    first_name = models.CharField(max_length=50, null=True, blank=True)
+    last_name = models.CharField(max_length=50, null=True, blank=True)
+    phone_number = models.CharField(max_length=20, null=True, blank=True)
+    birth_date = models.DateField(null=True, blank=True)
+
     ROLE_CHOICES = [
         ('admin', 'Admin'),
         ('editor', 'Editor'),
         ('viewer', 'Viewer'),
         ('accountent', 'Accountent'),
+        ('client', 'Client'),
     ]
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='viewer')
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='client')
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     # Add any additional fields you require

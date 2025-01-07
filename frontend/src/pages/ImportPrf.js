@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchPerformas, saveSelectedPerformas } from '../actions/performaActions';
 import { setCustomsParams, clearCustomsParams } from '../actions/customsParamsAction'; // Ensure correct import path
 import '../components/CottageForm.css'; // Import your CSS file
+import ImportExcel from '../components/ImportExcel';
 import './importPrf.css'; // Create and import a dedicated CSS file for additional styling if needed
 
 const ImportPf = () => {
@@ -149,7 +150,6 @@ const ImportPf = () => {
           >
             پاک کردن پارامترها
           </button>
-          
         </div>
       </form>
       <button onClick={handleSendSelected} className="save-selected-button" disabled={loading}>
@@ -174,6 +174,10 @@ const ImportPf = () => {
           <p>
             <strong>URL VCode Int:</strong> {urlVCodeInt}
           </p>
+          <h2>دریافت و بارگذاری پرفورم‌ها</h2>
+      <ImportExcel />
+      {/* Rest of the ImportPf component */}
+          
         </div>
       )}
 

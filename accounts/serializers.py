@@ -10,7 +10,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ('id', 'email', 'username', 'password', 'role')
+        fields = ('id', 'email', 'username', 'password', 'role','phone_number','birth_date')
 
     def create(self, validated_data):
         password = validated_data.pop('password')
@@ -23,6 +23,8 @@ class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
     role = serializers.CharField(read_only=True)
+    phone_number =serializers.CharField(read_only=True)
+    birth_date = serializers.DateField(read_only=True)
 
     def validate(self, data):
         user = authenticate(**data)

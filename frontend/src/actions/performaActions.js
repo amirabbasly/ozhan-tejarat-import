@@ -23,6 +23,9 @@ import {
     ADD_PERFORMA_REQUEST,
     ADD_PERFORMA_SUCCESS,
     ADD_PERFORMA_FAILURE,
+    IMPORT_PERFORMA_REQUEST,
+    IMPORT_PERFORMA_SUCCESS,
+    IMPORT_PERFORMA_FAILURE,
 
 } from './actionTypes';
 
@@ -146,3 +149,28 @@ export const createOrder = (cottageData) => async (dispatch) => {
         });
     }
 };
+
+export const importPerforma = (file) => async (dispatch) => {
+    dispatch({ type: IMPORT_PERFORMA_REQUEST });
+  
+    const formData = new FormData();
+    formData.append('file', file);
+  
+    try {
+      const response = await axiosInstance.post('/import-performa/', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      dispatch({
+        type: IMPORT_PERFORMA_SUCCESS,
+        payload: response.data,
+      });
+    } catch (error) {
+      dispatch({
+        type: IMPORT_PERFORMA_FAILURE,
+        payload: error.response?.data?.error || 'An error occurred during import.',
+      });
+    }
+  };
+  

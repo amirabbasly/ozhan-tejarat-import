@@ -31,6 +31,8 @@ class LoginView(APIView):
                 'email': user.email,
                 'username': user.username,
                 'role': user.role,
+                'phone_number': user.phone_number,
+                'birth_date': user.birth_date,
             }
         })
 

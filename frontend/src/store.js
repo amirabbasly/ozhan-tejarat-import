@@ -4,7 +4,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { combineReducers } from 'redux';
 import { cottageReducer } from './reducers/cottageReducers';
 import { cottageDetailsReducer, exportCottageReducer, exportedCottageDetailsReducer } from './reducers/cottageReducers'
-import { performaReducer, orderReducer, regedOrderDetailsReducer} from './reducers/performaReducers';
+import { performaReducer, orderReducer, regedOrderDetailsReducer, importReducer} from './reducers/performaReducers';
 import { customsDeclarationReducer, customsExportDeclarationReducer } from './reducers/customsDeclarationReducers';
 import { loadCustomsParams, saveCustomsParams } from './utils/localSotrage/localstorage';
 import { representationReducer, checkReducer } from './reducers/representationReducers';
@@ -30,6 +30,7 @@ const rootReducer = combineReducers({
   notifications: notificationsReducer,
   exportCottages: exportCottageReducer,
   exportedCottageDetails: exportedCottageDetailsReducer,
+  importPerforma: importReducer,
 });
 
 // Configure the store with preloaded state

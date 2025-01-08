@@ -34,6 +34,9 @@ import {
     FETCH_EXPORT_COTTAGE_DETAILS_REQUEST,
     FETCH_EXPORT_COTTAGE_DETAILS_SUCCESS,
     FETCH_EXPORT_COTTAGE_DETAILS_FAILURE,
+    IMPORT_EXPORTED_COTTAGES_REQUEST,
+    IMPORT_EXPORTED_COTTAGES_SUCCESS,
+    IMPORT_EXPORTED_COTTAGES_FAILURE,
     
 } from './actionTypes';
 
@@ -350,10 +353,29 @@ export const updateExportCottageDetails = (cottageId, updatedCottage, fullSerial
       });
     }
   };
-
-  // actions/performaActions.js
+  export const importCottagesAction = (file) => async (dispatch) => {
+    dispatch({ type: IMPORT_EXPORTED_COTTAGES_REQUEST });
+    const formData = new FormData();
+    formData.append('file', file);
+  
+    try {
+      const response = await axiosInstance.post('/import-cottages/', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+  
+      dispatch({ type: IMPORT_EXPORTED_COTTAGES_SUCCESS, payload: response.data.success });
+    } catch (error) {
+      dispatch({
+        type: IMPORT_EXPORTED_COTTAGES_FAILURE,
+        payload: error.response?.data?.error || 'An error occurred during import.',
+      });
+    }
+  };
+  
 export const importExportedCottagesAction = (file) => async (dispatch) => {
-  dispatch({ type: 'IMPORT_EXPORTED_COTTAGES_REQUEST' });
+  dispatch({ type: IMPORT_EXPORTED_COTTAGES_REQUEST });
   const formData = new FormData();
   formData.append('file', file);
 
@@ -364,10 +386,10 @@ export const importExportedCottagesAction = (file) => async (dispatch) => {
       },
     });
 
-    dispatch({ type: 'IMPORT_EXPORTED_COTTAGES_SUCCESS', payload: response.data.success });
+    dispatch({ type: IMPORT_EXPORTED_COTTAGES_SUCCESS, payload: response.data.success });
   } catch (error) {
     dispatch({
-      type: 'IMPORT_EXPORTED_COTTAGES_FAILURE',
+      type: IMPORT_EXPORTED_COTTAGES_FAILURE,
       payload: error.response?.data?.error || 'An error occurred during import.',
     });
   }

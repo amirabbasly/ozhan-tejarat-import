@@ -6,7 +6,7 @@ import { fetchDeclarations, saveMultipleDeclarations } from '../actions/customsD
 import { setCustomsParams, clearCustomsParams } from '../actions/customsParamsAction';
 import './CustomsDeclarationList.css'; // Import the CSS file
 import { Link } from 'react-router-dom';
-
+import ImportExcelCottages from './ImportCottages';
 const CustomsDeclarationList = () => {
   const dispatch = useDispatch();
 
@@ -195,6 +195,7 @@ const CustomsDeclarationList = () => {
           <h3>پارامترهای فعلی:</h3>
           <p><strong>SSDSSH GUID:</strong> {ssdsshGUID}</p>
           <p><strong>URL VCode Int:</strong> {urlVCodeInt}</p>
+          <ImportExcelCottages />
         </div>
       )}
 

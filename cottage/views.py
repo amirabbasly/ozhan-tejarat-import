@@ -739,6 +739,80 @@ class ExportedCottagesViewSet(viewsets.ModelViewSet):
                 {"error": "Cottage not found."},
                 status=status.HTTP_404_NOT_FOUND
             )
+
+class ImportCottagesView(APIView):
+    """
+    DRF view to handle Excel file uploads with Persian headings.
+    """
+    parser_classes = (MultiPartParser, FormParser,)  # allow file uploads
+
+    EXPECTED_HEADINGS = {
+        'سریال اظهارنامه': 'cottage_number',
+        'تاریخ': 'cottage_date',
+        'شماره ثبت سفارش': 'proforma',
+        'کد ساتا': 'refrence_number',
+        'ارزش کل': 'total_value',
+        'تعداد': 'quantity',
+        'مشتری': 'cottage_customer',
+        'قیمت ارز': 'currency_price',
+        'وضعیت اظهار': 'cottage_status',
+    }
+
+    def post(self, request, format=None):
+        excel_file = request.FILES.get('file')
+        if not excel_file:
+            return Response({"error": "یک فایل انتخاب کنید."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            workbook = load_workbook(excel_file, data_only=True)
+            sheet = workbook.active  # or workbook["SheetName"] if needed
+
+            # Validate heading row
+            heading_row = [cell.value for cell in sheet[1]]  # First row as list
+            if len(heading_row) < len(self.EXPECTED_HEADINGS):
+                return Response({"error": "تعداد ستون های فایل کامل نمیباشد"}, status=400)
+
+            col_map = {}
+            for col_index, heading in enumerate(heading_row):
+                if heading in self.EXPECTED_HEADINGS:
+                    col_map[col_index] = self.EXPECTED_HEADINGS[heading]
+
+            if len(col_map) < len(self.EXPECTED_HEADINGS):
+                missing_headings = set(self.EXPECTED_HEADINGS.keys()) - set(heading_row)
+                return Response({"error": f"فایل باید شامل فیلد های: {', '.join(missing_headings)} باشد"}, status=400)
+
+            for row in sheet.iter_rows(min_row=2, values_only=True):
+                if all(value is None for value in row):  # Skip empty rows
+                    continue
+
+                data_for_model = {}
+                for col_index, cell_value in enumerate(row):
+                    if col_index in col_map:
+                        field_name = col_map[col_index]
+                        data_for_model[field_name] = cell_value
+
+                # Handle the 'proforma' field (ForeignKey)
+                proforma_value = data_for_model.get('proforma')
+                if proforma_value:
+                    try:
+                        proforma_obj = Performa.objects.get(prf_order_no=proforma_value)
+                        data_for_model['proforma'] = proforma_obj
+                    except Performa.DoesNotExist:
+                        return Response({"error": f"ثبت سفارش با شماره ثبت سفارش '{proforma_value}' وجود ندارد."}, status=400)
+
+                cottage_number = data_for_model.get('cottage_number')
+                if not cottage_number:
+                    continue
+
+                Cottage.objects.update_or_create(
+                    cottage_number=cottage_number,
+                    defaults=data_for_model
+                )
+
+            return Response({"success": "اظهانمامه ها با موفقیت بارگزاری شدند."}, status=200)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 class ImportExportedCottagesView(APIView):
     """
     DRF view to handle Excel file uploads with Persian headings.
@@ -769,7 +843,7 @@ class ImportExportedCottagesView(APIView):
             # 1) Validate heading row
             heading_row = [cell.value for cell in sheet[1]]  # First row as list
             if len(heading_row) < len(self.EXPECTED_HEADINGS):
-                return Response({"error": "The file has fewer columns than expected."}, status=400)
+                return Response({"error": "تعداد ستون های فایل کامل نمیباشد"}, status=400)
 
             # Build a map from column index -> model field name
             # Example: col_map[0] = 'full_serial_number'
@@ -782,7 +856,7 @@ class ImportExportedCottagesView(APIView):
             if len(col_map) < len(self.EXPECTED_HEADINGS):
                 missing_headings = set(self.EXPECTED_HEADINGS.keys()) - set(heading_row)
                 return Response({
-                    "error": f"Missing required headings: {', '.join(missing_headings)}"
+                    "error": f"فایل باید شامل فیلد های: {', '.join(missing_headings)} باشد"
                 }, status=400)
 
             # 2) Iterate from row 2 onward
@@ -811,7 +885,7 @@ class ImportExportedCottagesView(APIView):
                     defaults=data_for_model
                 )
 
-            return Response({"success": "Cottages imported successfully."})
+            return Response({"success": "اظهانمامه ها با موفقیت بارگزاری شدند."})
 
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

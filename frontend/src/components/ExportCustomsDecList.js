@@ -111,7 +111,7 @@ const ExportCustomsDecList = () => {
 
     return (
         <div className="customs-declaration-container">
-            <h2 className="title">لیست اظهارنامه‌های گمرکی</h2>
+            <h2 className="title">لیست اظهارنامه‌های صادراتی</h2>
 
             {/* Form for inputs */}
             <form className="declaration-form" onSubmit={handleSubmit}>

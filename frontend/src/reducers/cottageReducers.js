@@ -20,6 +20,10 @@ import {
   FETCH_EXPORT_COTTAGE_DETAILS_REQUEST,
   FETCH_EXPORT_COTTAGE_DETAILS_SUCCESS,
   FETCH_EXPORT_COTTAGE_DETAILS_FAILURE,
+  IMPORT_EXPORTED_COTTAGES_REQUEST,
+  IMPORT_EXPORTED_COTTAGES_SUCCESS,
+  IMPORT_EXPORTED_COTTAGES_FAILURE,
+  
   
 } from '../actions/actionTypes';
 
@@ -32,6 +36,7 @@ const initialCottagesState = {
     success: false,
     error: '',
 },
+
 };
 const initialExportState = {
   loading: false,
@@ -44,7 +49,11 @@ const initialCottageDetailsState = {
   cottage: null,
   error: '',
 };
-
+const initialImportState = {
+  loading: false,
+  success: null,
+  error: null,
+};
 
 // Cottage List Reducer
 export const cottageReducer = (state = initialCottagesState, action) => {
@@ -166,5 +175,18 @@ export const exportedCottageDetailsReducer = (state = initialCottageDetailsState
           return { ...state, loading: false, error: action.payload };
       default:
           return state;
+  }
+};
+
+export const importCottageReducer = (state = initialImportState, action) => {
+  switch (action.type) {
+    case  IMPORT_EXPORTED_COTTAGES_REQUEST:
+      return { ...state, loading: true, success: null, error: null };
+    case  IMPORT_EXPORTED_COTTAGES_SUCCESS:
+      return { ...state, loading: false, success: action.payload, error: null };
+    case  IMPORT_EXPORTED_COTTAGES_FAILURE:
+      return { ...state, loading: false, success: null, error: action.payload };
+    default:
+      return state;
   }
 };

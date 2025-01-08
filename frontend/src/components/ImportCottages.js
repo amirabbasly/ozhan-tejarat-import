@@ -1,7 +1,7 @@
 // ImportExcelCottages.jsx (example)
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { importExportedCottagesAction } from '../actions/cottageActions';
+import { importCottagesAction } from '../actions/cottageActions';
 
 const ImportExcelCottages = () => {
   const dispatch = useDispatch();
@@ -20,7 +20,7 @@ const ImportExcelCottages = () => {
       return;
     }
 
-    dispatch(importExportedCottagesAction(file));
+    dispatch(importCottagesAction(file));
   };
 
   return (
@@ -33,7 +33,7 @@ const ImportExcelCottages = () => {
           onChange={handleFileChange}
         />
         <button type="submit" disabled={loading}>
-          {loading ? 'در حال بارگزاری...' : 'بارگزاری'}
+          {loading ? 'Uploading...' : 'Upload'}
         </button>
       </form>
 

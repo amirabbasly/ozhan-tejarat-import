@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import CottageViewSet, CustomsDeclarationListView, GreenCustomsDeclarationView, SaveCottageView, SaveCottageGoodsView, FetchGoodsAPIView,FetchCustomsDutyInformationAPIView, upload_file,CottageGoodsViewSet, CottageCombinedDataView, ExportCustomsDeclarationListView, ExportedCottagesViewSet, FetchCotageRemainAmountView, ChatbotAPIView, ImportExportedCottagesView
+from .views import CottageViewSet, CustomsDeclarationListView, GreenCustomsDeclarationView, SaveCottageView, SaveCottageGoodsView, FetchGoodsAPIView,FetchCustomsDutyInformationAPIView, upload_file,CottageGoodsViewSet, CottageCombinedDataView, ExportCustomsDeclarationListView, ExportedCottagesViewSet, FetchCotageRemainAmountView, ChatbotAPIView, ImportExportedCottagesView, ImportCottagesView
 router = DefaultRouter()
 router.register(r'cottages', CottageViewSet)
 router.register(r'cottage-goods', CottageGoodsViewSet, basename='cottagegoods')
@@ -20,6 +20,7 @@ urlpatterns = [
     path('export-customs-declarations/', ExportCustomsDeclarationListView.as_view(), name='customs_declarations'),    
     path('fetch-cotage-remain-amount/', FetchCotageRemainAmountView.as_view(), name='fetch-cotage-remain-amount'),
     path('chatbot/', ChatbotAPIView.as_view(), name='chatbot-api'),
+    path('import-cottages/', ImportCottagesView.as_view(), name='import_cottages'),
     path('import-exported-cottages/', ImportExportedCottagesView.as_view(), name='import_exported_cottages'),
 
 ]

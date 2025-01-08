@@ -3,7 +3,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { combineReducers } from 'redux';
 import { cottageReducer } from './reducers/cottageReducers';
-import { cottageDetailsReducer, exportCottageReducer, exportedCottageDetailsReducer } from './reducers/cottageReducers'
+import { cottageDetailsReducer, exportCottageReducer, exportedCottageDetailsReducer, importCottageReducer } from './reducers/cottageReducers'
 import { performaReducer, orderReducer, regedOrderDetailsReducer, importReducer} from './reducers/performaReducers';
 import { customsDeclarationReducer, customsExportDeclarationReducer } from './reducers/customsDeclarationReducers';
 import { loadCustomsParams, saveCustomsParams } from './utils/localSotrage/localstorage';
@@ -31,6 +31,7 @@ const rootReducer = combineReducers({
   exportCottages: exportCottageReducer,
   exportedCottageDetails: exportedCottageDetailsReducer,
   importPerforma: importReducer,
+  importCottage: importCottageReducer,
 });
 
 // Configure the store with preloaded state

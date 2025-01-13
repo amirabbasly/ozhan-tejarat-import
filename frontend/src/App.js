@@ -25,6 +25,9 @@ import ExportCottageList from './components/ExportCottagesList';
 import AddExportCottages from './components/AddExportCottages';
 import ExportedCottageDetails from './pages/ExportedCottageDetails';
 import Chatbots from './components/ChatBot';
+import HSCodeImport from './components/HSCodeFromExcel';
+import HSCodeForm from './components/HSCodeForm';
+import HSCodeListComponent from './components/HSCodeList';
 // Import Redux Provider and store
 import { Provider } from 'react-redux';
 import store from './store';
@@ -216,6 +219,32 @@ function AppContent() {
               </PrivateRoute>
             }
           />
+          <Route
+            path="/hscode-import"
+            element={
+              <PrivateRoute>
+                <HSCodeImport/>
+              </PrivateRoute>
+            }
+          />
+                    <Route
+            path="/hscode-form"
+            element={
+              <PrivateRoute>
+                <HSCodeForm/>
+              </PrivateRoute>
+            }
+          />
+          
+          <Route
+            path="/hscode-list"
+            element={
+              <PrivateRoute>
+                <HSCodeListComponent/>
+              </PrivateRoute>
+            }
+          />
+          
                     <Route
             path="/add-representation"
             element={

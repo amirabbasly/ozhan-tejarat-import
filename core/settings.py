@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'cottage.apps.CottageConfig',
     'jalali_date',
     'accounts',
+    'customs',
+    'django_filters',
     'notifications.apps.NotificationsConfig',
     'representation',
     'django.contrib.contenttypes',
@@ -155,6 +157,11 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_CREDENTIALS = True
 
 REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend'
+    ],
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 500,  # Default number of items per page
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
@@ -193,9 +200,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 10000  # Increase the limit as needed
 
 DATABASES = {
     'default': {

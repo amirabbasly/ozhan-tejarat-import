@@ -10,6 +10,8 @@ import { loadCustomsParams, saveCustomsParams } from './utils/localSotrage/local
 import { representationReducer, checkReducer } from './reducers/representationReducers';
 import { dashboardReducer } from './reducers/dashboardReducers'
 import { notificationsReducer } from './reducers/notificationsReducer';
+import { hscodeReducer, hscodeListReducer } from "./reducers/hscodeReducer";
+
 import authReducer from './reducers/authReducers';
 // Load initial parameters from localStorage
 const persistedParams = loadCustomsParams();
@@ -32,6 +34,9 @@ const rootReducer = combineReducers({
   exportedCottageDetails: exportedCottageDetailsReducer,
   importPerforma: importReducer,
   importCottage: importCottageReducer,
+  hscode: hscodeReducer,
+  hscodeList: hscodeListReducer,
+
 });
 
 // Configure the store with preloaded state

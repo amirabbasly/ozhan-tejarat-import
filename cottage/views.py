@@ -1,4 +1,4 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, filters
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import action
@@ -26,6 +26,15 @@ from .utils import get_cottage_combined_data
 from openai import OpenAI
 from rest_framework.parsers import MultiPartParser, FormParser
 from openpyxl import load_workbook
+from rest_framework.pagination import PageNumberPagination
+from django_filters.rest_framework import DjangoFilterBackend
+
+
+
+
+class CustomPageNumberPagination(PageNumberPagination):
+    page_size_query_param = 'page_size'
+    max_page_size = 600
 
 client = OpenAI(
     api_key="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",  # This is the default and can be omitted
@@ -255,7 +264,10 @@ class FetchCustomsDutyInformationAPIView(APIView):
 class CottageViewSet(viewsets.ModelViewSet):
     queryset = Cottage.objects.all()
     serializer_class = CottageSerializer
-    
+    pagination_class = CustomPageNumberPagination  # Apply pagination here
+    filter_backends = [ filters.SearchFilter]
+    search_fields = ["cottage_number", "proforma__prf_order_no",]  # fields you want to search
+
 
     # Custom action to get a cottage by number (read-only)
     @action(detail=False, methods=['get'], url_path='by-number/(?P<cottage_number>[^/.]+)')

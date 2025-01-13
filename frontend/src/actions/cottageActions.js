@@ -69,21 +69,25 @@ export const fetchExportCottagesFailure = (error) => ({
     payload: error,
 });
 
-// Asynchronous Action Creator (Thunk)
-export const fetchCottages = () => async (dispatch) => {
-    dispatch(fetchCottagesRequest());
-    try {
-        const response = await axiosInstance.get('cottages/');
-        dispatch(fetchCottagesSuccess(response.data));
-    } catch (error) {
-        const errorMsg =
-            error.response && error.response.data
-                ? error.response.data
-                : error.message;
-        dispatch(fetchCottagesFailure(errorMsg));
+export const fetchCottages = (page = 1, pageSize = 10, search = "") => async (dispatch) => {
+  dispatch(fetchCottagesRequest());
+  try {
+    const params = new URLSearchParams();
+    params.append("page", page);
+    params.append("page_size", pageSize);
+    if (search) {
+      params.append("search", search); // pass the search param
     }
-};
 
+    const response = await axiosInstance.get(`cottages/?` + params.toString());
+    // The response is assumed to have { count, next, previous, results }
+    dispatch(fetchCottagesSuccess(response.data));
+  } catch (error) {
+    const errorMsg =
+      error.response && error.response.data ? error.response.data : error.message;
+    dispatch(fetchCottagesFailure(errorMsg));
+  }
+};
 
 export const fetchCottageDetails = (cottageNumber) => async (dispatch) => {
     dispatch({ type: FETCH_COTTAGE_DETAILS_REQUEST });

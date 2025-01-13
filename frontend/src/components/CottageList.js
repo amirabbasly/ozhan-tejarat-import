@@ -1,17 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import React, { useEffect, useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import {
   fetchCottages,
   updateCottageCurrencyPrice,
-  deleteCottages, // Import the deleteCottages action
-} from '../actions/cottageActions';
+  deleteCottages,
+} from "../actions/cottageActions";
+import { Link, useNavigate } from "react-router-dom";
 
-import './CottageList.css';
-import { Link, useNavigate } from 'react-router-dom';
-import DatePicker from 'react-multi-date-picker';
-import persian from "react-date-object/calendars/persian";
-import persian_fa from "react-date-object/locales/persian_fa";
-import DateObject from "react-date-object";
+import "./CottageList.css";
+import PaginationControls from "./PaginationControls";
 
 const CottageList = () => {
   const navigate = useNavigate();
@@ -19,244 +16,197 @@ const CottageList = () => {
 
   useEffect(() => {
     if (auth.isAuthenticated === false) {
-      navigate('/');
+      navigate("/");
     }
   }, [auth.isAuthenticated, navigate]);
 
   const dispatch = useDispatch();
 
-  // Access cottages state from Redux store
+  // Redux state
   const {
-    cottages,
+    cottages,   // the array of cottages from the server
     loading,
     error,
+    next,
+    previous,
+    count,
     updatingCurrencyPrice,
     updateCurrencyPriceError,
   } = useSelector((state) => state.cottages);
 
-  const [selectedCottages, setSelectedCottages] = useState([]);
-  const [areAllSelected, setAreAllSelected] = useState(false);
-  const [currencyPrice, setCurrencyPrice] = useState('');
+  // (!!!) STATES FOR SEARCH:
+  const [searchText, setSearchText] = useState("");
+  const [search, setSearch] = useState("");
 
-  // States for search, filters, and date range
-  const [searchTerm, setSearchTerm] = useState('');
-  const [proformaFilter, setProformaFilter] = useState('');
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
-  const [filteredCottages, setFilteredCottages] = useState([]);
+  const handleSearchButtonClick = () => {
+    setSearch(searchText);
+    setCurrentPage(1); // optional: reset to page 1 when searching
+  };
 
+  // (!!!) PAGINATION STATES
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const totalPages = Math.ceil(count / pageSize);
+
+  // (!!!) On mount or when `currentPage`, `pageSize`, or `search` changes,
+  // fetch from the BACKEND (no local filter).
   useEffect(() => {
-    dispatch(fetchCottages());
-  }, [dispatch]);
+    dispatch(fetchCottages(currentPage, pageSize, search));
+  }, [dispatch, currentPage, pageSize, search]);
 
+  // If currency updates finish, refetch the same page
   useEffect(() => {
     if (Object.keys(updatingCurrencyPrice || {}).length === 0) {
-      // Fetch updated cottages when all updates are complete
-      dispatch(fetchCottages());
+      dispatch(fetchCottages(currentPage, pageSize, search));
     }
-  }, [updatingCurrencyPrice, dispatch]);
+  }, [updatingCurrencyPrice, dispatch, currentPage, pageSize, search]);
 
-  useEffect(() => {
-    console.log('Error:', error);
-    console.log('Update Currency Price Error:', updateCurrencyPriceError);
-  }, [error, updateCurrencyPriceError]);
+  // NEXT/PREV
+  const hasNext = !!next;
+  const hasPrevious = !!previous;
 
-  // Filtering logic
-  useEffect(() => {
-    const filtered = cottages.filter((cottage) => {
-      const matchesSearchTerm =
-        searchTerm.trim() === '' ||
-        cottage.cottage_number.toString().includes(searchTerm) ||
-        (cottage.proforma && cottage.proforma.includes(searchTerm));
-
-      const matchesProforma =
-        proformaFilter === '' || (cottage.proforma && cottage.proforma === proformaFilter);
-
-      // Parse cottage_date into DateObject
-      const cottageDate = new DateObject({
-        date: cottage.cottage_date,
-        format: 'YYYY/MM/DD',
-        calendar: persian,
-        locale: persian_fa,
-      });
-
-      let matchesDate = true;
-
-      if (startDate) {
-        matchesDate = matchesDate && cottageDate.unix >= startDate.unix;
-      }
-
-      if (endDate) {
-        matchesDate = matchesDate && cottageDate.unix <= endDate.unix;
-      }
-
-      return matchesSearchTerm && matchesProforma && matchesDate;
-    });
-
-    setFilteredCottages(filtered);
-  }, [cottages, searchTerm, proformaFilter, startDate, endDate]);
-
-  const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value);
+  const handlePageChange = (e) => {
+    setCurrentPage(Number(e.target.value));
+  };
+  const handleNextPage = () => {
+    if (hasNext) setCurrentPage((prev) => prev + 1);
+  };
+  const handlePreviousPage = () => {
+    if (hasPrevious) setCurrentPage((prev) => prev - 1);
+  };
+  const handlePageSizeChange = (e) => {
+    setPageSize(Number(e.target.value));
+    setCurrentPage(1);
   };
 
-  const handleProformaChange = (e) => {
-    setProformaFilter(e.target.value);
-  };
+  // ----------------------------------
+  // SELECT / DELETE / UPDATE Logic
+  // ----------------------------------
+  const [selectedCottages, setSelectedCottages] = useState([]);
+  const [areAllSelected, setAreAllSelected] = useState(false);
+  const [currencyPrice, setCurrencyPrice] = useState("");
 
-  // Existing selection and currency price functions
   const handleSelectCottage = (event, cottage) => {
     const { checked } = event.target;
-    let updatedSelections;
-
+    let updated;
     if (checked) {
-      updatedSelections = [...selectedCottages, cottage];
+      updated = [...selectedCottages, cottage];
     } else {
-      updatedSelections = selectedCottages.filter(
-        (selectedCottage) => selectedCottage.id !== cottage.id
-      );
+      updated = selectedCottages.filter((c) => c.id !== cottage.id);
     }
-
-    setSelectedCottages(updatedSelections);
-    setAreAllSelected(updatedSelections.length === filteredCottages.length);
+    setSelectedCottages(updated);
+    setAreAllSelected(updated.length === cottages.length); // now comparing to ALL cottages
   };
 
   const handleSelectAll = (event) => {
     const { checked } = event.target;
     setAreAllSelected(checked);
-
     if (checked) {
-      setSelectedCottages(filteredCottages);
+      setSelectedCottages(cottages);
     } else {
       setSelectedCottages([]);
     }
   };
 
   const handleApplyCurrencyPrice = () => {
-    if (selectedCottages.length === 0 || !currencyPrice) {
-      alert('لطفاً حداقل یک کوتاژ را انتخاب کرده و نرخ ارز را وارد کنید.');
+    if (!selectedCottages.length || !currencyPrice) {
+      alert("انتخاب کوتاژ و نرخ ارز الزامی است");
       return;
     }
-
-    // Create an array of promises from dispatching the update actions
-    const updatePromises = selectedCottages.map((cottage) =>
-      dispatch(updateCottageCurrencyPrice(cottage.id, currencyPrice))
+    const promises = selectedCottages.map((c) =>
+      dispatch(updateCottageCurrencyPrice(c.id, currencyPrice))
     );
-
-    // Wait for all update actions to complete
-    Promise.all(updatePromises)
+    Promise.all(promises)
       .then(() => {
-        // After all updates, fetch the cottages again
-        dispatch(fetchCottages());
-        alert('نرخ ارز برای اظهارنامه های انتخاب شده به‌روزرسانی شد.');
+        alert("نرخ ارز برای اظهارنامه های انتخاب شده بروزرسانی شد");
+        dispatch(fetchCottages(currentPage, pageSize, search));
       })
-      .catch((error) => {
-        console.error('Error updating currency price:', error);
-        alert('خطا در به‌روزرسانی نرخ ارز برای برخی از کوتاژها.');
-      });
+      .catch((err) => alert("خطا در بروزرسانی نرخ ارز: " + err));
   };
+
   const handleDeleteSelectedCottages = () => {
-    if (selectedCottages.length === 0) {
-      alert('لطفاً حداقل یک کوتاژ را انتخاب کنید.');
+    if (!selectedCottages.length) {
+      alert("لطفاً حداقل یک کوتاژ را انتخاب کنید.");
       return;
     }
-  
-    if (!window.confirm('آیا از حذف کوتاژهای انتخاب شده اطمینان دارید؟')) {
+    if (!window.confirm("آیا از حذف کوتاژهای انتخاب شده اطمینان دارید؟")) {
       return;
     }
-  
-    const idsToDelete = selectedCottages.map((cottage) => cottage.id);
-  
+    const idsToDelete = selectedCottages.map((c) => c.id);
     dispatch(deleteCottages(idsToDelete))
       .then(() => {
-        alert('کوتاژهای انتخاب شده با موفقیت حذف شدند.');
-        // Clear selected cottages and fetch the updated list
+        alert("کوتاژهای انتخاب شده با موفقیت حذف شدند.");
         setSelectedCottages([]);
-        dispatch(fetchCottages());
+        dispatch(fetchCottages(currentPage, pageSize, search));
       })
-      .catch((error) => {
-        console.error('Error deleting cottages:', error);
-        alert('خطا در حذف کوتاژها.');
-      });
+      .catch((err) => alert("خطا در حذف کوتاژها: " + err));
   };
-  
 
   return (
     <div className="cottage-cont">
       <div className="cottage-list-container">
         <h2>لیست اظهارنامه ها</h2>
 
-        {/* Search and Filters Section */}
-        <div className="filter-container">
+        {/* (!!!) SEARCH ROW: only for sending 'search' to backend */}
+        <div className="search-bar">
+          <label>جستجو (کد/نام فارسی/نام انگلیسی):</label>
           <input
             type="text"
-            placeholder="جستجو..."
-            value={searchTerm}
-            onChange={handleSearchChange}
-            className="search-input"
+            placeholder="Type your search..."
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
           />
-          <select value={proformaFilter} onChange={handleProformaChange} className="filter-select">
-            <option value="">همه پروفرم‌ها</option>
-            {[...new Set(cottages.map((cottage) => cottage.proforma))].map((proforma, index) => (
-              <option key={index} value={proforma}>
-                {proforma}
-              </option>
-            ))}
-          </select>
-          <DatePicker
-            value={startDate}
-            onChange={setStartDate}
-            calendar={persian}
-            locale={persian_fa}
-            format="YYYY/MM/DD"
-            placeholder="تاریخ شروع"
-            className="date-picker"
-          />
-          <DatePicker
-            value={endDate}
-            onChange={setEndDate}
-            calendar={persian}
-            locale={persian_fa}
-            format="YYYY/MM/DD"
-            placeholder="تاریخ پایان"
-            className="date-picker"
-          />
+          <button onClick={handleSearchButtonClick}>Search</button>
         </div>
 
-        {/* Currency Price Section */}
+        {/* Currency Price UI */}
         <div className="currency-price-section">
           <input
-          className='c-price-input'
+            className="c-price-input"
             type="number"
-            id="currencyPrice"
             value={currencyPrice}
             onChange={(e) => setCurrencyPrice(e.target.value)}
             placeholder="نرخ ارز را وارد کنید"
           />
         </div>
         <button
-        className="primary-button"
+          className="primary-button"
           onClick={handleApplyCurrencyPrice}
-          disabled={selectedCottages.length === 0 || !currencyPrice}
+          disabled={!selectedCottages.length || !currencyPrice}
         >
-          ثبت نرخ ارز برای کوتاژهای انتخاب شده
+          ثبت نرخ ارز برای انتخاب شده
         </button>
-        
         <button
           onClick={handleDeleteSelectedCottages}
-          disabled={selectedCottages.length === 0}
+          disabled={!selectedCottages.length}
           className="delete-button"
         >
           حذف کوتاژهای انتخاب شده
         </button>
 
-
+        {/* Loading / Error */}
         {loading && <p className="loading">در حال بارگذاری...</p>}
         {error && <p className="error">{error}</p>}
-        {!loading && !error && (
-          filteredCottages.length === 0 ? (
-            <p className="no-data">هیچ اظهارنامه ای با این جستجو و فیلترها یافت نشد.</p>
-          ) : (
+
+        {/* TABLE + PAGINATION */}
+        {!loading && !error && cottages.length === 0 ? (
+          <p className="no-data">هیچ داده‌ای یافت نشد.</p>
+        ) : (
+          <>
+            {/* TOP PAGINATION */}
+            <PaginationControls
+              currentPage={currentPage}
+              totalPages={totalPages}
+              pageSize={pageSize}
+              pageSizeOptions={[10, 20, 50, 100]}
+              hasNext={!!next}
+              hasPrevious={!!previous}
+              onPageChange={handlePageChange}
+              onNextPage={handleNextPage}
+              onPreviousPage={handlePreviousPage}
+              onPageSizeChange={handlePageSizeChange}
+            />
+
             <table className="cottage-table">
               <thead>
                 <tr>
@@ -277,13 +227,14 @@ const CottageList = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredCottages.map((cottage, index) => {
+                {cottages.map((cottage, index) => {
                   const isChecked = selectedCottages.some(
-                    (selectedCottage) => selectedCottage.id === cottage.id
+                    (sel) => sel.id === cottage.id
                   );
                   const isUpdating =
                     updatingCurrencyPrice && updatingCurrencyPrice[cottage.id];
-                  const updateError = updateCurrencyPriceError && updateCurrencyPriceError[cottage.id];
+                  const updateError =
+                    updateCurrencyPriceError && updateCurrencyPriceError[cottage.id];
 
                   return (
                     <tr key={cottage.id}>
@@ -298,31 +249,47 @@ const CottageList = () => {
                       <td>{cottage.cottage_number}</td>
                       <td>{cottage.cottage_date}</td>
                       <td>{cottage.proforma}</td>
-                      <td>
-                        {cottage.total_value}
-                      </td>
+                      <td>{cottage.total_value}</td>
                       <td>
                         {isUpdating ? (
                           <span className="loading">در حال به‌روزرسانی...</span>
                         ) : updateError ? (
                           <span className="error">
-                            {typeof updateError === 'string' ? updateError : JSON.stringify(updateError)}
+                            {typeof updateError === "string"
+                              ? updateError
+                              : JSON.stringify(updateError)}
                           </span>
                         ) : cottage.currency_price ? (
                           `${cottage.currency_price} ریال`
                         ) : (
-                          '—'
+                          "—"
                         )}
                       </td>
                       <td>
-                        <Link to={`/cottages/${cottage.cottage_number}`}>جزئیات</Link>
+                        <Link to={`/cottages/${cottage.cottage_number}`}>
+                          جزئیات
+                        </Link>
                       </td>
                     </tr>
                   );
                 })}
               </tbody>
             </table>
-          )
+
+            {/* BOTTOM PAGINATION */}
+            <PaginationControls
+              currentPage={currentPage}
+              totalPages={totalPages}
+              pageSize={pageSize}
+              pageSizeOptions={[10, 20, 50, 100]}
+              hasNext={!!next}
+              hasPrevious={!!previous}
+              onPageChange={handlePageChange}
+              onNextPage={handleNextPage}
+              onPreviousPage={handlePreviousPage}
+              onPageSizeChange={handlePageSizeChange}
+            />
+          </>
         )}
       </div>
     </div>

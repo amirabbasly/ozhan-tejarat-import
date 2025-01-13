@@ -68,8 +68,11 @@ export const cottageReducer = (state = initialCottagesState, action) => {
       return {
         ...state,
         loading: false,
-        cottages: action.payload,
+        cottages: action.payload.results,
         error: '',
+        count: action.payload.count,
+        next: action.payload.next,
+        previous: action.payload.previous,
       };
     case FETCH_COTTAGES_FAILURE:
       return {
@@ -150,7 +153,7 @@ export const exportCottageReducer = (state = initialExportState, action) => {
       return {
         ...state,
         loading: false,
-        cottages: action.payload,
+        cottages: action.payload.results,
         error: '',
       };
     case FETCH_EXPORT_COTTAGE_FAILURE:

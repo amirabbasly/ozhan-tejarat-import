@@ -26,6 +26,7 @@ urlpatterns = [
     path('api/', include('representation.urls')),
     path('api/accounts/', include('accounts.urls')),
     path('api/notifications/', include('notifications.urls')),
+    path('api/customs/', include('customs.urls'))
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

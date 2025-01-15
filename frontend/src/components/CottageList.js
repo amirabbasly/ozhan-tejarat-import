@@ -8,7 +8,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 
 import "./CottageList.css";
-import PaginationControls from "./PaginationControls";
+import PaginationControls from "./PaginationControls"; // <-- Import your component
 
 const CottageList = () => {
   const navigate = useNavigate();
@@ -21,10 +21,17 @@ const CottageList = () => {
   }, [auth.isAuthenticated, navigate]);
 
   const dispatch = useDispatch();
+  const [searchText, setSearchText] = useState("");
+  const [search, setSearch] = useState("");
 
-  // Redux state
+  const handleSearchButtonClick = () => {
+    setSearch(searchText);
+    setCurrentPage(1); // optional: reset to page 1 when searching
+  };
+
+  // Access cottages state from Redux store
   const {
-    cottages,   // the array of cottages from the server
+    cottages,
     loading,
     error,
     next,
@@ -34,68 +41,61 @@ const CottageList = () => {
     updateCurrencyPriceError,
   } = useSelector((state) => state.cottages);
 
-  // (!!!) STATES FOR SEARCH:
-  const [searchText, setSearchText] = useState("");
-  const [search, setSearch] = useState("");
-
-  const handleSearchButtonClick = () => {
-    setSearch(searchText);
-    setCurrentPage(1); // optional: reset to page 1 when searching
-  };
-
-  // (!!!) PAGINATION STATES
+  // -------------------- PAGINATION STATE --------------------
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const totalPages = Math.ceil(count / pageSize);
+  const [pageSize, setPageSize] = useState(10); // or 50, or your default
+  const totalPages = Math.ceil(count / pageSize); // For the dropdown in PaginationControls
 
-  // (!!!) On mount or when `currentPage`, `pageSize`, or `search` changes,
-  // fetch from the BACKEND (no local filter).
+  // On mount or on `currentPage` change, fetch that page
   useEffect(() => {
     dispatch(fetchCottages(currentPage, pageSize, search));
   }, [dispatch, currentPage, pageSize, search]);
 
-  // If currency updates finish, refetch the same page
+  // If currency updates are done, refetch
   useEffect(() => {
     if (Object.keys(updatingCurrencyPrice || {}).length === 0) {
-      dispatch(fetchCottages(currentPage, pageSize, search));
+      dispatch(fetchCottages(currentPage));
     }
-  }, [updatingCurrencyPrice, dispatch, currentPage, pageSize, search]);
+  }, [updatingCurrencyPrice, dispatch, currentPage]);
 
-  // NEXT/PREV
+  // We define booleans for enabling next/prev based on the presence of `next`/`previous`
   const hasNext = !!next;
   const hasPrevious = !!previous;
 
+  // If you want the user to pick a page from a dropdown:
   const handlePageChange = (e) => {
     setCurrentPage(Number(e.target.value));
   };
+
   const handleNextPage = () => {
     if (hasNext) setCurrentPage((prev) => prev + 1);
   };
+
   const handlePreviousPage = () => {
     if (hasPrevious) setCurrentPage((prev) => prev - 1);
   };
+
+  // If user changes page size => setPageSize, reset to page 1
   const handlePageSizeChange = (e) => {
     setPageSize(Number(e.target.value));
     setCurrentPage(1);
   };
 
-  // ----------------------------------
-  // SELECT / DELETE / UPDATE Logic
-  // ----------------------------------
+  // -------------------- SELECTED COTTAGES LOGIC --------------------
   const [selectedCottages, setSelectedCottages] = useState([]);
   const [areAllSelected, setAreAllSelected] = useState(false);
   const [currencyPrice, setCurrencyPrice] = useState("");
 
   const handleSelectCottage = (event, cottage) => {
     const { checked } = event.target;
-    let updated;
+    let updatedSelections;
     if (checked) {
-      updated = [...selectedCottages, cottage];
+      updatedSelections = [...selectedCottages, cottage];
     } else {
-      updated = selectedCottages.filter((c) => c.id !== cottage.id);
+      updatedSelections = selectedCottages.filter((c) => c.id !== cottage.id);
     }
-    setSelectedCottages(updated);
-    setAreAllSelected(updated.length === cottages.length); // now comparing to ALL cottages
+    setSelectedCottages(updatedSelections);
+    setAreAllSelected(updatedSelections.length === cottages.length);
   };
 
   const handleSelectAll = (event) => {
@@ -108,20 +108,24 @@ const CottageList = () => {
     }
   };
 
+  // -------------------- UPDATE & DELETE ACTIONS --------------------
   const handleApplyCurrencyPrice = () => {
     if (!selectedCottages.length || !currencyPrice) {
-      alert("انتخاب کوتاژ و نرخ ارز الزامی است");
+      alert("لطفاً حداقل یک کوتاژ را انتخاب کرده و نرخ ارز را وارد کنید.");
       return;
     }
-    const promises = selectedCottages.map((c) =>
-      dispatch(updateCottageCurrencyPrice(c.id, currencyPrice))
+    const updatePromises = selectedCottages.map((cottage) =>
+      dispatch(updateCottageCurrencyPrice(cottage.id, currencyPrice))
     );
-    Promise.all(promises)
+    Promise.all(updatePromises)
       .then(() => {
-        alert("نرخ ارز برای اظهارنامه های انتخاب شده بروزرسانی شد");
-        dispatch(fetchCottages(currentPage, pageSize, search));
+        alert("نرخ ارز برای اظهارنامه های انتخاب شده به‌روزرسانی شد.");
+        dispatch(fetchCottages(currentPage));
       })
-      .catch((err) => alert("خطا در بروزرسانی نرخ ارز: " + err));
+      .catch((error) => {
+        console.error("Error updating currency price:", error);
+        alert("خطا در به‌روزرسانی نرخ ارز برای برخی از کوتاژها.");
+      });
   };
 
   const handleDeleteSelectedCottages = () => {
@@ -132,14 +136,17 @@ const CottageList = () => {
     if (!window.confirm("آیا از حذف کوتاژهای انتخاب شده اطمینان دارید؟")) {
       return;
     }
-    const idsToDelete = selectedCottages.map((c) => c.id);
+    const idsToDelete = selectedCottages.map((cottage) => cottage.id);
     dispatch(deleteCottages(idsToDelete))
       .then(() => {
         alert("کوتاژهای انتخاب شده با موفقیت حذف شدند.");
         setSelectedCottages([]);
-        dispatch(fetchCottages(currentPage, pageSize, search));
+        dispatch(fetchCottages(currentPage));
       })
-      .catch((err) => alert("خطا در حذف کوتاژها: " + err));
+      .catch((error) => {
+        console.error("Error deleting cottages:", error);
+        alert("خطا در حذف کوتاژها.");
+      });
   };
 
   return (
@@ -147,7 +154,7 @@ const CottageList = () => {
       <div className="cottage-list-container">
         <h2>لیست اظهارنامه ها</h2>
 
-        {/* (!!!) SEARCH ROW: only for sending 'search' to backend */}
+        {/* SIMPLE SEARCH BAR (NO FILTERING) */}
         <div className="search-bar">
           <label>جستجو (کد/نام فارسی/نام انگلیسی):</label>
           <input
@@ -159,11 +166,14 @@ const CottageList = () => {
           <button onClick={handleSearchButtonClick}>Search</button>
         </div>
 
-        {/* Currency Price UI */}
+        {/* NO PROFORMA / DATE FILTERS ANYMORE */}
+
+        {/* CURRENCY PRICE */}
         <div className="currency-price-section">
           <input
             className="c-price-input"
             type="number"
+            id="currencyPrice"
             value={currencyPrice}
             onChange={(e) => setCurrencyPrice(e.target.value)}
             placeholder="نرخ ارز را وارد کنید"
@@ -174,7 +184,7 @@ const CottageList = () => {
           onClick={handleApplyCurrencyPrice}
           disabled={!selectedCottages.length || !currencyPrice}
         >
-          ثبت نرخ ارز برای انتخاب شده
+          ثبت نرخ ارز برای کوتاژهای انتخاب شده
         </button>
         <button
           onClick={handleDeleteSelectedCottages}
@@ -184,112 +194,114 @@ const CottageList = () => {
           حذف کوتاژهای انتخاب شده
         </button>
 
-        {/* Loading / Error */}
+        {/* LOADING/ERROR */}
         {loading && <p className="loading">در حال بارگذاری...</p>}
         {error && <p className="error">{error}</p>}
 
-        {/* TABLE + PAGINATION */}
-        {!loading && !error && cottages.length === 0 ? (
-          <p className="no-data">هیچ داده‌ای یافت نشد.</p>
-        ) : (
-          <>
-            {/* TOP PAGINATION */}
-            <PaginationControls
-              currentPage={currentPage}
-              totalPages={totalPages}
-              pageSize={pageSize}
-              pageSizeOptions={[10, 20, 50, 100]}
-              hasNext={!!next}
-              hasPrevious={!!previous}
-              onPageChange={handlePageChange}
-              onNextPage={handleNextPage}
-              onPreviousPage={handlePreviousPage}
-              onPageSizeChange={handlePageSizeChange}
-            />
+        {/* DISPLAY TABLE & PAGINATION */}
+        {!loading && !error && (
+          cottages.length === 0 ? (
+            <p className="no-data">هیچ اظهارنامه ای یافت نشد.</p>
+          ) : (
+            <>
+              {/* -- TOP PAGINATION -- */}
+              <PaginationControls
+                currentPage={currentPage}
+                totalPages={totalPages}
+                pageSize={pageSize}
+                pageSizeOptions={[10, 20, 50, 100]}
+                hasNext={hasNext}
+                hasPrevious={hasPrevious}
+                onPageChange={handlePageChange}
+                onNextPage={handleNextPage}
+                onPreviousPage={handlePreviousPage}
+                onPageSizeChange={handlePageSizeChange}
+              />
 
-            <table className="cottage-table">
-              <thead>
-                <tr>
-                  <th>
-                    <input
-                      type="checkbox"
-                      onChange={handleSelectAll}
-                      checked={areAllSelected}
-                    />
-                  </th>
-                  <th>ردیف</th>
-                  <th>شماره کوتاژ</th>
-                  <th>تاریخ</th>
-                  <th>شماره پروفرم</th>
-                  <th>ارزش کل</th>
-                  <th>نرخ ارز</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {cottages.map((cottage, index) => {
-                  const isChecked = selectedCottages.some(
-                    (sel) => sel.id === cottage.id
-                  );
-                  const isUpdating =
-                    updatingCurrencyPrice && updatingCurrencyPrice[cottage.id];
-                  const updateError =
-                    updateCurrencyPriceError && updateCurrencyPriceError[cottage.id];
+              <table className="cottage-table">
+                <thead>
+                  <tr>
+                    <th>
+                      <input
+                        type="checkbox"
+                        onChange={handleSelectAll}
+                        checked={areAllSelected}
+                      />
+                    </th>
+                    <th>ردیف</th>
+                    <th>شماره کوتاژ</th>
+                    <th>تاریخ</th>
+                    <th>شماره پروفرم</th>
+                    <th>ارزش کل</th>
+                    <th>نرخ ارز</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {cottages.map((cottage, index) => {
+                    const isChecked = selectedCottages.some(
+                      (selectedCottage) => selectedCottage.id === cottage.id
+                    );
+                    const isUpdating =
+                      updatingCurrencyPrice && updatingCurrencyPrice[cottage.id];
+                    const updateError =
+                      updateCurrencyPriceError && updateCurrencyPriceError[cottage.id];
 
-                  return (
-                    <tr key={cottage.id}>
-                      <td>
-                        <input
-                          type="checkbox"
-                          checked={isChecked}
-                          onChange={(e) => handleSelectCottage(e, cottage)}
-                        />
-                      </td>
-                      <td>{index + 1}</td>
-                      <td>{cottage.cottage_number}</td>
-                      <td>{cottage.cottage_date}</td>
-                      <td>{cottage.proforma}</td>
-                      <td>{cottage.total_value}</td>
-                      <td>
-                        {isUpdating ? (
-                          <span className="loading">در حال به‌روزرسانی...</span>
-                        ) : updateError ? (
-                          <span className="error">
-                            {typeof updateError === "string"
-                              ? updateError
-                              : JSON.stringify(updateError)}
-                          </span>
-                        ) : cottage.currency_price ? (
-                          `${cottage.currency_price} ریال`
-                        ) : (
-                          "—"
-                        )}
-                      </td>
-                      <td>
-                        <Link to={`/cottages/${cottage.cottage_number}`}>
-                          جزئیات
-                        </Link>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                    return (
+                      <tr key={cottage.id}>
+                        <td>
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={(e) => handleSelectCottage(e, cottage)}
+                          />
+                        </td>
+                        <td>{index + 1}</td>
+                        <td>{cottage.cottage_number}</td>
+                        <td>{cottage.cottage_date}</td>
+                        <td>{cottage.proforma}</td>
+                        <td>{cottage.total_value}</td>
+                        <td>
+                          {isUpdating ? (
+                            <span className="loading">در حال به‌روزرسانی...</span>
+                          ) : updateError ? (
+                            <span className="error">
+                              {typeof updateError === "string"
+                                ? updateError
+                                : JSON.stringify(updateError)}
+                            </span>
+                          ) : cottage.currency_price ? (
+                            `${cottage.currency_price} ریال`
+                          ) : (
+                            "—"
+                          )}
+                        </td>
+                        <td>
+                          <Link to={`/cottages/${cottage.cottage_number}`}>
+                            جزئیات
+                          </Link>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
 
-            {/* BOTTOM PAGINATION */}
-            <PaginationControls
-              currentPage={currentPage}
-              totalPages={totalPages}
-              pageSize={pageSize}
-              pageSizeOptions={[10, 20, 50, 100]}
-              hasNext={!!next}
-              hasPrevious={!!previous}
-              onPageChange={handlePageChange}
-              onNextPage={handleNextPage}
-              onPreviousPage={handlePreviousPage}
-              onPageSizeChange={handlePageSizeChange}
-            />
-          </>
+              {/* -- BOTTOM PAGINATION -- */}
+              <PaginationControls
+                currentPage={currentPage}
+                totalPages={totalPages}
+                pageSize={pageSize}
+                pageSizeOptions={[10, 20, 50, 100]}
+                hasNext={hasNext}
+                hasPrevious={hasPrevious}
+                onPageChange={handlePageChange}
+                onNextPage={handleNextPage}
+                onPreviousPage={handlePreviousPage}
+                onPageSizeChange={handlePageSizeChange}
+              />
+            </>
+          )
         )}
       </div>
     </div>

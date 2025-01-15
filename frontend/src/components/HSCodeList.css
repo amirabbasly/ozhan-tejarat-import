@@ -177,3 +177,7 @@
   border-radius: 5px;
   font-size: 16px;
 }
+/* CSS */
+.hidden-input {
+  display: none;
+}

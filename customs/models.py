@@ -1,11 +1,29 @@
 # customs/models.py
 
 from django.db import models
+from accounts.models import CustomUser
+from django.utils.timezone import now
 
 class Tag(models.Model):
     tag = models.CharField(max_length=255)
     def __str__(self):
         return f"{self.tag}"
+
+class Heading(models.Model):
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.title
+
+
+class SubHeading(models.Model):
+    heading = models.ForeignKey(Heading, on_delete=models.CASCADE, related_name="subheadings")
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.heading.title} > {self.title}"
 
 
 class HSCode(models.Model):
@@ -33,6 +51,11 @@ class HSCode(models.Model):
     ]
     SUQ = models.CharField(max_length=20, choices=SUQ_OPTIONS, default='u')
     tags = models.ManyToManyField(Tag)
+    updated_by = models.ForeignKey(
+        CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name="updated_hscodes"
+    )
+    updated_date = models.DateTimeField(auto_now=True)
+    subheading = models.ForeignKey(SubHeading, on_delete=models.SET_NULL, null=True, related_name="hscodes")
     class Meta:
         ordering = ["-id"] 
     def __str__(self):

@@ -26,7 +26,7 @@ import AddExportCottages from './components/AddExportCottages';
 import ExportedCottageDetails from './pages/ExportedCottageDetails';
 import Chatbots from './components/ChatBot';
 import HSCodeImport from './components/HSCodeFromExcel';
-import HSCodeForm from './components/HSCodeForm';
+import HSCodeUpdate from './components/HSCodeUpdate';
 import HSCodeListComponent from './components/HSCodeList';
 // Import Redux Provider and store
 import { Provider } from 'react-redux';
@@ -228,10 +228,10 @@ function AppContent() {
             }
           />
                     <Route
-            path="/hscode-form"
+            path="/hscode-update"
             element={
               <PrivateRoute>
-                <HSCodeForm/>
+                <HSCodeUpdate/>
               </PrivateRoute>
             }
           />

@@ -5,11 +5,15 @@ import {
     FETCH_HSCODE_FAILURE,
     FETCH_HSCODE_LIST_REQUEST,
     FETCH_HSCODE_LIST_SUCCESS,
-    FETCH_HSCODE_LIST_FAILURE
+    FETCH_HSCODE_LIST_FAILURE,
+    FETCH_ALL_HSCODE_REQUEST,
+    FETCH_ALL_HSCODE_SUCCESS,
+    FETCH_ALL_HSCODE_FAILURE,
   } from "../actions/actionTypes";
   
   const initialState = {
     loading: false,
+    codeList: [],
     hscodeData: null,
     error: null,
   };
@@ -17,7 +21,7 @@ import {
   const initialListState = {
     loading: false,
     error: null,
-    codeList: [],
+    hscodeList: [],
   };
   
   export const hscodeReducer = (state = initialState, action) => {
@@ -28,6 +32,18 @@ import {
         return { ...state, loading: false, hscodeData: action.payload };
       case FETCH_HSCODE_FAILURE:
         return { ...state, loading: false, error: action.payload };
+        case FETCH_HSCODE_LIST_FAILURE:
+          return { ...state, loading: false, error: action.payload };
+          case FETCH_ALL_HSCODE_REQUEST:
+            return { ...state, loading: true, error: null };
+          case FETCH_ALL_HSCODE_SUCCESS:
+            return {
+              ...state,
+              loading: false,
+              codeList: action.payload,
+            };
+          case FETCH_ALL_HSCODE_FAILURE:
+            return { ...state, loading: false, error: action.payload };
       default:
         return state;
     }
@@ -45,8 +61,7 @@ import {
         next: action.payload.next,
         previous: action.payload.previous,
       };
-    case FETCH_HSCODE_LIST_FAILURE:
-      return { ...state, loading: false, error: action.payload };
+
     default:
       return state;
   }

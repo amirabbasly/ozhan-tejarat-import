@@ -18,6 +18,8 @@ class Cottage(models.Model):
     docs_recieved = models.BooleanField(default=False)
     rewatch = models.BooleanField(default=False)
     documents = models.FileField(null=True,blank=True )
+    class Meta:
+        ordering = ["-id"] 
 
 
     def __str__(self):

@@ -8,11 +8,12 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.decorators import action
 from .models import HSCode, Tag
 import requests
-from .serializers import HSCodeSerializer, TagSerializer
+from .serializers import HSCodeSerializer, TagSerializer, HSCodeListSerializer
 from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import HSCodeFilter  # Import the filter set
 import re
+from django.utils.timezone import now
 
 class CustomPageNumberPagination(PageNumberPagination):
     page_size_query_param = 'page_size'
@@ -28,7 +29,7 @@ class HSCodeViewSet(viewsets.ModelViewSet):
     pagination_class = CustomPageNumberPagination  # Apply pagination here
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_class = HSCodeFilter
-    search_fields = ["code", "goods_name_fa", "goods_name_en"]
+    search_fields = ["code", "goods_name_fa", "goods_name_en", "tags__tag"]
 
     @action(detail=True, methods=['post'], url_path='add-tags')
     def add_tags(self, request, pk=None):
@@ -96,8 +97,9 @@ class HSCodeImportView(APIView):
         )
 class FetchAndUpdateHSCodeView(APIView):
     """
-    This APIView takes `ASP.NET_SessionId`, `Authorization`, and `tariffCode` as input,
-    sends a request to the CRS API, and updates the relevant HSCode with extracted tags.
+    This APIView takes `sessionId`, `authorization`, and `tariffCode` as input,
+    sends a request to the CRS API, and updates the relevant HSCode
+    (fields and tags) with data from the API response.
     """
 
     def post(self, request, *args, **kwargs):
@@ -108,7 +110,10 @@ class FetchAndUpdateHSCodeView(APIView):
 
         if not session_id or not authorization or not tariff_code:
             return Response(
-                {"detail": "Missing required fields: 'ASP.NET_SessionId', 'Authorization', or 'tariffCode'."},
+                {
+                    "detail": "Missing required fields: 'sessionId', "
+                              "'authorization', or 'tariffCode'."
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -118,16 +123,20 @@ class FetchAndUpdateHSCodeView(APIView):
         # Request headers
         headers = {
             'accept': 'application/json, text/plain, */*',
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+            'user-agent': (
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                'AppleWebKit/537.36 (KHTML, like Gecko) '
+                'Chrome/131.0.0.0 Safari/537.36'
+            ),
             'referer': 'https://crs.ntsw.ir/ts5',
             'cache-control': 'no-cache',
             'pragma': 'no-cache'
         }
 
-        # Cookies
+        # Cookies – ensure these match what your API expects
         cookies = {
             "Authorization": authorization,
-            "": session_id,
+            "ASP.NET_SessionId": session_id,
         }
 
         try:
@@ -138,58 +147,121 @@ class FetchAndUpdateHSCodeView(APIView):
             if response.status_code != 200:
                 return Response(
                     {
-                        "detail": f"Failed to fetch data from the CRS API. Status code: {response.status_code}",
+                        "detail": (
+                            f"Failed to fetch data from the CRS API. "
+                            f"Status code: {response.status_code}"
+                        ),
                         "response": response.json(),
                     },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-
-            # Parse the API response
             response_data = response.json()
 
-            # Extract the tags from the response
+            tariff_data = response_data.get("tariff", {})
+            if not tariff_data:
+                return Response(
+                    {"detail": "No 'tariff' data found in the API response."},
+                    status=status.HTTP_200_OK,
+                )
+
+            # Get or create the HSCode object by "code"
+            # If you never change the code once set, it's safe to match on it
+            hscode, created = HSCode.objects.get_or_create(code=tariff_data.get("code", tariff_code))
+
+            # Update fields from the "tariff" data
+            # You can always do a safety check before converting to int
+            hscode.goods_name_fa = tariff_data.get("persianDescription", hscode.goods_name_fa)
+            hscode.goods_name_en = tariff_data.get("englishDescription", hscode.goods_name_en)
+
+            # Suppose you want to store the importDuty in `customs_duty_rate`:
+            import_duty = tariff_data.get("importDuty")
+            if import_duty is not None:
+                try:
+                    hscode.customs_duty_rate = int(import_duty)
+                except ValueError:
+                    pass  # fallback or handle error if needed
+
+            # Suppose `profit` is something else or same as importDuty
+            # If you don't have "profit" in the API, you can skip or default it:
+            if not hscode.profit:
+                hscode.profit = 0  # or some default / or remove it entirely if not relevant
+
+            # commodityPriority -> `priority`
+            commodity_priority = tariff_data.get("commodityPriority")
+            if commodity_priority is not None:
+                try:
+                    hscode.priority = int(commodity_priority)
+                except ValueError:
+                    pass  # fallback or handle error if needed
+
+            # suq -> `SUQ`
+            suq_value = tariff_data.get("suq")
+            # Make sure suq_value is one of the SUQ_OPTIONS in your model or default to 'U'
+            valid_suq_choices = dict(HSCode.SUQ_OPTIONS).keys()  # e.g. ['1000kwh','1000u','2U',...]
+            if suq_value in valid_suq_choices:
+                hscode.SUQ = suq_value
+            else:
+                # fallback if the suq_value from the API isn't recognized
+                hscode.SUQ = 'U'
+
+             # ------------------------ 2) EXTRACT NEW TAGS ------------------------
             raw_tags = response_data.get("tags", [])
-            if not raw_tags:
-                return Response(
-                    {"detail": "No tags found in the API response."},
-                    status=status.HTTP_200_OK,
-                )
+            # We'll collect only the tags inside « ... »
+            new_tags = set()  # use a set to avoid duplicates
+            for tag_str in raw_tags:
+                match = re.search(r'«([^»]+)»', tag_str)
+                if match:
+                    new_tags.add(match.group(1))
 
-            # Extract content inside parentheses (e.g., « ... »)
-            extracted_tags = [
-                re.search(r'«([^»]+)»', tag).group(1)
-                for tag in raw_tags if re.search(r'«([^»]+)»', tag)
-            ]
+            # new_tags now contains only the extracted strings from « ... ».
 
-            if not extracted_tags:
-                return Response(
-                    {"detail": "No valid tags found in parentheses."},
-                    status=status.HTTP_200_OK,
-                )
+            # ------------------------ 3) CLEAR OLD TAGS NOT IN NEW RESPONSE ------------------------
+            old_tags = set(hscode.tags.values_list('tag', flat=True))
+            tags_to_remove = old_tags - new_tags
+            # Remove tags that are no longer present
+            if tags_to_remove:
+                for tag_text in tags_to_remove:
+                    tag_obj = Tag.objects.filter(tag=tag_text).first()
+                    if tag_obj:
+                        hscode.tags.remove(tag_obj)
 
-            # Update or create the HSCode object
-            hscode, created = HSCode.objects.get_or_create(code=tariff_code)
-            existing_tags = list(hscode.tags.values_list('tag', flat=True))
-
-            # Add new tags to the HSCode object
-            for tag_name in extracted_tags:
-                if tag_name not in existing_tags:
-                    tag, _ = Tag.objects.get_or_create(tag=tag_name)
-                    hscode.tags.add(tag)
-
+            # ------------------------ 4) ADD NEW TAGS THAT DIDN'T EXIST BEFORE ------------------------
+            tags_to_add = new_tags - old_tags
+            for tag_text in tags_to_add:
+                tag_obj, _ = Tag.objects.get_or_create(tag=tag_text)
+                hscode.tags.add(tag_obj)
+            hscode.updated_by = request.user
+            hscode.updated_date = now()
+            # ------------------------ SAVE THE HSCode ------------------------
             hscode.save()
 
+            # ------------------------ BUILD RESPONSE ------------------------
             return Response(
                 {
                     "detail": "HSCode updated successfully.",
                     "HSCode": hscode.code,
-                    "tags": [tag.tag for tag in hscode.tags.all()],
+                    "goods_name_fa": hscode.goods_name_fa,
+                    "goods_name_en": hscode.goods_name_en,
+                    "profit": hscode.profit,
+                    "customs_duty_rate": hscode.customs_duty_rate,
+                    "priority": hscode.priority,
+                    "SUQ": hscode.SUQ,
+                    "tags": [t.tag for t in hscode.tags.all()],
                 },
                 status=status.HTTP_200_OK,
             )
 
         except requests.RequestException as e:
             return Response(
-                {"detail": f"An error occurred while communicating with the CRS API: {str(e)}"},
+                {"detail": f"Error while communicating with the CRS API: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
+class HSCodeListView(APIView):
+    def get(self, request):
+        # Retrieve all Performa instances
+        codes = HSCode.objects.all()
+        # Serialize the queryset
+        serializer = HSCodeListSerializer(codes, many=True)
+        # Return the serialized data
+        return Response(serializer.data, status=status.HTTP_200_OK)

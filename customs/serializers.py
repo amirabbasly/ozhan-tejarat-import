@@ -22,5 +22,17 @@ class HSCodeSerializer(serializers.ModelSerializer):
             'customs_duty_rate',
             'priority',
             'SUQ',
+            'updated_by',
+            'updated_date',
             'tags',
+
         ]
+
+class HSCodeListSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = HSCode
+        fields = [
+            'code',
+        ]
+

@@ -29,6 +29,7 @@ import HSCodeImport from './components/HSCodeFromExcel';
 import HSCodeUpdate from './components/HSCodeUpdate';
 import HSCodeListComponent from './components/HSCodeList';
 import HSCodeInfiniteScroll from './components/HSCodeInfiniteScroll';
+import ImportComponent from './components/ImportHeadings';
 // Import Redux Provider and store
 import { Provider } from 'react-redux';
 import store from './store';
@@ -225,6 +226,30 @@ function AppContent() {
             element={
               <PrivateRoute>
                 <HSCodeImport/>
+              </PrivateRoute>
+            }
+          />
+                    <Route
+    path="/import-headings"
+            element={
+              <PrivateRoute>
+                <ImportComponent endpoint="/customs/import-headings/" title="Import Headings" />
+              </PrivateRoute>
+            }
+          />
+                              <Route
+    path="/import-subheadings"
+            element={
+              <PrivateRoute>
+                <ImportComponent endpoint="/customs/import-subheadings/" title="Import SubHeadings" />
+              </PrivateRoute>
+            }
+          />
+                                        <Route
+    path="/import-seasons"
+            element={
+              <PrivateRoute>
+                <ImportComponent endpoint="/customs/import-seasons/" title="Import Seasons" />
               </PrivateRoute>
             }
           />

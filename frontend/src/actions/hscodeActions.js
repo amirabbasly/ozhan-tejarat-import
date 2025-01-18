@@ -9,6 +9,12 @@ import {
     FETCH_ALL_HSCODE_REQUEST,
     FETCH_ALL_HSCODE_SUCCESS,
     FETCH_ALL_HSCODE_FAILURE,
+    IMPORT_REQUEST,
+    IMPORT_SUCCESS,
+    IMPORT_FAILURE,
+    FETCH_HSCODE_DETAIL_REQUEST,
+    FETCH_HSCODE_DETAIL_SUCCESS,
+    FETCH_HSCODE_DETAIL_FAILURE
   } from "./actionTypes";
   import axiosInstance from "../utils/axiosInstance";
   
@@ -29,7 +35,30 @@ import {
       });
     }
   };
+  export const importData = (endpoint, file) => async (dispatch) => {
+    dispatch({ type: IMPORT_REQUEST });
 
+    try {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const response = await axiosInstance.post(endpoint, formData, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+
+        dispatch({
+            type: IMPORT_SUCCESS,
+            payload: response.data.message,
+        });
+    } catch (error) {
+        dispatch({
+            type: IMPORT_FAILURE,
+            payload: error.response?.data?.error || "An error occurred during import.",
+        });
+    }
+};
 
 // actions/hscodeActions.js
 
@@ -78,4 +107,37 @@ export const fetchAllCodes = (data) => async (dispatch) => {
       payload: error.response?.data || "An error occurred",
     });
   }
+};
+// Action Creators
+export const fetchHSCodeRequest = () => ({
+  type: FETCH_HSCODE_DETAIL_REQUEST,
+});
+
+export const fetchHSCodeSuccess = (data) => ({
+  type: FETCH_HSCODE_DETAIL_SUCCESS,
+  payload: data,
+});
+
+export const fetchHSCodeFailure = (error) => ({
+  type: FETCH_HSCODE_DETAIL_FAILURE,
+  payload: error,
+});
+
+// Async Action using thunk middleware
+export const fetchHSCodeDetail = (code) => {
+  return async (dispatch) => {
+    dispatch(fetchHSCodeRequest());
+    try {
+      const response = await axiosInstance.get(`/customs/hscode-detail/?code=${code}`);
+      // Axios automatically parses the response data
+      const data = response.data;
+      dispatch(fetchHSCodeSuccess(data));
+    } catch (error) {
+      // Error handling: use error.response.data if available
+      const message = error.response && error.response.data.detail
+        ? error.response.data.detail
+        : error.message;
+      dispatch(fetchHSCodeFailure(message));
+    }
+  };
 };

@@ -1,0 +1,74 @@
+.overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  
+    /* fade-in by default */
+    animation: fadeIn 1.5s forwards;
+  }
+  
+  .overlay.closing {
+    /* fade-out on close */
+    animation: fadeOut 0.3s forwards;
+  }
+  
+  @keyframes fadeIn {
+    0%   { opacity: 0; }
+    100% { opacity: 1; }
+  }
+  @keyframes fadeOut {
+    0%   { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  
+  .overlay-content {
+    background: #fafafa;
+    padding: 30px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 900px;
+    max-height: 100%;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  
+    /* slide in from top */
+    animation: slideIn 1s forwards;
+  }
+  
+  .overlay-content.closing {
+    /* slide out if .closing */
+    animation: slideOut 1s forwards;
+  }
+  
+  @keyframes slideIn {
+    from { transform: translateY(-40px); }
+    to   { transform: translateY(0); }
+  }
+  @keyframes slideOut {
+    from { transform: translateY(0); }
+    to   { transform: translateY(-40px); }
+  }
+  
+  /* close button styling (example) */
+  .close-btn {
+    background-color: #ffffff00;
+    color: black;
+  }
+  .close-btn:hover{
+    background-color: #ffffff00;
+    color: black;
+  }
+  .overlay-rib{
+    padding: 10px;
+    border-radius: 50px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+
+  }
+  

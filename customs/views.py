@@ -6,18 +6,47 @@ from rest_framework.response import Response
 from rest_framework import viewsets, status, filters
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.decorators import action
-from .models import HSCode, Tag
+from .models import HSCode, Tag, Season, Heading
 import requests
-from .serializers import HSCodeSerializer, TagSerializer, HSCodeListSerializer
+from .serializers import HSCodeSerializer, TagSerializer, HSCodeListSerializer, HSCodeDetailSerializer
 from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import HSCodeFilter  # Import the filter set
 import re
 from django.utils.timezone import now
+from django.db import transaction
 
 class CustomPageNumberPagination(PageNumberPagination):
     page_size_query_param = 'page_size'
     max_page_size = 600
+class HSCodeDetailByCodeView(APIView):
+    """
+    Retrieve HSCode details by providing its code.
+    The code should be provided as a query parameter, e.g.:
+      /api/hscode-detail/?code=0101212345
+    """
+
+    def get(self, request, *args, **kwargs):
+        # Get the "code" query parameter
+        code = request.query_params.get('code', None)
+        if not code:
+            return Response(
+                {"detail": "No HSCode code provided in the query parameters."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            # Retrieve the HSCode object by its code.
+            hscode = HSCode.objects.get(code=code)
+        except HSCode.DoesNotExist:
+            return Response(
+                {"detail": f"HSCode with code '{code}' not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Serialize the found HSCode
+        serializer = HSCodeDetailSerializer(hscode)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class HSCodeViewSet(viewsets.ModelViewSet):
     """
@@ -69,26 +98,52 @@ class HSCodeImportView(APIView):
 
         excel_file = request.FILES['excel_file']
 
-        # Force the columns that might have leading zeros to be read as strings
-        # (Adjust the column names to match your actual Excel headers)
+        # Force columns to be read as strings if needed (e.g., to preserve leading zeros)
         df = pd.read_excel(
             excel_file,
             dtype={
-                "TableNumberFix": str,  # preserve leading zeros in TableNumberFix
-                # If you have other columns needing leading zeros, add them here as well.
+                "TableNumberFix": str,  # Preserve leading zeros in the code
+                # Add additional columns if needed.
             }
         )
 
-        # Now the column "TableNumberFix" remains as a string with leading zeros, if present
         for _, row in df.iterrows():
+            code = row.get('TableNumberFix', '')
+            if not code:
+                continue
+
+            # Extract season and heading parts from the code
+            season_code = code[:2]    # first 2 digits for season
+            heading_code = code[:4]   # first 4 digits for heading
+
+            # Look up the corresponding Season instance.
+            # Adjust the field name in the filter (e.g., 'code') as per your Season model.
+            season = Season.objects.filter(code=season_code).first()
+            if season is None:
+                # You might want to either create a new Season, skip this row,
+                # or raise an error. Here, we simply continue to the next row.
+                continue
+
+            # Look up the corresponding Heading instance.
+            # Adjust the field name (e.g., 'code') according to your Heading model.
+            heading = Heading.objects.filter(code=heading_code).first()
+            # It is possible that the heading isn't found. In that case,
+            # you can decide to skip or leave heading as None.
+            
+            # Perform the update_or_create.
+            # Add additional fields according to your model.
             HSCode.objects.update_or_create(
-                code=row.get('TableNumberFix', ''),
-                goods_name_en=row.get('TableKalaNameEN', ''),
-                goods_name_fa=row.get('TableKalaName', ''),
-                profit=row.get('TableCommercialbenefit', ''),
-                SUQ=row.get('TableSUQ', ''),
-                priority=row.get('commodityPriority',''),
-                customs_duty_rate=row.get('TableVorodi', ''),
+                code=code,
+                defaults={
+                    "goods_name_en": row.get('TableKalaNameEN', ''),
+                    "goods_name_fa": row.get('TableKalaName', ''),
+                    "profit": row.get('TableCommercialbenefit', 0),
+                    "SUQ": row.get('TableSUQ', ''),
+                    "priority": row.get('commodityPriority', None),
+                    "customs_duty_rate": row.get('TableVorodi', None),
+                    "season": season,
+                    "heading": heading,
+                }
             )
 
         return Response(
@@ -256,7 +311,6 @@ class FetchAndUpdateHSCodeView(APIView):
                 {"detail": f"Error while communicating with the CRS API: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
-
 class HSCodeListView(APIView):
     def get(self, request):
         # Retrieve all Performa instances
@@ -265,3 +319,92 @@ class HSCodeListView(APIView):
         serializer = HSCodeListSerializer(codes, many=True)
         # Return the serialized data
         return Response(serializer.data, status=status.HTTP_200_OK)
+class ImportHeadingsView(APIView):
+    """
+    API endpoint to import Heading records from an Excel file.
+    """
+
+    def post(self, request, *args, **kwargs):
+        # Check if a file is provided
+        file = request.FILES.get('file')
+        if not file:
+            return Response({"error": "No file provided."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Load the Excel file into a DataFrame
+            df = pd.read_excel(file)
+
+            # Check for required columns
+            if 'code' not in df.columns or 'description' not in df.columns:
+                return Response({"error": "The file must contain 'code' and 'description' columns."}, status=status.HTTP_400_BAD_REQUEST)
+
+            headings_to_create = []
+
+            with transaction.atomic():
+                for _, row in df.iterrows():
+                    code = str(row['code']).zfill(4)  # Ensure the code is a 4-character string
+                    description = row['description']
+
+                    # Extract the first two digits of the code to find the season
+                    season_code = code[:2]
+                    season = Season.objects.filter(code=season_code).first()
+                    if not season:
+                        return Response({"error": f"No Season found with code {season_code}."}, status=status.HTTP_400_BAD_REQUEST)
+
+                    # Create Heading instance
+                    headings_to_create.append(
+                        Heading(
+                            code=code,
+                            season=season,
+                            description=description
+                        )
+                    )
+
+                # Bulk create all Heading instances
+                Heading.objects.bulk_create(headings_to_create)
+
+            return Response({"message": "Headings imported successfully."}, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+class ImportSeasonsView(APIView):
+    """
+    API endpoint to import Season records from an Excel file.
+    """
+
+    def post(self, request, *args, **kwargs):
+        # Check if a file is provided
+        file = request.FILES.get('file')
+        if not file:
+            return Response({"error": "No file provided."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Load the Excel file into a DataFrame
+            df = pd.read_excel(file)
+
+            # Check for required columns
+            if 'code' not in df.columns or 'description' not in df.columns:
+                return Response({"error": "The file must contain 'code' and 'description' columns."}, status=status.HTTP_400_BAD_REQUEST)
+
+            seasons_to_create = []
+
+            with transaction.atomic():
+                for _, row in df.iterrows():
+                    code = str(row['code']).zfill(2)  # Ensure the code is a 2-character string
+                    description = row['description']
+
+                    # Create Season instance
+                    seasons_to_create.append(
+                        Season(
+                            code=code,
+                            description=description
+                        )
+                    )
+
+                # Bulk create all Season instances
+                Season.objects.bulk_create(seasons_to_create)
+
+            return Response({"message": "Seasons imported successfully."}, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

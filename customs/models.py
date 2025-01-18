@@ -8,22 +8,33 @@ class Tag(models.Model):
     tag = models.CharField(max_length=255)
     def __str__(self):
         return f"{self.tag}"
+class Commercial(models.Model):
+    condition = models.CharField(max_length=255)
+    result = models.CharField(max_length=255)
+    title = models.CharField(max_length=255)
+
+
+class Season(models.Model):
+    code = models.CharField(max_length=2, unique=True)
+    description = models.TextField(blank=True, null=True)
+    season_notes = models.TextField(blank=True, null=True)
+    icon = models.ImageField(blank=True, null=True)
+    def __str__(self):
+        return self.code
+
+
 
 class Heading(models.Model):
-    title = models.CharField(max_length=255)
+    code = models.CharField(max_length=4, unique=True)
+    season = models.ForeignKey(Season, on_delete=models.CASCADE, related_name="headings")
     description = models.TextField(blank=True, null=True)
+    heading_notes = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return self.title
+        return self.code
 
 
-class SubHeading(models.Model):
-    heading = models.ForeignKey(Heading, on_delete=models.CASCADE, related_name="subheadings")
-    title = models.CharField(max_length=255)
-    description = models.TextField(blank=True, null=True)
 
-    def __str__(self):
-        return f"{self.heading.title} > {self.title}"
 
 
 class HSCode(models.Model):
@@ -32,6 +43,9 @@ class HSCode(models.Model):
     goods_name_en = models.TextField(max_length=1000)
     profit = models.IntegerField()
     customs_duty_rate = models.IntegerField(
+        null=True, blank=True
+    )
+    import_duty_rate = models.IntegerField(
         null=True, blank=True
     )
     priority = models.IntegerField(null=True, blank=True)
@@ -50,14 +64,19 @@ class HSCode(models.Model):
         ('U','U'),
     ]
     SUQ = models.CharField(max_length=20, choices=SUQ_OPTIONS, default='u')
-    tags = models.ManyToManyField(Tag)
+    tags = models.ManyToManyField(Tag, null=True, blank=True,)
     updated_by = models.ForeignKey(
         CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name="updated_hscodes"
     )
     updated_date = models.DateTimeField(auto_now=True)
-    subheading = models.ForeignKey(SubHeading, on_delete=models.SET_NULL, null=True, related_name="hscodes")
+    season = models.ForeignKey(Season, on_delete=models.CASCADE, related_name="code_seasons")
+    heading = models.ForeignKey(Heading, on_delete=models.SET_NULL, null=True, blank=True, related_name="hscodes")
+    commercials = models.ManyToManyField(Commercial, null=True, blank=True)
+
     class Meta:
         ordering = ["-id"] 
     def __str__(self):
         return f"{self.code} - {self.goods_name_en[:50]}"
+
+
 

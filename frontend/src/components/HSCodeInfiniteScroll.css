@@ -172,7 +172,7 @@
   .card-header h3 {
     margin: 0;
     color: #ad1534; /* Neutral dark gray for headings */
-    font-size: 1.2rem;
+    font-size: 1rem;
   }
   
   /* Card Body */
@@ -227,4 +227,3 @@
   .observer-element {
     height: 1px;
   }
-  

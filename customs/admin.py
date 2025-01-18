@@ -1,13 +1,10 @@
 from django.contrib import admin
-from .models import HSCode, Heading, SubHeading, Tag
+from .models import HSCode, Heading, Tag, Season
 
 @admin.register(Heading)
 class HeadingAdmin(admin.ModelAdmin):
-    list_display = ('title', 'description')
+    list_display = ('code', 'description')
 
-@admin.register(SubHeading)
-class SubHeadingAdmin(admin.ModelAdmin):
-    list_display = ('title', 'heading', 'description')
 @admin.register(Tag)
 class TagAdmin (admin.ModelAdmin):
     list_display = ['tag']
@@ -15,3 +12,6 @@ class TagAdmin (admin.ModelAdmin):
 @admin.register(HSCode)
 class HSCodeAdmin (admin.ModelAdmin):
     list_display = ('code','goods_name_en')
+@admin.register(Season)
+class SeasonAdmin (admin.ModelAdmin):
+    list_display = ('code','description')

@@ -28,6 +28,7 @@ import Chatbots from './components/ChatBot';
 import HSCodeImport from './components/HSCodeFromExcel';
 import HSCodeUpdate from './components/HSCodeUpdate';
 import HSCodeListComponent from './components/HSCodeList';
+import HSCodeInfiniteScroll from './components/HSCodeInfiniteScroll';
 // Import Redux Provider and store
 import { Provider } from 'react-redux';
 import store from './store';
@@ -241,6 +242,14 @@ function AppContent() {
             element={
               <PrivateRoute>
                 <HSCodeListComponent/>
+              </PrivateRoute>
+            }
+          />
+           <Route
+            path="/hscode-inf"
+            element={
+              <PrivateRoute>
+                <HSCodeInfiniteScroll/>
               </PrivateRoute>
             }
           />

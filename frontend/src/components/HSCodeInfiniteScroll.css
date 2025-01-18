@@ -1,0 +1,230 @@
+/* Container Styles */
+.hscode-infinite {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #fafafa;
+    direction: rtl;
+  }
+  
+  /* Title Style */
+  .title {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    font-size: 2rem;
+    color: #333; /* Darker for contrast */
+  }
+  
+  /* Search and Filter */
+  .search-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .search-bar input {
+    padding: 0.6rem;
+    flex: 1;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+  }
+  
+  .search-bar button {
+    padding: 0.6rem 1rem;
+    border: none;
+    background-color: #eeeeee;
+    color: #333;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .search-bar button:hover {
+    background-color: #e0e0e0;
+  }
+  
+  /* Filter Form */
+  .filter-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    justify-content: center;
+  }
+  
+  .filter-row {
+    display: flex;
+    flex-direction: column;
+    min-width: 120px;
+  }
+  
+  .filter-row label {
+    margin-bottom: 0.3rem;
+    font-weight: 600;
+    color: #555;
+  }
+  
+  .filter-row select {
+    padding: 0.4rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+  }
+  
+  /* Cards Grid Container */
+  .hscards-container {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  /* Responsive Grid */
+  @media (max-width: 1200px) {
+    .hscards-container {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+  
+  @media (max-width: 992px) {
+    .hscards-container {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .hscards-container {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .hscards-container {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  /* HSCode Card Styles */
+  .hscode-card {
+    /* Gradient background with different shades of white/light gray */
+    background: linear-gradient(135deg, #ffffff, #fcfcfc);
+    border: 1px solid #e1e4e8;
+    border-radius: 8px;
+    padding: 0.8rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  /* Subtle overlay gradient for a refined hover effect */
+  .hscode-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -50%;
+    width: 200%;
+    height: 100%;
+    background: linear-gradient(
+      120deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(245, 245, 245, 0.3) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    transform: skewX(-25deg);
+    transition: opacity 0.3s ease;
+    opacity: 0;
+    pointer-events: none;
+  }
+  
+  .hscode-card:hover::before {
+    opacity: 1;
+  }
+  
+  .hscode-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  }
+  
+  /* Separator at the bottom of each card */
+  .hscode-card::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background-color: #e1e4e8;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+  }
+  
+  /* Card Header */
+  .card-header {
+    border-bottom: 1px solid #e1e4e8;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.4rem;
+  }
+  
+  .card-header h3 {
+    margin: 0;
+    color: #ad1534; /* Neutral dark gray for headings */
+    font-size: 1.2rem;
+  }
+  
+  /* Card Body */
+  .card-body {
+    flex: 1;
+  }
+  
+  .card-body p {
+    margin: 0.4rem 0;
+    color: #555;
+    font-size: 0.9rem;
+    line-height: 1.3;
+  }
+  
+  /* Separator between card body items */
+  .card-body p + p {
+    border-top: 1px dashed #e1e4e8;
+    padding-top: 0.4rem;
+  }
+  
+  /* Tags */
+  .tags {
+    margin-top: 0.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  
+  .tag {
+    background-color: #9e9e9e;
+    color: #fff;
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+  }
+  
+  /* Loader and Observer Element */
+  .loading {
+    text-align: center;
+    margin: 1rem 0;
+    color: #aaa;
+    font-weight: 600;
+  }
+  
+  .error {
+    text-align: center;
+    margin: 1rem 0;
+    color: #e74c3c;
+    font-weight: 600;
+  }
+  
+  .observer-element {
+    height: 1px;
+  }
+  

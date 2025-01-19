@@ -1,74 +1,154 @@
+/* Overlay & Content Animations */
 .overlay {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background-color: rgba(0,0,0,0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  
-    /* fade-in by default */
-    animation: fadeIn 1.5s forwards;
-  }
-  
-  .overlay.closing {
-    /* fade-out on close */
-    animation: fadeOut 0.3s forwards;
-  }
-  
-  @keyframes fadeIn {
-    0%   { opacity: 0; }
-    100% { opacity: 1; }
-  }
-  @keyframes fadeOut {
-    0%   { opacity: 1; }
-    100% { opacity: 0; }
-  }
-  
-  .overlay-content {
-    background: #fafafa;
-    padding: 30px;
-    border-radius: 12px;
-    width: 90%;
-    max-width: 900px;
-    max-height: 100%;
-    overflow-y: auto;
-    position: relative;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-  
-    /* slide in from top */
-    animation: slideIn 1s forwards;
-  }
-  
-  .overlay-content.closing {
-    /* slide out if .closing */
-    animation: slideOut 1s forwards;
-  }
-  
-  @keyframes slideIn {
-    from { transform: translateY(-40px); }
-    to   { transform: translateY(0); }
-  }
-  @keyframes slideOut {
-    from { transform: translateY(0); }
-    to   { transform: translateY(-40px); }
-  }
-  
-  /* close button styling (example) */
-  .close-btn {
-    background-color: #ffffff00;
-    color: black;
-  }
-  .close-btn:hover{
-    background-color: #ffffff00;
-    color: black;
-  }
-  .overlay-rib{
-    padding: 10px;
-    border-radius: 50px;
-    background-color: #ffffff;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  /* fade-in by default */
+  animation: fadeIn 1.5s forwards;
+}
 
-  }
-  
+.overlay.closing {
+  animation: fadeOut 0.3s forwards;
+}
+
+@keyframes fadeIn {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+@keyframes fadeOut {
+  0%   { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.overlay-content {
+  background: #fafafa;
+  padding: 30px;
+  border-radius: 12px;
+  width: 80%;
+  max-width: 1400px;
+  height: 80%;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  /* slide in from top */
+  animation: slideIn 0.8s forwards;
+}
+
+.overlay-content.closing {
+  animation: slideOut 1s forwards;
+}
+
+@keyframes slideIn {
+  from { transform: translateY(-40px); }
+  to   { transform: translateY(0); }
+}
+@keyframes slideOut {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-40px); }
+}
+
+/* Close Button */
+.close-btn {
+  background-color: transparent;
+  color: black;
+  font-size: 15px;
+  border: none;
+  cursor: pointer;
+}
+
+.close-btn:hover {
+  background-color: transparent;
+}
+
+/* Overlay Rib */
+.overlay-rib {
+  padding: 1px;
+  border-radius: 50px;
+  background-color: #ffffff;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  background: linear-gradient(90deg, rgba(246,233,255,1) 0%, rgba(229,249,255,1) 50%, rgba(255,231,197,1) 100%);
+}
+
+.overlay-rib p {
+  margin-left: 20px;
+  font-size: 1rem;
+}
+
+/* Dropdown Containers */
+.dropdown-container {
+  flex: 1; /* for items inside a flex row */
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  margin: 15px 0;
+  overflow: hidden;
+  cursor: pointer;
+  /* Remove transitions affecting dimensions/borders */
+}
+
+.dropdown-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #ffffff;
+  color: rgb(68,68,68);
+  padding: 10px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.dropdown-header:hover {
+  background-color: #fcfcfc;
+}
+
+/* Arrow Icon */
+.arrow {
+  display: inline-block;
+  margin-right: 10px;
+  width: 10px;
+  height: 10px;
+  border: solid rgb(65,65,65);
+  border-width: 0 2px 2px 0;
+  transform: rotate(-135deg); /* Default upward arrow */
+  transition: transform 0.3s ease;
+}
+
+.arrow.down {
+  transform: rotate(45deg); /* Downward arrow */
+}
+
+/* Dropdown Content Animations */
+.dropdown-content {
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-top: 1px solid #ddd;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* When the dropdown is expanded, the content is fully visible */
+.dropdown-container.expanded .dropdown-content {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Flex row for side-by-side dropdowns */
+.dropdown-row {
+  display: flex;
+  gap: 15px; /* Space between dropdowns */
+  margin-bottom: 15px;
+}
+
+/* Additional styling for detail container */
+.detail-container {
+  display: flex;
+  flex-direction: column;
+}

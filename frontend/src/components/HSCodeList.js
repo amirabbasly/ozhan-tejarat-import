@@ -175,7 +175,6 @@ const HSCodeListComponent = () => {
                 <th>حقوق گمرکی</th>
                 <th>الویت</th>
                 <th>واحد</th>
-                <th>Tags</th>
               </tr>
             </thead>
             <tbody>
@@ -189,15 +188,7 @@ const HSCodeListComponent = () => {
                   <td>{hscode.customs_duty_rate}</td>
                   <td>{hscode.priority}</td>
                   <td>{hscode.SUQ}</td>
-                  <td>
-                    {hscode.tags.length > 0
-                      ? hscode.tags.map((tagObj) => (
-                          <span key={tagObj.id}>
-                            ({tagObj.tag})
-                          </span>
-                        ))
-                      : "No Tags"}
-                  </td>
+   
                 </tr>
               ))}
             </tbody>

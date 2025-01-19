@@ -4,92 +4,166 @@ import "./HSCodeDetail.css";
 
 const HSCodeDetail = ({ onClose }) => {
   const [isClosing, setIsClosing] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [tagsOpen, setTagsOpen] = useState(false);
+  const [commercialsOpen, setCommercialsOpen] = useState(false);
 
-  // Retrieve the HSCode detail state from Redux
   const { loading, data, error } = useSelector(
     (state) => state.hscode || { loading: false, data: null, error: null }
   );
 
-  // Trigger fade-out animation
   const handleClose = () => {
     setIsClosing(true);
   };
 
-  // Once fade-out finishes, call onClose() to unmount this component
   useEffect(() => {
     let timer;
     if (isClosing) {
       timer = setTimeout(() => {
-        onClose(); // the function passed by the parent
-      }, 300); // match your CSS animation duration
+        onClose();
+      }, 300);
     }
     return () => clearTimeout(timer);
   }, [isClosing, onClose]);
 
-  // Add .closing class if isClosing is true
   const overlayClass = `overlay ${isClosing ? "closing" : ""}`;
   const contentClass = `overlay-content ${isClosing ? "closing" : ""}`;
 
   return (
     <div className={overlayClass} onClick={handleClose}>
+      {loading && <p className="detail-loading">Loading details...</p>}
+      {error && <p className="detail-error">Error: {error}</p>}
 
-      <div
-        className={contentClass}
-        onClick={(e) => {
-          e.stopPropagation(); // Don’t close if clicking inside
-        }}
-      >
-        <div className="overlay-rib">
-        <button className="close-btn" onClick={handleClose}>
-X
-        </button>
-        {data.code}
-</div>
-        {loading && <p className="detail-loading">Loading details...</p>}
-
-        {error && <p className="detail-error">Error: {error}</p>}
-
-        {data && (
-          <div className="detail-container">
-            <h3 className="detail-title">{data.code}</h3>
-            <p>
-              <strong>کد تعرفه:</strong> {data.code}
-            </p>
-            <p>
-              <strong>نام تجاری فارسی:</strong> {data.goods_name_fa}
-            </p>
-            <p>
-              <strong>نام تجاری انگلیسی:</strong> {data.goods_name_en}
-            </p>
-            <p>
-              <strong>سود بازرگانی:</strong> {data.profit}
-            </p>
-            <p>
-              <strong>حقوق گمرکی:</strong> {data.customs_duty_rate}
-            </p>
-            <p>
-              <strong>الویت کالایی:</strong> {data.priority}
-            </p>
-            <p>
-              <strong>واحد:</strong> {data.SUQ}
-            </p>
-            <p>
-              <strong>فصل:</strong> {data.season.description}
-            </p>
-            {data.tags && data.tags.length > 0 && (
-              <div className="detail-tags">
-                <strong>Tags:</strong>
-                <ul>
-                  {data.tags.map((tag, idx) => (
-                    <li key={idx}>{tag}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            
+      {data && (
+        <div
+          className={contentClass}
+          onClick={(e) => {
+            e.stopPropagation(); // Prevent closing when clicking inside
+          }}
+        >
+          <div className="overlay-rib">
+            <button className="close-btn" onClick={handleClose}>
+              X
+            </button>
+            <p>{data.code}</p>
           </div>
-        )}
-      </div>
+
+          <div className="detail-container">
+            {/* Details Section */}
+            <div className={`dropdown-container ${detailsOpen ? "expanded" : ""}`}>
+              <div
+                className="dropdown-header"
+                onClick={(e) => {
+                  e.stopPropagation(); // Stop propagation so only this header toggles its own state
+                  setDetailsOpen((prev) => !prev);
+                }}
+              >
+                <span className={`arrow ${detailsOpen ? "down" : "up"}`}></span>
+                {detailsOpen ? "بستن جزئیات" : "نمایش جزئیات"}
+              </div>
+              {detailsOpen && (
+                <div className="dropdown-content">
+                  <p>
+                    <strong>کد تعرفه:</strong> {data.code}
+                  </p>
+                  <p>{data.goods_name_fa}</p>
+                  <p>
+                    <strong>نام تجاری انگلیسی:</strong> {data.goods_name_en}
+                  </p>
+                  <p>
+                    <strong>سود بازرگانی:</strong> {data.profit}
+                  </p>
+                  <p>
+                    <strong>حقوق گمرکی:</strong> {data.customs_duty_rate}
+                  </p>
+                  <p>
+                    <strong>الویت کالایی:</strong> {data.priority}
+                  </p>
+                  <p>
+                    <strong>واحد:</strong> {data.SUQ}
+                  </p>
+                  <p>
+                    <strong>فصل:</strong> {data.season.description}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Tags and Commercials in a Flex Row */}
+            <div className="dropdown-row">
+              {/* Tags Section */}
+              <div className={`dropdown-container ${tagsOpen ? "expanded" : ""}`}>
+                <div
+                  className="dropdown-header"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setTagsOpen((prev) => !prev);
+                  }}
+                >
+                  <span className={`arrow ${tagsOpen ? "down" : "up"}`}></span>
+                  {tagsOpen ? "بستن برچسب‌ها" : "نمایش برچسب‌ها"}
+                </div>
+                {tagsOpen && data.tags && data.tags.length > 0 && (
+                  <div className="dropdown-content">
+                    {(() => {
+                      const groupedMap = data.tags.reduce((map, tagObj) => {
+                        const { title, tag } = tagObj;
+                        if (!map.has(title)) {
+                          map.set(title, []);
+                        }
+                        map.get(title).push(`«${tag}»`);
+                        return map;
+                      }, new Map());
+
+                      const groups = Array.from(groupedMap);
+
+                      return (
+                        <ul>
+                          {groups.map(([title, tags]) => (
+                            <li key={title}>
+                              <strong>{title}</strong>: {tags.join(" و ")}
+                            </li>
+                          ))}
+                        </ul>
+                      );
+                    })()}
+                  </div>
+                )}
+              </div>
+
+              {/* Commercials Section */}
+              <div className={`dropdown-container ${commercialsOpen ? "expanded" : ""}`}>
+                <div
+                  className="dropdown-header"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCommercialsOpen((prev) => !prev);
+                  }}
+                >
+                  <span className={`arrow ${commercialsOpen ? "down" : "up"}`}></span>
+                  {commercialsOpen ? "بستن مجوزها" : "نمایش مجوزها"}
+                </div>
+                {commercialsOpen &&
+                  data.commercials &&
+                  data.commercials.length > 0 && (
+                    <div className="dropdown-content">
+                      <ul>
+                        {data.commercials.map((commercial) => (
+                          <li key={commercial.id}>
+                            <strong>عنوان:</strong> {commercial.title} <br />
+                            <strong>شرایط:</strong> {commercial.condition} <br />
+                            <strong>نتیجه:</strong> {commercial.result} <br />
+                            <strong>شناسه قانون:</strong> {commercial.rule_id}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

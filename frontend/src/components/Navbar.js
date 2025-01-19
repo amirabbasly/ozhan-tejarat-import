@@ -232,10 +232,10 @@
               {showSubmenu.tanzimat && (
                 <ul className="submenu">
                   <li className="submenu-item">
-                    <Link to="/hscode-list">تعرفه های گمرکی</Link>
+                    <Link to="/hscode-list">جدول تعرفه ها</Link>
                   </li>
                   <li className="submenu-item">
-                    <Link to="/settings/security">امنیت</Link>
+                    <Link to="/hscode-inf">لیست تعرفه ها</Link>
                   </li>
                   <li className="submenu-item">
                     <Link to="/settings/preferences">ترجیحات</Link>

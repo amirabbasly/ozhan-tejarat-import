@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework import viewsets, status, filters
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.decorators import action
-from .models import HSCode, Tag, Season, Heading
+from .models import HSCode, Tag, Season, Heading, Commercial
 import requests
 from .serializers import HSCodeSerializer, TagSerializer, HSCodeListSerializer, HSCodeDetailSerializer
 from rest_framework.pagination import PageNumberPagination
@@ -151,157 +151,192 @@ class HSCodeImportView(APIView):
             status=status.HTTP_200_OK
         )
 class FetchAndUpdateHSCodeView(APIView):
-    """
-    This APIView takes `sessionId`, `authorization`, and `tariffCode` as input,
-    sends a request to the CRS API, and updates the relevant HSCode
-    (fields and tags) with data from the API response.
-    """
-
     def post(self, request, *args, **kwargs):
-        # Extract input data from the request
-        session_id = request.data.get('sessionId')
-        authorization = request.data.get('authorization')
-        tariff_code = request.data.get('tariffCode')
+        # 1. Extract basic data
+        session_id = request.data.get("sessionId")
+        authorization = request.data.get("authorization")
+        tariff_code = request.data.get("tariffCode")
 
         if not session_id or not authorization or not tariff_code:
             return Response(
-                {
-                    "detail": "Missing required fields: 'sessionId', "
-                              "'authorization', or 'tariffCode'."
-                },
+                {"detail": "Missing required fields: 'sessionId', 'authorization', or 'tariffCode'."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # API endpoint
+        # 2. API call setup
         url = f"https://crs.ntsw.ir/api/vas/CRSTS5?tariffCode={tariff_code}"
-
-        # Request headers
         headers = {
-            'accept': 'application/json, text/plain, */*',
-            'user-agent': (
-                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
-                'AppleWebKit/537.36 (KHTML, like Gecko) '
-                'Chrome/131.0.0.0 Safari/537.36'
-            ),
-            'referer': 'https://crs.ntsw.ir/ts5',
-            'cache-control': 'no-cache',
-            'pragma': 'no-cache'
+            "accept": "application/json, text/plain, */*",
+            "user-agent": "Mozilla/5.0",
+            "referer": "https://crs.ntsw.ir/ts5",
+            "cache-control": "no-cache",
+            "pragma": "no-cache",
         }
-
-        # Cookies – ensure these match what your API expects
-        cookies = {
-            "Authorization": authorization,
-            "ASP.NET_SessionId": session_id,
-        }
+        cookies = {"Authorization": authorization, "ASP.NET_SessionId": session_id}
 
         try:
-            # Send a GET request to the external API
+            # 3. Fetch the CRS data
             response = requests.get(url, headers=headers, cookies=cookies)
-
-            # Check if the request was successful
             if response.status_code != 200:
                 return Response(
                     {
-                        "detail": (
-                            f"Failed to fetch data from the CRS API. "
-                            f"Status code: {response.status_code}"
-                        ),
+                        "detail": f"Failed to fetch data from the CRS API. Status code: {response.status_code}",
                         "response": response.json(),
                     },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-            response_data = response.json()
 
+            response_data = response.json()
             tariff_data = response_data.get("tariff", {})
             if not tariff_data:
-                return Response(
-                    {"detail": "No 'tariff' data found in the API response."},
-                    status=status.HTTP_200_OK,
-                )
+                return Response({"detail": "No 'tariff' data found."}, status=status.HTTP_200_OK)
 
-            # Get or create the HSCode object by "code"
-            # If you never change the code once set, it's safe to match on it
+            # 4. Get or create HSCode
             hscode, created = HSCode.objects.get_or_create(code=tariff_data.get("code", tariff_code))
 
-            # Update fields from the "tariff" data
-            # You can always do a safety check before converting to int
+            # 5. Update HSCode fields
             hscode.goods_name_fa = tariff_data.get("persianDescription", hscode.goods_name_fa)
             hscode.goods_name_en = tariff_data.get("englishDescription", hscode.goods_name_en)
+            import_duty = tariff_data.get("importDuty", hscode.import_duty_rate)
 
-            # Suppose you want to store the importDuty in `customs_duty_rate`:
-            import_duty = tariff_data.get("importDuty")
             if import_duty is not None:
                 try:
-                    hscode.customs_duty_rate = int(import_duty)
+                    hscode.import_duty_rate = int(import_duty)
                 except ValueError:
-                    pass  # fallback or handle error if needed
-
-            # Suppose `profit` is something else or same as importDuty
-            # If you don't have "profit" in the API, you can skip or default it:
-            if not hscode.profit:
-                hscode.profit = 0  # or some default / or remove it entirely if not relevant
-
-            # commodityPriority -> `priority`
+                    pass
             commodity_priority = tariff_data.get("commodityPriority")
             if commodity_priority is not None:
                 try:
                     hscode.priority = int(commodity_priority)
                 except ValueError:
-                    pass  # fallback or handle error if needed
+                    pass
 
-            # suq -> `SUQ`
             suq_value = tariff_data.get("suq")
-            # Make sure suq_value is one of the SUQ_OPTIONS in your model or default to 'U'
-            valid_suq_choices = dict(HSCode.SUQ_OPTIONS).keys()  # e.g. ['1000kwh','1000u','2U',...]
-            if suq_value in valid_suq_choices:
-                hscode.SUQ = suq_value
-            else:
-                # fallback if the suq_value from the API isn't recognized
-                hscode.SUQ = 'U'
+            if suq_value:
+                hscode.SUQ = suq_value  # Validate if needed
 
-             # ------------------------ 2) EXTRACT NEW TAGS ------------------------
+            if hscode.profit is None:
+                hscode.profit = 0
+
+            # ----------------------------------------------------------------------
+            # 6. Handle tags with 3 rules:
+            #    1) angled quotes => inside is 'tag', outside is 'title'
+            #    2) dash or underscore => left is 'title', right is 'tag'
+            #    3) otherwise => entire string in 'tag', empty title
+            # ----------------------------------------------------------------------
             raw_tags = response_data.get("tags", [])
-            # We'll collect only the tags inside « ... »
-            new_tags = set()  # use a set to avoid duplicates
+            new_tag_pairs = []
+
             for tag_str in raw_tags:
-                match = re.search(r'«([^»]+)»', tag_str)
-                if match:
-                    new_tags.add(match.group(1))
+                tag_str = tag_str.strip()
 
-            # new_tags now contains only the extracted strings from « ... ».
+                # Rule (1) angled quotes:
+                match_angled = re.search(r'«([^»]+)»', tag_str)
+                if match_angled:
+                    # The text inside angled quotes => tag
+                    tag_val = match_angled.group(1).strip()
+                    # Remove angled part to get the outside => title
+                    title_val = re.sub(r'«[^»]+»', '', tag_str).strip()
 
-            # ------------------------ 3) CLEAR OLD TAGS NOT IN NEW RESPONSE ------------------------
-            old_tags = set(hscode.tags.values_list('tag', flat=True))
-            tags_to_remove = old_tags - new_tags
-            # Remove tags that are no longer present
-            if tags_to_remove:
-                for tag_text in tags_to_remove:
-                    tag_obj = Tag.objects.filter(tag=tag_text).first()
-                    if tag_obj:
-                        hscode.tags.remove(tag_obj)
+                else:
+                    # Rule (2) dash or underscore
+                    if '-' in tag_str:
+                        left, right = tag_str.split('-', 1)
+                        title_val = left.strip()
+                        tag_val = right.strip()
 
-            # ------------------------ 4) ADD NEW TAGS THAT DIDN'T EXIST BEFORE ------------------------
-            tags_to_add = new_tags - old_tags
-            for tag_text in tags_to_add:
-                tag_obj, _ = Tag.objects.get_or_create(tag=tag_text)
+                    elif '_' in tag_str:
+                        left, right = tag_str.split('_', 1)
+                        title_val = left.strip()
+                        tag_val = right.strip()
+
+                    else:
+                        # Rule (3) entire string is 'tag'
+                        title_val = ""
+                        tag_val = tag_str
+
+                new_tag_pairs.append((title_val, tag_val))
+
+            # Remove old tags not in the new set
+            # (we identify uniqueness by 'tag', ignoring 'title')
+            new_tags_set = {pair[1] for pair in new_tag_pairs}
+            old_tags_set = set(hscode.tags.values_list("tag", flat=True))
+            tags_to_remove = old_tags_set - new_tags_set
+            for tag_text in tags_to_remove:
+                tag_obj = Tag.objects.filter(tag=tag_text).first()
+                if tag_obj:
+                    hscode.tags.remove(tag_obj)
+
+            # Add or create new Tag objects
+            for title_val, tag_val in new_tag_pairs:
+                tag_obj, _ = Tag.objects.get_or_create(
+                    tag=tag_val,
+                    defaults={"title": title_val}
+                )
+                # Optionally update the title each time, in case it changed
+                tag_obj.title = title_val
+                tag_obj.save()
+
                 hscode.tags.add(tag_obj)
+
+            # 7. Parse "tS5RuleResult" and update Commercial
+            tS5_results = response_data.get("tS5RuleResult", [])
+            new_commercial_objs = []
+            for rule in tS5_results:
+                rule_id = rule.get("ruleId", "")
+                rule_title = rule.get("ruleTitle", "")
+                result_str = rule.get("result", "")
+                conditions_list = rule.get("conditions", [])
+
+                # Combine multiple conditions into one string if needed
+                conditions_joined = " | ".join(conditions_list)
+
+                # Get or create a Commercial entry (if you have a rule_id field)
+                commercial_obj, _ = Commercial.objects.get_or_create(
+                    rule_id=rule_id,
+                    defaults={
+                        "title": rule_title,
+                        "condition": conditions_joined,
+                        "result": result_str,
+                    },
+                )
+                # If not created, optionally update existing
+                commercial_obj.title = rule_title
+                commercial_obj.condition = conditions_joined
+                commercial_obj.result = result_str
+                commercial_obj.save()
+
+                new_commercial_objs.append(commercial_obj)
+
+            # REPLACE existing commercials with the new ones (if that's desired)
+            hscode.commercials.set(new_commercial_objs)
+
+            # 8. Save
             hscode.updated_by = request.user
             hscode.updated_date = now()
-            # ------------------------ SAVE THE HSCode ------------------------
             hscode.save()
 
-            # ------------------------ BUILD RESPONSE ------------------------
+            # 9. Response
             return Response(
                 {
                     "detail": "HSCode updated successfully.",
                     "HSCode": hscode.code,
                     "goods_name_fa": hscode.goods_name_fa,
                     "goods_name_en": hscode.goods_name_en,
-                    "profit": hscode.profit,
-                    "customs_duty_rate": hscode.customs_duty_rate,
-                    "priority": hscode.priority,
-                    "SUQ": hscode.SUQ,
-                    "tags": [t.tag for t in hscode.tags.all()],
+                    "commercials": [
+                        {
+                            "id": c.id,
+                            "rule_id": getattr(c, "rule_id", None),
+                            "title": c.title,
+                            "condition": c.condition,
+                            "result": c.result,
+                        }
+                        for c in hscode.commercials.all()
+                    ],
+                    "tags": [
+                        {"id": t.id, "title": t.title, "tag": t.tag}
+                        for t in hscode.tags.all()
+                    ],
                 },
                 status=status.HTTP_200_OK,
             )

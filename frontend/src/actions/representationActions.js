@@ -26,7 +26,7 @@ export const fetchRepresentations = () => async (dispatch) => {
     dispatch({ type: FETCH_REPRESENTATIONS_REQUEST });
     try {
         const response = await axiosInstance.get('/representations/');
-        dispatch({ type: FETCH_REPRESENTATIONS_SUCCESS, payload: response.data });
+        dispatch({ type: FETCH_REPRESENTATIONS_SUCCESS, payload: response.data.results });
     } catch (error) {
         dispatch({
             type: FETCH_REPRESENTATIONS_FAILURE,
@@ -86,7 +86,7 @@ export const fetchChecks = () => async (dispatch) => {
     dispatch({ type: FETCH_CHECKS_REQUEST });
     try {
         const response = await axiosInstance.get('/checks/');
-        dispatch({ type: FETCH_CHECKS_SUCCESS, payload: response.data });
+        dispatch({ type: FETCH_CHECKS_SUCCESS, payload: response.data.results });
     } catch (error) {
         dispatch({
             type: FETCH_CHECKS_FAILURE,

@@ -5,14 +5,19 @@ from accounts.models import CustomUser
 from django.utils.timezone import now
 
 class Tag(models.Model):
+    title = models.CharField(max_length=255, null=True, blank=True)
     tag = models.CharField(max_length=255)
     def __str__(self):
         return f"{self.tag}"
+
+        
 class Commercial(models.Model):
+    rule_id = models.CharField(max_length=50, blank=True, null=True)  # <-- Add this
     condition = models.CharField(max_length=255)
     result = models.CharField(max_length=255)
     title = models.CharField(max_length=255)
-
+    def __str__(self):
+        return f"{self.title}"
 
 class Season(models.Model):
     code = models.CharField(max_length=2, unique=True)

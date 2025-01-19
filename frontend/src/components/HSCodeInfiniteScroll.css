@@ -6,6 +6,7 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #fafafa;
     direction: rtl;
+    
   }
   
   /* Title Style */
@@ -118,6 +119,7 @@
     flex-direction: column;
     position: relative;
     overflow: hidden;
+    
   }
   
   /* Subtle overlay gradient for a refined hover effect */

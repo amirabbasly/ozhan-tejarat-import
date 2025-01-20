@@ -4,7 +4,7 @@
     margin: 0 auto;
     padding: 1rem;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #fafafa;
+    background-color: #fafafa00;
     direction: rtl;
     
   }
@@ -32,16 +32,29 @@
     border: 1px solid #e0e0e0;
     border-radius: 4px;
   }
+
   
-  .search-bar button {
-    padding: 0.6rem 1rem;
-    border: none;
-    background-color: #eeeeee;
-    color: #333;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-  }
+
+  .btn-grad {background-image: linear-gradient(to right, #283048 0%, #859398  51%, #283048  100%)}
+  .btn-grad {
+     margin: 10px;
+     padding: 15px 45px;
+     text-align: center;
+     text-transform: uppercase;
+     transition: 0.5s;
+     background-size: 200% auto;
+     color: white;            
+     box-shadow: 0 0 20px #eee;
+     border-radius: 10px;
+     display: block;
+   }
+
+   .btn-grad:hover {
+     background-position: right center; /* change the direction of the change here */
+     color: #fff;
+     text-decoration: none;
+   }
+  
   
   .search-bar button:hover {
     background-color: #e0e0e0;
@@ -229,3 +242,44 @@
   .observer-element {
     height: 1px;
   }
+  .hscode-card {
+    position: relative;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+  }
+  
+  /* Background Image Layer */
+  .hscode-card .background-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.3; /* Adjust this value for desired opacity */
+    z-index: 1;
+  }
+  
+  /* Content Layer */
+  .hscode-card .content-layer {
+    position: relative;
+    z-index: 2; /* Ensures content is above the background image */
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.8); /* Optional: semi-transparent background for better readability */
+    border-radius: 8px;
+  }
+  
+  /* Hover Effect */
+  .hscode-card:hover .background-image {
+    opacity: 0.5; /* Slightly increase opacity on hover */
+  }
+  
+  .hscode-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  }
+  

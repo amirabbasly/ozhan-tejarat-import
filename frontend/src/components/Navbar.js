@@ -12,7 +12,7 @@
     const [showSubSubmenu, setShowSubSubmenu] = useState({
       'receive-order': false, 
     });
-    const { role } = useSelector((state) => state.auth.user);
+    const role = user?.role;
     const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
 
     const [showSubmenu, setShowSubmenu] = useState({

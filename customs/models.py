@@ -79,7 +79,7 @@ class HSCode(models.Model):
     commercials = models.ManyToManyField(Commercial, null=True, blank=True)
 
     class Meta:
-        ordering = ["-id"] 
+        ordering = ["-code"] 
     def __str__(self):
         return f"{self.code} - {self.goods_name_en[:50]}"
 

@@ -97,7 +97,7 @@ const HSCodeListComponent = () => {
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)} // just local
         />
-        <button onClick={handleSearchButtonClick}>Search</button>
+        <button className="btn-grad" onClick={handleSearchButtonClick}>Search</button>
       </div>
 
       {/* FILTER SECTION */}

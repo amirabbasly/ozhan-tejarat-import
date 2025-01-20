@@ -1,15 +1,23 @@
-/* Overlay & Content Animations */
+/* ---------------------------
+   OVERLAY & BACKDROP 
+---------------------------- */
 .overlay {
   position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background-color: rgba(0,0,0,0.5);
+  top: 0; 
+  left: 0;
+  width: 100%; 
+  height: 100%;
+  /* A darker backdrop */
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  /* fade-in by default */
-  animation: fadeIn 1.5s forwards;
+
+  /* Fade-in by default */
+  animation: fadeIn 0.8s forwards;
 }
 
 .overlay.closing {
@@ -25,130 +33,205 @@
   100% { opacity: 0; }
 }
 
+/* ---------------------------
+   OVERLAY CONTENT 
+---------------------------- */
 .overlay-content {
-  background: #fafafa;
-  padding: 30px;
-  border-radius: 12px;
+  position: relative;
   width: 80%;
   max-width: 1400px;
   height: 80%;
   overflow-y: auto;
-  position: relative;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-  /* slide in from top */
-  animation: slideIn 0.8s forwards;
+
+  /* Subtle frosted glass effect, but dark */
+  background: rgba(40, 40, 40, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  border-radius: 12px;
+  padding: 0; /* We'll add content padding below */
+
+  /* Elevated shadow */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+  /* Slide in from top */
+  animation: slideIn 0.6s forwards;
 }
 
 .overlay-content.closing {
-  animation: slideOut 1s forwards;
+  animation: slideOut 0.4s forwards;
 }
 
 @keyframes slideIn {
-  from { transform: translateY(-40px); }
-  to   { transform: translateY(0); }
+  from {
+    transform: translateY(-40px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 @keyframes slideOut {
-  from { transform: translateY(0); }
-  to   { transform: translateY(-40px); }
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-40px);
+    opacity: 0;
+  }
+}
+
+/* ---------------------------
+   RIBBON / HEADER 
+---------------------------- */
+.overlay-rib {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  /* A neutral dark gradient */
+  background: linear-gradient(90deg, #2f2f2f, #3b3b3b);
+  color: #f1f1f1;
+
+  /* Rounded top corners */
+  border-radius: 12px 12px 0 0;
+
+  padding: 15px 20px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.overlay-rib p {
+  margin: 0;
+  font-size: 1rem;
 }
 
 /* Close Button */
 .close-btn {
-  background-color: transparent;
-  color: black;
-  font-size: 15px;
+  background: none;
   border: none;
+  color: #f1f1f1;
+  font-size: 24px;
+  line-height: 1;
   cursor: pointer;
+  transition: background-color 0.4s ease;
 }
-
 .close-btn:hover {
-  background-color: transparent;
-}
+background-color: #2f2f2f;}
 
-/* Overlay Rib */
-.overlay-rib {
-  padding: 1px;
-  border-radius: 50px;
-  background-color: #ffffff;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+/* ---------------------------
+   DETAIL CONTAINER 
+---------------------------- */
+.detail-container {
   display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  background: linear-gradient(90deg, rgba(246,233,255,1) 0%, rgba(229,249,255,1) 50%, rgba(255,231,197,1) 100%);
+  flex-direction: column;
+  gap: 20px;
+
+  /* Content padding */
+  padding: 20px;
 }
 
-.overlay-rib p {
-  margin-left: 20px;
-  font-size: 1rem;
+/* Loading & Error Messages */
+.detail-loading,
+.detail-error {
+  color: #ddd;
+  background: rgba(60, 60, 60, 0.9);
+  padding: 10px 20px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  max-width: 300px;
 }
 
-/* Dropdown Containers */
+/* ---------------------------
+   DROPDOWN CONTAINERS 
+---------------------------- */
+.dropdown-row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
 .dropdown-container {
-  flex: 1; /* for items inside a flex row */
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  margin: 15px 0;
+  flex: 1;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
-  /* Remove transitions affecting dimensions/borders */
+  background-color: rgba(60, 60, 60, 0.3);
+  transition: background-color 0.2s ease;
+}
+.dropdown-container:hover {
+  background-color: rgba(60, 60, 60, 0.5);
 }
 
+/* Dropdown Header */
 .dropdown-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: #ffffff;
-  color: rgb(68,68,68);
-  padding: 10px;
+  color: #f1f1f1;
   font-size: 16px;
-  cursor: pointer;
+  padding: 10px 15px;
 }
-
 .dropdown-header:hover {
-  background-color: #fcfcfc;
+  background-color: rgba(80,80,80,0.5);
 }
 
 /* Arrow Icon */
 .arrow {
   display: inline-block;
-  margin-right: 10px;
+  margin-right: 8px;
   width: 10px;
   height: 10px;
-  border: solid rgb(65,65,65);
+  border: solid #bbb;
   border-width: 0 2px 2px 0;
-  transform: rotate(-135deg); /* Default upward arrow */
+  transform: rotate(-135deg); /* default upward arrow */
   transition: transform 0.3s ease;
 }
-
 .arrow.down {
-  transform: rotate(45deg); /* Downward arrow */
+  transform: rotate(45deg); /* downward arrow */
 }
 
-/* Dropdown Content Animations */
+/* Dropdown Content */
 .dropdown-content {
-  padding: 10px;
-  background-color: #f9f9f9;
-  border-top: 1px solid #ddd;
+  padding: 10px 15px;
+  background-color: rgba(45,45,45,0.8);
+  border-top: 1px solid rgba(255,255,255,0.1);
+
+  max-height: 0;
+  overflow: hidden;
   opacity: 0;
   transform: translateY(-10px);
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition: max-height 0.4s ease, 
+              opacity 0.4s ease, 
+              transform 0.4s ease;
 }
-
-/* When the dropdown is expanded, the content is fully visible */
 .dropdown-container.expanded .dropdown-content {
+  max-height: 1000px; /* large enough to display full content */
   opacity: 1;
   transform: translateY(0);
 }
 
-/* Flex row for side-by-side dropdowns */
-.dropdown-row {
-  display: flex;
-  gap: 15px; /* Space between dropdowns */
-  margin-bottom: 15px;
+/* Dropdown Content Text & Lists */
+.dropdown-content p,
+.dropdown-content li {
+  color: #ddd;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+.dropdown-content ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.dropdown-content li {
+  margin-bottom: 10px;
 }
 
-/* Additional styling for detail container */
-.detail-container {
-  display: flex;
-  flex-direction: column;
+
+.dropdown-content li::before {
+  content: "• ";
+  color: #888;
 }
+

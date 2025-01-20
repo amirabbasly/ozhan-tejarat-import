@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axiosInstance from "../utils/axiosInstance";
+import './HSCodeDetail.css'
 
 const Chatbot = () => {
     const [messages, setMessages] = useState([]); // Store chat history
@@ -80,7 +81,7 @@ const Chatbot = () => {
                     placeholder="پیام خود را بنویسید..."
                     style={styles.input}
                 />
-                <button onClick={sendMessage} style={styles.button}>
+                <button className="btn-grad" onClick={sendMessage} style={styles.button}>
                     Send
                 </button>
             </div>
@@ -115,14 +116,7 @@ const styles = {
         border: "1px solid #ccc",
         marginRight: "10px",
     },
-    button: {
-        padding: "10px 20px",
-        borderRadius: "8px",
-        border: "none",
-        background: "#007bff",
-        color: "white",
-        cursor: "pointer",
-    },
+
 };
 
 export default Chatbot;

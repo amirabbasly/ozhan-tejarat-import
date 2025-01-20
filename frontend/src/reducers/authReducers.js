@@ -27,7 +27,7 @@ const initialState = {
     token: localStorage.getItem('access_token'),
     refresh_token: localStorage.getItem('refresh_token'),
     isAuthenticated: !!localStorage.getItem('access_token'), // True if token exists
-    loading: !localStorage.getItem('access_token'),
+    loading: false,
     user: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null, // Parse user JSON
     error: null,
 };

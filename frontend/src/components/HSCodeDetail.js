@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import "./HSCodeDetail.css";
+// You can optionally import an icon library for a nicer close icon
+// import { FiX } from "react-icons/fi";
 
 const HSCodeDetail = ({ onClose }) => {
   const [isClosing, setIsClosing] = useState(false);
-  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(true);
   const [tagsOpen, setTagsOpen] = useState(false);
   const [commercialsOpen, setCommercialsOpen] = useState(false);
 
@@ -41,8 +43,10 @@ const HSCodeDetail = ({ onClose }) => {
             e.stopPropagation(); // Prevent closing when clicking inside
           }}
         >
+          {/* Overlay Header / Ribbon */}
           <div className="overlay-rib">
             <button className="close-btn" onClick={handleClose}>
+              {/* <FiX size={20} />  If you prefer an icon from a library */}
               X
             </button>
             <p>{data.code}</p>
@@ -50,11 +54,13 @@ const HSCodeDetail = ({ onClose }) => {
 
           <div className="detail-container">
             {/* Details Section */}
-            <div className={`dropdown-container ${detailsOpen ? "expanded" : ""}`}>
+            <div
+              className={`dropdown-container ${detailsOpen ? "expanded" : ""}`}
+            >
               <div
                 className="dropdown-header"
                 onClick={(e) => {
-                  e.stopPropagation(); // Stop propagation so only this header toggles its own state
+                  e.stopPropagation();
                   setDetailsOpen((prev) => !prev);
                 }}
               >
@@ -66,7 +72,7 @@ const HSCodeDetail = ({ onClose }) => {
                   <p>
                     <strong>کد تعرفه:</strong> {data.code}
                   </p>
-                  <p>{data.goods_name_fa}</p>
+                  <p>نام تجاری فارسی:{data.goods_name_fa}</p>
                   <p>
                     <strong>نام تجاری انگلیسی:</strong> {data.goods_name_en}
                   </p>
@@ -80,19 +86,28 @@ const HSCodeDetail = ({ onClose }) => {
                     <strong>الویت کالایی:</strong> {data.priority}
                   </p>
                   <p>
-                    <strong>واحد:</strong> {data.SUQ}
+                    <strong>واحد شمارش:</strong> {data.SUQ}
                   </p>
                   <p>
                     <strong>فصل:</strong> {data.season.description}
+                  </p>
+                  <p>
+                  {data.heading && (
+  <p>
+    <strong>قسمت:</strong> {data.heading.description}
+  </p>
+)}
                   </p>
                 </div>
               )}
             </div>
 
-            {/* Tags and Commercials in a Flex Row */}
+            {/* Tags and Commercials side-by-side */}
             <div className="dropdown-row">
               {/* Tags Section */}
-              <div className={`dropdown-container ${tagsOpen ? "expanded" : ""}`}>
+              <div
+                className={`dropdown-container ${tagsOpen ? "expanded" : ""}`}
+              >
                 <div
                   className="dropdown-header"
                   onClick={(e) => {
@@ -132,7 +147,11 @@ const HSCodeDetail = ({ onClose }) => {
               </div>
 
               {/* Commercials Section */}
-              <div className={`dropdown-container ${commercialsOpen ? "expanded" : ""}`}>
+              <div
+                className={`dropdown-container ${
+                  commercialsOpen ? "expanded" : ""
+                }`}
+              >
                 <div
                   className="dropdown-header"
                   onClick={(e) => {
@@ -140,7 +159,9 @@ const HSCodeDetail = ({ onClose }) => {
                     setCommercialsOpen((prev) => !prev);
                   }}
                 >
-                  <span className={`arrow ${commercialsOpen ? "down" : "up"}`}></span>
+                  <span
+                    className={`arrow ${commercialsOpen ? "down" : "up"}`}
+                  ></span>
                   {commercialsOpen ? "بستن مجوزها" : "نمایش مجوزها"}
                 </div>
                 {commercialsOpen &&

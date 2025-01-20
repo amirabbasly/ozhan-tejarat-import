@@ -2,6 +2,7 @@
 
 body {
     font-family: 'Vazir', sans-serif; /* You can use any Persian/Arabic web-safe font or Google Fonts */
+    
 }
 
 .login-container {
@@ -10,7 +11,7 @@ body {
     align-items: center;
     justify-content: center;
     height: 100vh;
-    background-color: #f9f9f9;
+    background-color: transparent;
 }
 
 .login-box {

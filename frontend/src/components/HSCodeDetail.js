@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
+import HSCodeUpdateSingle from "./HSCodeUpdateSingle"; // <-- Import the new component
 import "./HSCodeDetail.css";
-// You can optionally import an icon library for a nicer close icon
-// import { FiX } from "react-icons/fi";
+// import { FiX } from "react-icons/fi"; // optional icon library
 
 const HSCodeDetail = ({ onClose }) => {
   const [isClosing, setIsClosing] = useState(false);
@@ -10,13 +10,15 @@ const HSCodeDetail = ({ onClose }) => {
   const [tagsOpen, setTagsOpen] = useState(false);
   const [commercialsOpen, setCommercialsOpen] = useState(false);
 
+  // We load HS Code details from Redux
   const { loading, data, error } = useSelector(
     (state) => state.hscode || { loading: false, data: null, error: null }
   );
+  
+  // Get the user's role from Redux (adjust the selector based on your state structure)
+  const { role } = useSelector((state) => state.auth.user || { role: null });
 
-  const handleClose = () => {
-    setIsClosing(true);
-  };
+  const handleClose = () => setIsClosing(true);
 
   useEffect(() => {
     let timer;
@@ -39,29 +41,25 @@ const HSCodeDetail = ({ onClose }) => {
       {data && (
         <div
           className={contentClass}
-          onClick={(e) => {
-            e.stopPropagation(); // Prevent closing when clicking inside
-          }}
+          onClick={(e) => e.stopPropagation()} // stop click from closing overlay
         >
-          {/* Overlay Header / Ribbon */}
+          {/* Top Ribbon */}
           <div className="overlay-rib">
             <button className="close-btn" onClick={handleClose}>
-              {/* <FiX size={20} />  If you prefer an icon from a library */}
+              {/* <FiX size={20} /> If using an icon */}
               X
             </button>
             <p>{data.code}</p>
           </div>
 
           <div className="detail-container">
-            {/* Details Section */}
-            <div
-              className={`dropdown-container ${detailsOpen ? "expanded" : ""}`}
-            >
+            {/* 1) Details */}
+            <div className={`dropdown-container ${detailsOpen ? "expanded" : ""}`}>
               <div
                 className="dropdown-header"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setDetailsOpen((prev) => !prev);
+                  setDetailsOpen(!detailsOpen);
                 }}
               >
                 <span className={`arrow ${detailsOpen ? "down" : "up"}`}></span>
@@ -69,50 +67,50 @@ const HSCodeDetail = ({ onClose }) => {
               </div>
               {detailsOpen && (
                 <div className="dropdown-content">
-                  <p>
-                    <strong>کد تعرفه:</strong> {data.code}
-                  </p>
-                  <p>نام تجاری فارسی:{data.goods_name_fa}</p>
-                  <p>
-                    <strong>نام تجاری انگلیسی:</strong> {data.goods_name_en}
-                  </p>
-                  <p>
-                    <strong>سود بازرگانی:</strong> {data.profit}
-                  </p>
-                  <p>
-                    <strong>حقوق گمرکی:</strong> {data.customs_duty_rate}
-                  </p>
-                  <p>
-                    <strong>الویت کالایی:</strong> {data.priority}
-                  </p>
-                  <p>
-                    <strong>واحد شمارش:</strong> {data.SUQ}
-                  </p>
-                  <p>
-                    <strong>فصل:</strong> {data.season.description}
-                  </p>
-                  <p>
-                  {data.heading && (
-  <p>
-    <strong>قسمت:</strong> {data.heading.description}
-  </p>
-)}
-                  </p>
+                  <div className="ddown-divide">
+                    <p>
+                      <strong>کد تعرفه:</strong> {data.code}
+                    </p>
+                    <p>نام تجاری فارسی: {data.goods_name_fa}</p>
+                    <p>
+                      <strong>نام تجاری انگلیسی:</strong> {data.goods_name_en}
+                    </p>
+                    <p>
+                      <strong>سود بازرگانی:</strong> {data.profit}
+                    </p>
+                    <p>
+                      <strong>حقوق گمرکی:</strong> {data.customs_duty_rate}
+                    </p>
+                  </div>
+                  <div className="ddown-divide">
+                    <p>
+                      <strong>اولویت کالایی:</strong> {data.priority}
+                    </p>
+                    <p>
+                      <strong>واحد شمارش:</strong> {data.SUQ}
+                    </p>
+                    <p>
+                      <strong>فصل:</strong> {data.season.description}
+                    </p>
+                    {data.heading && (
+                      <p>
+                        <strong>قسمت:</strong> {data.heading.description}
+                      </p>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
 
-            {/* Tags and Commercials side-by-side */}
+            {/* 2) Tags and Commercials */}
             <div className="dropdown-row">
-              {/* Tags Section */}
-              <div
-                className={`dropdown-container ${tagsOpen ? "expanded" : ""}`}
-              >
+              {/* Tags */}
+              <div className={`dropdown-container ${tagsOpen ? "expanded" : ""}`}>
                 <div
                   className="dropdown-header"
                   onClick={(e) => {
                     e.stopPropagation();
-                    setTagsOpen((prev) => !prev);
+                    setTagsOpen(!tagsOpen);
                   }}
                 >
                   <span className={`arrow ${tagsOpen ? "down" : "up"}`}></span>
@@ -146,22 +144,18 @@ const HSCodeDetail = ({ onClose }) => {
                 )}
               </div>
 
-              {/* Commercials Section */}
+              {/* Commercials */}
               <div
-                className={`dropdown-container ${
-                  commercialsOpen ? "expanded" : ""
-                }`}
+                className={`dropdown-container ${commercialsOpen ? "expanded" : ""}`}
               >
                 <div
                   className="dropdown-header"
                   onClick={(e) => {
                     e.stopPropagation();
-                    setCommercialsOpen((prev) => !prev);
+                    setCommercialsOpen(!commercialsOpen);
                   }}
                 >
-                  <span
-                    className={`arrow ${commercialsOpen ? "down" : "up"}`}
-                  ></span>
+                  <span className={`arrow ${commercialsOpen ? "down" : "up"}`}></span>
                   {commercialsOpen ? "بستن مجوزها" : "نمایش مجوزها"}
                 </div>
                 {commercialsOpen &&
@@ -171,10 +165,7 @@ const HSCodeDetail = ({ onClose }) => {
                       <ul>
                         {data.commercials.map((commercial) => (
                           <li key={commercial.id}>
-                            <strong>عنوان:</strong> {commercial.title} <br />
-                            <strong>شرایط:</strong> {commercial.condition} <br />
-                            <strong>نتیجه:</strong> {commercial.result} <br />
-                            <strong>شناسه قانون:</strong> {commercial.rule_id}
+                            <strong>{commercial.condition} :</strong> {commercial.result} <br />
                           </li>
                         ))}
                       </ul>
@@ -182,6 +173,13 @@ const HSCodeDetail = ({ onClose }) => {
                   )}
               </div>
             </div>
+
+            {/* 3) Include the single-update component only for admin users */}
+            {role === "admin" && (
+              <div style={{ marginTop: "2rem" }}>
+                <HSCodeUpdateSingle code={data.code} />
+              </div>
+            )}
           </div>
         </div>
       )}

@@ -43,7 +43,7 @@ const CottageList = () => {
 
   // -------------------- PAGINATION STATE --------------------
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10); // or 50, or your default
+  const [pageSize, setPageSize] = useState(50); // or 50, or your default
   const totalPages = Math.ceil(count / pageSize); // For the dropdown in PaginationControls
 
   // On mount or on `currentPage` change, fetch that page
@@ -155,15 +155,16 @@ const CottageList = () => {
         <h2>لیست اظهارنامه ها</h2>
 
         {/* SIMPLE SEARCH BAR (NO FILTERING) */}
+        <label>جستجو (کد/نام فارسی/نام انگلیسی):</label>
         <div className="search-bar">
-          <label>جستجو (کد/نام فارسی/نام انگلیسی):</label>
+
           <input
             type="text"
             placeholder="Type your search..."
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
           />
-          <button onClick={handleSearchButtonClick}>Search</button>
+          <button className="btn-grad" onClick={handleSearchButtonClick}>Search</button>
         </div>
 
         {/* NO PROFORMA / DATE FILTERS ANYMORE */}
@@ -209,7 +210,7 @@ const CottageList = () => {
                 currentPage={currentPage}
                 totalPages={totalPages}
                 pageSize={pageSize}
-                pageSizeOptions={[10, 20, 50, 100]}
+                pageSizeOptions={[10, 20, 50, 100, 200]}
                 hasNext={hasNext}
                 hasPrevious={hasPrevious}
                 onPageChange={handlePageChange}
@@ -292,7 +293,7 @@ const CottageList = () => {
                 currentPage={currentPage}
                 totalPages={totalPages}
                 pageSize={pageSize}
-                pageSizeOptions={[10, 20, 50, 100]}
+                pageSizeOptions={[10, 20, 50, 100, 200]}
                 hasNext={hasNext}
                 hasPrevious={hasPrevious}
                 onPageChange={handlePageChange}

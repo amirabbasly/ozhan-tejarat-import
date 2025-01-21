@@ -47,7 +47,6 @@ class HSCodeDetailByCodeView(APIView):
         # Serialize the found HSCode
         serializer = HSCodeDetailSerializer(hscode)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
 class HSCodeViewSet(viewsets.ModelViewSet):
     """
     A ViewSet for managing HSCode objects.
@@ -58,7 +57,7 @@ class HSCodeViewSet(viewsets.ModelViewSet):
     pagination_class = CustomPageNumberPagination  # Apply pagination here
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_class = HSCodeFilter
-    search_fields = ["code", "goods_name_fa", "goods_name_en", "tags__tag"]
+    search_fields = ["code", "goods_name_fa", "goods_name_en", "tags__tag","heading__description","season__description"]
 
     @action(detail=True, methods=['post'], url_path='add-tags')
     def add_tags(self, request, pk=None):

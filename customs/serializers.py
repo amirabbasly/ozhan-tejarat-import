@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import HSCode, Tag, Season, Heading, Commercial
 
+
 class CommercialSerializer(serializers.ModelSerializer):
     class Meta:
         model = Commercial
@@ -23,6 +24,7 @@ class HeadingSerializer(serializers.ModelSerializer):
         fields = ['code','description']
 class HSCodeSerializer(serializers.ModelSerializer):
     season = SeasonIconSerializer(many=False, read_only=True)
+    updated_by = serializers.StringRelatedField(read_only=True)
 
     class Meta:
         model = HSCode

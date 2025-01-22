@@ -28,6 +28,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from openpyxl import load_workbook
 from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
+from .filters import CottageFilter
 
 
 
@@ -265,7 +266,8 @@ class CottageViewSet(viewsets.ModelViewSet):
     queryset = Cottage.objects.all()
     serializer_class = CottageSerializer
     pagination_class = CustomPageNumberPagination  # Apply pagination here
-    filter_backends = [ filters.SearchFilter]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_class = CottageFilter
     search_fields = ["cottage_number", "proforma__prf_order_no",]  # fields you want to search
 
 

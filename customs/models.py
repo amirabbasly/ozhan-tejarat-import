@@ -46,12 +46,12 @@ class HSCode(models.Model):
     code = models.CharField(max_length=20, unique=True)
     goods_name_fa = models.TextField(max_length=1000)
     goods_name_en = models.TextField(max_length=1000)
-    profit = models.IntegerField()
+    profit = models.CharField(max_length=255)
     customs_duty_rate = models.IntegerField(
         null=True, blank=True
     )
-    import_duty_rate = models.IntegerField(
-        null=True, blank=True
+    import_duty_rate = models.CharField(
+        null=True, blank=True, max_length=255
     )
     priority = models.IntegerField(null=True, blank=True)
     SUQ_OPTIONS = [

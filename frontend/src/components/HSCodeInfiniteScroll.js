@@ -46,6 +46,7 @@ const HSCodeInfiniteScroll = () => {
   useEffect(() => {
     const filters = { profit, priority, customsDutyRate, suq, search };
     dispatch(HSCodeList(currentPage, pageSize, filters));
+    
   }, [dispatch, currentPage, pageSize, profit, priority, customsDutyRate, suq, search]);
 
   // Append or set loaded data based on page.
@@ -71,9 +72,10 @@ const HSCodeInfiniteScroll = () => {
   };
 
   const handleSearchButtonClick = () => {
-    setSearch(searchText);
+    setSearch(searchText); // Pass the text value from the input
+    setCurrentPage(1); // Optional: reset to page 1 when searching
   };
-
+  
   // Setup Intersection Observer for infinite scrolling.
   const observer = useRef();
   const loaderRef = useCallback(

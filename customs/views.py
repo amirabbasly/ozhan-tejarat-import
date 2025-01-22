@@ -101,13 +101,13 @@ class HSCodeImportView(APIView):
         df = pd.read_excel(
             excel_file,
             dtype={
-                "TableNumberFix": str,  # Preserve leading zeros in the code
+                "code": str,  # Preserve leading zeros in the code
                 # Add additional columns if needed.
             }
         )
 
         for _, row in df.iterrows():
-            code = row.get('TableNumberFix', '')
+            code = row.get('code', '')
             if not code:
                 continue
 
@@ -134,12 +134,13 @@ class HSCodeImportView(APIView):
             HSCode.objects.update_or_create(
                 code=code,
                 defaults={
-                    "goods_name_en": row.get('TableKalaNameEN', ''),
-                    "goods_name_fa": row.get('TableKalaName', ''),
-                    "profit": row.get('TableCommercialbenefit', 0),
-                    "SUQ": row.get('TableSUQ', ''),
+                    "goods_name_fa": row.get('title', ''),
+                    "goods_name_en": row.get('titleEn', ''),
+                    "profit": row.get('tradeBenefit', 0),
+                    "SUQ": row.get('suq', ''),
                     "priority": row.get('commodityPriority', None),
-                    "customs_duty_rate": row.get('TableVorodi', None),
+                    "import_duty_rate": row.get('importDuty', None),
+                    "customs_duty_rate": row.get('customsDuties', None),
                     "season": season,
                     "heading": heading,
                 }
@@ -194,7 +195,6 @@ class FetchAndUpdateHSCodeView(APIView):
             hscode, created = HSCode.objects.get_or_create(code=tariff_data.get("code", tariff_code))
 
             # 5. Update HSCode fields
-            hscode.goods_name_fa = tariff_data.get("persianDescription", hscode.goods_name_fa)
             hscode.goods_name_en = tariff_data.get("englishDescription", hscode.goods_name_en)
             import_duty = tariff_data.get("importDuty", hscode.import_duty_rate)
 
@@ -320,7 +320,6 @@ class FetchAndUpdateHSCodeView(APIView):
                 {
                     "detail": "HSCode updated successfully.",
                     "HSCode": hscode.code,
-                    "goods_name_fa": hscode.goods_name_fa,
                     "goods_name_en": hscode.goods_name_en,
                     "commercials": [
                         {

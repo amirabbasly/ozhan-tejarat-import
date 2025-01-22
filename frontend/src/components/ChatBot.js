@@ -72,7 +72,11 @@ const Chatbot = () => {
                     <ChatBubble key={index} sender={msg.sender} text={msg.text} />
                 ))}
             </div>
+            
             <div style={styles.inputContainer}>
+            <button className="btn-grad" onClick={sendMessage} style={styles.button}>
+                    Send
+                </button>
                 <input
                     type="text"
                     value={userInput}
@@ -81,9 +85,7 @@ const Chatbot = () => {
                     placeholder="پیام خود را بنویسید..."
                     style={styles.input}
                 />
-                <button className="btn-grad" onClick={sendMessage} style={styles.button}>
-                    Send
-                </button>
+
             </div>
         </div>
     );
@@ -111,7 +113,7 @@ const styles = {
     },
     input: {
         flex: "1",
-        padding: "10px",
+        padding: "6px",
         borderRadius: "8px",
         border: "1px solid #ccc",
         marginRight: "10px",

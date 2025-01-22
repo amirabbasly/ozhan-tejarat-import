@@ -2,6 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { HSCodeList } from "../actions/hscodeActions";
 import "./HSCodeList.css";
+
+// Single update (actually bulk) component
+import HSCodeUpdateBulk from "./HSCodeUpdateBulk";
 import PaginationControls from "./PaginationControls";
 
 const HSCodeListComponent = () => {
@@ -21,67 +24,66 @@ const HSCodeListComponent = () => {
   const [customsDutyRate, setCustomsDutyRate] = useState("");
   const [suq, setSuq] = useState("");
 
-  // ----------------------------------------
-  // Search: We store two states:
-  // 1) searchText: user typing in the input
-  // 2) search: the actual search param we send to backend
-  // ----------------------------------------
+  // Search
   const [searchText, setSearchText] = useState("");
-  const [search, setSearch] = useState("");
+  const [query, setQuery] = useState("");
 
-  // Options for filters (example)
-  const profitOptions = ["", "0", "1", "4", "6", "9", "11", "16", "18", "28", "51"];
-  const priorityOptions = ["", "2", "4", "21", "22", "23", "24", "25", "26", "27"];
-  const cdrOptions = ["", "4", "1"];
-  const suqOptions = ["", "Kg", "L", "U", "m", "m2"];
+  // Array of selected HS code IDs
+  const [selectedCodes, setSelectedCodes] = useState([]);
 
-  // ----------------------------------------
-  // Only re-fetch data when page/size or filters or "search" changes 
-  // (NOT on every keystroke).
-  // ----------------------------------------
   useEffect(() => {
     const filters = {
       profit,
       priority,
       customsDutyRate,
       suq,
-      search, // we only update "search" when user clicks the search button
+      search: query,  // using the renamed variable
     };
+    console.log("Dispatching filters:", filters);
+
     dispatch(HSCodeList(currentPage, pageSize, filters));
-  }, [
-    dispatch,
-    currentPage,
-    pageSize,
-    profit,
-    priority,
-    customsDutyRate,
-    suq,
-    search, // If the user hits the Search button, "search" changes => fetch
-  ]);
+  }, [dispatch, currentPage, pageSize, profit, priority, customsDutyRate, suq, query]);
+  
 
   // Pagination
   const handlePageChange = (e) => setCurrentPage(Number(e.target.value));
-  const handleNextPage = () => { if (next) setCurrentPage((prev) => prev + 1); };
-  const handlePreviousPage = () => { if (previous) setCurrentPage((prev) => prev - 1); };
+  const handleNextPage = () => {
+    if (next) setCurrentPage((prev) => prev + 1);
+  };
+  const handlePreviousPage = () => {
+    if (previous) setCurrentPage((prev) => prev - 1);
+  };
   const handlePageSizeChange = (e) => {
     setPageSize(Number(e.target.value));
     setCurrentPage(1);
   };
 
-  // Filter helper
+  // Filter
   const handleFilterChange = (e, setter) => {
     setter(e.target.value);
     setCurrentPage(1);
   };
 
-  // ----------------------------------------
-  // When user clicks "Search", update `search` from `searchText`
-  // This triggers the useEffect => re-fetch with new search param
-  // ----------------------------------------
   const handleSearchButtonClick = () => {
-    setSearch(searchText);
-    setCurrentPage(1); // If desired, reset to first page
+    setQuery(searchText);
+    setCurrentPage(1);
   };
+
+  // Toggle selection for a given HS code ID
+  const handleCheckboxChange = (id) => {
+    setSelectedCodes((prevSelected) => {
+      if (prevSelected.includes(id)) {
+        // remove from list
+        return prevSelected.filter((codeId) => codeId !== id);
+      } else {
+        // add to list
+        return [...prevSelected, id];
+      }
+    });
+  };
+
+  // Clear all selections if needed
+  const clearSelections = () => setSelectedCodes([]);
 
   return (
     <div className="hscode-list">
@@ -95,9 +97,11 @@ const HSCodeListComponent = () => {
           type="text"
           placeholder="Type your search..."
           value={searchText}
-          onChange={(e) => setSearchText(e.target.value)} // just local
+          onChange={(e) => setSearchText(e.target.value)}
         />
-        <button className="btn-grad" onClick={handleSearchButtonClick}>Search</button>
+        <button className="btn-grad" onClick={handleSearchButtonClick}>
+          Search
+        </button>
       </div>
 
       {/* FILTER SECTION */}
@@ -105,7 +109,7 @@ const HSCodeListComponent = () => {
         <div className="filter-row">
           <label>سود بازگانی:</label>
           <select value={profit} onChange={(e) => handleFilterChange(e, setProfit)}>
-            {profitOptions.map((val) => (
+            {["", "0", "1", "4", "6", "9", "11", "16", "18", "28", "51"].map((val) => (
               <option key={val} value={val}>
                 {val === "" ? "همه" : val}
               </option>
@@ -115,7 +119,7 @@ const HSCodeListComponent = () => {
         <div className="filter-row">
           <label>الویت:</label>
           <select value={priority} onChange={(e) => handleFilterChange(e, setPriority)}>
-            {priorityOptions.map((val) => (
+            {["", "2", "4", "21", "22", "23", "24", "25", "26", "27"].map((val) => (
               <option key={val} value={val}>
                 {val === "" ? "همه" : val}
               </option>
@@ -124,8 +128,11 @@ const HSCodeListComponent = () => {
         </div>
         <div className="filter-row">
           <label>حقوق گمرکی:</label>
-          <select value={customsDutyRate} onChange={(e) => handleFilterChange(e, setCustomsDutyRate)}>
-            {cdrOptions.map((val) => (
+          <select
+            value={customsDutyRate}
+            onChange={(e) => handleFilterChange(e, setCustomsDutyRate)}
+          >
+            {["", "4", "1"].map((val) => (
               <option key={val} value={val}>
                 {val === "" ? "همه" : val}
               </option>
@@ -135,7 +142,7 @@ const HSCodeListComponent = () => {
         <div className="filter-row">
           <label>واحد:</label>
           <select value={suq} onChange={(e) => handleFilterChange(e, setSuq)}>
-            {suqOptions.map((val) => (
+            {["", "Kg", "L", "U", "m", "m2"].map((val) => (
               <option key={val} value={val}>
                 {val === "" ? "همه" : val}
               </option>
@@ -151,7 +158,6 @@ const HSCodeListComponent = () => {
       {/* TABLE + PAGINATION */}
       {!loading && !error && hscodeList && hscodeList.length > 0 ? (
         <>
-          {/* TOP PAGINATION */}
           <PaginationControls
             currentPage={currentPage}
             totalPages={totalPages}
@@ -168,33 +174,42 @@ const HSCodeListComponent = () => {
           <table className="hscode-table">
             <thead>
               <tr>
+                <th>Select</th>
                 <th>Code</th>
                 <th>Goods Name (FA)</th>
                 <th>Goods Name (EN)</th>
                 <th>سود بازرگانی</th>
                 <th>حقوق گمرکی</th>
                 <th>الویت</th>
+                <th>تاریخ آپدیت</th>
+                <th>آپدیت شده</th>
                 <th>واحد</th>
               </tr>
             </thead>
             <tbody>
               {hscodeList.map((hscode) => (
                 <tr key={hscode.id}>
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={selectedCodes.includes(hscode.code)}
+                      onChange={() => handleCheckboxChange(hscode.code)}
+                    />
+                  </td>
                   <td>{hscode.code}</td>
                   <td>{hscode.goods_name_fa}</td>
                   <td>{hscode.goods_name_en}</td>
-
                   <td>{hscode.profit}</td>
                   <td>{hscode.customs_duty_rate}</td>
                   <td>{hscode.priority}</td>
+                  <td>{hscode.updated_date}</td>
+                  <td>{hscode.updated_by}</td>
                   <td>{hscode.SUQ}</td>
-   
                 </tr>
               ))}
             </tbody>
           </table>
 
-          {/* BOTTOM PAGINATION */}
           <PaginationControls
             currentPage={currentPage}
             totalPages={totalPages}
@@ -207,6 +222,18 @@ const HSCodeListComponent = () => {
             onPreviousPage={handlePreviousPage}
             onPageSizeChange={handlePageSizeChange}
           />
+
+          {/* SINGLE Update Component for ALL selected rows */}
+          <div style={{ marginTop: "2rem" }}>
+          <HSCodeUpdateBulk codes={selectedCodes} />
+
+            {/* Optional: Button to clear selections */}
+            {selectedCodes.length > 0 && (
+              <button onClick={clearSelections} style={{ marginTop: "1rem" }}>
+                Clear Selections
+              </button>
+            )}
+          </div>
         </>
       ) : (
         !loading && <p className="no-data">No HSCode data available.</p>

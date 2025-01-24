@@ -25,7 +25,6 @@ const AddOrder = () => {
     prf_freight_price:'',
     FOB:'',
     prf_total_price: '',
-    prf_seller_name:'',
     prf_seller_country: '',
     prf_status:'',
     prfVCodeInt:'',
@@ -106,6 +105,16 @@ const AddOrder = () => {
     setFormData({ ...formData, prf_status: selectedOption ? selectedOption.value : '' });
     setErrors({ ...errors, prf_status: '' }); // Clear error for status
   };
+
+  // Auto calculate prf_total_price whenever prf_freight_price or FOB changes
+  useEffect(() => {
+    const freightPrice = parseFloat(formData.prf_freight_price) || 0;
+    const fobPrice = parseFloat(formData.FOB) || 0;
+    setFormData((prevState) => ({
+      ...prevState,
+      prf_total_price: (freightPrice + fobPrice).toFixed(2),
+    }));
+  }, [formData.prf_freight_price, formData.FOB]);
 
   return (
     <form className="cottage-form" onSubmit={handleSubmit}>
@@ -196,18 +205,9 @@ const AddOrder = () => {
           onChange={handleChange}
           placeholder="ارزش کل"
           required
+          readOnly
         />
-        
-        <span>نام فروشنده</span>
-        <input
-          type="text"
-          name="prf_seller_name"
-          value={formData.prf_seller_name}
-          onChange={handleChange}
-          placeholder="نام فروشنده"
-          required
-        />
-        
+      
         <span>کشور فروشنده</span>
         <input
           type="text"

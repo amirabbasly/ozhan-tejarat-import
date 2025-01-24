@@ -5,15 +5,21 @@ import {
   updateCottageCurrencyPrice,
   deleteCottages,
 } from "../actions/cottageActions";
+import { fetchOrders } from "../actions/performaActions";
 import { Link, useNavigate } from "react-router-dom";
 
 import "./CottageList.css";
 import PaginationControls from "./PaginationControls"; // <-- Import your component
+import Select from 'react-select';
 
 const CottageList = () => {
   const navigate = useNavigate();
   const auth = useSelector((state) => state.auth);
-
+  const orders = useSelector((state) => state.order.orders)
+  const orderOptions = orders.map((order) => ({
+    value: order.prf_order_no,
+    label: order.prf_order_no,
+  }));
   useEffect(() => {
     if (auth.isAuthenticated === false) {
       navigate("/");
@@ -22,10 +28,10 @@ const CottageList = () => {
 
   const dispatch = useDispatch();
   const [searchText, setSearchText] = useState("");
-  const [search, setSearch] = useState("");
+  const [query, setQuery] = useState("");
 
   const handleSearchButtonClick = () => {
-    setSearch(searchText);
+    setQuery(searchText);
     setCurrentPage(1); // optional: reset to page 1 when searching
   };
 
@@ -45,11 +51,20 @@ const CottageList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(50); // or 50, or your default
   const totalPages = Math.ceil(count / pageSize); // For the dropdown in PaginationControls
+  const [cottageStatus, setCottageStatus] = useState("");
+  const [prfOrderNo, setPrfOrderNo] = useState("");
 
   // On mount or on `currentPage` change, fetch that page
   useEffect(() => {
-    dispatch(fetchCottages(currentPage, pageSize, search));
-  }, [dispatch, currentPage, pageSize, search]);
+    dispatch(fetchOrders());
+    const filters = {
+      search: query,  // using the renamed variable
+      cottage_status: cottageStatus,
+      prfOrderNo
+    };
+    console.log("Dispatching filters:", filters);
+    dispatch(fetchCottages(currentPage, pageSize, filters));
+  }, [dispatch, currentPage, pageSize , query, cottageStatus,prfOrderNo]);
 
   // If currency updates are done, refetch
   useEffect(() => {
@@ -61,6 +76,10 @@ const CottageList = () => {
   // We define booleans for enabling next/prev based on the presence of `next`/`previous`
   const hasNext = !!next;
   const hasPrevious = !!previous;
+  const handleFilterChange = (e, setter) => {
+    setter(e.target.value);
+    setCurrentPage(1);
+  };
 
   // If you want the user to pick a page from a dropdown:
   const handlePageChange = (e) => {
@@ -180,6 +199,32 @@ const CottageList = () => {
             placeholder="نرخ ارز را وارد کنید"
           />
         </div>
+{/*
+        <div className="filter-row">
+          <label>سود بازگانی:</label>
+          <select value={cottageStatus} onChange={  (e) => handleFilterChange(e, setCottageStatus)}>
+            {["", "0", "1", "4", "6", "9", "11", "16", "18", "28", "51"].map((val) => (
+              <option key={val} value={val}>
+                {val === "" ? "همه" : val}
+              </option>
+            ))}
+          </select>
+        </div> */}
+
+        <Select
+  name="proforma"
+  className="selectPrf"
+  value={orderOptions.find((option) => option.value === prfOrderNo) || null} // Match the object
+  onChange={(selectedOption) => setPrfOrderNo(selectedOption ? selectedOption.value : "")} // Update state correctly
+  options={orderOptions}
+  isLoading={loading}
+  isClearable
+  placeholder={loading ? "در حال بارگذاری..." : error ? "خطا در بارگذاری" : "انتخاب سفارش"}
+  noOptionsMessage={() =>
+    !loading && !error ? "سفارشی موجود نیست" : "در حال بارگذاری..."
+  }
+/>
+
         <button
           className="primary-button"
           onClick={handleApplyCurrencyPrice}

@@ -69,16 +69,17 @@ export const fetchExportCottagesFailure = (error) => ({
     payload: error,
 });
 
-export const fetchCottages = (page = 1, pageSize = 10, search = "") => async (dispatch) => {
+export const fetchCottages = (page = 1, pageSize = 50, filters = {}) => async (dispatch) => {
   dispatch(fetchCottagesRequest());
   try {
     const params = new URLSearchParams();
     params.append("page", page);
     params.append("page_size", pageSize);
-    if (search) {
-      params.append("search", search); // pass the search param
-    }
-
+    if (filters.prfOrderNo) params.append("proforma", filters.prfOrderNo);
+    if (filters.cottage_status) params.append("cottage_status", filters.cottage_status);
+    
+    // NEW: add 'search' if it exists
+    if (filters.search) params.append("search", filters.search);
     const response = await axiosInstance.get(`cottages/?` + params.toString());
     // The response is assumed to have { count, next, previous, results }
     dispatch(fetchCottagesSuccess(response.data));

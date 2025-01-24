@@ -15,7 +15,7 @@ def import_performa_from_excel(file_path):
     """
     # Load Excel file
     data = pd.read_excel(file_path)
-    
+
     # Define required columns with their expected Persian names
     required_columns = {
         'prf_order_no': 'شماره سفارش',
@@ -32,7 +32,7 @@ def import_performa_from_excel(file_path):
         'registrant': 'ثبت‌کننده',
         'remaining_total': 'باقیمانده',
     }
-    
+
     # Check if all required columns are in the Excel file
     if not all(col in data.columns for col in required_columns.values()):
         raise ValueError(f"Excel file is missing required columns: {list(required_columns.values())}")
@@ -42,21 +42,25 @@ def import_performa_from_excel(file_path):
 
     records = []
     with transaction.atomic():
-        for _, row in data.iterrows():
+        for index, row in data.iterrows():
             try:
                 # Parse Jalali dates and handle missing values
                 prf_date = row.get(required_columns['prf_date'])
                 prf_expire_date = row.get(required_columns['prf_expire_date'])
 
-
+                # Convert numeric fields to float before Decimal
+                prf_freight_price = Decimal(float(row[required_columns['prf_freight_price']]))
+                FOB = Decimal(float(row[required_columns['FOB']]))
+                prf_total_price = Decimal(float(row[required_columns['prf_total_price']]))
+                remaining_total = Decimal(float(row[required_columns['remaining_total']]))
 
                 # Create Performa instance
                 performa = Performa(
                     prf_order_no=row[required_columns['prf_order_no']],
                     prf_number=row[required_columns['prf_number']],
-                    prf_freight_price=Decimal(row[required_columns['prf_freight_price']]),
-                    FOB=Decimal(row[required_columns['FOB']]),
-                    prf_total_price=Decimal(row[required_columns['prf_total_price']]),
+                    prf_freight_price=prf_freight_price,
+                    FOB=FOB,
+                    prf_total_price=prf_total_price,
                     prf_currency_type=row[required_columns['prf_currency_type']],
                     prf_seller_country=row[required_columns['prf_seller_country']],
                     prf_status=row[required_columns['prf_status']],
@@ -64,16 +68,15 @@ def import_performa_from_excel(file_path):
                     prf_expire_date=prf_expire_date,
                     prfVCodeInt=row[required_columns['prfVCodeInt']],
                     registrant=row[required_columns['registrant']],
-                    remaining_total=row[required_columns['remaining_total']],
-                    
+                    # Set remaining_total to prf_total_price when creating a new Performa
+                    remaining_total=prf_total_price if pd.isnull(remaining_total) else remaining_total,
                 )
                 records.append(performa)
             except Exception as e:
-                raise ValueError(f"Error processing row {_ + 1}: {e}")
+                raise ValueError(f"Error processing row {index + 1}: {e}")
 
         # Bulk create all Performa objects
         Performa.objects.bulk_create(records)
-
 
 def get_performa_combined_data(selected_year):
     yearly_totals = defaultdict(Decimal)       # Yearly total prices

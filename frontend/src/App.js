@@ -30,6 +30,8 @@ import HSCodeUpdate from './components/HSCodeUpdate';
 import HSCodeListComponent from './components/HSCodeList';
 import HSCodeInfiniteScroll from './components/HSCodeInfiniteScroll';
 import ImportComponent from './components/ImportHeadings';
+import ImportExcelCottages from './components/ImportCottages';
+
 // Import Redux Provider and store
 import { Provider } from 'react-redux';
 import store from './store';
@@ -98,6 +100,14 @@ function AppContent() {
             element={
               <PrivateRoute>
                 <CottageListPage />
+              </PrivateRoute>
+            }
+          />
+                    <Route
+            path="/cottage-from-excel"
+            element={
+              <PrivateRoute>
+                <ImportExcelCottages />
               </PrivateRoute>
             }
           />

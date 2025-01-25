@@ -11,6 +11,10 @@ import { Link, useNavigate } from "react-router-dom";
 import "./CottageList.css";
 import PaginationControls from "./PaginationControls"; // <-- Import your component
 import Select from 'react-select';
+import DatePicker from 'react-multi-date-picker';
+import persian from "react-date-object/calendars/persian";
+import persian_fa from "react-date-object/locales/persian_fa";
+import moment from 'moment-jalaali';
 
 const CottageList = () => {
   const navigate = useNavigate();
@@ -20,6 +24,7 @@ const CottageList = () => {
     value: order.prf_order_no,
     label: order.prf_order_no,
   }));
+
   useEffect(() => {
     if (auth.isAuthenticated === false) {
       navigate("/");
@@ -51,20 +56,52 @@ const CottageList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(50); // or 50, or your default
   const totalPages = Math.ceil(count / pageSize); // For the dropdown in PaginationControls
-  const [cottageStatus, setCottageStatus] = useState("");
+  const [cottageDate, setCottageDate] = useState("");
+  const [cottageDateBefore, setCottageDateBefore] = useState("");
   const [prfOrderNo, setPrfOrderNo] = useState("");
+
+  // Optionally, keep the helper function or remove it
+  const convertToWesternDigits = (str) => {
+    if (typeof str !== 'string') return str;  // Safeguard
+    const easternDigits = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+    const westernDigits = ['0','1','2','3','4','5','6','7','8','9'];
+    return str.replace(/[۰-۹]/g, d => westernDigits[easternDigits.indexOf(d)]);
+  };
+
+  // Date change handler to ensure cottageDate is a string with English numerals
+// Handler for 'cottageDate'
+const handleCottageDateChange = (date) => {
+  if (date && date.format) {
+    setCottageDate(date.format("YYYY-MM-DD"));
+  } else {
+    setCottageDate("");
+  }
+};
+
+// Handler for 'cottageDateBefore'
+const handleCottageDateBeforeChange = (date) => {
+  if (date && date.format) {
+    setCottageDateBefore(date.format("YYYY-MM-DD"));
+  } else {
+    setCottageDateBefore("");
+  }
+};
+
 
   // On mount or on `currentPage` change, fetch that page
   useEffect(() => {
     dispatch(fetchOrders());
     const filters = {
       search: query,  // using the renamed variable
-      cottage_status: cottageStatus,
+      cottageDate: convertToWesternDigits(cottageDate),  // Use helper if necessary
+      cottageDateBefore:convertToWesternDigits(cottageDateBefore),
       prfOrderNo
     };
     console.log("Dispatching filters:", filters);
+    console.log("Cottage Date before sending:", filters.cottageDate);
+
     dispatch(fetchCottages(currentPage, pageSize, filters));
-  }, [dispatch, currentPage, pageSize , query, cottageStatus,prfOrderNo]);
+  }, [dispatch, currentPage, pageSize, query, cottageDate, prfOrderNo, cottageDateBefore]);
 
   // If currency updates are done, refetch
   useEffect(() => {
@@ -76,10 +113,6 @@ const CottageList = () => {
   // We define booleans for enabling next/prev based on the presence of `next`/`previous`
   const hasNext = !!next;
   const hasPrevious = !!previous;
-  const handleFilterChange = (e, setter) => {
-    setter(e.target.value);
-    setCurrentPage(1);
-  };
 
   // If you want the user to pick a page from a dropdown:
   const handlePageChange = (e) => {
@@ -147,6 +180,7 @@ const CottageList = () => {
       });
   };
 
+  
   const handleDeleteSelectedCottages = () => {
     if (!selectedCottages.length) {
       alert("لطفاً حداقل یک کوتاژ را انتخاب کنید.");
@@ -188,6 +222,46 @@ const CottageList = () => {
 
         {/* NO PROFORMA / DATE FILTERS ANYMORE */}
 
+        <div className="filter-container">
+          <Select
+            name="proforma"
+            className="filter-react-select"
+            value={orderOptions.find((option) => option.value === prfOrderNo) || null} // Match the object
+            onChange={(selectedOption) => setPrfOrderNo(selectedOption ? selectedOption.value : "")} // Update state correctly
+            options={orderOptions}
+            isLoading={loading}
+            isClearable
+            placeholder={loading ? "در حال بارگذاری..." : error ? "خطا در بارگذاری" : "انتخاب سفارش"}
+            noOptionsMessage={() =>
+              !loading && !error ? "سفارشی موجود نیست" : "در حال بارگذاری..."
+            }
+          />
+          <DatePicker
+            value={cottageDate}
+            onChange={handleCottageDateChange}  
+            calendar={persian}
+            locale={persian_fa}
+            format="YYYY-MM-DD"
+            numerals="en" 
+            placeholder="تاریخ شروع"
+            className="date-picker"
+            clearable
+            
+          />
+          <DatePicker
+            value={cottageDateBefore}
+            onChange={handleCottageDateBeforeChange}  
+            calendar={persian}
+            locale={persian_fa}
+            format="YYYY-MM-DD"
+            numerals="en" 
+            placeholder="تاریخ شروع"
+            className="date-picker"
+            clearable
+          />
+          
+        </div>
+
         {/* CURRENCY PRICE */}
         <div className="currency-price-section">
           <input
@@ -199,7 +273,7 @@ const CottageList = () => {
             placeholder="نرخ ارز را وارد کنید"
           />
         </div>
-{/*
+        {/*
         <div className="filter-row">
           <label>سود بازگانی:</label>
           <select value={cottageStatus} onChange={  (e) => handleFilterChange(e, setCottageStatus)}>
@@ -210,20 +284,6 @@ const CottageList = () => {
             ))}
           </select>
         </div> */}
-
-        <Select
-  name="proforma"
-  className="selectPrf"
-  value={orderOptions.find((option) => option.value === prfOrderNo) || null} // Match the object
-  onChange={(selectedOption) => setPrfOrderNo(selectedOption ? selectedOption.value : "")} // Update state correctly
-  options={orderOptions}
-  isLoading={loading}
-  isClearable
-  placeholder={loading ? "در حال بارگذاری..." : error ? "خطا در بارگذاری" : "انتخاب سفارش"}
-  noOptionsMessage={() =>
-    !loading && !error ? "سفارشی موجود نیست" : "در حال بارگذاری..."
-  }
-/>
 
         <button
           className="primary-button"
@@ -239,6 +299,7 @@ const CottageList = () => {
         >
           حذف کوتاژهای انتخاب شده
         </button>
+
 
         {/* LOADING/ERROR */}
         {loading && <p className="loading">در حال بارگذاری...</p>}

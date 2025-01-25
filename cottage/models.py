@@ -19,7 +19,7 @@ class Cottage(models.Model):
     rewatch = models.BooleanField(default=False)
     documents = models.FileField(null=True,blank=True )
     class Meta:
-        ordering = ["-id"] 
+        ordering = ["-cottage_date"] 
 
 
     def __str__(self):

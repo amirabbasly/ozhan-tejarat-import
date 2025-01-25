@@ -30,7 +30,6 @@ const HSCodeUpdate = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     let success = true;
     for (const tariffCode of formData.tariffCodes) {
       const data = {

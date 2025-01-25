@@ -42,3 +42,5 @@ class Performa(models.Model):
     @property
     def total_cottage_value(self):
         return self.cottages.aggregate(total=models.Sum('total_value'))['total'] or Decimal('0.00')
+    class Meta:
+        ordering = ["-prf_date"] 

@@ -76,8 +76,10 @@ export const fetchCottages = (page = 1, pageSize = 50, filters = {}) => async (d
     params.append("page", page);
     params.append("page_size", pageSize);
     if (filters.prfOrderNo) params.append("proforma", filters.prfOrderNo);
-    if (filters.cottage_status) params.append("cottage_status", filters.cottage_status);
-    
+    if (filters.cottageDateBefore) params.append("cottage_date_before", filters.cottageDateBefore);
+
+    if (filters.cottageDate) params.append("cottage_date_after", filters.cottageDate);
+
     // NEW: add 'search' if it exists
     if (filters.search) params.append("search", filters.search);
     const response = await axiosInstance.get(`cottages/?` + params.toString());

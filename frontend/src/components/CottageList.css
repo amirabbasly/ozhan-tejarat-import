@@ -64,9 +64,15 @@ border-top: 1px solid #a4a4a4;
 .filter-container {
   flex-wrap: wrap;
   display: flex;
-  justify-content: space-between;
+  justify-content: space-evenly;
   align-items: center;
   margin-bottom: 20px;
+
+}
+.rmdp-clear-button {
+  color: red;
+  font-size: 12px;
+  cursor: pointer;
 }
 
 
@@ -77,7 +83,8 @@ border-top: 1px solid #a4a4a4;
 .filter-container input {
   padding: 10px;
   margin-bottom: 30px;
-  width: 250px;
+  width: 100%;
+
 }
 
 .filter-select {
@@ -87,6 +94,11 @@ border-top: 1px solid #a4a4a4;
   border-radius: 4px;
   margin-bottom: 30px;
 }
+.filter-react-select {
+  width: 273px;
+  padding: 10px;
+   margin-bottom: 30px;
+ }
 
 .search-input:focus,
 .filter-select:focus {

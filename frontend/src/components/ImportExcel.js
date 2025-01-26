@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { importPerforma } from '../actions/performaActions';
+import './ImportComponents.css'; // <-- import the shared CSS
 
 const ImportExcel = () => {
   const dispatch = useDispatch();
@@ -14,17 +15,15 @@ const ImportExcel = () => {
 
   const handleImport = (e) => {
     e.preventDefault();
-
     if (!file) {
       alert('لطفاً یک فایل انتخاب کنید.');
       return;
     }
-
     dispatch(importPerforma(file));
   };
 
   return (
-    <div className="import-excel-container">
+    <div className="import-container">
       <h3>بارگذاری فایل اکسل</h3>
       <form onSubmit={handleImport}>
         <input

@@ -227,7 +227,7 @@ const CottageForm = () => {
         <button
           type="button"
           onClick={() => setShowGoodsForm(!showGoodsForm)}
-          className="add-goods-button"
+          className="btn-grad"
         >
           افزودن کالا
         </button>
@@ -305,7 +305,7 @@ const CottageForm = () => {
         placeholder="تخفیف"
         required
       />
-      <button type="button" onClick={addGood}>
+      <button type="button"  onClick={addGood}>
         افزودن
       </button>
 
@@ -325,7 +325,7 @@ const CottageForm = () => {
           </div>
         )}
       </div>
-      <button type="submit" className="submit-button" disabled={cottageCreation.loading}>
+      <button type="submit" className="btn-grad1" disabled={cottageCreation.loading}>
         {cottageCreation.loading ? 'در حال ایجاد...' : 'ایجاد کوتاژ'}
       </button>
     </form>

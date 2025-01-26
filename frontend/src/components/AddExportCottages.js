@@ -216,7 +216,7 @@ const handleChange = (e) => {
             
 
             
-            <button className="form-button" type="submit">ثبت</button>
+            <button className="btn-grad1" type="submit">ثبت</button>
         </form>
     );
 };

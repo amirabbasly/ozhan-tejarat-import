@@ -1,7 +1,7 @@
-// ImportExcelCottages.jsx (example)
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { importExportedCottagesAction } from '../actions/cottageActions';
+import './ImportComponents.css'; // <-- import the shared CSS
 
 const ImportExcelCottages = () => {
   const dispatch = useDispatch();
@@ -19,26 +19,26 @@ const ImportExcelCottages = () => {
       alert('Please select a file.');
       return;
     }
-
     dispatch(importExportedCottagesAction(file));
   };
 
   return (
-    <div>
+    <div className="import-container">
       <h3>دریافت اظهارنامه از اکسل</h3>
       <form onSubmit={handleImport}>
         <input
           type="file"
           accept=".xlsx, .xls"
           onChange={handleFileChange}
+          className="file-input"
         />
-        <button type="submit" disabled={loading}>
-          {loading ? 'در حال بارگزاری...' : 'بارگزاری'}
+        <button type="submit" className="import-button" disabled={loading}>
+          {loading ? 'Uploading...' : 'Upload'}
         </button>
       </form>
 
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      {success && <p style={{ color: 'green' }}>{success}</p>}
+      {error && <p className="error-message">{error}</p>}
+      {success && <p className="success-message">{success}</p>}
     </div>
   );
 };

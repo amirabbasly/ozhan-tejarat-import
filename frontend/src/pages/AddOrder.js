@@ -230,7 +230,7 @@ const AddOrder = () => {
         />
         {errors.prf_status && <div className="error">{errors.prf_status[0]}</div>}
       </div>
-      <button type="submit" className="submit-button" disabled={orderCreation.loading}>
+      <button type="submit" className="btn-grad1" disabled={orderCreation.loading}>
         {orderCreation.loading ? 'در حال ایجاد...' : 'ایجاد ثبت سفارش'}
       </button>
     </form>

@@ -152,6 +152,19 @@ const RegedOrderDetails = () => {
         )}
       </div>
       <div className="order-field">
+        <label>نرخ ارز:</label>
+        {editMode ? (
+          <input
+            type="number"
+            name="prf_currency_price"
+            value={formData.prf_currency_price || ''}
+            onChange={handleInputChange}
+          />
+        ) : (
+          <span>{order.prf_currency_price}</span>
+        )}
+      </div>
+      <div className="order-field">
         <label>باقیمانده سفارش:</label>
         {
                       order.remaining_total > -1

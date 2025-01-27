@@ -34,6 +34,7 @@ class PerformaSerializer(serializers.ModelSerializer):
             'FOB',
             'prf_total_price',
             'prf_currency_type',
+            'prf_currency_price',
             'prf_seller_country',
             'prf_status',
             'prf_date',  # Writable field
@@ -54,6 +55,7 @@ class PerformaListSerializer(serializers.ModelSerializer):
             'prf_number',
             'prf_total_price',
             'prf_currency_type',
+            'prf_currency_price',
             'prf_seller_country',
             'prf_status',
             'prf_date',  # Writable field

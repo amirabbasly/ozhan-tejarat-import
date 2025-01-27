@@ -178,6 +178,9 @@
                       <Link className="submenu-link" to="/checks">
                         <li className="submenu-item">لیست چک ها</li>
                       </Link>
+                      <Link className="submenu-link" to="/check-from-excel">
+                        <li className="submenu-item">ورود چک</li>
+                      </Link>                     
                     </ul>
                   )}
                 </li>
@@ -195,6 +198,9 @@
                       </Link>
                       <Link className="submenu-link" to="/representations">
                         <li className="submenu-item">لیست وکالتنامه ها</li>
+                      </Link>
+                      <Link className="submenu-link" to="/rep-from-excel">
+                        <li className="submenu-item">ورود وکالتنامه</li>
                       </Link>
                     </ul>
                   )}

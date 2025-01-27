@@ -18,6 +18,9 @@ import {
     UPDATE_CHECK_FAILURE,
     DELETE_CHECK_SUCCESS,
     DELETE_CHECK_FAILURE,
+    IMPORT_REPRESENTATION_REQUEST,
+    IMPORT_REPRESENTATION_SUCCESS,
+    IMPORT_REPRESENTATION_FAILURE
 
 } from './actionTypes';
 
@@ -141,3 +144,4 @@ export const deleteCheck = (id) => async (dispatch) => {
         });
     }
 };
+

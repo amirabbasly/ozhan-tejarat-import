@@ -255,7 +255,7 @@ const handleCottageDateBeforeChange = (date) => {
             locale={persian_fa}
             format="YYYY-MM-DD"
             numerals="en" 
-            placeholder="تاریخ شروع"
+            placeholder="تاریخ پایان"
             className="date-picker"
             clearable
           />

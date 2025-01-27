@@ -351,7 +351,7 @@ export const updateExportCottageDetails = (cottageId, updatedCottage, fullSerial
                 : error.message || 'Something went wrong';
   
       dispatch({
-        type: COTTAGE_UPDATE_FAILURE,
+        type: EXPORT_COTTAGE_UPDATE_FAILURE,
         payload: errorMsg,
       });
       dispatch({

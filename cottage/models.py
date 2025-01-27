@@ -26,6 +26,8 @@ class Cottage(models.Model):
         return f"Cottage {self.cottage_number} - {self.proforma}"
 
     def save(self, *args, **kwargs):
+        if not self.currency_price and self.proforma.prf_currency_price is not None:
+            self.currency_price = self.proforma.prf_currency_price
         with transaction.atomic():
             # Lock the related proforma for concurrency safety
             proforma = Performa.objects.select_for_update().get(prf_order_no=self.proforma.prf_order_no)

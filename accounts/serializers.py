@@ -1,7 +1,7 @@
 # accounts/serializers.py
 
 from rest_framework import serializers
-from .models import CustomUser
+from .models import CustomUser, Costumer
 from django.contrib.auth import authenticate
 
 class UserSerializer(serializers.ModelSerializer):
@@ -31,3 +31,9 @@ class LoginSerializer(serializers.Serializer):
         if user and user.is_active:
             return user
         raise serializers.ValidationError("Invalid credentials")
+
+class CostumerSerializer(serializers.ModelSerializer):
+    class Meta:
+
+        model = Costumer
+        fields = '__all__'

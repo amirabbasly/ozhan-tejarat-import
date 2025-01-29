@@ -49,3 +49,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+class Costumer(models.Model):
+    full_name = models.CharField(max_length=255, unique=True)
+    phone_number = models.CharField(max_length=100, null=True, blank=True)
+    national_code = models.CharField(max_length=100, null=True, blank=True, unique=True)

@@ -10,6 +10,9 @@ import {
     AUTH_ERROR,
     TOKEN_REFRESH_SUCCESS,
     TOKEN_REFRESH_FAIL,
+    FETCH_COSTUMER_LIST_REQUEST,
+    FETCH_COSTUMER_LIST_SUCCESS,
+    FETCH_COSTUMER_LIST_FAILURE
 } from './actionTypes';
 import axiosInstance from '../utils/axiosInstance';
 
@@ -102,6 +105,22 @@ export const refreshToken = () => async dispatch => {
         dispatch({
             type: TOKEN_REFRESH_FAIL,
             payload: err.response.data,
+        });
+    }
+};
+
+export const fetchCostumers = () => async (dispatch) => {
+    dispatch({ type: FETCH_COSTUMER_LIST_REQUEST });
+    try {
+        const response = await axiosInstance.get('accounts/costumer_list/');
+        dispatch({
+            type: FETCH_COSTUMER_LIST_SUCCESS,
+            payload: response.data,
+        });
+    } catch (error) {
+        dispatch({
+            type: FETCH_COSTUMER_LIST_FAILURE,
+            payload: error.response ? error.response.data.error : 'An error occurred.',
         });
     }
 };

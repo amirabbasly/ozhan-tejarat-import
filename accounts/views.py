@@ -1,10 +1,11 @@
 # accounts/views.py
+from rest_framework.viewsets import ModelViewSet
 
 from rest_framework import generics, permissions
 from rest_framework.response import Response
 from rest_framework import status
-from .models import CustomUser
-from .serializers import UserSerializer, LoginSerializer
+from .models import CustomUser, Costumer
+from .serializers import UserSerializer, LoginSerializer, CostumerSerializer
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
@@ -41,3 +42,14 @@ class UserRolesView(APIView):
 
     def get(self, request):
         return Response({'role': request.user.role})
+class costumerViewSet(ModelViewSet):
+    queryset = Costumer.objects.all()
+    serializer_class = CostumerSerializer
+class CostumerListView(APIView):
+    def get(self, request):
+        # Retrieve all Performa instances
+        costumers = Costumer.objects.all()
+        # Serialize the queryset
+        serializer = CostumerSerializer(costumers, many=True)
+        # Return the serialized data
+        return Response(serializer.data, status=status.HTTP_200_OK)

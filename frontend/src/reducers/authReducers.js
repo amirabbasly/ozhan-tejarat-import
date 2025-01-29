@@ -9,6 +9,9 @@ import {
     AUTH_ERROR,
     TOKEN_REFRESH_SUCCESS,
     TOKEN_REFRESH_FAIL,
+    FETCH_COSTUMER_LIST_REQUEST,
+    FETCH_COSTUMER_LIST_SUCCESS,
+    FETCH_COSTUMER_LIST_FAILURE
 } from '../actions/actionTypes';
 
 // Helper function to save tokens to localStorage
@@ -31,8 +34,13 @@ const initialState = {
     user: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null, // Parse user JSON
     error: null,
 };
+const initialCostumerState = {
+    loading: false,
+    error: null,
+    costumerList:[]
+}
 
-const authReducer = (state = initialState, action) => {
+export const authReducer = (state = initialState, action) => {
     const { type, payload } = action;
 
     switch (type) {
@@ -116,4 +124,19 @@ const authReducer = (state = initialState, action) => {
     }
 };
 
-export default authReducer;
+  export const costumerListReducer = (state = initialCostumerState, action) => {
+  switch (action.type) {
+    case FETCH_COSTUMER_LIST_REQUEST:
+      return { ...state, loading: true, error: null };
+    case FETCH_COSTUMER_LIST_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        error: null,
+        costumerList: action.payload,
+      };
+
+    default:
+      return state;
+  }
+};

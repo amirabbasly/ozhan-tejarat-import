@@ -31,6 +31,7 @@ class Check(models.Model):
     bank = models.CharField(max_length=255)
     is_paid = models.BooleanField(default=False)
     document = models.FileField(null=True, blank=True)
-
+    class Meta:
+        ordering = ["-id"] 
     def __str__(self):
         return f"Check by {self.issuer} for {self.issued_for}"

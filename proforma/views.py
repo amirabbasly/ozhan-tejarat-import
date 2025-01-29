@@ -142,6 +142,7 @@ class GUIDApiView(APIView):
                         'prf_seller_country': proforma_data.get('prfCountryNameStr'),
                         'registrant': proforma_data.get('registrant'),
                         'prf_order_no': prf_order_no,
+                        'bank_info': proforma_data.get('bnkNameStr'),
                         'prf_status': proforma_data.get('prfStatusStr'),
                         'activity': proforma_data.get('prfActiveStatusStr'),
                         # Add other fields as needed

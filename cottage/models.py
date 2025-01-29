@@ -3,6 +3,7 @@ from proforma.models import Performa
 from decimal import Decimal
 from django_jalali.db import models as jmodels
 from django.core.exceptions import ValidationError
+from accounts.models import Costumer
 
 class Cottage(models.Model):
     cottage_number = models.IntegerField(unique=True)
@@ -12,7 +13,7 @@ class Cottage(models.Model):
     total_value = models.DecimalField(max_digits=20, decimal_places=2)
     quantity = models.PositiveIntegerField()
     currency_price = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
-    cottage_customer = models.CharField(max_length=55,null=True, blank=True)
+    cottage_customer = models.ForeignKey(Costumer, on_delete=models.SET_NULL, null=True, blank=True)
     cottage_status = models.CharField(max_length=55,null=True, blank=True)
     rafee_taahod = models.BooleanField(default=False)
     docs_recieved = models.BooleanField(default=False)
@@ -120,3 +121,5 @@ class ExportedCottages(models.Model):
     currency_price = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
     declaration_status = models.CharField(max_length=55,null=True, blank=True)
     remaining_total = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
+    class Meta:
+        ordering = ["-id"] 

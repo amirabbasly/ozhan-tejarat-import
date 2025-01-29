@@ -94,9 +94,67 @@ const RegedOrderDetails = () => {
     <div className="order-details-container">
       <h2>جزئیات ثبت سفارش </h2>
       <div className="order-field">
-        <label>شماره سفارش:</label>
+        <label>شماره ثبت سفارش:</label>
         <span>{formData.prf_order_no}</span>
       </div>
+      <div className="order-field">
+        <label>شماره پرفورم:</label>
+        {editMode ? (
+          <input
+            type="text"
+            name="prf_number"
+            value={formData.prf_number || ''}
+            onChange={handleInputChange}
+          />
+        ) : (
+          <span>{order.prf_number}</span>
+        )}
+      </div>
+      
+      <div className="order-field">
+        <label>شماره پرونده:</label>
+        <span>{formData.prfVCodeInt}</span>
+      </div>
+      <div className="order-field">
+        <label>نوع کالا :</label>
+        {editMode ? (
+          <input
+            type="text"
+            name="goods_type"
+            value={formData.goods_type || ''}
+            onChange={handleInputChange}
+          />
+        ) : (
+          <span>{order.goods_type}</span>
+        )}
+      </div>
+      <div className="order-field">
+        <label>ابزار پرداخت:</label>
+        {editMode ? (
+          <input
+            type="number"
+            name="payment_instrument"
+            value={formData.payment_instrument || ''}
+            onChange={handleInputChange}
+          />
+        ) : (
+          <span>{order.payment_instrument}</span>
+        )}
+      </div>
+      <div className="order-field">
+        <label>اطلاعات بانک :</label>
+        {editMode ? (
+          <input
+            type="text"
+            name="bank_info"
+            value={formData.bank_info || ''}
+            onChange={handleInputChange}
+          />
+        ) : (
+          <span>{order.bank_info}</span>
+        )}
+      </div>
+      
 
       <div className="order-field">
         <label>FOB:</label>
@@ -126,7 +184,7 @@ const RegedOrderDetails = () => {
       </div>
       
       <div className="order-field">
-        <label>قیمت کل:</label>
+        <label>ارزش کل:</label>
         {editMode ? (
           <input
             type="number"
@@ -136,6 +194,28 @@ const RegedOrderDetails = () => {
           />
         ) : (
           <span>{order.prf_total_price}</span>
+        )}
+      </div>
+
+      <div className="order-field">
+        <label>باقیمانده سفارش:</label>
+        {
+                      order.remaining_total > -1
+                        ? `باقی مانده : ${new Intl.NumberFormat('fa-IR').format(order.remaining_total)}`
+                        : `مابع تفاوت : ${new Intl.NumberFormat('fa-IR').format(Math.abs(order.remaining_total))}`
+                    }
+      </div>
+      <div className="order-field">
+        <label>خریداری شده:</label>
+        {editMode ? (
+          <input
+            type="number"
+            name="purchased_total"
+            value={formData.purchased_total || ''}
+            onChange={handleInputChange}
+          />
+        ) : (
+          <span>{order.purchased_total}</span>
         )}
       </div>
       <div className="order-field">
@@ -165,12 +245,17 @@ const RegedOrderDetails = () => {
         )}
       </div>
       <div className="order-field">
-        <label>باقیمانده سفارش:</label>
-        {
-                      order.remaining_total > -1
-                        ? `باقی مانده : ${new Intl.NumberFormat('fa-IR').format(order.remaining_total)}`
-                        : `مابع تفاوت : ${new Intl.NumberFormat('fa-IR').format(Math.abs(order.remaining_total))}`
-                    }
+        <label>ریال واریزی:</label>
+        {editMode ? (
+          <input
+            type="number"
+            name="rial_deposit"
+            value={formData.rial_deposit || ''}
+            onChange={handleInputChange}
+          />
+        ) : (
+          <span>{order.rial_deposit}</span>
+        )}
       </div>
       <div className="order-field">
         <label>کشور فروشنده:</label>
@@ -217,10 +302,7 @@ const RegedOrderDetails = () => {
     <span>{order.prf_expire_date}</span>
   )}
 </div>
-      <div className="order-field">
-        <label>شماره پرونده:</label>
-        <span>{formData.prfVCodeInt}</span>
-      </div>
+
       <div className="order-buttons">
         {editMode ? (
           <button className="primary-button" onClick={handleSaveClick}>ذخیره</button>

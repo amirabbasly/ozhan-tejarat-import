@@ -204,11 +204,12 @@
                       </Link>
                     </ul>
                   )}
-                </li>
+                  
+                </li>{/* 
                   <Link className='submenu-link' to="/chatbot">
                   <li className="submenu-item">
                      مشاور هوش مصنوعی
-                  </li></Link>
+                  </li></Link>*/}
                 </ul>
 
               )}

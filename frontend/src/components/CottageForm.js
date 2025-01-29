@@ -7,6 +7,7 @@ import persian_fa from "react-date-object/locales/persian_fa";
 import Select from 'react-select';
 import { fetchOrders } from '../actions/performaActions'; 
 import { createCottage } from '../actions/cottageActions';
+import { fetchCostumers } from '../actions/authActions';
 import { RESET_COTTAGE_CREATION } from '../actions/actionTypes';
 
 const CottageForm = () => {
@@ -43,6 +44,8 @@ const CottageForm = () => {
   // Fetch orders when the component mounts
   useEffect(() => {
     dispatch(fetchOrders());
+    dispatch(fetchCostumers());
+   
   }, [dispatch]);
 
   // Handle input changes for cottage form

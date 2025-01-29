@@ -28,6 +28,11 @@ const AddOrder = () => {
     prf_seller_country: '',
     prf_status:'',
     prfVCodeInt:'',
+    payment_instrument:'',
+    purchased_total:'',
+    bank_info:'',
+    rial_deposit:'',
+
   });
 
   const [errors, setErrors] = useState({}); // For backend validation errors
@@ -79,6 +84,11 @@ const AddOrder = () => {
         prf_seller_country: '',
         prf_status:'',
         prfVCodeInt:'',
+        payment_instrument:'',
+        purchased_total:'',
+        bank_info:'',
+        rial_deposit:'',
+
       });
       alert('سفارش با موفقیت ایجاد شد!');
       navigate('/reged-orders');
@@ -177,7 +187,14 @@ const AddOrder = () => {
           required
         />
         {errors.prf_number && <div className="add-error">{errors.prf_number[0]}</div>}
-
+        <span>ابزار پرداخت</span>
+        <input
+          type="number"
+          name="payment_instrument"
+          value={formData.payment_instrument}
+          onChange={handleChange}
+          placeholder="ابزار پرداخت"
+        />
         <span>FOB</span>
         <input
           type="number"
@@ -207,6 +224,22 @@ const AddOrder = () => {
           required
           readOnly
         />
+                <span>خرید شده</span>
+        <input
+          type="number"
+          name="purchased_total"
+          value={formData.purchased_total}
+          onChange={handleChange}
+          placeholder="ارزش کل خریداری شده"
+        />
+              <span>ریال واریزی</span>
+        <input
+          type="number"
+          name="rial_deposit"
+          value={formData.rial_deposit}
+          onChange={handleChange}
+          placeholder="ریال واریزی"
+        />
       
         <span>کشور فروشنده</span>
         <input
@@ -216,6 +249,15 @@ const AddOrder = () => {
           onChange={handleChange}
           placeholder="کشور فروشنده"
           required
+        />
+                <span>اطلاعات بانک</span>
+        <input
+          type="text"
+          name="bank_info"
+          value={formData.bank_info}
+          onChange={handleChange}
+          placeholder="اطلاعات بانک"
+          
         />
         
         <span>وضعیت</span>

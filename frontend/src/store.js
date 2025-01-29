@@ -12,7 +12,7 @@ import { dashboardReducer } from './reducers/dashboardReducers'
 import { notificationsReducer } from './reducers/notificationsReducer';
 import { hscodeReducer, hscodeListReducer, importHSReducer } from "./reducers/hscodeReducer";
 
-import authReducer from './reducers/authReducers';
+import {authReducer, costumerListReducer} from './reducers/authReducers';
 // Load initial parameters from localStorage
 const persistedParams = loadCustomsParams();
 
@@ -37,6 +37,7 @@ const rootReducer = combineReducers({
   hscode: hscodeReducer,
   hscodeList: hscodeListReducer,
   import: importHSReducer,
+  costumers: costumerListReducer,
 
 });
 

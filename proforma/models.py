@@ -15,7 +15,7 @@ class Performa(models.Model):
     FOB = models.DecimalField(max_digits=20, decimal_places=2, default=1)
     prf_total_price = models.DecimalField(max_digits=20, decimal_places=2, default=1)
     prf_currency_type = models.CharField(max_length=100, default="asd")
-    prf_currency_price = models.PositiveIntegerField(max_length=8, null=True, blank=True)
+    prf_currency_price = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
     prf_seller_country = models.CharField(max_length=255, default="asd")
     prf_status = models.CharField(max_length=50, default="asd")
     prf_date = jmodels.jDateField(null=True, blank=True)
@@ -23,6 +23,12 @@ class Performa(models.Model):
     prfVCodeInt = models.CharField(max_length=50, unique=True)
     remaining_total = models.DecimalField(max_digits=20, decimal_places=2, default=0)
     registrant = models.CharField(max_length=100)
+    goods_type = models.CharField(max_length=100, null=True, blank=True)
+    payment_instrument = models.CharField(max_length=100, null=True, blank=True)
+    bank_info = models.CharField(max_length=255, null=True, blank=True)
+    purchased_total = models.IntegerField(max_length=30, null=True, blank=True)
+    rial_deposit = models.BigIntegerField(max_length=50, null=True, blank=True)
+
 
 
     def save(self, *args, **kwargs):
@@ -34,7 +40,6 @@ class Performa(models.Model):
             )
         else:
             old_prf_currency_price = None
-        super().save(*args, **kwargs)
 
         if not self.pk:
             # If creating a new Performa, remaining_total is prf_total_price

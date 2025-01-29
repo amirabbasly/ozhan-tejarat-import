@@ -41,6 +41,11 @@ class PerformaSerializer(serializers.ModelSerializer):
             'prf_expire_date',  # Writable field
             'prfVCodeInt',
             'remaining_total',
+            'goods_type',
+            'payment_instrument',
+            'bank_info',
+            'purchased_total',
+            'rial_deposit',
             'cottages'  
         ]
 
@@ -62,5 +67,6 @@ class PerformaListSerializer(serializers.ModelSerializer):
             'prf_expire_date',  # Writable field
             'prfVCodeInt',
             'remaining_total',
+            
         ]
 

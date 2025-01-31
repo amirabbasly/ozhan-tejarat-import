@@ -12,7 +12,10 @@ import {
     TOKEN_REFRESH_FAIL,
     FETCH_COSTUMER_LIST_REQUEST,
     FETCH_COSTUMER_LIST_SUCCESS,
-    FETCH_COSTUMER_LIST_FAILURE
+    FETCH_COSTUMER_LIST_FAILURE,
+    CREATE_COSTUMER_REQUEST,
+    CREATE_COSTUMER_SUCCESS,
+    CREATE_COSTUMER_FAILURE
 } from './actionTypes';
 import axiosInstance from '../utils/axiosInstance';
 
@@ -112,7 +115,7 @@ export const refreshToken = () => async dispatch => {
 export const fetchCostumers = () => async (dispatch) => {
     dispatch({ type: FETCH_COSTUMER_LIST_REQUEST });
     try {
-        const response = await axiosInstance.get('accounts/costumer_list/');
+        const response = await axiosInstance.get('accounts/customer_list/');
         dispatch({
             type: FETCH_COSTUMER_LIST_SUCCESS,
             payload: response.data,

@@ -3,7 +3,7 @@ from django.urls import path, include
 from .views import RegisterView, LoginView, UserRolesView,costumerViewSet, CostumerListView
 from rest_framework_simplejwt.views import TokenRefreshView
 router = DefaultRouter()
-router.register('costumers', costumerViewSet, basename='costumers')
+router.register('customers', costumerViewSet, basename='costumers')
 
 urlpatterns = [
     path('', include(router.urls)),
@@ -11,7 +11,7 @@ urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('user_role/', UserRolesView.as_view(), name='user_role'),
-    path('costumer_list/', CostumerListView.as_view(), name='costumer_list'),
+    path('customer_list/', CostumerListView.as_view(), name='costumer_list'),
 
 
 ]

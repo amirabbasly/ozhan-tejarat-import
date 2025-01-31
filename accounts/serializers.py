@@ -34,6 +34,5 @@ class LoginSerializer(serializers.Serializer):
 
 class CostumerSerializer(serializers.ModelSerializer):
     class Meta:
-
         model = Costumer
-        fields = '__all__'
+        fields = ['id', 'full_name', 'phone_number', 'national_code']

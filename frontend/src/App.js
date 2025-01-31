@@ -1,47 +1,53 @@
 // src/App.js
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import React from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
 
 // Import your pages and components
-import Home from './pages/Home';
-import AddCottage from './pages/AddCottage';
-import CottageListPage from './pages/CottageListPage';
-import Navbar from './components/Navbar';
-import ImportProforma from './pages/ImportPrf';
-import CustomsDeclarationList from './components/CustomsDeclarationList';
-import CustomsDeclarationDetails from './components/CustomsDeclarationDetails';
-import CottageDetails from './pages/CottageDetails';
-import Login from './components/login';
-import RegedOrderList from './pages/RegedOrderList';
-import RegedOrderDetails from './components/RegedOrderDetails';
-import AddOrder from './pages/AddOrder';
-import RepresentationList from './components/RepresentationList';
-import RepresentationForm from './components/RepresentationForm';
-import CheckList from './components/ChecksList';
-import AddCheck from './components/AddCheck'
-import ExportCustomsDecList from './components/ExportCustomsDecList'
-import AllNotifications from './components/AllNotifications';
-import ExportCottageList from './components/ExportCottagesList';
-import AddExportCottages from './components/AddExportCottages';
-import ExportedCottageDetails from './pages/ExportedCottageDetails';
-import Chatbots from './components/ChatBot';
-import HSCodeImport from './components/HSCodeFromExcel';
-import HSCodeUpdate from './components/HSCodeUpdate';
-import HSCodeListComponent from './components/HSCodeList';
-import HSCodeInfiniteScroll from './components/HSCodeInfiniteScroll';
-import ImportComponent from './components/ImportHeadings';
-import ImportExcelCottages from './components/ImportCottages';
-import ImportRep from './components/RepresentationImport';
-import ImportCheck from './components/CheckImport';
+import Home from "./pages/Home";
+import AddCottage from "./pages/AddCottage";
+import CottageListPage from "./pages/CottageListPage";
+import Navbar from "./components/Navbar";
+import ImportProforma from "./pages/ImportPrf";
+import CustomsDeclarationList from "./components/CustomsDeclarationList";
+import CustomsDeclarationDetails from "./components/CustomsDeclarationDetails";
+import CottageDetails from "./pages/CottageDetails";
+import Login from "./components/login";
+import RegedOrderList from "./pages/RegedOrderList";
+import RegedOrderDetails from "./components/RegedOrderDetails";
+import AddOrder from "./pages/AddOrder";
+import RepresentationList from "./components/RepresentationList";
+import RepresentationForm from "./components/RepresentationForm";
+import CheckList from "./components/ChecksList";
+import AddCheck from "./components/AddCheck";
+import ExportCustomsDecList from "./components/ExportCustomsDecList";
+import AllNotifications from "./components/AllNotifications";
+import ExportCottageList from "./components/ExportCottagesList";
+import AddExportCottages from "./components/AddExportCottages";
+import ExportedCottageDetails from "./pages/ExportedCottageDetails";
+import Chatbots from "./components/ChatBot";
+import HSCodeImport from "./components/HSCodeFromExcel";
+import HSCodeUpdate from "./components/HSCodeUpdate";
+import HSCodeListComponent from "./components/HSCodeList";
+import HSCodeInfiniteScroll from "./components/HSCodeInfiniteScroll";
+import ImportComponent from "./components/ImportHeadings";
+import ImportExcelCottages from "./components/ImportCottages";
+import ImportRep from "./components/RepresentationImport";
+import ImportCheck from "./components/CheckImport";
 // Import Redux Provider and store
-import { Provider } from 'react-redux';
-import store from './store';
-import Forbidden from './components/Forbidden';
+import { Provider } from "react-redux";
+import store from "./store";
+import Forbidden from "./components/Forbidden";
+import CustomerCreateForm from "./components/CustomerCreateForm";
 
 // Import the PrivateRoute component
-import PrivateRoute from './components/PrivateRoute';
+import PrivateRoute from "./components/PrivateRoute";
 
-import './App.css';
+import "./App.css";
 
 function App() {
   return (
@@ -58,7 +64,7 @@ function AppContent() {
   const location = useLocation();
 
   // List of paths where the Navbar should not be displayed
-  const noNavbarRoutes = ['/login'];
+  const noNavbarRoutes = ["/login"];
 
   return (
     <>
@@ -80,7 +86,7 @@ function AppContent() {
               </PrivateRoute>
             }
           />
-            <Route
+          <Route
             path="/notifications/all"
             element={
               <PrivateRoute>
@@ -104,7 +110,7 @@ function AppContent() {
               </PrivateRoute>
             }
           />
-                    <Route
+          <Route
             path="/cottage-from-excel"
             element={
               <PrivateRoute>
@@ -112,7 +118,7 @@ function AppContent() {
               </PrivateRoute>
             }
           />
-                              <Route
+          <Route
             path="/rep-from-excel"
             element={
               <PrivateRoute>
@@ -120,7 +126,7 @@ function AppContent() {
               </PrivateRoute>
             }
           />
-                    <Route
+          <Route
             path="/export-cottages"
             element={
               <PrivateRoute>
@@ -128,7 +134,7 @@ function AppContent() {
               </PrivateRoute>
             }
           />
-                    <Route
+          <Route
             path="/reged-orders"
             element={
               <PrivateRoute>
@@ -160,7 +166,7 @@ function AppContent() {
               </PrivateRoute>
             }
           />
-                    <Route
+          <Route
             path="/chatbot"
             element={
               <PrivateRoute requiredRole="admin">
@@ -168,7 +174,7 @@ function AppContent() {
               </PrivateRoute>
             }
           />
-           <Route
+          <Route
             path="/export-decl"
             element={
               <PrivateRoute requiredRole="admin">
@@ -176,7 +182,7 @@ function AppContent() {
               </PrivateRoute>
             }
           />
-            <Route
+          <Route
             path="/add-order"
             element={
               <PrivateRoute>
@@ -184,7 +190,7 @@ function AppContent() {
               </PrivateRoute>
             }
           />
-           <Route
+          <Route
             path="/order-details/:prf_order_no"
             element={
               <PrivateRoute>
@@ -200,7 +206,7 @@ function AppContent() {
               </PrivateRoute>
             }
           />
-                    <Route
+          <Route
             path="/export-cottages/:fullSerialNumber"
             element={
               <PrivateRoute>
@@ -224,7 +230,7 @@ function AppContent() {
               </PrivateRoute>
             }
           />
-                    <Route
+          <Route
             path="/add-check"
             element={
               <PrivateRoute>
@@ -232,7 +238,7 @@ function AppContent() {
               </PrivateRoute>
             }
           />
-                              <Route
+          <Route
             path="/add-export"
             element={
               <PrivateRoute>
@@ -244,69 +250,86 @@ function AppContent() {
             path="/hscode-import"
             element={
               <PrivateRoute>
-                <HSCodeImport/>
+                <HSCodeImport />
               </PrivateRoute>
             }
           />
-                    <Route
+          <Route
             path="/check-from-excel"
             element={
               <PrivateRoute>
-                <ImportCheck/>
+                <ImportCheck />
               </PrivateRoute>
             }
           />
-                    <Route
-    path="/import-headings"
+          <Route
+            path="/import-headings"
             element={
               <PrivateRoute>
-                <ImportComponent endpoint="/customs/import-headings/" title="Import Headings" />
+                <ImportComponent
+                  endpoint="/customs/import-headings/"
+                  title="Import Headings"
+                />
               </PrivateRoute>
             }
           />
-                              <Route
-    path="/import-subheadings"
+          <Route
+            path="/import-subheadings"
             element={
               <PrivateRoute>
-                <ImportComponent endpoint="/customs/import-subheadings/" title="Import SubHeadings" />
+                <ImportComponent
+                  endpoint="/customs/import-subheadings/"
+                  title="Import SubHeadings"
+                />
               </PrivateRoute>
             }
           />
-                                        <Route
-    path="/import-seasons"
+          <Route
+            path="/import-seasons"
             element={
               <PrivateRoute>
-                <ImportComponent endpoint="/customs/import-seasons/" title="Import Seasons" />
+                <ImportComponent
+                  endpoint="/customs/import-seasons/"
+                  title="Import Seasons"
+                />
               </PrivateRoute>
             }
           />
-                    <Route
+          <Route
             path="/hscode-update"
             element={
               <PrivateRoute>
-                <HSCodeUpdate/>
+                <HSCodeUpdate />
               </PrivateRoute>
             }
           />
-          
+
           <Route
             path="/hscode-list"
             element={
               <PrivateRoute>
-                <HSCodeListComponent/>
+                <HSCodeListComponent />
               </PrivateRoute>
             }
           />
-           <Route
+          <Route
+            path="/new-customer"
+            element={
+              <PrivateRoute>
+                <CustomerCreateForm />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/hscode-inf"
             element={
               <PrivateRoute>
-                <HSCodeInfiniteScroll/>
+                <HSCodeInfiniteScroll />
               </PrivateRoute>
             }
           />
-          
-                    <Route
+
+          <Route
             path="/add-representation"
             element={
               <PrivateRoute>

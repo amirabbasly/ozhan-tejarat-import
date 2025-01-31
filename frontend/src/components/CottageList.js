@@ -10,16 +10,16 @@ import { Link, useNavigate } from "react-router-dom";
 
 import "./CottageList.css";
 import PaginationControls from "./PaginationControls"; // <-- Import your component
-import Select from 'react-select';
-import DatePicker from 'react-multi-date-picker';
+import Select from "react-select";
+import DatePicker from "react-multi-date-picker";
 import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
-import moment from 'moment-jalaali';
+import moment from "moment-jalaali";
 
 const CottageList = () => {
   const navigate = useNavigate();
   const auth = useSelector((state) => state.auth);
-  const orders = useSelector((state) => state.order.orders)
+  const orders = useSelector((state) => state.order.orders);
   const orderOptions = orders.map((order) => ({
     value: order.prf_order_no,
     label: order.prf_order_no,
@@ -62,46 +62,56 @@ const CottageList = () => {
 
   // Optionally, keep the helper function or remove it
   const convertToWesternDigits = (str) => {
-    if (typeof str !== 'string') return str;  // Safeguard
-    const easternDigits = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
-    const westernDigits = ['0','1','2','3','4','5','6','7','8','9'];
-    return str.replace(/[۰-۹]/g, d => westernDigits[easternDigits.indexOf(d)]);
+    if (typeof str !== "string") return str; // Safeguard
+    const easternDigits = ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"];
+    const westernDigits = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+    return str.replace(
+      /[۰-۹]/g,
+      (d) => westernDigits[easternDigits.indexOf(d)]
+    );
   };
 
   // Date change handler to ensure cottageDate is a string with English numerals
-// Handler for 'cottageDate'
-const handleCottageDateChange = (date) => {
-  if (date && date.format) {
-    setCottageDate(date.format("YYYY-MM-DD"));
-  } else {
-    setCottageDate("");
-  }
-};
+  // Handler for 'cottageDate'
+  const handleCottageDateChange = (date) => {
+    if (date && date.format) {
+      setCottageDate(date.format("YYYY-MM-DD"));
+    } else {
+      setCottageDate("");
+    }
+  };
 
-// Handler for 'cottageDateBefore'
-const handleCottageDateBeforeChange = (date) => {
-  if (date && date.format) {
-    setCottageDateBefore(date.format("YYYY-MM-DD"));
-  } else {
-    setCottageDateBefore("");
-  }
-};
-
+  // Handler for 'cottageDateBefore'
+  const handleCottageDateBeforeChange = (date) => {
+    if (date && date.format) {
+      setCottageDateBefore(date.format("YYYY-MM-DD"));
+    } else {
+      setCottageDateBefore("");
+    }
+  };
 
   // On mount or on `currentPage` change, fetch that page
   useEffect(() => {
     dispatch(fetchOrders());
     const filters = {
-      search: query,  // using the renamed variable
-      cottageDate: convertToWesternDigits(cottageDate),  // Use helper if necessary
-      cottageDateBefore:convertToWesternDigits(cottageDateBefore),
-      prfOrderNo
+      search: query, // using the renamed variable
+      cottageDate: convertToWesternDigits(cottageDate), // Use helper if necessary
+      cottageDateBefore: convertToWesternDigits(cottageDateBefore),
+      prfOrderNo,
     };
     console.log("Dispatching filters:", filters);
     console.log("Cottage Date before sending:", filters.cottageDate);
 
     dispatch(fetchCottages(currentPage, pageSize, filters));
-  }, [dispatch, currentPage, pageSize, query, cottageDate, prfOrderNo, cottageDateBefore]);
+  }, [
+    dispatch,
+    currentPage,
+    pageSize,
+    query,
+    cottageDate,
+    prfOrderNo,
+    cottageDateBefore,
+  ]);
 
   // If currency updates are done, refetch
   useEffect(() => {
@@ -180,7 +190,6 @@ const handleCottageDateBeforeChange = (date) => {
       });
   };
 
-  
   const handleDeleteSelectedCottages = () => {
     if (!selectedCottages.length) {
       alert("لطفاً حداقل یک کوتاژ را انتخاب کنید.");
@@ -210,14 +219,15 @@ const handleCottageDateBeforeChange = (date) => {
         {/* SIMPLE SEARCH BAR (NO FILTERING) */}
         <label>جستجو (کد/نام فارسی/نام انگلیسی):</label>
         <div className="search-bar">
-
           <input
             type="text"
             placeholder="Type your search..."
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
           />
-          <button className="btn-grad" onClick={handleSearchButtonClick}>Search</button>
+          <button className="btn-grad" onClick={handleSearchButtonClick}>
+            Search
+          </button>
         </div>
 
         {/* NO PROFORMA / DATE FILTERS ANYMORE */}
@@ -226,43 +236,52 @@ const handleCottageDateBeforeChange = (date) => {
           <Select
             name="proforma"
             className="filter-react-select"
-            value={orderOptions.find((option) => option.value === prfOrderNo) || null} // Match the object
-            onChange={(selectedOption) => setPrfOrderNo(selectedOption ? selectedOption.value : "")} // Update state correctly
+            value={
+              orderOptions.find((option) => option.value === prfOrderNo) || null
+            } // Match the object
+            onChange={(selectedOption) =>
+              setPrfOrderNo(selectedOption ? selectedOption.value : "")
+            } // Update state correctly
             options={orderOptions}
             isLoading={loading}
             isClearable
-            placeholder={loading ? "در حال بارگذاری..." : error ? "خطا در بارگذاری" : "انتخاب سفارش"}
+            placeholder={
+              loading
+                ? "در حال بارگذاری..."
+                : error
+                ? "خطا در بارگذاری"
+                : "انتخاب سفارش"
+            }
             noOptionsMessage={() =>
               !loading && !error ? "سفارشی موجود نیست" : "در حال بارگذاری..."
             }
           />
           <DatePicker
             value={cottageDate}
-            onChange={handleCottageDateChange}  
+            onChange={handleCottageDateChange}
             calendar={persian}
             locale={persian_fa}
             format="YYYY-MM-DD"
-            numerals="en" 
+            numerals="en"
             placeholder="تاریخ شروع"
             className="date-picker"
             clearable
-            
           />
           <DatePicker
             value={cottageDateBefore}
-            onChange={handleCottageDateBeforeChange}  
+            onChange={handleCottageDateBeforeChange}
             calendar={persian}
             locale={persian_fa}
             format="YYYY-MM-DD"
-            numerals="en" 
+            numerals="en"
             placeholder="تاریخ پایان"
             className="date-picker"
             clearable
           />
-          
         </div>
 
         {/* CURRENCY PRICE */}
+        {/* 
         <div className="currency-price-section">
           <input
             className="c-price-input"
@@ -273,7 +292,7 @@ const handleCottageDateBeforeChange = (date) => {
             placeholder="نرخ ارز را وارد کنید"
           />
         </div>
-        {/*
+     
         <div className="filter-row">
           <label>سود بازگانی:</label>
           <select value={cottageStatus} onChange={  (e) => handleFilterChange(e, setCottageStatus)}>
@@ -283,7 +302,7 @@ const handleCottageDateBeforeChange = (date) => {
               </option>
             ))}
           </select>
-        </div> */}
+        </div> 
 
         <button
           className="primary-button"
@@ -291,7 +310,7 @@ const handleCottageDateBeforeChange = (date) => {
           disabled={!selectedCottages.length || !currencyPrice}
         >
           ثبت نرخ ارز برای کوتاژهای انتخاب شده
-        </button>
+        </button>*/}
         <button
           onClick={handleDeleteSelectedCottages}
           disabled={!selectedCottages.length}
@@ -300,14 +319,14 @@ const handleCottageDateBeforeChange = (date) => {
           حذف کوتاژهای انتخاب شده
         </button>
 
-
         {/* LOADING/ERROR */}
         {loading && <p className="loading">در حال بارگذاری...</p>}
         {error && <p className="error">{error}</p>}
 
         {/* DISPLAY TABLE & PAGINATION */}
-        {!loading && !error && (
-          cottages.length === 0 ? (
+        {!loading &&
+          !error &&
+          (cottages.length === 0 ? (
             <p className="no-data">هیچ اظهارنامه ای یافت نشد.</p>
           ) : (
             <>
@@ -350,9 +369,11 @@ const handleCottageDateBeforeChange = (date) => {
                       (selectedCottage) => selectedCottage.id === cottage.id
                     );
                     const isUpdating =
-                      updatingCurrencyPrice && updatingCurrencyPrice[cottage.id];
+                      updatingCurrencyPrice &&
+                      updatingCurrencyPrice[cottage.id];
                     const updateError =
-                      updateCurrencyPriceError && updateCurrencyPriceError[cottage.id];
+                      updateCurrencyPriceError &&
+                      updateCurrencyPriceError[cottage.id];
 
                     return (
                       <tr key={cottage.id}>
@@ -370,7 +391,9 @@ const handleCottageDateBeforeChange = (date) => {
                         <td>{cottage.total_value}</td>
                         <td>
                           {isUpdating ? (
-                            <span className="loading">در حال به‌روزرسانی...</span>
+                            <span className="loading">
+                              در حال به‌روزرسانی...
+                            </span>
                           ) : updateError ? (
                             <span className="error">
                               {typeof updateError === "string"
@@ -408,8 +431,7 @@ const handleCottageDateBeforeChange = (date) => {
                 onPageSizeChange={handlePageSizeChange}
               />
             </>
-          )
-        )}
+          ))}
       </div>
     </div>
   );

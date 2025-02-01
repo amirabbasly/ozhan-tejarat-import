@@ -153,7 +153,7 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000", 
-    "http://192.168.8.187:3000", # React frontend URL
+    "http://172.20.20.199", # React frontend URL
 ]
 CORS_ALLOW_CREDENTIALS = True
 

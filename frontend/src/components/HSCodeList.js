@@ -162,7 +162,7 @@ const HSCodeListComponent = () => {
             currentPage={currentPage}
             totalPages={totalPages}
             pageSize={pageSize}
-            pageSizeOptions={[50, 100, 200, 500]}
+            pageSizeOptions={[40, 50, 100, 200, 500]}
             hasNext={!!next}
             hasPrevious={!!previous}
             onPageChange={handlePageChange}
@@ -214,7 +214,7 @@ const HSCodeListComponent = () => {
             currentPage={currentPage}
             totalPages={totalPages}
             pageSize={pageSize}
-            pageSizeOptions={[50, 100, 200, 500]}
+            pageSizeOptions={[40, 50, 100, 200, 500]}
             hasNext={!!next}
             hasPrevious={!!previous}
             onPageChange={handlePageChange}

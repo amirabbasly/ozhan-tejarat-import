@@ -207,7 +207,7 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 10000  # Increase the limit as needed
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'Ozhan',          # Your PostgreSQL database name
+        'NAME': 'ozhan',          # Your PostgreSQL database name
         'USER': 'postgres',        # Your PostgreSQL username
         'PASSWORD': '4li',     # Your PostgreSQL password
         'HOST': 'localhost',             # Database host (usually 'localhost' for local development)

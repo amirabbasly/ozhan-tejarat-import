@@ -207,7 +207,7 @@ const LineChartComponent = ({ prf_summary, selectedYear, onYearChange }) => {
             cursor: 'pointer',
           }}
         >
-          قیمت
+          ارزش
         </button>
         <button
           onClick={() => setDataType('count')}

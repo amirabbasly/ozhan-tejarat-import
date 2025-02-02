@@ -23,4 +23,14 @@ class CheckSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'file': {'required': False, 'allow_null':True},
         }
-    
+
+
+class SummarySerializer(serializers.Serializer):
+    passed_checks_count = serializers.IntegerField()
+    unpassed_checks_count = serializers.IntegerField()
+    passed_checks_value = serializers.IntegerField()
+    unpassed_checks_value = serializers.IntegerField()
+    past_representations_count = serializers.IntegerField()
+    unpast_representations_count = serializers.IntegerField()
+
+   

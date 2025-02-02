@@ -161,6 +161,8 @@ const AddOrder = () => {
           placeholder={errors.prf_order_no ? errors.prf_order_no[0] : "شماره ثبت سفارش"}
           className={errors.prf_order_no ? "error-input" : ""}
           required
+          min={0}
+
         />
         {errors.prf_order_no && <div className="add-error">{errors.prf_order_no[0]}</div>}
 
@@ -173,6 +175,8 @@ const AddOrder = () => {
           placeholder={errors.prfVCodeInt ? errors.prfVCodeInt[0] : "شماره پرونده"}
           className={errors.prfVCodeInt ? "error-input" : ""}
           required
+          min={0}
+
         />
         {errors.prfVCodeInt && <div className="add-error">{errors.prfVCodeInt[0]}</div>}
 
@@ -185,6 +189,7 @@ const AddOrder = () => {
           placeholder={errors.prf_number ? errors.prf_number[0] :"شماره پیش فاکتور"}
           className={errors.prfVCodeInt ? "error-input" : ""}
           required
+          
         />
         {errors.prf_number && <div className="add-error">{errors.prf_number[0]}</div>}
         <span>ابزار پرداخت</span>
@@ -194,6 +199,8 @@ const AddOrder = () => {
           value={formData.payment_instrument}
           onChange={handleChange}
           placeholder="ابزار پرداخت"
+          min={0}
+
         />
         <span>FOB</span>
         <input
@@ -203,6 +210,8 @@ const AddOrder = () => {
           onChange={handleChange}
           placeholder="FOB"
           required
+          min={0}
+
         />
         <span>کرایه حمل</span>
         <input
@@ -212,6 +221,8 @@ const AddOrder = () => {
           onChange={handleChange}
           placeholder="کرایه حمل"
           required
+          min={0}
+
         />
 
         <span>ارزش کل</span>
@@ -221,6 +232,7 @@ const AddOrder = () => {
           value={formData.prf_total_price}
           onChange={handleChange}
           placeholder="ارزش کل"
+          min={0}
           required
           readOnly
         />
@@ -231,6 +243,8 @@ const AddOrder = () => {
           value={formData.purchased_total}
           onChange={handleChange}
           placeholder="ارزش کل خریداری شده"
+          min={0}
+
         />
               <span>ریال واریزی</span>
         <input
@@ -239,6 +253,7 @@ const AddOrder = () => {
           value={formData.rial_deposit}
           onChange={handleChange}
           placeholder="ریال واریزی"
+          min={0}
         />
       
         <span>کشور فروشنده</span>

@@ -1,13 +1,13 @@
 import requests
 import certifi
 
-API_KEY = "AIzaSyDL6_bPK_4BDiw6GmZTo17yWGz7Tp-Kq9g"
+API_KEY = "AIzaSyBXmy7WymgH6np_beLSTR4MPASp23DBapw"
 url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={API_KEY}"
 
 headers = {"Content-Type": "application/json"}
 data = {
     "contents": [
-        {"parts": [{"text": "بند 3 قانون گمرکی جمهوری اسلامی"}]}
+        {"parts": [{"text": "شماره تعرفه اسب در گمرک چیست"}]}
     ]
 }
 

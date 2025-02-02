@@ -3,23 +3,14 @@ import React, { useState, useEffect } from 'react';
 import './Home.css';
 import { useDispatch, useSelector } from 'react-redux';
 import LineChartComponent from '../components/LineChartComponent';
-import BarChartComponent from '../components/BarChartComponent'; // Import the new component
-
-// Import the chart components and Chart.js modules
-import { Pie, Doughnut } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  ArcElement,
-  Tooltip,
-  Legend,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  PointElement,
-  LineElement,
-} from 'chart.js';
-import {fetchCotDashboard, fetchPrfDashboard } from '../actions/dashboardActions'
+import BarChartComponent from '../components/BarChartComponent';
+import PieChartComponent from '../components/PieChartComponent'; // Import PieChartComponent
+import DoughnutChartComponent from '../components/DoughnutChartComponent'; // Import DoughnutChartComponent
+// Import Chart.js modules
+import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title, PointElement, LineElement } from 'chart.js';
+import { fetchCotDashboard, fetchPrfDashboard } from '../actions/dashboardActions';
+import axiosInstance from '../utils/axiosInstance';
+import { Link } from 'react-router-dom';
 
 ChartJS.register(
   ArcElement,
@@ -34,7 +25,6 @@ ChartJS.register(
 );
 
 const Home = () => {
-  // Store the selected year for each card
   const [selectedYears, setSelectedYears] = useState({
     order: 'all',
     declaration: 'all',
@@ -42,6 +32,17 @@ const Home = () => {
     representation: 'all',
     cottageBarYear: 'all',
   });
+
+  const [summaryData, setSummaryData] = useState({
+    passed_checks_count: 0,
+    unpassed_checks_count: 0,
+    passed_checks_value: 0,
+    unpassed_checks_value: 0,
+    past_representations_count: 0,
+    unpast_representations_count: 0,
+  });
+
+  const [dataType, setDataType] = useState('price'); // New state to toggle between price and count
 
   const dispatch = useDispatch();
 
@@ -51,62 +52,56 @@ const Home = () => {
       [cardType]: year,
     }));
 
-    // Dispatch different actions based on cardType
     if (cardType === 'order') {
       dispatch(fetchPrfDashboard(year === 'all' ? 'all' : year));
     } else if (cardType === 'declaration') {
       dispatch(fetchCotDashboard(year === 'all' ? 'all' : year));
     }
-    // Add more conditions if you have other cardTypes
+  };
+
+  // Fetch the summary data from the DRF view
+  const fetchSummaryData = async () => {
+    try {
+      const response = await axiosInstance.get('/rep-dashboard/');  // Make sure this matches the URL for your DRF view
+      const data = response.data;
+      setSummaryData(data);
+    } catch (error) {
+      console.error('Error fetching summary data:', error);
+    }
   };
 
   useEffect(() => {
-    // Initial data fetch for all cards
+    fetchSummaryData();
+
     dispatch(fetchPrfDashboard(selectedYears.order));
     dispatch(fetchCotDashboard(selectedYears.declaration));
-    // Dispatch other actions if needed
   }, [dispatch, selectedYears.order, selectedYears.declaration]);
 
+  const { passed_checks_count, unpassed_checks_count, passed_checks_value, unpassed_checks_value, past_representations_count, unpast_representations_count } = summaryData;
+
+  // Checks Data for Pie Chart (Quantity vs Value)
   const checksData = {
     labels: ['چک‌های پاس‌شده', 'چک‌های پاس‌نشده'],
     datasets: [
       {
-        label: 'آمار چک‌ها',
-        data: [15, 8],
-        backgroundColor: ['#36A2EB', '#FF6384'],
-        hoverBackgroundColor: ['#36A2EB80', '#FF638480'],
+        label: dataType === 'price' ? 'آمار چک‌ها (بر اساس ارزش)' : 'آمار چک‌ها (بر اساس تعداد)',
+        data: dataType === 'price'
+          ? [passed_checks_value, unpassed_checks_value]
+          : [passed_checks_count, unpassed_checks_count],
+        backgroundColor: ['#2bb3cf', '#FF6384'],
+        hoverBackgroundColor: ['#2bb3cf80', '#FF638480'],
       },
     ],
   };
-
-  // Jalali months array
-  const jalaliMonths = [
-    'فروردین',
-    'اردیبهشت',
-    'خرداد',
-    'تیر',
-    'مرداد',
-    'شهریور',
-    'مهر',
-    'آبان',
-    'آذر',
-    'دی',
-    'بهمن',
-    'اسفند',
-  ];
-
-  const { prf_summary, cot_summary, loading, error } = useSelector(
-    (state) => state.dashboard
-  );
 
   // Representation Doughnut Chart Data & Options
   const representationDoughnutData = {
     labels: ['وکالت فعال', 'وکالت غیرفعال'],
     datasets: [
       {
-        data: [7, 3],
-        backgroundColor: ['#36A2EB', '#FF6384'],
-        hoverBackgroundColor: ['#36A2EB80', '#FF638480'],
+        data: [unpast_representations_count, past_representations_count], // Total representations are assumed to be 10 for now
+        backgroundColor: ['#2bb3cf', '#FF6384'],
+        hoverBackgroundColor: ['#2bb3cf80', '#FF638480'],
       },
     ],
   };
@@ -121,22 +116,20 @@ const Home = () => {
     },
   };
 
-  const years = prf_summary?.yearly_data?.map((item) => item.year) || [];
+  const { prf_summary, cot_summary, loading, error } = useSelector((state) => state.dashboard);
+
 
   return (
     <div className="dashboard">
-      {/* Header Section */}
       <header className="dashboard-header">
         <h1>داشبورد مدیریت</h1>
         <p>مروری سریع بر سامانه</p>
       </header>
 
-      {/* Cards Section */}
       <div className="cards-container">
         {/* Order Card */}
         <div className="static-card">
           <h2>ثبت سفارش</h2>
-
           {loading ? (
             <p>در حال بارگذاری...</p>
           ) : error ? (
@@ -153,76 +146,65 @@ const Home = () => {
         {/* Declaration Card */}
         <div className="static-card">
           <h2>اظهارنامه</h2>
-          {/* Integrate the BarChartComponent */}
           <BarChartComponent
             cot_summary={cot_summary}
             selectedYear={selectedYears.declaration}
             onYearChange={(year) => handleYearChange('declaration', year)}
           />
-
         </div>
 
         {/* Checks Card */}
         <div className="static-card">
           <h2>چک‌ها</h2>
-          <div className="card-year-selector">
-            <label htmlFor="checks-year">انتخاب سال:</label>
-            <select
-              id="checks-year"
-              value={selectedYears.checks}
-              onChange={(e) => handleYearChange('checks', e.target.value)}
+          <div style={{ marginTop: '10px' }}>
+            <button
+              onClick={() => setDataType('price')}
+              style={{
+                marginLeft: '10px',
+                padding: '5px 10px',
+                backgroundColor: dataType === 'price' ? '#4bc0c0' : '#e0e0e0',
+                color: dataType === 'price' ? '#fff' : '#000',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+              }}
             >
-              <option value="all">همه سال‌ها</option>
-
-              {Array.from({ length: 10 }, (_, i) => {
-                const year = new Date().getFullYear() - i;
-                return (
-                  <option key={year} value={year}>
-                    {year}
-                  </option>
-                );
-              })}
-            </select>
+              ارزش
+            </button>
+            <button
+              onClick={() => setDataType('count')}
+              style={{
+                marginLeft: '10px',
+                padding: '5px 10px',
+                backgroundColor: dataType === 'count' ? '#36a2eb' : '#e0e0e0',
+                color: dataType === 'count' ? '#fff' : '#000',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+              }}
+            >
+              تعداد
+            </button>
           </div>
-          <p>چک‌های سال {selectedYears.checks}</p>
           <ul>
-            <li>تعداد کل چک‌ها: 23</li>
+            <li>تعداد کل چک‌ها: {passed_checks_count + unpassed_checks_count}</li>
           </ul>
-          <div style={{ width: '400px', height: '300px', margin: 'auto' }}>
-            <Pie data={checksData} />
-          </div>
-          <button className="action-btn">مشاهده چک‌ها</button>
+          {/* PieChart Component */}
+          <PieChartComponent data={checksData} />
+          
+
         </div>
 
         {/* Representation Card */}
         <div className="static-card">
           <h2>وکالت</h2>
-          <div className="card-year-selector">
-            <label htmlFor="representation-year">انتخاب سال:</label>
-            <select
-              id="representation-year"
-              value={selectedYears.representation}
-              onChange={(e) => handleYearChange('representation', e.target.value)}
-            >
-              <option value="all">همه سال‌ها</option>
-              {years.map((year) => (
-                <option key={year} value={year}>
-                  {year}
-                </option>
-              ))}
-            </select>
-          </div>
-          <p>وکالت‌نامه‌های سال {selectedYears.representation}</p>
+
           <ul>
-            <li>تعداد کل وکالت‌نامه‌ها: 10</li>
+            <li>تعداد کل وکالت‌نامه‌ها: {past_representations_count + unpast_representations_count}</li>
           </ul>
-
-          {/* Doughnut Chart for وکالت‌نامه‌ها */}
-          <div style={{ width: '400px', height: '300px', margin: 'auto' }}>
-            <Doughnut data={representationDoughnutData} options={representationDoughnutOptions} />
-          </div>
-
-          <button className="action-btn">مشاهده وکالت‌نامه‌ها</button>
+          {/* DoughnutChartComponent */}
+          <DoughnutChartComponent data={representationDoughnutData} options={representationDoughnutOptions} />
+          <Link to="/representations" ><button className="action-btn">مشاهده وکالت‌نامه‌ها</button></Link>
         </div>
       </div>
     </div>

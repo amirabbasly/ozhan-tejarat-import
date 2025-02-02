@@ -1,11 +1,14 @@
 from rest_framework.viewsets import ModelViewSet
 from .models import Representation, Check
-from .serializers import RepresentationSerializer, CheckSerializer
+from .serializers import RepresentationSerializer, CheckSerializer, SummarySerializer
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import  status
 from openpyxl import load_workbook
+from django.db.models import Sum, Count
+from datetime import datetime
+from .utils import jalali_to_gregorian  # You need a utility to convert Jalali to Gregorian
 
 
 class RepresentationViewSet(ModelViewSet):
@@ -180,3 +183,48 @@ class ImportChecksView(APIView):
 
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class SummaryView(APIView):
+    
+    def get(self, request):
+        # Get the number of passed and unpassed checks
+        passed_checks = Check.objects.filter(is_paid=True)
+        unpassed_checks = Check.objects.filter(is_paid=False)
+
+        passed_checks_count = passed_checks.count()
+        unpassed_checks_count = unpassed_checks.count()
+
+        # Get the total value of passed and unpassed checks
+        passed_checks_value = passed_checks.aggregate(total_value=Sum('value'))['total_value'] or 0
+        unpassed_checks_value = unpassed_checks.aggregate(total_value=Sum('value'))['total_value'] or 0
+
+        # Get the number of representations where the end date has passed
+        today = datetime.today().date()  # Today's Gregorian date
+        past_representations_count = 0
+        unpast_representations_count = 0
+
+        # Iterate through representations and compare their end_date (Jalali) with today's Gregorian date
+        representations = Representation.objects.all()
+        for rep in representations:
+            # Convert end_date (Jalali) to Gregorian using the utility function
+            end_date_gregorian = jalali_to_gregorian(rep.end_date)
+            
+            if end_date_gregorian and end_date_gregorian <= today:
+                past_representations_count += 1
+            else:
+                unpast_representations_count += 1
+
+        # Prepare the summary data
+        summary_data = {
+            'passed_checks_count': passed_checks_count,
+            'unpassed_checks_count': unpassed_checks_count,
+            'passed_checks_value': passed_checks_value,
+            'unpassed_checks_value': unpassed_checks_value,
+            'past_representations_count': past_representations_count,
+            'unpast_representations_count': unpast_representations_count,
+        }
+
+        # Serialize and return the response
+        serializer = SummarySerializer(summary_data)
+        return Response(serializer.data)

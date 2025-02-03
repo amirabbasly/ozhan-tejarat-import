@@ -43,7 +43,8 @@ import { Provider } from "react-redux";
 import store from "./store";
 import Forbidden from "./components/Forbidden";
 import CustomerCreateForm from "./components/CustomerCreateForm";
-
+import GoodsList from "./components/GoodsList";
+import TariffCalculator from "./components/TarriffCalculator";
 // Import the PrivateRoute component
 import PrivateRoute from "./components/PrivateRoute";
 
@@ -206,6 +207,14 @@ function AppContent() {
               </PrivateRoute>
             }
           />
+                    <Route
+            path="/cottage-goods-list"
+            element={
+              <PrivateRoute>
+                <GoodsList />
+              </PrivateRoute>
+            }
+          />
           <Route
             path="/export-cottages/:fullSerialNumber"
             element={
@@ -334,6 +343,14 @@ function AppContent() {
             element={
               <PrivateRoute>
                 <RepresentationForm />
+              </PrivateRoute>
+            }
+          />
+                    <Route
+            path="/tariff-calculator"
+            element={
+              <PrivateRoute>
+                <TariffCalculator />
               </PrivateRoute>
             }
           />

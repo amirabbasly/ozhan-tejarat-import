@@ -37,12 +37,12 @@ class CustomPageNumberPagination(PageNumberPagination):
     page_size_query_param = 'page_size'
     max_page_size = 600
 
-client = OpenAI(
-    api_key="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",  # This is the default and can be omitted
-)
+API_KEY = "AIzaSyBXmy7WymgH6np_beLSTR4MPASp23DBapw"
+GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={}".format(API_KEY)
+
 class ChatbotAPIView(APIView):
     """
-    APIView to handle chatbot queries using OpenAI's ChatCompletion API.
+    APIView to handle chatbot queries using the Gemini API.
     """
 
     def post(self, request, *args, **kwargs):
@@ -52,23 +52,44 @@ class ChatbotAPIView(APIView):
         if not user_input:
             return Response({"error": "Message is required."}, status=status.HTTP_400_BAD_REQUEST)
 
-        try:
-            # Call OpenAI's ChatCompletion API
-            response = client.chat.completions.create(
-                model="gpt-4o-mini",  # Or use "gpt-4" for GPT-4
-                messages=[
-                    {"role": "system", "content": "You are a helpful assistant specialized in iranian customs laws."},
-                    {"role": "user", "content": user_input},
-                ],
-                max_tokens=150,
-                temperature=0.7,
-            )
-            # Extract the chatbot's response
-            bot_reply = response['choices'][0]['message']['content']
-            return Response({"reply": bot_reply}, status=status.HTTP_200_OK)
+        # Prepare the request data for Gemini API
+        data = {
+            "contents": [
+                {"parts": [{"text": user_input}]}
+            ]
+        }
 
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        try:
+            # Make the POST request to the Gemini API
+            response = requests.post(GEMINI_API_URL, json=data, headers={"Content-Type": "application/json"}, verify=False)
+            
+            if response.status_code == 200:
+                try:
+                    # Parse the response JSON
+                    response_data = response.json()
+                    print("Gemini API Response:", response_data)  # Debugging: print the full response data
+                    
+                    # Extract bot reply
+                    candidates = response_data.get("candidates", [])
+                    if candidates:
+                        parts = candidates[0].get("content", {}).get("parts", [])
+                        if parts:
+                            bot_reply = parts[0].get("text", "").strip()
+                            if bot_reply:
+                                return Response({"reply": bot_reply}, status=status.HTTP_200_OK)
+                            else:
+                                return Response({"error": "Received empty reply from Gemini."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                        else:
+                            return Response({"error": "No content parts in the response."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                    else:
+                        return Response({"error": "No candidates returned from Gemini."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                except requests.exceptions.JSONDecodeError:
+                    return Response({"error": "Failed to decode Gemini API response."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            else:
+                return Response({"error": f"Request failed with status code {response.status_code}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        except requests.exceptions.RequestException as e:
+            return Response({"error": f"Request failed: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 class CottageCombinedDataView(APIView):
     def get(self, request):
         # Get the selected year from query params
@@ -503,6 +524,8 @@ class GreenCustomsDeclarationView(APIView):
 class CottageGoodsViewSet(viewsets.ModelViewSet):
     queryset = CottageGoods.objects.all()
     serializer_class = CottageGoodsSerializer
+    pagination_class = CustomPageNumberPagination  # Apply pagination here
+    search_fields = ["cottage__cottage_number", ]  # fields you want to search
 
     # Add custom logic or actions if needed
     def perform_create(self, serializer):

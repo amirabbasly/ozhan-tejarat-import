@@ -37,6 +37,9 @@ import {
     IMPORT_EXPORTED_COTTAGES_REQUEST,
     IMPORT_EXPORTED_COTTAGES_SUCCESS,
     IMPORT_EXPORTED_COTTAGES_FAILURE,
+    FETCH_GODDS_LIST_REQUEST,
+    FETCH_GODDS_LIST_SUCCESS,
+    FETCH_GODDS_LIST_FAILURE
     
 } from './actionTypes';
 
@@ -399,5 +402,28 @@ export const importExportedCottagesAction = (file) => async (dispatch) => {
       type: IMPORT_EXPORTED_COTTAGES_FAILURE,
       payload: error.response?.data?.error || 'An error occurred during import.',
     });
+  }
+};
+export const fetchGoddsList = (page = 1, pageSize = 50, filters = {}) => async (dispatch) => {
+  dispatch({ type: FETCH_GODDS_LIST_REQUEST });
+  try {
+    const params = new URLSearchParams();
+    params.append("page", page);
+    params.append("page_size", pageSize);
+    if (filters.search) params.append("search", filters.search);
+    const response = await axiosInstance.get(`cottage-goods/?` + params.toString());
+      dispatch({
+        type: FETCH_GODDS_LIST_SUCCESS,
+        payload: response.data,
+      });
+  } catch (error) {
+      const errorMsg =
+          error.response && error.response.data
+              ? error.response.data
+              : error.message;
+              dispatch({
+                type: FETCH_GODDS_LIST_FAILURE,
+                payload: errorMsg,
+              });
   }
 };

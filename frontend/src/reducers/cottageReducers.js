@@ -23,6 +23,10 @@ import {
   IMPORT_EXPORTED_COTTAGES_REQUEST,
   IMPORT_EXPORTED_COTTAGES_SUCCESS,
   IMPORT_EXPORTED_COTTAGES_FAILURE,
+  FETCH_GODDS_LIST_REQUEST,
+  FETCH_GODDS_LIST_SUCCESS,
+  FETCH_GODDS_LIST_FAILURE
+  
   
   
 } from '../actions/actionTypes';
@@ -41,6 +45,11 @@ const initialCottagesState = {
 const initialExportState = {
   loading: false,
   cottages: [],
+  error: '',
+};
+const initialGoodsState = {
+  loading: false,
+  goods: [],
   error: '',
 };
 
@@ -189,6 +198,36 @@ export const importCottageReducer = (state = initialImportState, action) => {
       return { ...state, loading: false, success: action.payload, error: null };
     case  IMPORT_EXPORTED_COTTAGES_FAILURE:
       return { ...state, loading: false, success: null, error: action.payload };
+    default:
+      return state;
+  }
+};
+export const cottageGoodsReducer = (state = initialGoodsState, action) => {
+  switch (action.type) {
+    case FETCH_GODDS_LIST_REQUEST:
+      return {
+        ...state,
+        loading: true,
+        error: '',
+      };
+    case FETCH_GODDS_LIST_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        goods: action.payload.results,
+        error: '',
+        count: action.payload.count,
+        next: action.payload.next,
+        previous: action.payload.previous,
+      };
+    case FETCH_GODDS_LIST_FAILURE:
+      return {
+        ...state,
+        loading: false,
+        goods: [],
+        error: action.payload,
+      };
+
     default:
       return state;
   }

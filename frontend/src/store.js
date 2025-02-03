@@ -3,7 +3,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { combineReducers } from 'redux';
 import { cottageReducer } from './reducers/cottageReducers';
-import { cottageDetailsReducer, exportCottageReducer, exportedCottageDetailsReducer, importCottageReducer } from './reducers/cottageReducers'
+import { cottageDetailsReducer, exportCottageReducer, exportedCottageDetailsReducer, importCottageReducer, cottageGoodsReducer } from './reducers/cottageReducers'
 import { performaReducer, orderReducer, regedOrderDetailsReducer, importReducer} from './reducers/performaReducers';
 import { customsDeclarationReducer, customsExportDeclarationReducer } from './reducers/customsDeclarationReducers';
 import { loadCustomsParams, saveCustomsParams } from './utils/localSotrage/localstorage';
@@ -23,6 +23,7 @@ const rootReducer = combineReducers({
   orderDetails: regedOrderDetailsReducer,
   performa: performaReducer,
   cottages: cottageReducer,
+  cottageGoods: cottageGoodsReducer,
   customsDeclarations: customsDeclarationReducer,
   customsExportDeclarations: customsExportDeclarationReducer,
   cottageDetails: cottageDetailsReducer,

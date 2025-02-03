@@ -132,6 +132,9 @@
                       <Link className="submenu-link" to="/cottages">
                         <li className="submenu-item">لیست اظهارنامه ها</li>
                       </Link>
+                      <Link className="submenu-link" to="/cottage-goods-list">
+                        <li className="submenu-item">لیست کلی کالا ها</li>
+                      </Link>
                       {role === 'admin' && (
                       <Link className="submenu-link" to="/decl">
                         <li className="submenu-item">دریافت از سامانه</li>
@@ -245,7 +248,7 @@
                     <Link to="/hscode-inf">لیست تعرفه ها</Link>
                   </li>
                   <li className="submenu-item">
-                    <Link to="/settings/preferences">ترجیحات</Link>
+                    <Link to="/settings/preferences">محاسبه گمرکی</Link>
                   </li>
                 </ul>
               )}

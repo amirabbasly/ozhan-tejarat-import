@@ -37,9 +37,16 @@ class JalaliDateField(serializers.Field):
             return jalali_date.strftime('%Y-%m-%d')
         except (ValueError, TypeError) as e:
             raise serializers.ValidationError('Invalid date object.')
-
+class serializerForGoods(serializers.ModelSerializer):
+      class Meta:
+        model = Cottage
+        fields = [
+            'cottage_number', 
+            'proforma',
+            'cottage_date'
+        ]  
 class CottageGoodsSerializer(serializers.ModelSerializer):
-    cottage = serializers.PrimaryKeyRelatedField(read_only=True)
+    cottage = serializerForGoods(read_only=True)
     class Meta:
         model = CottageGoods
         fields = '__all__'

@@ -13,9 +13,6 @@ import {
     FETCH_COSTUMER_LIST_REQUEST,
     FETCH_COSTUMER_LIST_SUCCESS,
     FETCH_COSTUMER_LIST_FAILURE,
-    CREATE_COSTUMER_REQUEST,
-    CREATE_COSTUMER_SUCCESS,
-    CREATE_COSTUMER_FAILURE
 } from './actionTypes';
 import axiosInstance from '../utils/axiosInstance';
 

@@ -15,8 +15,9 @@
   justify-content: flex-start;
   height: 60px;
 }
+
   body {
-    padding-top: 60px; /* Matches the navbar height to push the content below */
+    margin-top: 60px; /* Matches the navbar height to push the content below */
   } 
 
 .nacbar-container-cont {

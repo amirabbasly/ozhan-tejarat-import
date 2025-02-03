@@ -76,6 +76,8 @@ class CottageGoods(models.Model):
     other_expense = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True, default=None)
     final_price = models.DecimalField(max_digits=20, decimal_places=2,blank=True, editable=False, default=0)
     goods_description = models.CharField(null=True, blank=True, max_length=500)
+    class Meta:
+        ordering = ["-cottage__cottage_date"] 
 
     def calculate_riali(self):
         return (self.total_value or Decimal(0)) * (self.cottage.currency_price or Decimal(0))

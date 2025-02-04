@@ -2,7 +2,7 @@
 
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import HSCodeImportView, FetchAndUpdateHSCodeView, HSCodeViewSet, HSCodeListView, ImportHeadingsView, ImportSeasonsView, HSCodeDetailByCodeView
+from .views import HSCodeImportView, FetchAndUpdateHSCodeView, HSCodeViewSet, HSCodeListView, ImportHeadingsView, ImportSeasonsView, HSCodeDetailByCodeView, CurrencyExchangeRateView
 
 router = DefaultRouter()
 
@@ -16,4 +16,6 @@ urlpatterns = [
     path('import-seasons/', ImportSeasonsView.as_view(), name='season_import'),
     path('import-headings/', ImportHeadingsView.as_view(), name='heading_import'),
     path('hscode-detail/', HSCodeDetailByCodeView.as_view(), name='hscode-detail-by-code'),
+    path('currency-exchange-rates/', CurrencyExchangeRateView.as_view(), name='currency-exchange-rates'),
+
 ]

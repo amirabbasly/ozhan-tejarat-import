@@ -248,7 +248,7 @@
                     <Link to="/hscode-inf">لیست تعرفه ها</Link>
                   </li>
                   <li className="submenu-item">
-                    <Link to="/settings/preferences">محاسبه گمرکی</Link>
+                    <Link to="/tariff-calculator">محاسبه گمرکی</Link>
                   </li>
                 </ul>
               )}

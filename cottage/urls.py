@@ -19,7 +19,6 @@ urlpatterns = [
     path('cot-summary/', CottageCombinedDataView.as_view(), name='cottage-summary'),
     path('export-customs-declarations/', ExportCustomsDeclarationListView.as_view(), name='customs_declarations'),    
     path('fetch-cotage-remain-amount/', FetchCotageRemainAmountView.as_view(), name='fetch-cotage-remain-amount'),
-    path('chatbot/', ChatbotAPIView.as_view(), name='chatbot-api'),
     path('import-cottages/', ImportCottagesView.as_view(), name='import_cottages'),
     path('import-exported-cottages/', ImportExportedCottagesView.as_view(), name='import_exported_cottages'),
 

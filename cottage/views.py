@@ -29,6 +29,10 @@ from openpyxl import load_workbook
 from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import CottageFilter
+from django.db.models import Q
+import re
+
+
 
 
 
@@ -41,35 +45,87 @@ API_KEY = "AIzaSyBXmy7WymgH6np_beLSTR4MPASp23DBapw"
 GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={}".format(API_KEY)
 
 class ChatbotAPIView(APIView):
-    """
-    APIView to handle chatbot queries using the Gemini API.
-    """
-
     def post(self, request, *args, **kwargs):
-        # Get the user input from the request
         user_input = request.data.get('message', '')
-
         if not user_input:
             return Response({"error": "Message is required."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Prepare the request data for Gemini API
+        # Extract cottage number(s) from user_input
+        numbers = re.findall(r'\b\d+\b', user_input)  # e.g. "35411581"
+        
+        if numbers:
+            cottage_number = numbers[0]
+            cottages = Cottage.objects.filter(
+                Q(cottage_number__icontains=cottage_number)
+            )
+        else:
+            # fallback if no numbers found in user input
+            cottages = Cottage.objects.none()
+
+        # Build the context string from the data
+        data_snippets = []
+        for cottage in cottages:
+            data_snippets.append(
+                f"""
+                number: {cottage.cottage_number}
+                date: {cottage.cottage_date}
+                proforma: {cottage.proforma}
+                reference_number: {cottage.refrence_number}
+                total_value: {cottage.total_value}
+                quantity: {cottage.quantity}
+                currency_price: {cottage.currency_price}
+                cottage_customer: {cottage.cottage_customer}
+                cottage_status: {cottage.cottage_status}
+                rafee_taahod: {cottage.rafee_taahod}
+                docs_recieved: {cottage.docs_recieved}
+                rewatch: {cottage.rewatch}
+                documents: {cottage.documents}
+                """
+            )
+
+        database_context = "\n\n".join(data_snippets)
+
+        if not database_context:
+            database_context = "No relevant data found in the database."
+
+        # Construct a prompt for Gemini
+        prompt_text = f"""
+        You are a chatbot with access to the following database records:
+
+        {database_context}
+
+        User's Question: {user_input}
+
+        Please answer based on the above database information.
+        """
+        print(prompt_text)
+
         data = {
             "contents": [
-                {"parts": [{"text": user_input}]}
+                {
+                    "parts": [
+                        {
+                            "text": prompt_text
+                        }
+                    ]
+                }
             ]
         }
 
+        # Send the request to Gemini
         try:
-            # Make the POST request to the Gemini API
-            response = requests.post(GEMINI_API_URL, json=data, headers={"Content-Type": "application/json"}, verify=False)
-            
+            response = requests.post(
+                GEMINI_API_URL,
+                json=data,
+                headers={"Content-Type": "application/json"},
+                verify=False
+            )
+
             if response.status_code == 200:
                 try:
-                    # Parse the response JSON
                     response_data = response.json()
-                    print("Gemini API Response:", response_data)  # Debugging: print the full response data
-                    
-                    # Extract bot reply
+                    print("Gemini API Response:", response_data)  # debug
+
                     candidates = response_data.get("candidates", [])
                     if candidates:
                         parts = candidates[0].get("content", {}).get("parts", [])
@@ -78,15 +134,30 @@ class ChatbotAPIView(APIView):
                             if bot_reply:
                                 return Response({"reply": bot_reply}, status=status.HTTP_200_OK)
                             else:
-                                return Response({"error": "Received empty reply from Gemini."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                                return Response(
+                                    {"error": "Received empty reply from Gemini."},
+                                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                                )
                         else:
-                            return Response({"error": "No content parts in the response."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                            return Response(
+                                {"error": "No content parts in the response."},
+                                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                            )
                     else:
-                        return Response({"error": "No candidates returned from Gemini."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                        return Response(
+                            {"error": "No candidates returned from Gemini."},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                        )
                 except requests.exceptions.JSONDecodeError:
-                    return Response({"error": "Failed to decode Gemini API response."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                    return Response(
+                        {"error": "Failed to decode Gemini API response."},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                    )
             else:
-                return Response({"error": f"Request failed with status code {response.status_code}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                return Response(
+                    {"error": f"Request failed with status code {response.status_code}"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
 
         except requests.exceptions.RequestException as e:
             return Response({"error": f"Request failed: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

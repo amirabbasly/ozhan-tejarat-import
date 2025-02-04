@@ -15,6 +15,7 @@ from .filters import HSCodeFilter  # Import the filter set
 import re
 from django.utils.timezone import now
 from django.db import transaction
+from bs4 import BeautifulSoup
 
 class CustomPageNumberPagination(PageNumberPagination):
     page_size_query_param = 'page_size'
@@ -441,3 +442,26 @@ class ImportSeasonsView(APIView):
 
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+class CurrencyExchangeRateView(APIView):
+    def get(self, request):
+        url = "https://irica.ir/web_directory/54345-%D9%86%D8%B1%D8%AE-%D8%A7%D8%B1%D8%B2.html"
+        response = requests.get(url)
+
+        if response.status_code != 200:
+            return Response({"error": "Failed to fetch data"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        soup = BeautifulSoup(response.text, 'html.parser')
+        rows = soup.find_all('tr', class_='currPricingListHeaderTableItems')
+
+        currencies = []
+        for row in rows:
+            name_column = row.find('td', class_='listrow1') or row.find('td', class_='listrow2')
+            price_column = row.find_all('td')[1]  # The second column contains the price
+
+            if name_column and price_column:
+                currency_name = name_column.get_text(strip=True).split(' ')[0]  # Get the currency name
+                currency_price = price_column.get_text(strip=True).split(' ')[0]  # Get the price
+
+                currencies.append({'label': currency_name, 'value': currency_price})
+
+        return Response(currencies, status=status.HTTP_200_OK)

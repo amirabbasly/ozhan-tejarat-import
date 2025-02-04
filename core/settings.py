@@ -106,6 +106,11 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
+                'chatbot': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
                 'notifications': {
             'handlers': ['console', 'file'],
             'level': 'DEBUG',

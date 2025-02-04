@@ -64,7 +64,7 @@ const Chatbot = () => {
       </div>
 
       <div className="inputContainer">
-        <button className="btn-grad" onClick={sendMessage}>
+        <button className="btn-grad1" onClick={sendMessage}>
           Send
         </button>
         <input

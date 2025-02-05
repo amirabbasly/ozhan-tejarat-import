@@ -47,7 +47,7 @@ import GoodsList from "./components/GoodsList";
 import TariffCalculator from "./components/TarriffCalculator";
 // Import the PrivateRoute component
 import PrivateRoute from "./components/PrivateRoute";
-
+import TextOverlayForm from "./components/TextOverlayForm";
 import "./App.css";
 
 function App() {
@@ -351,6 +351,14 @@ function AppContent() {
             element={
               <PrivateRoute>
                 <TariffCalculator />
+              </PrivateRoute>
+            }
+          />
+                              <Route
+            path="/certificate-of-origin"
+            element={
+              <PrivateRoute>
+                <TextOverlayForm />
               </PrivateRoute>
             }
           />

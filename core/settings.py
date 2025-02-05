@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     'jalali_date',
     'accounts',
     'customs',
+    'documents',
+    'chatbot',
     'django_filters',
     'notifications.apps.NotificationsConfig',
     'representation',
@@ -112,6 +114,11 @@ LOGGING = {
             'propagate': True,
         },
                 'notifications': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+                        'documents': {
             'handlers': ['console', 'file'],
             'level': 'DEBUG',
             'propagate': True,

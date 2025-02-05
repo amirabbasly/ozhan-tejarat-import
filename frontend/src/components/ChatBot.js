@@ -41,10 +41,11 @@ const Chatbot = () => {
 
   // Chat bubble component
   const ChatBubble = ({ sender, text }) => (
-    <div className={`chat-bubble ${sender}`}>
+    <div className={`chat-bubble ${sender}`} style={{ direction: 'rtl', unicodeBidi: 'plaintext' }}>
       <span>{text}</span>
     </div>
   );
+  
 
   return (
     <div className="container">

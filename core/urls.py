@@ -26,6 +26,7 @@ urlpatterns = [
     path('api/', include('cottage.urls')),
     path('api/', include('representation.urls')),
     path('api/accounts/', include('accounts.urls')),
+    path('api/documents/', include('documents.urls')),
     path('api/notifications/', include('notifications.urls')),
     path('api/customs/', include('customs.urls'))
 ]

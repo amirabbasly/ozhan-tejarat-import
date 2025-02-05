@@ -5,7 +5,6 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-# Import your models
 from customs.models import HSCode
 from cottage.models import Cottage
 
@@ -26,35 +25,50 @@ class ChatbotAPIView(APIView):
         if not user_input:
             return Response({"error": "Message is required."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # 1. Extract any numeric codes (like "01012910" or "35411581") from the user's input
-        numbers = re.findall(r'\b\d+\b', user_input)  # list of strings, e.g. ["01012910", "35411581"]
+        # -------------------------------------------------------
+        # 1. Extract the text we need to search (search_text)
+        # -------------------------------------------------------
+        # Priority:
+        #   1) If there is text inside parentheses "( ... )", use it.
+        #   2) Otherwise, look for text between "تعرفه" and "چیست" or "چنده".
+        #   3) Otherwise, fallback to the entire user_input.
+        # -------------------------------------------------------
+        match_parens = re.search(r'\((.*?)\)', user_input)
+        if match_parens:
+            # Found something inside parentheses
+            search_text = match_parens.group(1).strip()
+        else:
+            # Check after the word 'تعرفه' and before 'چیست' or 'چنده'
+            match_after_tarife = re.search(r'تعرفه\s+(.+?)\s+(?:چیست|چنده|چیه|)', user_input)
+            if match_after_tarife:
+                # Extract whatever is between "تعرفه" and "چیست/چنده"
+                search_text = match_after_tarife.group(1).strip()
+            else:
+                # Fallback to the entire user_input
+                search_text = user_input
 
-        # Prepare containers for the data snippets
+        # -------------------------------------------------------
+        # 2. Optionally, extract any numeric codes (e.g. "01012910")
+        # -------------------------------------------------------
+        numbers = re.findall(r'\b\d+\b', user_input)
+
         data_snippets = []
 
-        # -----------------------------
-        # 2. HSCode Retrieval
-        # -----------------------------
-        # We'll collect all HSCode objects that match any numeric code found
-        hscode_queryset = HSCode.objects.none()
+        # -------------------------------------------------------
+        # 3. HSCode Retrieval
+        # -------------------------------------------------------
+        # We'll combine code__icontains and Persian name__icontains,
+        # using the extracted search_text for the actual search.
+        hscode_queryset = HSCode.objects.filter(
+            Q(code__icontains=search_text) |
+            Q(goods_name_fa__icontains=search_text)
+        )
 
-        for number in numbers:
-            # Combine with the existing queryset using OR logic (i.e., union).
-            # We do __icontains so "01012910" can match "0101.29.10" if you store it that way,
-            # as long as the digits appear in sequence. If your DB doesn't store dots, a direct match is fine too.
-            hscode_queryset = hscode_queryset.union(
-                HSCode.objects.filter(code__icontains=number)
-            )
-
-        # If no numbers were found, or we want to fallback to general search, uncomment:
-        # hscode_queryset = HSCode.objects.filter(
-        #     Q(code__icontains=user_input) |
-        #     Q(goods_name_fa__icontains=user_input) |
-        #     Q(goods_name_en__icontains=user_input) |
-        #     Q(profit__icontains=user_input) |
-        #     Q(customs_duty_rate__icontains=user_input) |
-        #     Q(import_duty_rate__icontains=user_input)
-        # )
+        # If you also want to try matching numeric codes separately, you can do:
+        # for number in numbers:
+        #     hscode_queryset = hscode_queryset.union(
+        #         HSCode.objects.filter(code__icontains=number)
+        #     )
 
         data_snippets.append("=== HSCode Data ===")
         if hscode_queryset.exists():
@@ -69,23 +83,20 @@ class ChatbotAPIView(APIView):
                     f"سود: {hs.profit}\n"
                     f"نرخ حقوق گمرکی: {hs.customs_duty_rate}\n"
                     f"حقوق ورودی: {hs.import_duty_rate}\n"
-                    f"اولویت (Priority): {hs.priority}\n"
-                    f"واحد (SUQ): {hs.SUQ}\n"
-                    f"فصل (Season): {hs.season.code if hs.season else 'بدون فصل'}\n"
-                    f"Heading: {hs.heading.code if hs.heading else 'None'}\n"
-                    f"برچسب‌ها (Tags): {', '.join(tag_list)}\n"
-                    f"کامرشال (Commercials): {', '.join(commercial_list)}"
+                    f"اولویت (گروه کالایی): {hs.priority}\n"
+                    f"واحد شمارش: {hs.SUQ}\n"
+                    f"فصل: {hs.season.code if hs.season else 'بدون فصل'}\n"
+                    f"سرفصل: {hs.heading.code if hs.heading else 'None'}\n"
+                    f"برچسب‌ها: {', '.join(tag_list)}\n"
+                    f"مجوز ها: {', '.join(commercial_list)}"
                 )
         else:
             data_snippets.append("هیچ HSCode مطابقت ندارد.")
 
-        # -----------------------------
-        # 3. Cottage Retrieval
-        # -----------------------------
-        # We'll do something similar for cottages,
-        # assuming the user might ask for a cottage by a numeric ID in the same input.
+        # -------------------------------------------------------
+        # 4. Cottage Retrieval (optional)
+        # -------------------------------------------------------
         cottage_queryset = Cottage.objects.none()
-
         for number in numbers:
             cottage_queryset = cottage_queryset.union(
                 Cottage.objects.filter(cottage_number__icontains=number)
@@ -95,39 +106,35 @@ class ChatbotAPIView(APIView):
         if cottage_queryset.exists():
             for cottage in cottage_queryset:
                 data_snippets.append(
-                    f"شماره کوتاژ (Cottage Number): {cottage.cottage_number}\n"
-                    f"تاریخ کوتاژ (Cottage Date): {cottage.cottage_date}\n"
-                    f"وضعیت کوتاژ (Status): {cottage.cottage_status}\n"
-                    f"مقدار (Quantity): {cottage.quantity}\n"
-                    f"ارزش کل (Total Value): {cottage.total_value}\n"
-                    f"واحد ارزی (Currency Price): {cottage.currency_price}\n"
+                    f"شماره کوتاژ: {cottage.cottage_number}\n"
+                    f"تاریخ کوتاژ: {cottage.cottage_date}\n"
+                    f"وضعیت کوتاژ: {cottage.cottage_status}\n"
+                    f"مقدار: {cottage.quantity}\n"
+                    f"ارزش کل: {cottage.total_value}\n"
+                    f"نرخ ارز: {cottage.currency_price}\n"
                     f"شماره ساتا: {cottage.refrence_number}\n"
-                    f"پروفورما: {cottage.proforma}\n"
-                    f"وضعیت رفع تعهد (rafee_taahod): {cottage.rafee_taahod}\n"
-                    f"مدارک دریافت شده (docs_recieved): {cottage.docs_recieved}\n"
-                    f"rewatch: {cottage.rewatch}\n"
-                    f"سند (documents): {cottage.documents}"
+                    f"شماره ثبت سفارش: {cottage.proforma}\n"
+                    f"وضعیت رفع تعهد: {cottage.rafee_taahod}\n"
+                    f"مدارک دریافت شده: {cottage.docs_recieved}\n"
+                    f"بازبینی: {cottage.rewatch}"
                 )
         else:
             data_snippets.append("هیچ کوتاژ مطابقت ندارد.")
 
-        # -----------------------------
-        # 4. Build the Prompt
-        # -----------------------------
+        # -------------------------------------------------------
+        # 5. Build the Prompt for Gemini
+        # -------------------------------------------------------
         database_context = "\n\n".join(data_snippets)
-
-        # Note the final instruction to "respond in Persian"
         prompt_text = f"""
         شما یک ربات گفتگو هستید که به اطلاعات زیر دسترسی دارید:
 
         {database_context}
-
+        
         پرسش کاربر: {user_input}
 
         لطفا تنها بر اساس اطلاعات فوق پاسخ دهید و پاسخ خود را به زبان فارسی بنویسید.
         """
 
-        # 5. Prepare the JSON for Gemini
         data = {
             "contents": [
                 {
@@ -140,22 +147,20 @@ class ChatbotAPIView(APIView):
             ]
         }
 
-        # For debugging, you may print the final prompt:
-        # print(prompt_text)
-
-        # 6. Make the POST request to Gemini
+        # -------------------------------------------------------
+        # 6. Send request to Gemini
+        # -------------------------------------------------------
         try:
             response = requests.post(
                 GEMINI_API_URL,
                 json=data,
                 headers={"Content-Type": "application/json"},
-                verify=False  # For dev only; consider removing or configuring certs in production
+                verify=False  # For development only; remove or set properly in production
             )
 
             if response.status_code == 200:
                 try:
                     response_data = response.json()
-                    # Debug
                     print("Gemini API Response:", response_data)
 
                     candidates = response_data.get("candidates", [])

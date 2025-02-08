@@ -5,52 +5,87 @@ from rest_framework.response import Response
 from rest_framework import status
 from PIL import Image, ImageDraw, ImageFont
 import io
-from .serializers import OverlayTextSerializer
+from .serializers import OverlayTextSerializer, ImageTemplateSerializer
 from .models import ImageTemplate
-
 class OverlayTextView(APIView):
     def post(self, request):
-        # Get the template from the database (assuming you have one default template)
+        # 1) Fetch the template based on template_id
         try:
-            template = ImageTemplate.objects.first()  # Or filter by name if you have multiple templates
+            template_id = request.data.get('template_id')
+            template = ImageTemplate.objects.get(id=template_id)
         except ImageTemplate.DoesNotExist:
-            return Response({"error": "Template not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "Template not found."},
+                            status=status.HTTP_404_NOT_FOUND)
 
-        # Validate the data using the serializer
+        # 2) Validate incoming data
         serializer = OverlayTextSerializer(data=request.data)
-        if serializer.is_valid():
-            exporter = serializer.validated_data['exporter']
-            consignee = serializer.validated_data['consignee']
-            quantity = serializer.validated_data['quantity']
-            description = serializer.validated_data['description']
+        if not serializer.is_valid():
+            return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
 
-            # Load the template image from the model
-            template_image_path = template.template_image.path
-            img = Image.open(template_image_path)
+        # 3) Extract validated fields
+        exporter = serializer.validated_data['exporter']
+        consignee = serializer.validated_data['consignee']
+        means_of_transport = serializer.validated_data['means_of_transport']
+        goods = serializer.validated_data['goods']  # List of dictionaries
 
-            # Define the drawing context and font
-            draw = ImageDraw.Draw(img)
-            font = ImageFont.load_default()
+        # 4) Load the template image and prepare for drawing
+        img = Image.open(template.template_image.path)
+        draw = ImageDraw.Draw(img)
+        font = ImageFont.load_default()
 
-            # Parse the text positions from the model (convert the string to a tuple of integers)
-            exporter_pos = tuple(map(int, template.exporter_position.split(',')))
-            consignee_pos = tuple(map(int, template.consignee_position.split(',')))
-            quantity_pos = tuple(map(int, template.quantity_position.split(',')))
-            description_pos = tuple(map(int, template.description_position.split(',')))
+        # 5) Draw static fields using multiline_text to preserve line breaks
+        # Positions are stored as "x,y" strings in your model.
+        exporter_x, exporter_y = map(int, template.exporter_position.split(','))
+        consignee_x, consignee_y = map(int, template.consignee_position.split(','))
+        transport_x, transport_y = map(int, template.means_of_transport_position.split(','))
 
-            # Add the text to the image based on positions from the model
-            draw.text(exporter_pos, exporter, fill="black", font=font)
-            draw.text(consignee_pos, consignee, fill="black", font=font)
-            draw.text(quantity_pos, quantity, fill="black", font=font)
-            draw.text(description_pos, description, fill="black", font=font)
+        draw.multiline_text((exporter_x, exporter_y), exporter, fill="black", font=font)
+        draw.multiline_text((consignee_x, consignee_y), consignee, fill="black", font=font)
+        draw.multiline_text((transport_x, transport_y), means_of_transport, fill="black", font=font)
 
-            # Save the modified image to a BytesIO object
-            img_io = io.BytesIO()
-            img.save(img_io, format="JPEG")
-            img_io.seek(0)
+        # 6) Get the X-axis positions for each goods column.
+        #    In your model, these fields hold a single integer (as a string).
+        #    Additionally, we define an X coordinate for the index column.
+        description_x = int(template.description_position)       # e.g., "100"
+        hscode_x = int(template.hscode_position)                 # e.g., "300"
+        quantity_x = int(template.quantity_position)             # e.g., "500"
+        invoices_x = int(template.number_of_invoices_position)     # e.g., "700"
 
-            # Return the image as a HttpResponse
-            return HttpResponse(img_io.getvalue(), content_type="image/jpeg")
+        # 7) Get the start position and line height for listing goods.
+        #    goods_start_position is expected to be a string like "100,300" (x,y).
+        goods_start_x, goods_start_y = map(int, template.goods_start_position.split(','))
+        current_y = goods_start_y
+        line_height = template.goods_line_height  # Vertical spacing between each row
+        index_x = goods_start_x  
+        # 8) Draw each good in its own row.
+        #    Include an index column (using good['index'] if provided, or falling back to the loop index).
+        for i, good in enumerate(goods, start=1):
+            index_value = good.get('index', i)
+            description_text = good.get('description', '')
+            hscode_text = good.get('hscode', '')
+            quantity_text = good.get('quantity', '')
+            invoices_text = good.get('number_of_invoices', '')
 
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            # Draw each field at its respective X position and the current Y position.
+            draw.multiline_text((index_x,       current_y), str(index_value), fill="black", font=font)
+            draw.multiline_text((description_x, current_y), description_text, fill="black", font=font)
+            draw.multiline_text((hscode_x,      current_y), hscode_text, fill="black", font=font)
+            draw.multiline_text((quantity_x,    current_y), quantity_text, fill="black", font=font)
+            draw.multiline_text((invoices_x,    current_y), invoices_text, fill="black", font=font)
+
+            # Move down to the next row.
+            current_y += line_height
+
+        # 9) Save the modified image to a BytesIO object and return it.
+        img_io = io.BytesIO()
+        img.save(img_io, format="JPEG")
+        img_io.seek(0)
+
+        return HttpResponse(img_io.getvalue(), content_type="image/jpeg")
+class TemplateListView(APIView):
+    def get(self, request):
+        # Get all templates from the database
+        templates = ImageTemplate.objects.all()
+        serializer = ImageTemplateSerializer(templates, many=True)
+        return Response(serializer.data)

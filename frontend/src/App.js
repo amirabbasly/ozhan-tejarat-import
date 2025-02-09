@@ -48,6 +48,7 @@ import TariffCalculator from "./components/TarriffCalculator";
 // Import the PrivateRoute component
 import PrivateRoute from "./components/PrivateRoute";
 import TextOverlayForm from "./components/TextOverlayForm";
+import ExcelInvoice from "./components/ExcelInvoice";
 import "./App.css";
 
 function App() {
@@ -359,6 +360,14 @@ function AppContent() {
             element={
               <PrivateRoute>
                 <TextOverlayForm />
+              </PrivateRoute>
+            }
+          />
+                                        <Route
+            path="/excel-inv"
+            element={
+              <PrivateRoute>
+                <ExcelInvoice />
               </PrivateRoute>
             }
           />

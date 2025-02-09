@@ -19,3 +19,7 @@ class OverlayTextSerializer(serializers.Serializer):
     means_of_transport = serializers.CharField(required=True)
     goods = GoodSerializer(many=True)
     template_id = serializers.IntegerField()
+class FillExcelSerializer(serializers.Serializer):
+    name = serializers.CharField(required=True, max_length=100)
+    date = serializers.DateField(required=True)
+    amount = serializers.DecimalField(max_digits=10, decimal_places=2)

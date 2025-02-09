@@ -5,8 +5,49 @@ from rest_framework.response import Response
 from rest_framework import status
 from PIL import Image, ImageDraw, ImageFont
 import io
-from .serializers import OverlayTextSerializer, ImageTemplateSerializer
+from .serializers import OverlayTextSerializer, ImageTemplateSerializer, FillExcelSerializer
 from .models import ImageTemplate
+import os
+import openpyxl
+
+class FillExcelTemplateView(APIView):
+    """
+    POST:
+    Receives 'name', 'date', and 'amount' to fill in an Excel template.
+    Returns a downloadable Excel file.
+    """
+
+    def post(self, request, format=None):
+        serializer = FillExcelSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        data = serializer.validated_data
+        name = data['name']
+        date_value = data['date']         # this is a Python date object
+        amount_value = data['amount']     # this is a Decimal
+
+        # 1. Load the Excel template
+        template_path = 'static/excel_template/INV.xlsx'
+        wb = openpyxl.load_workbook(template_path)
+        sheet = wb.active  # or wb["SheetName"] if you have a named sheet
+
+        # 2. Fill in the required cells
+        # Let's place them in A2, B2, C2 as an example
+        sheet['I15'] = name
+        sheet['K15'] = date_value.strftime('%Y-%m-%d')  # convert date to string
+        sheet['J20'] = float(amount_value)              # convert Decimal to float
+
+        # 3. Build the response
+        response = HttpResponse(
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = 'attachment; filename="filled_template.xlsx"'
+
+        # 4. Save the workbook to the response
+        wb.save(response)
+
+        return response
 class OverlayTextView(APIView):
     def post(self, request):
         # 1) Fetch the template based on template_id
@@ -32,7 +73,9 @@ class OverlayTextView(APIView):
         # 4) Load the template image and prepare for drawing
         img = Image.open(template.template_image.path)
         draw = ImageDraw.Draw(img)
-        font = ImageFont.load_default()
+        font_path = os.path.join(settings.BASE_DIR, 'static', 'fonts', 'arial.ttf')
+        font_size = template.font_size                # <--- Read from the model
+        font = ImageFont.truetype(font_path, font_size)
 
         # 5) Draw static fields using multiline_text to preserve line breaks
         # Positions are stored as "x,y" strings in your model.
@@ -83,7 +126,7 @@ class OverlayTextView(APIView):
         img_io.seek(0)
 
         return HttpResponse(img_io.getvalue(), content_type="image/jpeg")
-class TemplateListView(APIView):
+class TemplateListView(APIView):    
     def get(self, request):
         # Get all templates from the database
         templates = ImageTemplate.objects.all()

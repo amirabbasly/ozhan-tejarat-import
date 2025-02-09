@@ -31,17 +31,18 @@
 
 /* Input and textarea styling */
 .form-input,
-.form-select,
-.form-textarea {
+.form-select{
   width: 100%;
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
 }
+.form-select{
+  width: 93%;
+}
 
 .form-input:focus,
-.form-select:focus,
-.form-textarea:focus {
+.form-select:focus {
   outline: none;
   border-color: #66afe9;
   box-shadow: 0 0 5px rgba(102, 175, 233, 0.5);
@@ -120,4 +121,22 @@
   max-width: 100%;
   border: 1px solid #ccc;
   border-radius: 4px;
+}
+/* Prevent textarea resizing and set a consistent size */
+.form-textarea {
+  height: 120px;       /* Fixed height */
+  resize: none;        /* Disable resizing */
+  padding: 10px;       /* Inner padding */
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: "Arial", sans-serif;
+  color: #333;
+  max-width: 93%;
+}
+
+.form-textarea:focus {
+  border-color: #66afe9;
+  box-shadow: 0 0 5px rgba(102, 175, 233, 0.5);
+  outline: none;
 }

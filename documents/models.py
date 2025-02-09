@@ -21,6 +21,7 @@ class ImageTemplate(models.Model):
         default="100,300",  # set whatever default x,y you want
         help_text="X,Y coordinate for the initial line of goods"
     )
+    font_size = models.IntegerField(default=20)
 
     def __str__(self):
         return self.name

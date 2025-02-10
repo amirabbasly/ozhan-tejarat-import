@@ -11,11 +11,7 @@ import os
 import openpyxl
 
 class FillExcelTemplateView(APIView):
-    """
-    POST:
-    Receives 'name', 'date', and 'amount' to fill in an Excel template.
-    Returns a downloadable Excel file.
-    """
+
 
     def post(self, request, format=None):
         serializer = FillExcelSerializer(data=request.data)
@@ -23,7 +19,7 @@ class FillExcelTemplateView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         data = serializer.validated_data
-        name = data['name']
+        invoice_number = data['invoice_number']
         date_value = data['date']         # this is a Python date object
         amount_value = data['amount']     # this is a Decimal
 
@@ -34,8 +30,8 @@ class FillExcelTemplateView(APIView):
 
         # 2. Fill in the required cells
         # Let's place them in A2, B2, C2 as an example
-        sheet['I15'] = name
-        sheet['K15'] = date_value.strftime('%Y-%m-%d')  # convert date to string
+        sheet['I15'] = invoice_number
+        sheet['A4'] = f"Invoice date: {date_value.strftime('%Y-%m-%d')}"
         sheet['J20'] = float(amount_value)              # convert Decimal to float
 
         # 3. Build the response

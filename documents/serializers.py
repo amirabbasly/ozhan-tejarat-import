@@ -19,7 +19,18 @@ class OverlayTextSerializer(serializers.Serializer):
     means_of_transport = serializers.CharField(required=True)
     goods = GoodSerializer(many=True)
     template_id = serializers.IntegerField()
+class InvoiceGoodSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=255)
+    country_of_origin = serializers.CharField(max_length=100)
+    commodity_code = serializers.CharField(max_length=100)
+    gw = serializers.DecimalField(max_digits=10, decimal_places=2)
+    nw = serializers.DecimalField(max_digits=10, decimal_places=2)
+    quantity = serializers.IntegerField()
+    unit = serializers.CharField(max_length=50)
+    unit_price = serializers.DecimalField(max_digits=10, decimal_places=2)
 class FillExcelSerializer(serializers.Serializer):
-    invoice_number = serializers.CharField(required=True, max_length=100)
-    date = serializers.DateField(required=True)
-    amount = serializers.DecimalField(max_digits=10, decimal_places=2)
+    invoice_number = serializers.CharField(max_length=255)
+    date = serializers.DateField()
+    amount = serializers.DecimalField(max_digits=12, decimal_places=2)
+    goods = InvoiceGoodSerializer(many=True)  # This will expect a list of goods
+

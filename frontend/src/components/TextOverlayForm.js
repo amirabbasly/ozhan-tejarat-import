@@ -105,9 +105,9 @@ const TextOverlayForm = () => {
         <div className="form-group">
           <label>
             صادرکننده:
-            <input
+            <textarea
               type="text"
-              className="form-input"
+              className="form-textarea"
               name="exporter"
               value={formData.exporter}
               onChange={(e) =>
@@ -120,16 +120,17 @@ const TextOverlayForm = () => {
         <div className="form-group">
           <label>
             گیرنده:
-            <input
+            </label>
+            <textarea
               type="text"
-              className="form-input"
+              className="form-textarea"
               name="consignee"
               value={formData.consignee}
               onChange={(e) =>
                 setFormData({ ...formData, consignee: e.target.value })
               }
             />
-          </label>
+
         </div>
 
         <div className="form-group">
@@ -189,10 +190,10 @@ const TextOverlayForm = () => {
                 />
               </div>
               <div className="form-group">
-                <label>تعداد فاکتورها:</label>
-                <input
+                <label>شماره فاکتورها:</label>
+                <textarea
                   type="text"
-                  className="form-input"
+                  className="form-textarea"
                   value={good.number_of_invoices}
                   onChange={(e) =>
                     handleGoodChange(

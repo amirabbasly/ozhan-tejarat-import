@@ -5,12 +5,26 @@ from rest_framework.response import Response
 from rest_framework import status
 from PIL import Image, ImageDraw, ImageFont
 import io
-from .serializers import OverlayTextSerializer, ImageTemplateSerializer, FillExcelSerializer
-from .models import ImageTemplate
+from .serializers import OverlayTextSerializer, ImageTemplateSerializer, FillExcelSerializer,  SellerSerializer, BuyerSerializer, InvoiceSerializer
+from .models import ImageTemplate, Seller, Buyer, Invoice
 import os
 import openpyxl
 import xlsxwriter
 from reportlab.lib.pagesizes import letter
+from rest_framework import viewsets
+from rest_framework.pagination import PageNumberPagination
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+from reportlab.platypus import (
+    SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+)
+from reportlab.graphics.shapes import Drawing, Line
+
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 
 class FillInvoiceView(APIView):
     def post(self, request, format=None):
@@ -181,3 +195,244 @@ class TemplateListView(APIView):
         templates = ImageTemplate.objects.all()
         serializer = ImageTemplateSerializer(templates, many=True)
         return Response(serializer.data)
+
+class SellerViewSet(viewsets.ModelViewSet):
+    queryset = Seller.objects.all()
+    serializer_class = SellerSerializer
+    pagination_class = None  # Disable pagination here
+
+
+class BuyerViewSet(viewsets.ModelViewSet):
+    queryset = Buyer.objects.all()
+    serializer_class = BuyerSerializer
+    pagination_class = None  # Disable pagination here
+
+
+
+class InvoiceViewSet(viewsets.ModelViewSet):
+    queryset = Invoice.objects.all()
+    serializer_class = InvoiceSerializer
+class InvoicePDFView(APIView):
+    """
+    Returns a PDF with the invoice number and date on the right side,
+    and other sections laid out as per the template.
+    """
+    def get(self, request, pk, format=None):
+        try:
+            invoice = Invoice.objects.get(pk=pk)
+        except Invoice.DoesNotExist:
+            return Response({"detail": "Invoice not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Register the Broadway font
+        pdfmetrics.registerFont(TTFont('Broadway', 'static/fonts/broadway.ttf'))
+
+        # 1) Create the HttpResponse for the PDF
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="invoice_{pk}.pdf"'
+
+        # Set up the SimpleDocTemplate with custom margins (left, right, top, bottom)
+        doc = SimpleDocTemplate(
+            response,
+            pagesize=A4,
+            title=f"Invoice {invoice.invoice_number}",
+            author="Your Company",
+            leftMargin=0.5 * inch,   # Set left margin to 0.5 inch
+            rightMargin=0.5 * inch,  # Set right margin to 0.5 inch
+            topMargin=0.2 * inch,    # Set top margin to 0.5 inch
+            bottomMargin=0.5 * inch  # Set bottom margin to 0.5 inch
+        )
+
+
+        # 3) Get default styles and add a custom style for right alignment
+        styles = getSampleStyleSheet()
+
+        # Custom Style for the word "INVOICE" (Red, Broadway font, large size)
+        styles.add(ParagraphStyle(
+            name="InvoiceTitle",
+            fontSize=24,
+            textColor=colors.black,
+            alignment=1,  # 2 = center
+            spaceAfter=0
+        ))
+
+        # Custom Style for seller's name (Red and Broadway Font)
+        styles.add(ParagraphStyle(
+            name="SellerName",
+            fontName="Broadway",
+            fontSize=26,
+            textColor=colors.red,
+            alignment=1,  # Align left
+            spaceAfter=20,
+        ))
+
+        # Custom Style for right alignment (Invoice Number and Date)
+        styles.add(ParagraphStyle(
+            name="RightAlign",
+            parent=styles["Normal"],
+            alignment=2,  # 2 = right align
+            fontSize=12,
+            textColor=colors.black,
+            spaceAfter=10,
+        ))
+                # Custom Style for right alignment (Invoice Number and Date)
+        styles.add(ParagraphStyle(
+            name="LeftAlign",
+            parent=styles["Normal"],
+            alignment=0,  # 2 = right align
+            fontSize=9,
+            textColor=colors.black,
+            spaceAfter=-50,
+        ))
+
+        # Story list to hold content
+        story = []
+        # Create a drawing container with the full width of the page, ignoring margins
+        drawing = Drawing(doc.pagesize[0] + doc.leftMargin + doc.rightMargin, 0.1 * inch)  # Full width, height of 0.1 inch for the line
+        line = Line(-doc.leftMargin, 0, doc.pagesize[0] + doc.rightMargin, 0)  # Line from left (ignoring left margin) to right (ignoring right margin)
+        drawing.add(line)  # Add the line to the drawing
+        # ===================================================================
+        # 6) Seller Info Section
+        seller_name = f"{invoice.seller.seller_name}"
+        story.append(Paragraph(seller_name, styles["SellerName"]))
+        # ===================================================================
+        # 4) Add the word "INVOICE" (Centered and Red)
+        invoice_title = "INVOICE"
+        story.append(Paragraph(invoice_title, styles["InvoiceTitle"]))
+
+        # ===================================================================
+        # 5) Invoice Info (Right-aligned - Invoice Number and Date)
+        invoice_info = f"""
+        invoice number: {invoice.invoice_number}<br/>
+        invoice date: {invoice.invoice_date}
+        """
+        story.append(Paragraph(invoice_info, styles["LeftAlign"]))
+        story.append(Spacer(1, 0.5 * inch))
+
+        # Add a separator line
+
+
+        # Seller Address, Country, Reference
+        seller_info = f"""
+        <b>Seller name and address:</b><br/>  {invoice.seller.seller_name}<br/>  {invoice.seller.seller_address}<br/>
+        Country of beneficiary: {invoice.seller.seller_country}<br/>
+        Seller's reference: {invoice.seller.seller_refrence}
+        """
+
+        # ===================================================================
+        # 8) Buyer Info Section
+        buyer_info = f"""
+        <b>Buyer’s Commercial Card No:</b> {invoice.buyer.buyer_card_number}<br/>
+        Buyer’s Name: {invoice.buyer.buyer_name}<br/>
+        Buyer’s Country: {invoice.buyer.buyer_country}
+        """
+        table_data = [
+            [Paragraph(seller_info), Paragraph(buyer_info)]
+        ]
+        
+        # Table for invoiceTitle and sellerName side by side
+        table = Table(table_data, colWidths=[3.6 * inch, 3.6 * inch])  # Adjust the widths as needed
+        table.setStyle(TableStyle([
+            ('ALIGN', (0, 0), (0, 0), 'CENTER'),
+            ('ALIGN', (1, 0), (1, 0), 'LEFT'),
+            ('VALIGN', (0, 0), (1, 0), 'TOP'),
+            ('FONTNAME', (0, 0), (1, 0), 'Broadway'),
+        ]))
+        story.append(Paragraph("Seller and Buyer Info", styles["LeftAlign"]))
+        story.append(drawing)
+
+        
+        story.append(table)
+        story.append(Spacer(0.5, 0.5 * inch))  # Add space before table
+        story.append(Paragraph("Shipping Info", styles["LeftAlign"]))
+
+        # Add the drawing (which contains the line) as a flowable
+        story.append(drawing)
+
+
+
+        table_data = [["No", "Item Description", "Item Description"]]  # headers
+
+        # Adding item descriptions as Paragraphs to allow text wrapping
+        for idx, item in enumerate(invoice.items.all(), 1):
+            # Wrap the item description in a Paragraph for automatic line breaks
+            item_description = Paragraph(item.description, styles["Normal"])  # use styles["Normal"] or your custom style
+            table_data.append([str(idx), item_description, ""])
+
+        # Create the table
+        table = Table(table_data, colWidths=[0.5 * inch, 4 * inch, 4 * inch])  # Adjust column widths
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),  # Header background
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),  # Header text color
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),  # Center-align all text
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),  # Header font
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),  # Bottom padding for headers
+            ('BACKGROUND', (0, 1), (-1, -1), colors.white),  # Background for body rows
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),  # Grid lines
+        ]))
+
+        # Add the table to the story
+        story.append(Spacer(1, 0.5 * inch))  # Add space before table
+        story.append(table)
+        # ===================================================================
+        # 11) Finalize the PDF
+        doc.build(story)
+
+        return response
+
+class InvoiceExcelView(APIView):
+    """
+    Returns an Excel file (XLSX) for the given Invoice (by primary key).
+    """
+    def get(self, request, pk, format=None):
+        try:
+            invoice = Invoice.objects.get(pk=pk)
+        except Invoice.DoesNotExist:
+            return Response({"detail": "Invoice not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Invoice"
+
+        # Write headers
+        ws["A1"] = "Invoice ID"
+        ws["B1"] = "Invoice Number"
+        ws["C1"] = "Seller"
+        ws["D1"] = "Buyer"
+        ws["E1"] = "Total Amount"
+        ws["F1"] = "Freight Charges"
+        ws["G1"] = "Currency"
+        ws["H1"] = "Invoice Date"
+
+        # Write the invoice info
+        ws["A2"] = invoice.invoice_id
+        ws["B2"] = invoice.invoice_number
+        ws["C2"] = invoice.seller.seller_account_name
+        ws["D2"] = invoice.buyer.buyer_card_number
+        ws["E2"] = float(invoice.total_amount)
+        ws["F2"] = invoice.freight_charges
+        ws["G2"] = invoice.invoice_currency
+        ws["H2"] = str(invoice.invoice_date)
+
+        # Optionally create a new sheet for items
+        item_sheet = wb.create_sheet("Items")
+        item_sheet["A1"] = "Description"
+        item_sheet["B1"] = "Quantity"
+        item_sheet["C1"] = "Unit Price"
+        item_sheet["D1"] = "Line Total"
+
+        row = 2
+        for item in invoice.items.all():
+            item_sheet[f"A{row}"] = item.description
+            item_sheet[f"B{row}"] = item.quantity
+            item_sheet[f"C{row}"] = float(item.unit_price)
+            item_sheet[f"D{row}"] = float(item.line_total)
+            row += 1
+
+        # Prepare response with XLSX data
+        response = HttpResponse(
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        response['Content-Disposition'] = f'attachment; filename="invoice_{pk}.xlsx"'
+
+        wb.save(response)
+        return response

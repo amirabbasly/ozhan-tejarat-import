@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import ImageTemplate
+from .models import ImageTemplate, Seller, Buyer, Invoice, InvoiceItem
+import uuid
 
 class ImageTemplateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -33,4 +34,130 @@ class FillExcelSerializer(serializers.Serializer):
     date = serializers.DateField()
     amount = serializers.DecimalField(max_digits=12, decimal_places=2)
     goods = InvoiceGoodSerializer(many=True)  # This will expect a list of goods
+class SellerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Seller
+        fields = [
+            'id',
+            'seller_name',
+            'seller_address',
+            'seller_refrence',
+            'seller_country',
+            'seller_bank_name',
+            'seller_account_name',
+            'seller_iban',
+            'seller_swift',
+            'seller_seal',
+        ]
 
+
+class BuyerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Buyer
+        fields = [
+            'id',
+            'buyer_name',
+            'buyer_card_number',
+            'buyer_country',
+        ]
+
+
+class InvoiceItemSerializer(serializers.ModelSerializer):
+    """
+    Represents a single line item in an Invoice.
+    """
+    line_total = serializers.DecimalField(
+        max_digits=10, decimal_places=2, read_only=True
+    )
+    
+    class Meta:
+        model = InvoiceItem
+        fields = [
+            'id',
+            'description',
+            'quantity',
+            'unit_price',
+            'line_total'
+        ]
+
+
+class InvoiceSerializer(serializers.ModelSerializer):
+    """
+    Invoice serializer supporting nested creation of InvoiceItems.
+    """
+    # Let the client send items in nested format
+    items = InvoiceItemSerializer(many=True, write_only=True, required=False)
+
+    # Read-only fields
+    total_amount = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
+    invoice_date = serializers.DateField(read_only=True)
+    
+    # If you want to generate `invoice_id` automatically, you can make it read-only,
+    # otherwise let clients supply it. Or you can handle generation in the model's `save()`.
+    invoice_id = serializers.CharField(required=False)
+
+    class Meta:
+        model = Invoice
+        fields = [
+            'id',
+            'seller',
+            'buyer',
+            'invoice_id',       # Unique invoice ID
+            'invoice_number',
+            'freight_charges',
+            'invoice_currency',
+            'invoice_date',
+            'total_amount',
+            'items',
+        ]
+
+    def create(self, validated_data):
+        # Pull out nested items
+        items_data = validated_data.pop('items', [])
+
+        # Optionally auto-generate `invoice_id` if not provided
+        if not validated_data.get('invoice_id'):
+            validated_data['invoice_id'] = 'INV-' + str(uuid.uuid4())[:8].upper()
+
+        # Create the Invoice
+        invoice = Invoice.objects.create(**validated_data)
+
+        # Create the InvoiceItems
+        for item_data in items_data:
+            InvoiceItem.objects.create(invoice=invoice, **item_data)
+
+        # Calculate total amount = sum of line_total + freight_charges (if that’s your logic)
+        total_lines = sum(item.line_total for item in invoice.items.all())
+        freight = invoice.freight_charges or 0
+        invoice.total_amount = total_lines + freight
+        invoice.save()
+
+        return invoice
+
+    def update(self, instance, validated_data):
+        """
+        Optional: If you want to handle updates to items or recalc total, 
+        override update as well.
+        """
+        items_data = validated_data.pop('items', None)
+
+        # Update direct fields on the invoice
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        # If items are included, handle them (this is simplistic – you might want
+        # a more robust approach to update items by ID, delete removed items, etc.)
+        if items_data is not None:
+            # Clear existing items or selectively update 
+            instance.items.all().delete()
+            for item_data in items_data:
+                InvoiceItem.objects.create(invoice=instance, **item_data)
+
+        # Recompute total
+        total_lines = sum(item.line_total for item in instance.items.all())
+        freight = instance.freight_charges or 0
+        instance.total_amount = total_lines + freight
+        instance.save()
+
+        return instance

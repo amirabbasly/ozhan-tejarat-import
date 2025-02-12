@@ -48,7 +48,10 @@ import TariffCalculator from "./components/TarriffCalculator";
 // Import the PrivateRoute component
 import PrivateRoute from "./components/PrivateRoute";
 import TextOverlayForm from "./components/TextOverlayForm";
-import ExcelInvoice from "./components/ExcelInvoice";
+import InvoiceForm from "./components/InvoiceForm";
+import SellerForm from "./components/SellerForm";
+import BuyerForm from "./components/BuyerForm";
+import InvoiceList from "./components/InvoiceList";
 import "./App.css";
 
 function App() {
@@ -364,13 +367,39 @@ function AppContent() {
             }
           />
                                         <Route
-            path="/excel-inv"
+            path="/inv"
             element={
               <PrivateRoute>
-                <ExcelInvoice />
+                <InvoiceForm />
               </PrivateRoute>
             }
           />
+<Route 
+  exact path="/sellers/new"
+  element={
+    <PrivateRoute>
+      <SellerForm />
+    </PrivateRoute>
+  }
+/>
+<Route
+  path="/buyers/new"
+  element={
+    <PrivateRoute>
+      <BuyerForm />
+    </PrivateRoute>
+  }
+/>
+<Route
+  path="/invoice-list"
+  element={
+    <PrivateRoute>
+      <InvoiceList />
+    </PrivateRoute>
+  }
+/>
+
+
           {/* Add more protected routes as needed */}
         </Routes>
       </main>

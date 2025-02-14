@@ -16,6 +16,7 @@ function SellerForm() {
     seller_iban: "",
     seller_swift: "",
     seller_seal: null, // for file upload
+    seller_logo: null, // for file upload
   });
 
   const handleChange = (e) => {
@@ -23,14 +24,16 @@ function SellerForm() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Updated file change handler to handle both seller_seal and seller_logo
   const handleFileChange = (e) => {
-    setFormData((prev) => ({ ...prev, seller_seal: e.target.files[0] }));
+    const { name, files } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: files[0] }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // We need multipart/form-data to upload the image (if any)
+    // We need multipart/form-data to upload the images (if any)
     const data = new FormData();
     data.append("seller_name", formData.seller_name);
     data.append("seller_address", formData.seller_address);
@@ -43,7 +46,9 @@ function SellerForm() {
     if (formData.seller_seal) {
       data.append("seller_seal", formData.seller_seal);
     }
-
+    if (formData.seller_logo) {
+      data.append("seller_logo", formData.seller_logo);
+    }
     try {
       await axiosInstance.post("documents/sellers/", data);
       alert("Seller created successfully!");
@@ -143,6 +148,16 @@ function SellerForm() {
             type="file"
             accept="image/*"
             name="seller_seal"
+            onChange={handleFileChange}
+          />
+        </div>
+
+        <div>
+          <label>Logo:</label>
+          <input
+            type="file"
+            accept="image/*"
+            name="seller_logo"
             onChange={handleFileChange}
           />
         </div>

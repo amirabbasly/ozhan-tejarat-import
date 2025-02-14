@@ -9,7 +9,6 @@ from .serializers import OverlayTextSerializer, ImageTemplateSerializer, FillExc
 from .models import ImageTemplate, Seller, Buyer, Invoice
 import os
 import openpyxl
-import xlsxwriter
 from reportlab.lib.pagesizes import letter
 from rest_framework import viewsets
 from rest_framework.pagination import PageNumberPagination
@@ -26,91 +25,7 @@ from reportlab.lib.units import inch
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 
-class FillInvoiceView(APIView):
-    def post(self, request, format=None):
-        # Deserialize the request data
-        serializer = FillExcelSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        data = serializer.validated_data
-        invoice_number = data['invoice_number']
-        date_value = data['date']
-        amount_value = data['amount']
-        goods = data['goods']  # List of goods from the request
-
-        # Check if the goods list is empty or missing
-        if not goods:
-            return Response({"error": "Goods list cannot be empty."}, status=status.HTTP_400_BAD_REQUEST)
-
-        # 1. Load the Excel template
-        template_path = 'static/excel_template/INV.xlsx'
-        wb = openpyxl.load_workbook(template_path)
-        sheet = wb.active
-
-        # 2. Fill in the required fields for the invoice
-        sheet['A2'] = invoice_number
-        sheet['A4'] = f"Invoice date: {date_value.strftime('%Y-%m-%d')}"
-        sheet['H13'] = float(amount_value)  # Total amount
-        # 3. Fill the goods table starting from row 20
-        starting_row = 20
-        for i, good in enumerate(goods):
-            row = starting_row + i  # Place each good in the next row
-
-            # Insert a new row if necessary (only after the first row)
-            if i > 0:
-                sheet.insert_rows(row)  # Insert a new row at the current position
-                
-                # Move the content below the inserted row down by 1 row
-                for r in range(sheet.max_row, row, -1):  # Start from the last row and go upwards
-                    for col in range(1, sheet.max_column + 1):  # Adjust the range to match your columns
-                        source_cell = sheet.cell(row=r-1, column=col)  # Copy from the row above
-                        target_cell = sheet.cell(row=r, column=col)
-                        
-                        # Check if the source cell is part of a merged cell range
-                        is_merged = False
-                        for merged in sheet.merged_cells.ranges:
-                            if source_cell.coordinate in merged:
-                                is_merged = True
-                                first_cell = sheet.cell(row=merged.min_row, column=merged.min_col)
-                                target_cell._value = first_cell._value  # Copy value from the first merged cell
-                                target_cell._style = first_cell._style  # Copy style from the first merged cell
-                                break
-                        
-                        if not is_merged:
-                            target_cell._value = source_cell._value  # Copy value for non-merged cells
-                            target_cell._style = source_cell._style  # Copy style for non-merged cells
-
-            # Ensure the good contains all necessary data (you can add further checks here if needed)
-            required_keys = ['name', 'country_of_origin', 'commodity_code', 'gw', 'nw', 'quantity', 'unit', 'unit_price']
-            for key in required_keys:
-                if key not in good:
-                    return Response({"error": f"Missing {key} for good {i + 1}"}, status=status.HTTP_400_BAD_REQUEST)
-
-            # Fill each column with data for this good
-            sheet[f'K{row}'] = i + 1  # Index number
-            sheet[f'I{row}'] = good['name']  # Goods name
-            sheet[f'H{row}'] = good['country_of_origin']  # Country of origin
-            sheet[f'G{row}'] = good['commodity_code']  # Commodity code
-            sheet[f'F{row}'] = good['gw']  # Gross weight
-            sheet[f'E{row}'] = good['nw']  # Net weight
-            sheet[f'D{row}'] = good['quantity']  # Quantity
-            sheet[f'C{row}'] = good['unit']  # Unit
-            sheet[f'B{row}'] = good['unit_price']  # Unit price
-            sheet[f'A{row}'] = good['quantity'] * good['unit_price']  # Total amount (calculated)
-
-
-
-        # 4. Build the response with the filled Excel file
-        response = HttpResponse(
-            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        )
-        response['Content-Disposition'] = 'attachment; filename="filled_template.xlsx"'
-
-        # Save the workbook to the response
-        wb.save(response)
-
-        return response
 class OverlayTextView(APIView):
     def post(self, request):
         # 1) Fetch the template based on template_id
@@ -350,29 +265,70 @@ class InvoicePDFView(APIView):
 
 
 
-        table_data = [["No", "Item Description", "Item Description"]]  # headers
+        table_data = [[
+            "No",
+            "Item Description",
+            "Origin",
+            "HS Code",
+            "Nw. kg",
+            "Gw. kg",
+            "#",
+            "Quantity",
+            "Unit Price",
+            "Amount"
+        ]]
 
-        # Adding item descriptions as Paragraphs to allow text wrapping
+        # For each invoice item, ensure that numeric values are converted to strings,
+        # and wrap text values in Paragraphs for proper styling/wrapping.
         for idx, item in enumerate(invoice.items.all(), 1):
-            # Wrap the item description in a Paragraph for automatic line breaks
-            item_description = Paragraph(item.description, styles["Normal"])  # use styles["Normal"] or your custom style
-            table_data.append([str(idx), item_description, ""])
+            description = Paragraph(item.description, styles["Normal"])
+            origin = Paragraph(item.origin, styles["Normal"])
+            # Convert commodity_code to string before passing to Paragraph
+            commodity_code = Paragraph(str(item.commodity_code), styles["Normal"])
+            nw_kg = str(item.nw_kg)
+            gw_kg = str(item.gw_kg)
+            number_field = ""  # Placeholder for '#' column (customize as needed)
+            quantity = str(item.quantity)
+            unit_price = str(item.unit_price)
+            # Calculate amount (if applicable)
+            try:
+                amount_val = float(item.quantity) * float(item.unit_price)
+            except (ValueError, TypeError):
+                amount_val = 0
+            amount = f"{amount_val:.2f}"
 
-        # Create the table
-        table = Table(table_data, colWidths=[0.5 * inch, 4 * inch, 4 * inch])  # Adjust column widths
-        table.setStyle(TableStyle([
+            table_data.append([
+                str(idx),
+                description,
+                origin,
+                commodity_code,
+                nw_kg,
+                gw_kg,
+                number_field,
+                quantity,
+                unit_price,
+                amount
+            ])
+
+        # Set column widths for 10 columns (adjust as needed)
+        col_widths = [
+            0.3 * inch, 1.5 * inch, 0.7 * inch, 0.9 * inch,
+            0.8 * inch, 0.8 * inch, 0.5 * inch, 0.7 * inch,
+            0.9 * inch, 1 * inch
+        ]
+        items_table = Table(table_data, colWidths=col_widths)
+        items_table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.grey),  # Header background
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),  # Header text color
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),  # Center-align all text
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),  # Header font
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),  # Bottom padding for headers
-            ('BACKGROUND', (0, 1), (-1, -1), colors.white),  # Background for body rows
-            ('GRID', (0, 0), (-1, -1), 1, colors.black),  # Grid lines
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),    # Header text color
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
         ]))
 
-        # Add the table to the story
-        story.append(Spacer(1, 0.5 * inch))  # Add space before table
-        story.append(table)
+        story.append(Spacer(1, 0.5 * inch))
+        story.append(items_table)
         # ===================================================================
         # 11) Finalize the PDF
         doc.build(story)

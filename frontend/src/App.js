@@ -211,7 +211,7 @@ function AppContent() {
               </PrivateRoute>
             }
           />
-                    <Route
+          <Route
             path="/cottage-goods-list"
             element={
               <PrivateRoute>
@@ -350,7 +350,7 @@ function AppContent() {
               </PrivateRoute>
             }
           />
-                    <Route
+          <Route
             path="/tariff-calculator"
             element={
               <PrivateRoute>
@@ -358,7 +358,7 @@ function AppContent() {
               </PrivateRoute>
             }
           />
-                              <Route
+          <Route
             path="/certificate-of-origin"
             element={
               <PrivateRoute>
@@ -366,7 +366,7 @@ function AppContent() {
               </PrivateRoute>
             }
           />
-                                        <Route
+          <Route
             path="/inv"
             element={
               <PrivateRoute>
@@ -374,31 +374,31 @@ function AppContent() {
               </PrivateRoute>
             }
           />
-<Route 
-  exact path="/sellers/new"
-  element={
-    <PrivateRoute>
-      <SellerForm />
-    </PrivateRoute>
-  }
-/>
-<Route
-  path="/buyers/new"
-  element={
-    <PrivateRoute>
-      <BuyerForm />
-    </PrivateRoute>
-  }
-/>
-<Route
-  path="/invoice-list"
-  element={
-    <PrivateRoute>
-      <InvoiceList />
-    </PrivateRoute>
-  }
-/>
-
+          <Route
+            exact
+            path="/sellers/new"
+            element={
+              <PrivateRoute>
+                <SellerForm />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/buyers/new"
+            element={
+              <PrivateRoute>
+                <BuyerForm />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/invoice-list"
+            element={
+              <PrivateRoute>
+                <InvoiceList />
+              </PrivateRoute>
+            }
+          />
 
           {/* Add more protected routes as needed */}
         </Routes>

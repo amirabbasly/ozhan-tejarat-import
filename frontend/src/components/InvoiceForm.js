@@ -16,38 +16,54 @@ function InvoiceForm() {
     invoice_number: "",
     invoice_currency: "USD",
     freight_charges: 0,
+    terms_of_delivery: "CPT",
+    terms_of_payment: "TT",
+    partial_shipment: false,
+    relevant_location: "",
+    standard: "JIS",
     items: [
-      { description: "", quantity: 1, unit_price: 0 },
+      {
+        description: "",
+        quantity: 1,
+        unit_price: 0,
+        nw_kg: 0,
+        gw_kg: 0,
+        commodity_code: "",
+        origin: "",
+      },
     ],
   });
 
   useEffect(() => {
     // Fetch sellers
-    axiosInstance.get("documents/sellers/")
+    axiosInstance
+      .get("documents/sellers/")
       .then((res) => setSellers(res.data))
       .catch((err) => console.error(err));
 
     // Fetch buyers
-    axiosInstance.get("documents/buyers/")
+    axiosInstance
+      .get("documents/buyers/")
       .then((res) => setBuyers(res.data))
       .catch((err) => console.error(err));
   }, []);
 
+  // Updated to handle checkboxes as well as text/number inputs
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setInvoiceData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
   const handleItemChange = (index, e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setInvoiceData((prev) => {
       const updatedItems = [...prev.items];
       updatedItems[index] = {
         ...updatedItems[index],
-        [name]: value,
+        [name]: type === "checkbox" ? checked : value,
       };
       return { ...prev, items: updatedItems };
     });
@@ -56,7 +72,17 @@ function InvoiceForm() {
   const addItemRow = () => {
     setInvoiceData((prev) => ({
       ...prev,
-      items: [...prev.items, { description: "", quantity: 1, unit_price: 0 }],
+      items: [
+        ...prev.items,
+        {
+          description: "",
+          quantity: 1,
+          unit_price: 0,
+          nw_kg: 0,
+          gw_kg: 0,
+          origin: "",
+        },
+      ],
     }));
   };
 
@@ -73,11 +99,15 @@ function InvoiceForm() {
     // convert numeric fields
     const payload = {
       ...invoiceData,
-      freight_charges: parseInt(invoiceData.freight_charges, 10) || 0,
+      freight_charges: parseFloat(invoiceData.freight_charges) || 0,
       items: invoiceData.items.map((item) => ({
         description: item.description,
         quantity: parseInt(item.quantity, 10) || 0,
         unit_price: parseFloat(item.unit_price) || 0,
+        nw_kg: parseFloat(item.nw_kg) || 0,
+        gw_kg: parseFloat(item.gw_kg) || 0,
+        origin: item.origin,
+        commodity_code: item.commodity_code,
       })),
     };
 
@@ -157,39 +187,144 @@ function InvoiceForm() {
           />
         </div>
 
+        <div>
+          <label>Terms of Delivery:</label>
+          <input
+            type="text"
+            name="terms_of_delivery"
+            value={invoiceData.terms_of_delivery}
+            onChange={handleChange}
+          />
+        </div>
+
+        <div>
+          <label>Terms of Payment:</label>
+          <input
+            type="text"
+            name="terms_of_payment"
+            value={invoiceData.terms_of_payment}
+            onChange={handleChange}
+          />
+        </div>
+
+        <div>
+          <label>Partial Shipment:</label>
+          <input
+            type="checkbox"
+            name="partial_shipment"
+            checked={invoiceData.partial_shipment}
+            onChange={handleChange}
+          />
+        </div>
+
+        <div>
+          <label>Relevant Location:</label>
+          <input
+            type="text"
+            name="relevant_location"
+            value={invoiceData.relevant_location}
+            onChange={handleChange}
+          />
+        </div>
+
+        <div>
+          <label>Standard:</label>
+          <input
+            type="text"
+            name="standard"
+            value={invoiceData.standard}
+            onChange={handleChange}
+          />
+        </div>
+
         <h3>Items</h3>
         {invoiceData.items.map((item, index) => (
-          <div key={index} style={{ marginBottom: "1rem" }}>
-            <label>Description:</label>
-            <input
-              type="text"
-              name="description"
-              value={item.description}
-              onChange={(e) => handleItemChange(index, e)}
-            />
+          <div
+            key={index}
+            style={{
+              marginBottom: "1rem",
+              padding: "0.5rem",
+              border: "1px solid #ccc",
+            }}
+          >
+            <div>
+              <label>Description:</label>
+              <input
+                type="text"
+                name="description"
+                value={item.description}
+                onChange={(e) => handleItemChange(index, e)}
+              />
+            </div>
 
-            <label>Quantity:</label>
-            <input
-              type="number"
-              name="quantity"
-              value={item.quantity}
-              onChange={(e) => handleItemChange(index, e)}
-            />
+            <div>
+              <label>Quantity:</label>
+              <input
+                type="number"
+                name="quantity"
+                value={item.quantity}
+                onChange={(e) => handleItemChange(index, e)}
+              />
+            </div>
 
-            <label>Unit Price:</label>
-            <input
-              type="number"
-              step="0.01"
-              name="unit_price"
-              value={item.unit_price}
-              onChange={(e) => handleItemChange(index, e)}
-            />
+            <div>
+              <label>Unit Price:</label>
+              <input
+                type="number"
+                step="0.01"
+                name="unit_price"
+                value={item.unit_price}
+                onChange={(e) => handleItemChange(index, e)}
+              />
+            </div>
+            <div>
+              <label>commodity code (HsCode):</label>
+              <input
+                type="number"
+                step="0.01"
+                name="commodity_code"
+                value={item.commodity_code}
+                onChange={(e) => handleItemChange(index, e)}
+              />
+            </div>
+            <div>
+              <label>Net Weight (kg):</label>
+              <input
+                type="number"
+                step="0.01"
+                name="nw_kg"
+                value={item.nw_kg}
+                onChange={(e) => handleItemChange(index, e)}
+              />
+            </div>
+
+            <div>
+              <label>Gross Weight (kg):</label>
+              <input
+                type="number"
+                step="0.01"
+                name="gw_kg"
+                value={item.gw_kg}
+                onChange={(e) => handleItemChange(index, e)}
+              />
+            </div>
+
+            <div>
+              <label>Origin:</label>
+              <input
+                type="text"
+                name="origin"
+                value={item.origin}
+                onChange={(e) => handleItemChange(index, e)}
+              />
+            </div>
 
             <button type="button" onClick={() => removeItemRow(index)}>
-              Remove
+              Remove Item
             </button>
           </div>
         ))}
+
         <button type="button" onClick={addItemRow}>
           Add Item
         </button>

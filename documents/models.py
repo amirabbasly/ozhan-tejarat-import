@@ -36,7 +36,8 @@ class Seller(models.Model):
     seller_iban = models.CharField(max_length=55, null=True, blank=True)
     seller_swift = models.CharField(max_length=55, null=True, blank=True)
     seller_seal = models.ImageField(upload_to='seals/', null=True, blank=True)
-
+    seller_logo = models.ImageField(upload_to='seals/', null=True, blank=True)
+    
 class Buyer(models.Model):
     buyer_name = models.CharField(max_length=255)
     buyer_card_number = models.CharField(max_length=55)
@@ -46,13 +47,22 @@ class Buyer(models.Model):
 class Invoice(models.Model):
     seller = models.ForeignKey('Seller', on_delete=models.CASCADE)
     buyer = models.ForeignKey('Buyer', on_delete=models.CASCADE)
-    total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    total_amount = models.DecimalField(max_digits=20, decimal_places=2, default=0)
     invoice_date = models.DateField(auto_now_add=True)
     # e.g. an automatically generated invoice number
     invoice_id = models.CharField(max_length=50, unique=True)
     invoice_number = models.CharField(max_length=50)
     freight_charges = models.IntegerField(max_length=50)
     invoice_currency = models.CharField(max_length=50)
+    terms_of_delivery = models.CharField(max_length=50)
+    terms_of_payment = models.CharField(max_length=50)
+    partial_shipment = models.BooleanField(default=False)
+    relevant_location = models.CharField(max_length=50)
+    standard = models.CharField(max_length=50)
+    total_gw = models.IntegerField(default=0)
+    total_nw = models.IntegerField(default=0)
+    
+
     
     def __str__(self):
         return f"Invoice {self.invoice_number}"
@@ -62,8 +72,11 @@ class InvoiceItem(models.Model):
     invoice = models.ForeignKey(Invoice, related_name='items', on_delete=models.CASCADE)
     description = models.CharField(max_length=255)
     quantity = models.IntegerField(default=1)
+    commodity_code = models.IntegerField(max_length=9)
     unit_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    
+    nw_kg = models.IntegerField(default=1)
+    gw_kg = models.IntegerField(default=1)
+    origin = models.CharField(max_length=55)
     @property
     def line_total(self):
         return self.quantity * self.unit_price

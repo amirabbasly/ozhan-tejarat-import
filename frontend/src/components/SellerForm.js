@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../utils/axiosInstance";
+import "./CottageForm.css";
 
 function SellerForm() {
   const navigate = useNavigate();
@@ -24,7 +25,6 @@ function SellerForm() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Updated file change handler to handle both seller_seal and seller_logo
   const handleFileChange = (e) => {
     const { name, files } = e.target;
     setFormData((prev) => ({ ...prev, [name]: files[0] }));
@@ -51,121 +51,146 @@ function SellerForm() {
     }
     try {
       await axiosInstance.post("documents/sellers/", data);
-      alert("Seller created successfully!");
-      navigate("/"); // redirect as you wish
+      alert("فروشنده با موفقیت ایجاد شد!");
+      navigate("/"); // redirect as needed
     } catch (error) {
-      console.error("Error creating seller:", error);
-      alert("Failed to create seller.");
+      console.error("خطا در ایجاد فروشنده:", error);
+      alert("ایجاد فروشنده با خطا مواجه شد.");
     }
   };
 
   return (
-    <div style={{ padding: "1rem" }}>
-      <h2>Create Seller</h2>
-      <form onSubmit={handleSubmit} encType="multipart/form-data">
-        <div>
-          <label>Seller Name:</label>
-          <input
-            type="text"
-            name="seller_name"
-            value={formData.seller_name}
-            onChange={handleChange}
-          />
-        </div>
+    <form
+      className="cottage-form"
+      dir="rtl"
+      onSubmit={handleSubmit}
+      encType="multipart/form-data"
+    >
+      <h2>ایجاد فروشنده</h2>
 
-        <div>
-          <label>Seller Address:</label>
-          <textarea
-            name="seller_address"
-            value={formData.seller_address}
-            onChange={handleChange}
-          />
-        </div>
+      <div className="form-group">
+        <label htmlFor="seller_name">نام فروشنده:</label>
+        <input
+          type="text"
+          id="seller_name"
+          name="seller_name"
+          value={formData.seller_name}
+          onChange={handleChange}
+          placeholder="نام فروشنده را وارد کنید"
+          required
+        />
+      </div>
 
-        <div>
-          <label>Reference:</label>
-          <input
-            type="text"
-            name="seller_refrence"
-            value={formData.seller_refrence}
-            onChange={handleChange}
-          />
-        </div>
+      <div className="form-group">
+        <label htmlFor="seller_address">آدرس فروشنده:</label>
+        <textarea
+          id="seller_address"
+          name="seller_address"
+          value={formData.seller_address}
+          onChange={handleChange}
+          placeholder="آدرس فروشنده را وارد کنید"
+          required
+        />
+      </div>
 
-        <div>
-          <label>Country:</label>
-          <input
-            type="text"
-            name="seller_country"
-            value={formData.seller_country}
-            onChange={handleChange}
-          />
-        </div>
+      <div className="form-group">
+        <label htmlFor="seller_refrence">ارجاع:</label>
+        <input
+          type="text"
+          id="seller_refrence"
+          name="seller_refrence"
+          value={formData.seller_refrence}
+          onChange={handleChange}
+          placeholder="ارجاع را وارد کنید"
+        />
+      </div>
 
-        <div>
-          <label>Bank Name:</label>
-          <input
-            type="text"
-            name="seller_bank_name"
-            value={formData.seller_bank_name}
-            onChange={handleChange}
-          />
-        </div>
+      <div className="form-group">
+        <label htmlFor="seller_country">کشور:</label>
+        <input
+          type="text"
+          id="seller_country"
+          name="seller_country"
+          value={formData.seller_country}
+          onChange={handleChange}
+          placeholder="کشور فروشنده را وارد کنید"
+        />
+      </div>
 
-        <div>
-          <label>Account Name:</label>
-          <input
-            type="text"
-            name="seller_account_name"
-            value={formData.seller_account_name}
-            onChange={handleChange}
-          />
-        </div>
+      <div className="form-group">
+        <label htmlFor="seller_bank_name">نام بانک:</label>
+        <input
+          type="text"
+          id="seller_bank_name"
+          name="seller_bank_name"
+          value={formData.seller_bank_name}
+          onChange={handleChange}
+          placeholder="نام بانک را وارد کنید"
+        />
+      </div>
 
-        <div>
-          <label>IBAN:</label>
-          <input
-            type="text"
-            name="seller_iban"
-            value={formData.seller_iban}
-            onChange={handleChange}
-          />
-        </div>
+      <div className="form-group">
+        <label htmlFor="seller_account_name">نام حساب:</label>
+        <input
+          type="text"
+          id="seller_account_name"
+          name="seller_account_name"
+          value={formData.seller_account_name}
+          onChange={handleChange}
+          placeholder="نام حساب را وارد کنید"
+        />
+      </div>
 
-        <div>
-          <label>Swift:</label>
-          <input
-            type="text"
-            name="seller_swift"
-            value={formData.seller_swift}
-            onChange={handleChange}
-          />
-        </div>
+      <div className="form-group">
+        <label htmlFor="seller_iban">شماره IBAN:</label>
+        <input
+          type="text"
+          id="seller_iban"
+          name="seller_iban"
+          value={formData.seller_iban}
+          onChange={handleChange}
+          placeholder="شماره IBAN را وارد کنید"
+        />
+      </div>
 
-        <div>
-          <label>Seal:</label>
-          <input
-            type="file"
-            accept="image/*"
-            name="seller_seal"
-            onChange={handleFileChange}
-          />
-        </div>
+      <div className="form-group">
+        <label htmlFor="seller_swift">کد سوئیفت:</label>
+        <input
+          type="text"
+          id="seller_swift"
+          name="seller_swift"
+          value={formData.seller_swift}
+          onChange={handleChange}
+          placeholder="کد سوئیفت را وارد کنید"
+        />
+      </div>
 
-        <div>
-          <label>Logo:</label>
-          <input
-            type="file"
-            accept="image/*"
-            name="seller_logo"
-            onChange={handleFileChange}
-          />
-        </div>
+      <div className="form-group">
+        <label htmlFor="seller_seal">مهر:</label>
+        <input
+          type="file"
+          id="seller_seal"
+          name="seller_seal"
+          accept="image/*"
+          onChange={handleFileChange}
+        />
+      </div>
 
-        <br />
-        <button type="submit">Save Seller</button>
-      </form>
-    </div>
+      <div className="form-group">
+        <label htmlFor="seller_logo">لوگو:</label>
+        <input
+          type="file"
+          id="seller_logo"
+          name="seller_logo"
+          accept="image/*"
+          onChange={handleFileChange}
+        />
+      </div>
+
+      <button type="submit" className="btn-grad1">
+        ذخیره فروشنده
+      </button>
+    </form>
   );
 }
 

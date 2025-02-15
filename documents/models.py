@@ -58,9 +58,13 @@ class Invoice(models.Model):
     terms_of_payment = models.CharField(max_length=50)
     partial_shipment = models.BooleanField(default=False)
     relevant_location = models.CharField(max_length=50)
+    means_of_transport = models.CharField(max_length=50)
+    country_of_origin = models.CharField(max_length=50)
+    port_of_loading = models.CharField(max_length=50)
     standard = models.CharField(max_length=50)
-    total_gw = models.IntegerField(default=0)
-    total_nw = models.IntegerField(default=0)
+    total_gw = models.DecimalField(default=0, max_digits=12, decimal_places=2,)
+    total_nw = models.DecimalField(default=0, max_digits=12, decimal_places=2,)
+    total_pack = models.IntegerField(default=0)
     
 
     
@@ -73,9 +77,11 @@ class InvoiceItem(models.Model):
     description = models.CharField(max_length=255)
     quantity = models.IntegerField(default=1)
     commodity_code = models.IntegerField(max_length=9)
-    unit_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    nw_kg = models.IntegerField(default=1)
-    gw_kg = models.IntegerField(default=1)
+    unit_price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    unit = models.CharField(max_length=55, default="U")
+    pack = models.IntegerField(default=1)
+    nw_kg = models.DecimalField(default=1, max_digits=12, decimal_places=2,)
+    gw_kg = models.DecimalField(default=1, max_digits=12, decimal_places=2,)
     origin = models.CharField(max_length=55)
     @property
     def line_total(self):

@@ -15,7 +15,7 @@ from rest_framework.pagination import PageNumberPagination
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from reportlab.platypus import (
-    SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+    SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image as RLImage
 )
 from reportlab.graphics.shapes import Drawing, Line
 
@@ -151,66 +151,74 @@ class InvoicePDFView(APIView):
             pagesize=A4,
             title=f"Invoice {invoice.invoice_number}",
             author="Your Company",
-            leftMargin=0.5 * inch,   # Set left margin to 0.5 inch
-            rightMargin=0.5 * inch,  # Set right margin to 0.5 inch
-            topMargin=0.2 * inch,    # Set top margin to 0.5 inch
-            bottomMargin=0.5 * inch  # Set bottom margin to 0.5 inch
+            leftMargin=0.5 * inch,   # 0.5 inch left margin
+            rightMargin=0.5 * inch,  # 0.5 inch right margin
+            topMargin=0.2 * inch,    # 0.2 inch top margin
+            bottomMargin=0.5 * inch  # 0.5 inch bottom margin
         )
 
-
-        # 3) Get default styles and add a custom style for right alignment
+        # 3) Get default styles and add custom styles
         styles = getSampleStyleSheet()
 
-        # Custom Style for the word "INVOICE" (Red, Broadway font, large size)
         styles.add(ParagraphStyle(
             name="InvoiceTitle",
             fontSize=24,
             textColor=colors.black,
-            alignment=1,  # 2 = center
+            alignment=1,  # Center align
             spaceAfter=0
         ))
 
-        # Custom Style for seller's name (Red and Broadway Font)
         styles.add(ParagraphStyle(
             name="SellerName",
             fontName="Broadway",
             fontSize=26,
             textColor=colors.red,
-            alignment=1,  # Align left
+            alignment=1,  # Center align
             spaceAfter=20,
         ))
 
-        # Custom Style for right alignment (Invoice Number and Date)
         styles.add(ParagraphStyle(
             name="RightAlign",
             parent=styles["Normal"],
-            alignment=2,  # 2 = right align
+            alignment=2,  # Right align
             fontSize=12,
             textColor=colors.black,
             spaceAfter=10,
         ))
-                # Custom Style for right alignment (Invoice Number and Date)
+
         styles.add(ParagraphStyle(
             name="LeftAlign",
             parent=styles["Normal"],
-            alignment=0,  # 2 = right align
+            alignment=0,  # Left align
             fontSize=9,
             textColor=colors.black,
             spaceAfter=-50,
         ))
 
+        # A custom style for small centered text in the table cells.
+        styles.add(ParagraphStyle(
+            name="Cnt",
+            parent=styles["Normal"],
+            alignment=1,
+            fontSize=9,
+            textColor=colors.black,
+        ))
+
         # Story list to hold content
         story = []
-        # Create a drawing container with the full width of the page, ignoring margins
-        drawing = Drawing(doc.pagesize[0] + doc.leftMargin + doc.rightMargin, 0.1 * inch)  # Full width, height of 0.1 inch for the line
-        line = Line(-doc.leftMargin, 0, doc.pagesize[0] + doc.rightMargin, 0)  # Line from left (ignoring left margin) to right (ignoring right margin)
-        drawing.add(line)  # Add the line to the drawing
+
+        # Create a drawing container with full width (ignoring margins)
+        drawing = Drawing(doc.pagesize[0] + doc.leftMargin + doc.rightMargin, 0.1 * inch)
+        line = Line(-doc.leftMargin, 0, doc.pagesize[0] + doc.rightMargin, 0)
+        drawing.add(line)
+
         # ===================================================================
         # 6) Seller Info Section
         seller_name = f"{invoice.seller.seller_name}"
         story.append(Paragraph(seller_name, styles["SellerName"]))
+
         # ===================================================================
-        # 4) Add the word "INVOICE" (Centered and Red)
+        # 4) Add the word "INVOICE" (Centered and styled)
         invoice_title = "INVOICE"
         story.append(Paragraph(invoice_title, styles["InvoiceTitle"]))
 
@@ -223,12 +231,9 @@ class InvoicePDFView(APIView):
         story.append(Paragraph(invoice_info, styles["LeftAlign"]))
         story.append(Spacer(1, 0.5 * inch))
 
-        # Add a separator line
-
-
         # Seller Address, Country, Reference
         seller_info = f"""
-        <b>Seller name and address:</b><br/>  {invoice.seller.seller_name}<br/>  {invoice.seller.seller_address}<br/>
+        <b>Seller name and address:</b><br/>{invoice.seller.seller_name}<br/>{invoice.seller.seller_address}<br/>
         Country of beneficiary: {invoice.seller.seller_country}<br/>
         Seller's reference: {invoice.seller.seller_refrence}
         """
@@ -241,30 +246,71 @@ class InvoicePDFView(APIView):
         Buyer’s Country: {invoice.buyer.buyer_country}
         """
         table_data = [
-            [Paragraph(seller_info), Paragraph(buyer_info)]
+            [Paragraph(seller_info, styles["Normal"]), Paragraph(buyer_info, styles["Normal"])]
         ]
         
-        # Table for invoiceTitle and sellerName side by side
-        table = Table(table_data, colWidths=[3.6 * inch, 3.6 * inch])  # Adjust the widths as needed
-        table.setStyle(TableStyle([
+        # Table for Seller and Buyer Info
+        info_table = Table(table_data, colWidths=[3.6 * inch, 3.6 * inch])
+        info_table.setStyle(TableStyle([
             ('ALIGN', (0, 0), (0, 0), 'CENTER'),
             ('ALIGN', (1, 0), (1, 0), 'LEFT'),
-            ('VALIGN', (0, 0), (1, 0), 'TOP'),
-            ('FONTNAME', (0, 0), (1, 0), 'Broadway'),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('FONTNAME', (0, 0), (-1, -1), 'Broadway'),
         ]))
         story.append(Paragraph("Seller and Buyer Info", styles["LeftAlign"]))
         story.append(drawing)
+        story.append(info_table)
+        story.append(Spacer(0.5, 0.5 * inch))
 
-        
-        story.append(table)
-        story.append(Spacer(0.5, 0.5 * inch))  # Add space before table
+        # ===================================================================
+        # 9) Shipping Info Section (rendered in a two-column table)
         story.append(Paragraph("Shipping Info", styles["LeftAlign"]))
-
-        # Add the drawing (which contains the line) as a flowable
         story.append(drawing)
+        story.append(Spacer(0.3, 0.3 * inch))
 
+        shipping_table_data = [
+            [
+                Paragraph("<b>Standard:</b> " + invoice.standard, styles["Normal"]),
+                Paragraph("<b>Transaction Currency:</b> " + invoice.invoice_currency, styles["Normal"])
+            ],
+            [
+                Paragraph("<b>Terms of Delivery:</b> " + invoice.terms_of_delivery, styles["Normal"]),
+                Paragraph("<b>Terms of Payment:</b> " + invoice.terms_of_payment, styles["Normal"])
+            ],
+            [
+                Paragraph("<b>Country of origin:</b> " + getattr(invoice, 'country_of_origin', ''), styles["Normal"]),
+                Paragraph("<b>Port/airport of discharge:</b> " + getattr(invoice, 'relevant_location', ''), styles["Normal"])
+            ],
+            [
+                Paragraph("<b>Place of Destination:</b> " + invoice.buyer.buyer_country, styles["Normal"]),
+                Paragraph("<b>Port/airport of loading:</b> " + getattr(invoice, 'port_of_loading', ''), styles["Normal"])
+            ],
+            [
+                Paragraph("<b>Partial Shipment:</b> " + ("Allowed" if invoice.partial_shipment else "Not Allowed"), styles["Normal"]),
+                Paragraph("<b>Relevant Location:</b> " + invoice.relevant_location, styles["Normal"])
+            ],
+            [
+                Paragraph("<b>Final delivery place:</b> " + invoice.relevant_location, styles["Normal"]),
+                Paragraph("<b>Transport mode and means:</b> " + getattr(invoice, 'means_of_transport', ''), styles["Normal"])
+            ]
+        ]
+        shipping_info_table = Table(shipping_table_data, colWidths=[3.5 * inch, 3.5 * inch])
+        shipping_info_table.setStyle(TableStyle([
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('LEFTPADDING', (0, 0), (-1, -1), 4),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 4),
+            ('TOPPADDING', (0, 0), (-1, -1), 2),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
+        ]))
+        story.append(shipping_info_table)
+        story.append(Spacer(1, 1 * inch))
+        story.append(Paragraph("Invoice Items", styles["LeftAlign"]))
+        story.append(drawing)
+        # --- End Shipping Info Table ---
 
-
+        # ===================================================================
+        # 10) Items Table
         table_data = [[
             "No",
             "Item Description",
@@ -278,19 +324,15 @@ class InvoicePDFView(APIView):
             "Amount"
         ]]
 
-        # For each invoice item, ensure that numeric values are converted to strings,
-        # and wrap text values in Paragraphs for proper styling/wrapping.
         for idx, item in enumerate(invoice.items.all(), 1):
-            description = Paragraph(item.description, styles["Normal"])
-            origin = Paragraph(item.origin, styles["Normal"])
-            # Convert commodity_code to string before passing to Paragraph
-            commodity_code = Paragraph(str(item.commodity_code), styles["Normal"])
+            description = Paragraph(item.description, styles["Cnt"])
+            origin = Paragraph(item.origin, styles["Cnt"])
+            commodity_code = Paragraph(str(item.commodity_code), styles["Cnt"])
             nw_kg = str(item.nw_kg)
             gw_kg = str(item.gw_kg)
-            number_field = ""  # Placeholder for '#' column (customize as needed)
+            unit = Paragraph(str(item.unit), styles["Cnt"])
             quantity = str(item.quantity)
             unit_price = str(item.unit_price)
-            # Calculate amount (if applicable)
             try:
                 amount_val = float(item.quantity) * float(item.unit_price)
             except (ValueError, TypeError):
@@ -304,13 +346,12 @@ class InvoicePDFView(APIView):
                 commodity_code,
                 nw_kg,
                 gw_kg,
-                number_field,
+                unit,
                 quantity,
                 unit_price,
                 amount
             ])
 
-        # Set column widths for 10 columns (adjust as needed)
         col_widths = [
             0.3 * inch, 1.5 * inch, 0.7 * inch, 0.9 * inch,
             0.8 * inch, 0.8 * inch, 0.5 * inch, 0.7 * inch,
@@ -318,23 +359,82 @@ class InvoicePDFView(APIView):
         ]
         items_table = Table(table_data, colWidths=col_widths)
         items_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),  # Header background
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),    # Header text color
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
             ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
             ('BACKGROUND', (0, 1), (-1, -1), colors.white),
             ('GRID', (0, 0), (-1, -1), 1, colors.black),
         ]))
-
         story.append(Spacer(1, 0.5 * inch))
         story.append(items_table)
+
         # ===================================================================
-        # 11) Finalize the PDF
+               # 11) Cost Summary Table (displayed under the items table)
+        # Calculate subtotal as (total_amount - freight_charges)
+        subtotal = invoice.total_amount - invoice.freight_charges
+        cost_summary_data = [
+            ["Total NW", "Total GW", "Freight Charges","Subtotal" , "Total Amount" ],
+            [                
+                str(invoice.total_nw),
+                str(invoice.total_gw),
+                str(invoice.freight_charges),
+                str(subtotal),
+                str(invoice.total_amount)
+            ]
+        ]
+        cost_summary_table = Table(cost_summary_data, colWidths=[1.2 * inch, 1.2 * inch, 1.2 * inch, 1.2 * inch, 1.5 * inch])
+        cost_summary_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ]))
+        story.append(Spacer(1, 0.5 * inch))
+        story.append(cost_summary_table)
+
+   # ===================================================================
+        # 12) Banking Info & Seller Seal Table (displayed under cost summary)
+        # Left column: Banking info; Right column: Seller seal image (if available)
+        banking_info = f"""
+        <b>Banking Info</b><br/>
+        Bank Name: {invoice.seller.seller_bank_name}<br/>
+        Account Name: {invoice.seller.seller_account_name}<br/>
+        IBAN: {invoice.seller.seller_iban}<br/>
+        SWIFT: {invoice.seller.seller_swift}
+        """
+        right_cell = Paragraph(banking_info, styles["Normal"])
+
+        # Prepare the right cell with seller seal (if available)
+        if invoice.seller.seller_seal:
+            try:
+                seal_image = RLImage(invoice.seller.seller_seal.path, width= 3 *inch, height= 0.75 *inch)
+                left_cell = seal_image
+            except Exception:
+                left_cell = Paragraph("Seal image not available", styles["Normal"])
+        else:
+            left_cell = Paragraph("No Seal Available", styles["Normal"])
+
+        banking_table_data = [[left_cell, right_cell]]
+        banking_info_table = Table(banking_table_data, colWidths=[4 * inch, 4 * inch])
+        banking_info_table.setStyle(TableStyle([
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('LEFTPADDING', (0, 0), (-1, -1), 6),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+            ('TOPPADDING', (0, 0), (-1, -1), 4),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+
+        ]))
+        story.append(Spacer(1, 0.5 * inch))
+        story.append(banking_info_table)
+
+        # ===================================================================
+        # 13) Finalize the PDF
         doc.build(story)
-
         return response
-
 class InvoiceExcelView(APIView):
     """
     Returns an Excel file (XLSX) for the given Invoice (by primary key).

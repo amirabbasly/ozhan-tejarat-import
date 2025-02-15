@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../utils/axiosInstance";
+
 function BuyerForm() {
   const navigate = useNavigate();
 
@@ -20,52 +21,61 @@ function BuyerForm() {
     e.preventDefault();
     try {
       await axiosInstance.post("documents/buyers/", formData);
-      alert("Buyer created successfully!");
-      navigate("/"); // or wherever you want
+      alert("خریدار با موفقیت ایجاد شد!");
+      navigate("/");
     } catch (error) {
-      console.error("Error creating buyer:", error);
-      alert("Failed to create buyer.");
+      console.error("خطا در ایجاد خریدار:", error);
+      alert("ایجاد خریدار با خطا مواجه شد.");
     }
   };
 
   return (
-    <div style={{ padding: "1rem" }}>
-      <h2>Create Buyer</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Buyer Name:</label>
-          <input
-            type="text"
-            name="buyer_name"
-            value={formData.buyer_name}
-            onChange={handleChange}
-          />
-        </div>
+    <form className="cottage-form" dir="rtl" onSubmit={handleSubmit}>
+      <h2>ایجاد خریدار</h2>
 
-        <div>
-          <label>Card Number:</label>
-          <input
-            type="text"
-            name="buyer_card_number"
-            value={formData.buyer_card_number}
-            onChange={handleChange}
-          />
-        </div>
+      <div className="form-group">
+        <label htmlFor="buyer_name">نام خریدار:</label>
+        <input
+          type="text"
+          id="buyer_name"
+          name="buyer_name"
+          value={formData.buyer_name}
+          onChange={handleChange}
+          placeholder="نام خریدار را وارد کنید"
+          required
+        />
+      </div>
 
-        <div>
-          <label>Buyer Country:</label>
-          <input
-            type="text"
-            name="buyer_country"
-            value={formData.buyer_country}
-            onChange={handleChange}
-          />
-        </div>
+      <div className="form-group">
+        <label htmlFor="buyer_card_number">شماره کارت:</label>
+        <input
+          type="text"
+          id="buyer_card_number"
+          name="buyer_card_number"
+          value={formData.buyer_card_number}
+          onChange={handleChange}
+          placeholder="شماره کارت را وارد کنید"
+          required
+        />
+      </div>
 
-        <br />
-        <button type="submit">Save Buyer</button>
-      </form>
-    </div>
+      <div className="form-group">
+        <label htmlFor="buyer_country">کشور خریدار:</label>
+        <input
+          type="text"
+          id="buyer_country"
+          name="buyer_country"
+          value={formData.buyer_country}
+          onChange={handleChange}
+          placeholder="کشور خریدار را وارد کنید"
+          required
+        />
+      </div>
+
+      <button type="submit" className="btn-grad1">
+        ذخیره خریدار
+      </button>
+    </form>
   );
 }
 

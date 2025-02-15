@@ -79,6 +79,7 @@ class InvoiceItemSerializer(serializers.ModelSerializer):
             'quantity',
             'unit_price',
             'line_total',
+            'pack',
             'nw_kg',
             'gw_kg',
             'origin',
@@ -113,6 +114,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
             'invoice_currency',
             'invoice_date',
             'total_amount',
+            'total_pack',
             'items',
             'terms_of_delivery',
             'terms_of_payment',
@@ -143,6 +145,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
         freight = invoice.freight_charges or 0
         invoice.total_amount = total_lines + freight
         invoice.total_gw = sum(item.gw_kg for item in invoice.items.all())
+        invoice.total_pack = sum(item.pack for item in invoice.items.all())
         invoice.total_nw = sum(item.nw_kg for item in invoice.items.all())
         invoice.save()
 
@@ -174,6 +177,9 @@ class InvoiceSerializer(serializers.ModelSerializer):
         total_nw = sum(item.nw_kg for item in invoice.items.all())
         freight = instance.freight_charges or 0
         instance.total_amount = total_lines + freight
+        invoice.total_gw = sum(item.gw_kg for item in invoice.items.all())
+        invoice.total_pack = sum(item.pack for item in invoice.items.all())
+        invoice.total_nw = sum(item.nw_kg for item in invoice.items.all())
         instance.save()
 
         return instance

@@ -2,25 +2,75 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../utils/axiosInstance";
+import Select from "react-select"; // Import ReactSelect
 
 function InvoiceForm() {
   const navigate = useNavigate();
 
-  // We'll fetch sellers & buyers to populate dropdowns
+  // Fetch sellers & buyers to populate dropdowns
   const [sellers, setSellers] = useState([]);
   const [buyers, setBuyers] = useState([]);
+
+  // Options for currency, delivery terms, payment terms, and standard types
+  const currencyOptions = [
+    { value: "USD", label: "دلار آمریکا" },
+    { value: "EUR", label: "یورو" },
+    { value: "GBP", label: "پوند استرلینگ" },
+    { value: "IRR", label: "ریال" },
+    { value: "AED", label: "درهم امارات" },
+  ];
+  const meansOfTransportOptions = [
+    { value: "By Sea", label: "By Sea" },
+    { value: "By Ship", label: "By Ship" },
+  ];
+
+  const termsOfDeliveryOptions = [
+    { value: "EXW", label: "EXW" },
+    { value: "FOB", label: "FOB" },
+    { value: "CIF", label: "CIF" },
+    { value: "CPT", label: "CPT" },
+    { value: "DAP", label: "DAP" },
+  ];
+  const unitOptions = [
+    { value: "U", label: "U" },
+    { value: "KG", label: "KG" },
+    { value: "PCK", label: "PCK" },
+    { value: "M3", label: "M3" },
+    { value: "M2", label: "M2" },
+    { value: "PCS", label: "PCS" },
+  ];
+
+  const termsOfPaymentOptions = [
+    { value: "TT", label: "TT" },
+    { value: "LC", label: "LC" },
+    { value: "COD", label: "COD" },
+    { value: "DP", label: "DP" },
+  ];
+
+  const standardOptions = [
+    { value: "JIS", label: "JIS" },
+    { value: "ISO", label: "ISO" },
+    { value: "DIN", label: "DIN" },
+    { value: "ASTM", label: "ASTM" },
+    { value: "EN", label: "EN" },
+    { value: "BS", label: "BS" },
+  ];
 
   const [invoiceData, setInvoiceData] = useState({
     seller: "",
     buyer: "",
     invoice_number: "",
-    invoice_currency: "USD",
+    invoice_currency: "USD", // default value
     freight_charges: 0,
-    terms_of_delivery: "CPT",
-    terms_of_payment: "TT",
+    terms_of_delivery: "CPT", // default value
+    terms_of_payment: "TT", // default value
     partial_shipment: false,
     relevant_location: "",
-    standard: "JIS",
+    means_of_transport: "By Sea",
+    country_of_origin: "",
+    port_of_loading: "",
+    standard: "JIS", // default value
+
     items: [
       {
         description: "",
@@ -28,7 +78,9 @@ function InvoiceForm() {
         unit_price: 0,
         nw_kg: 0,
         gw_kg: 0,
+        unit: "U",
         commodity_code: "",
+        pack: 1,
         origin: "",
       },
     ],
@@ -48,7 +100,7 @@ function InvoiceForm() {
       .catch((err) => console.error(err));
   }, []);
 
-  // Updated to handle checkboxes as well as text/number inputs
+  // Handle input changes (including checkboxes)
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setInvoiceData((prev) => ({
@@ -80,6 +132,9 @@ function InvoiceForm() {
           unit_price: 0,
           nw_kg: 0,
           gw_kg: 0,
+          unit: "U",
+          commodity_code: "",
+          pack: 1,
           origin: "",
         },
       ],
@@ -96,7 +151,6 @@ function InvoiceForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // convert numeric fields
     const payload = {
       ...invoiceData,
       freight_charges: parseFloat(invoiceData.freight_charges) || 0,
@@ -106,234 +160,406 @@ function InvoiceForm() {
         unit_price: parseFloat(item.unit_price) || 0,
         nw_kg: parseFloat(item.nw_kg) || 0,
         gw_kg: parseFloat(item.gw_kg) || 0,
-        origin: item.origin,
         commodity_code: item.commodity_code,
+        pack: parseInt(item.quantity, 10) || 0,
+        unit: item.unit,
+        origin: item.origin,
       })),
     };
 
     try {
       await axiosInstance.post("documents/invoices/", payload);
-      alert("Invoice created successfully!");
-      navigate("/"); // or wherever you want
+      alert("فاکتور با موفقیت ایجاد شد!");
+      navigate("/");
     } catch (error) {
-      console.error("Error creating invoice:", error);
-      alert("Failed to create invoice.");
+      console.error("خطا در ایجاد فاکتور:", error);
+      alert("ایجاد فاکتور با خطا مواجه شد.");
     }
   };
 
+  // Create options for ReactSelect from fetched sellers and buyers
+  const sellerOptions = sellers.map((sel) => ({
+    value: sel.id,
+    label: sel.seller_name,
+  }));
+
+  const buyerOptions = buyers.map((buyer) => ({
+    value: buyer.id,
+    label: buyer.buyer_name,
+  }));
+
   return (
-    <div style={{ padding: "1rem" }}>
-      <h2>Create Invoice</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Seller:</label>
-          <select
-            name="seller"
-            value={invoiceData.seller}
-            onChange={handleChange}
-          >
-            <option value="">-- Select Seller --</option>
-            {sellers.map((sel) => (
-              <option key={sel.id} value={sel.id}>
-                {sel.seller_name}
-              </option>
-            ))}
-          </select>
-        </div>
+    <form className="cottage-form" dir="rtl" onSubmit={handleSubmit}>
+      <h2>ایجاد فاکتور</h2>
 
-        <div>
-          <label>Buyer:</label>
-          <select
-            name="buyer"
-            value={invoiceData.buyer}
-            onChange={handleChange}
-          >
-            <option value="">-- Select Buyer --</option>
-            {buyers.map((byr) => (
-              <option key={byr.id} value={byr.id}>
-                {byr.buyer_name}
-              </option>
-            ))}
-          </select>
-        </div>
+      <div className="form-group">
+        <label htmlFor="seller">فروشنده:</label>
+        <Select
+          id="seller"
+          name="seller"
+          options={sellerOptions}
+          value={
+            sellerOptions.find(
+              (option) => option.value === invoiceData.seller
+            ) || null
+          }
+          onChange={(selectedOption) =>
+            setInvoiceData((prev) => ({
+              ...prev,
+              seller: selectedOption ? selectedOption.value : "",
+            }))
+          }
+          placeholder="-- انتخاب فروشنده --"
+        />
+      </div>
 
-        <div>
-          <label>Invoice Number:</label>
-          <input
-            type="text"
-            name="invoice_number"
-            value={invoiceData.invoice_number}
-            onChange={handleChange}
-          />
-        </div>
+      <div className="form-group">
+        <label htmlFor="buyer">خریدار:</label>
+        <Select
+          id="buyer"
+          name="buyer"
+          options={buyerOptions}
+          value={
+            buyerOptions.find((option) => option.value === invoiceData.buyer) ||
+            null
+          }
+          onChange={(selectedOption) =>
+            setInvoiceData((prev) => ({
+              ...prev,
+              buyer: selectedOption ? selectedOption.value : "",
+            }))
+          }
+          placeholder="-- انتخاب خریدار --"
+        />
+      </div>
 
-        <div>
-          <label>Currency:</label>
-          <input
-            type="text"
-            name="invoice_currency"
-            value={invoiceData.invoice_currency}
-            onChange={handleChange}
-          />
-        </div>
+      <div className="form-group">
+        <label htmlFor="invoice_number">شماره فاکتور:</label>
+        <input
+          type="text"
+          id="invoice_number"
+          name="invoice_number"
+          value={invoiceData.invoice_number}
+          onChange={handleChange}
+          placeholder="شماره فاکتور را وارد کنید"
+          required
+        />
+      </div>
 
-        <div>
-          <label>Freight Charges:</label>
-          <input
-            type="number"
-            name="freight_charges"
-            value={invoiceData.freight_charges}
-            onChange={handleChange}
-          />
-        </div>
+      <div className="form-group">
+        <label htmlFor="invoice_currency">ارز:</label>
+        <Select
+          id="invoice_currency"
+          name="invoice_currency"
+          options={currencyOptions}
+          value={
+            currencyOptions.find(
+              (option) => option.value === invoiceData.invoice_currency
+            ) || null
+          }
+          onChange={(selectedOption) =>
+            setInvoiceData((prev) => ({
+              ...prev,
+              invoice_currency: selectedOption ? selectedOption.value : "",
+            }))
+          }
+          placeholder="انتخاب ارز"
+        />
+      </div>
 
-        <div>
-          <label>Terms of Delivery:</label>
-          <input
-            type="text"
-            name="terms_of_delivery"
-            value={invoiceData.terms_of_delivery}
-            onChange={handleChange}
-          />
-        </div>
+      <div className="form-group">
+        <label htmlFor="freight_charges">هزینه حمل:</label>
+        <input
+          type="number"
+          id="freight_charges"
+          name="freight_charges"
+          value={invoiceData.freight_charges}
+          onChange={handleChange}
+          placeholder="هزینه حمل"
+        />
+      </div>
+      <div className="form-group">
+        <label htmlFor="country_of_origin"> کشور مبدا:</label>
+        <input
+          type="text"
+          id="country_of_origin"
+          name="country_of_origin"
+          value={invoiceData.country_of_origin}
+          onChange={handleChange}
+          placeholder="کشور مبدا"
+        />
+      </div>
+      <div className="form-group">
+        <label htmlFor="port_of_loading"> بندر بارگیری:</label>
+        <input
+          type="text"
+          id="port_of_loading"
+          name="port_of_loading"
+          value={invoiceData.port_of_loading}
+          onChange={handleChange}
+          placeholder="بندر بارگیری"
+        />
+      </div>
 
-        <div>
-          <label>Terms of Payment:</label>
-          <input
-            type="text"
-            name="terms_of_payment"
-            value={invoiceData.terms_of_payment}
-            onChange={handleChange}
-          />
-        </div>
+      <div className="form-group">
+        <label htmlFor="terms_of_delivery">شرایط تحویل:</label>
+        <Select
+          id="terms_of_delivery"
+          name="terms_of_delivery"
+          options={termsOfDeliveryOptions}
+          value={
+            termsOfDeliveryOptions.find(
+              (option) => option.value === invoiceData.terms_of_delivery
+            ) || null
+          }
+          onChange={(selectedOption) =>
+            setInvoiceData((prev) => ({
+              ...prev,
+              terms_of_delivery: selectedOption ? selectedOption.value : "",
+            }))
+          }
+          placeholder="انتخاب شرایط تحویل"
+        />
+      </div>
 
-        <div>
-          <label>Partial Shipment:</label>
-          <input
-            type="checkbox"
-            name="partial_shipment"
-            checked={invoiceData.partial_shipment}
-            onChange={handleChange}
-          />
-        </div>
+      <div className="form-group">
+        <label htmlFor="terms_of_payment">شرایط پرداخت:</label>
+        <Select
+          id="terms_of_payment"
+          name="terms_of_payment"
+          options={termsOfPaymentOptions}
+          value={
+            termsOfPaymentOptions.find(
+              (option) => option.value === invoiceData.terms_of_payment
+            ) || null
+          }
+          onChange={(selectedOption) =>
+            setInvoiceData((prev) => ({
+              ...prev,
+              terms_of_payment: selectedOption ? selectedOption.value : "",
+            }))
+          }
+          placeholder="انتخاب شرایط پرداخت"
+        />
+      </div>
+      <div className="form-group">
+        <label htmlFor="means_of_transport">وسیله حمل:</label>
+        <Select
+          id="means_of_transport"
+          name="means_of_transport"
+          options={meansOfTransportOptions}
+          value={
+            meansOfTransportOptions.find(
+              (option) => option.value === invoiceData.means_of_transport
+            ) || null
+          }
+          onChange={(selectedOption) =>
+            setInvoiceData((prev) => ({
+              ...prev,
+              means_of_transport: selectedOption ? selectedOption.value : "",
+            }))
+          }
+          placeholder="انتخاب وسیله حمل"
+        />
+      </div>
 
-        <div>
-          <label>Relevant Location:</label>
-          <input
-            type="text"
-            name="relevant_location"
-            value={invoiceData.relevant_location}
-            onChange={handleChange}
-          />
-        </div>
+      <div className="form-group">
+        <label htmlFor="partial_shipment">حمل به دفعات:</label>
+        <input
+          type="checkbox"
+          id="partial_shipment"
+          name="partial_shipment"
+          checked={invoiceData.partial_shipment}
+          onChange={handleChange}
+        />
+      </div>
 
-        <div>
-          <label>Standard:</label>
-          <input
-            type="text"
-            name="standard"
-            value={invoiceData.standard}
-            onChange={handleChange}
-          />
-        </div>
+      <div className="form-group">
+        <label htmlFor="relevant_location">گمرک مقصد:</label>
+        <input
+          type="text"
+          id="relevant_location"
+          name="relevant_location"
+          value={invoiceData.relevant_location}
+          onChange={handleChange}
+          placeholder="گمرک مقصد را وارد کنید"
+        />
+      </div>
 
-        <h3>Items</h3>
-        {invoiceData.items.map((item, index) => (
-          <div
-            key={index}
-            style={{
-              marginBottom: "1rem",
-              padding: "0.5rem",
-              border: "1px solid #ccc",
-            }}
-          >
-            <div>
-              <label>Description:</label>
-              <input
-                type="text"
-                name="description"
-                value={item.description}
-                onChange={(e) => handleItemChange(index, e)}
-              />
-            </div>
+      <div className="form-group">
+        <label htmlFor="standard">استاندارد:</label>
+        <Select
+          id="standard"
+          name="standard"
+          options={standardOptions}
+          value={
+            standardOptions.find(
+              (option) => option.value === invoiceData.standard
+            ) || null
+          }
+          onChange={(selectedOption) =>
+            setInvoiceData((prev) => ({
+              ...prev,
+              standard: selectedOption ? selectedOption.value : "",
+            }))
+          }
+          placeholder="انتخاب استاندارد"
+        />
+      </div>
 
-            <div>
-              <label>Quantity:</label>
-              <input
-                type="number"
-                name="quantity"
-                value={item.quantity}
-                onChange={(e) => handleItemChange(index, e)}
-              />
-            </div>
-
-            <div>
-              <label>Unit Price:</label>
-              <input
-                type="number"
-                step="0.01"
-                name="unit_price"
-                value={item.unit_price}
-                onChange={(e) => handleItemChange(index, e)}
-              />
-            </div>
-            <div>
-              <label>commodity code (HsCode):</label>
-              <input
-                type="number"
-                step="0.01"
-                name="commodity_code"
-                value={item.commodity_code}
-                onChange={(e) => handleItemChange(index, e)}
-              />
-            </div>
-            <div>
-              <label>Net Weight (kg):</label>
-              <input
-                type="number"
-                step="0.01"
-                name="nw_kg"
-                value={item.nw_kg}
-                onChange={(e) => handleItemChange(index, e)}
-              />
-            </div>
-
-            <div>
-              <label>Gross Weight (kg):</label>
-              <input
-                type="number"
-                step="0.01"
-                name="gw_kg"
-                value={item.gw_kg}
-                onChange={(e) => handleItemChange(index, e)}
-              />
-            </div>
-
-            <div>
-              <label>Origin:</label>
-              <input
-                type="text"
-                name="origin"
-                value={item.origin}
-                onChange={(e) => handleItemChange(index, e)}
-              />
-            </div>
-
-            <button type="button" onClick={() => removeItemRow(index)}>
-              Remove Item
-            </button>
+      <h3>کالاها</h3>
+      {invoiceData.items.map((item, index) => (
+        <div
+          key={index}
+          className="form-group"
+          style={{
+            border: "1px solid #ccc",
+            padding: "0.5rem",
+            marginBottom: "1rem",
+          }}
+        >
+          <div className="form-group">
+            <label htmlFor={`description-${index}`}>شرح کالا:</label>
+            <input
+              type="text"
+              id={`description-${index}`}
+              name="description"
+              value={item.description}
+              onChange={(e) => handleItemChange(index, e)}
+              placeholder="شرح کالا"
+              required
+            />
           </div>
-        ))}
 
-        <button type="button" onClick={addItemRow}>
-          Add Item
-        </button>
+          <div className="form-group">
+            <label htmlFor={`quantity-${index}`}>تعداد:</label>
+            <input
+              type="number"
+              id={`quantity-${index}`}
+              name="quantity"
+              value={item.quantity}
+              onChange={(e) => handleItemChange(index, e)}
+              placeholder="تعداد"
+              required
+            />
+          </div>
 
-        <br />
-        <br />
-        <button type="submit">Save Invoice</button>
-      </form>
-    </div>
+          <div className="form-group">
+            <label htmlFor={`unit_price-${index}`}>قیمت واحد:</label>
+            <input
+              type="number"
+              id={`unit_price-${index}`}
+              name="unit_price"
+              step="0.01"
+              value={item.unit_price}
+              onChange={(e) => handleItemChange(index, e)}
+              placeholder="قیمت واحد"
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor={`commodity_code-${index}`}>کد کالا (HS):</label>
+            <input
+              type="text"
+              id={`commodity_code-${index}`}
+              name="commodity_code"
+              value={item.commodity_code}
+              onChange={(e) => handleItemChange(index, e)}
+              placeholder="کد کالا"
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="unit">واحد:</label>
+            <Select
+              id={`unit-${index}`}
+              name="unit"
+              options={unitOptions}
+              value={
+                unitOptions.find((option) => option.value === item.unit) || null
+              }
+              onChange={(selectedOption) =>
+                setInvoiceData((prev) => {
+                  const updatedItems = [...prev.items];
+                  updatedItems[index].unit = selectedOption
+                    ? selectedOption.value
+                    : "";
+                  return { ...prev, items: updatedItems };
+                })
+              }
+              placeholder="انتخاب واحد"
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor={`nw_kg-${index}`}>وزن خالص (کیلوگرم):</label>
+            <input
+              type="number"
+              id={`nw_kg-${index}`}
+              name="nw_kg"
+              step="0.01"
+              value={item.nw_kg}
+              onChange={(e) => handleItemChange(index, e)}
+              placeholder="وزن خالص"
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor={`gw_kg-${index}`}>وزن ناخالص (کیلوگرم):</label>
+            <input
+              type="number"
+              id={`gw_kg-${index}`}
+              name="gw_kg"
+              step="0.01"
+              value={item.gw_kg}
+              onChange={(e) => handleItemChange(index, e)}
+              placeholder="وزن ناخالص"
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor={`paزk-${index}`}>تعداد بسته بندی :</label>
+            <input
+              type="number"
+              id={`pack-${index}`}
+              name="pack"
+              value={item.pack}
+              onChange={(e) => handleItemChange(index, e)}
+              placeholder="تعداد بسته بندی"
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor={`origin-${index}`}>مبدأ:</label>
+            <input
+              type="text"
+              id={`origin-${index}`}
+              name="origin"
+              value={item.origin}
+              onChange={(e) => handleItemChange(index, e)}
+              placeholder="مبدأ کالا"
+            />
+          </div>
+
+          <button
+            type="button"
+            onClick={() => removeItemRow(index)}
+            className="btn-grad1"
+          >
+            حذف کالا
+          </button>
+        </div>
+      ))}
+
+      <button type="button" onClick={addItemRow} className="btn-grad1">
+        افزودن کالا
+      </button>
+
+      <br />
+      <br />
+      <button type="submit" className="btn-grad1">
+        ذخیره فاکتور
+      </button>
+    </form>
   );
 }
 

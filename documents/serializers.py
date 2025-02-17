@@ -15,11 +15,20 @@ class GoodSerializer(serializers.Serializer):
     number_of_invoices = serializers.CharField(required=True)
 
 class OverlayTextSerializer(serializers.Serializer):
-    exporter = serializers.CharField(required=True)
-    consignee = serializers.CharField(required=True)
-    means_of_transport = serializers.CharField(required=True)
-    goods = GoodSerializer(many=True)
     template_id = serializers.IntegerField()
+    invoice_id = serializers.IntegerField()
+    # Remove 'exporter', 'consignee', 'means_of_transport', and 'goods' from required fields
+    exporter = serializers.CharField(required=False)  # No longer required
+    consignee = serializers.CharField(required=False)  # No longer required
+    means_of_transport = serializers.CharField(required=False)  # No longer required
+    goods = GoodSerializer(many=True, required=False)  # No longer required
+class OriginSerializer(serializers.Serializer):
+    template_id = serializers.IntegerField()
+    # Remove 'exporter', 'consignee', 'means_of_transport', and 'goods' from required fields
+    exporter = serializers.CharField(required=False)  # No longer required
+    consignee = serializers.CharField(required=False)  # No longer required
+    means_of_transport = serializers.CharField(required=False)  # No longer required
+    goods = GoodSerializer(many=True, required=False)  # No longer required
 class InvoiceGoodSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=255)
     country_of_origin = serializers.CharField(max_length=100)
@@ -41,7 +50,6 @@ class SellerSerializer(serializers.ModelSerializer):
             'id',
             'seller_name',
             'seller_address',
-            'seller_refrence',
             'seller_country',
             'seller_bank_name',
             'seller_account_name',
@@ -59,7 +67,8 @@ class BuyerSerializer(serializers.ModelSerializer):
             'id',
             'buyer_name',
             'buyer_card_number',
-            'buyer_country',
+            'buyer_address',
+            'buyer_tel'
         ]
 
 
@@ -95,8 +104,13 @@ class InvoiceSerializer(serializers.ModelSerializer):
     items = InvoiceItemSerializer(many=True, write_only=True, required=False)
 
     # Read-only fields
-    total_amount = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
-    invoice_date = serializers.DateField(read_only=True)
+    total_amount = serializers.DecimalField(max_digits=20, decimal_places=2, read_only=True)
+    total_nw = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
+    total_gw = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
+    total_qty = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
+    sub_total = serializers.DecimalField(max_digits=20, decimal_places=2, read_only=True)
+
+    invoice_date = serializers.DateField(read_only=False)
     
     # If you want to generate `invoice_id` automatically, you can make it read-only,
     # otherwise let clients supply it. Or you can handle generation in the model's `save()`.
@@ -113,16 +127,18 @@ class InvoiceSerializer(serializers.ModelSerializer):
             'freight_charges',
             'invoice_currency',
             'invoice_date',
+            'means_of_transport',
+            'country_of_origin',
+            'port_of_loading',
             'total_amount',
+            'sub_total',
             'total_pack',
             'items',
             'terms_of_delivery',
-            'terms_of_payment',
-            'partial_shipment',
             'relevant_location',
-            'standard',
             'total_gw',
-            'total_nw'
+            'total_nw',
+            'total_qty'
         ]
 
     def create(self, validated_data):
@@ -144,9 +160,11 @@ class InvoiceSerializer(serializers.ModelSerializer):
         total_lines = sum(item.line_total for item in invoice.items.all())
         freight = invoice.freight_charges or 0
         invoice.total_amount = total_lines + freight
+        invoice.sub_total = total_lines
         invoice.total_gw = sum(item.gw_kg for item in invoice.items.all())
         invoice.total_pack = sum(item.pack for item in invoice.items.all())
         invoice.total_nw = sum(item.nw_kg for item in invoice.items.all())
+        invoice.total_qty = sum(item.quantity for item in invoice.items.all())
         invoice.save()
 
         return invoice
@@ -177,9 +195,11 @@ class InvoiceSerializer(serializers.ModelSerializer):
         total_nw = sum(item.nw_kg for item in invoice.items.all())
         freight = instance.freight_charges or 0
         instance.total_amount = total_lines + freight
-        invoice.total_gw = sum(item.gw_kg for item in invoice.items.all())
-        invoice.total_pack = sum(item.pack for item in invoice.items.all())
-        invoice.total_nw = sum(item.nw_kg for item in invoice.items.all())
+        instance.sub_total = total_lines       
+        instance.total_gw = sum(item.gw_kg for item in invoice.items.all())
+        instance.total_pack = sum(item.pack for item in invoice.items.all())
+        instance.total_nw = sum(item.nw_kg for item in invoice.items.all())
+        instance.total_qty = sum(item.quantity for item in invoice.items.all())
         instance.save()
 
         return instance

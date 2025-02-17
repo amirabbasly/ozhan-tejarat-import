@@ -40,22 +40,6 @@ function InvoiceForm() {
     { value: "PCS", label: "PCS" },
   ];
 
-  const termsOfPaymentOptions = [
-    { value: "TT", label: "TT" },
-    { value: "LC", label: "LC" },
-    { value: "COD", label: "COD" },
-    { value: "DP", label: "DP" },
-  ];
-
-  const standardOptions = [
-    { value: "JIS", label: "JIS" },
-    { value: "ISO", label: "ISO" },
-    { value: "DIN", label: "DIN" },
-    { value: "ASTM", label: "ASTM" },
-    { value: "EN", label: "EN" },
-    { value: "BS", label: "BS" },
-  ];
-
   const [invoiceData, setInvoiceData] = useState({
     seller: "",
     buyer: "",
@@ -70,6 +54,7 @@ function InvoiceForm() {
     country_of_origin: "",
     port_of_loading: "",
     standard: "JIS", // default value
+    invoice_date: "", // Add this line
 
     items: [
       {
@@ -161,7 +146,7 @@ function InvoiceForm() {
         nw_kg: parseFloat(item.nw_kg) || 0,
         gw_kg: parseFloat(item.gw_kg) || 0,
         commodity_code: item.commodity_code,
-        pack: parseInt(item.quantity, 10) || 0,
+        pack: parseInt(item.pack, 10) || 0,
         unit: item.unit,
         origin: item.origin,
       })),
@@ -170,7 +155,7 @@ function InvoiceForm() {
     try {
       await axiosInstance.post("documents/invoices/", payload);
       alert("فاکتور با موفقیت ایجاد شد!");
-      navigate("/");
+      navigate("/isnvoice-list");
     } catch (error) {
       console.error("خطا در ایجاد فاکتور:", error);
       alert("ایجاد فاکتور با خطا مواجه شد.");
@@ -242,6 +227,17 @@ function InvoiceForm() {
           value={invoiceData.invoice_number}
           onChange={handleChange}
           placeholder="شماره فاکتور را وارد کنید"
+          required
+        />
+      </div>
+      <div className="form-group">
+        <label htmlFor="invoice_date">تاریخ فاکتور:</label>
+        <input
+          type="date"
+          id="invoice_date"
+          name="invoice_date"
+          value={invoiceData.invoice_date}
+          onChange={handleChange}
           required
         />
       </div>
@@ -323,26 +319,6 @@ function InvoiceForm() {
       </div>
 
       <div className="form-group">
-        <label htmlFor="terms_of_payment">شرایط پرداخت:</label>
-        <Select
-          id="terms_of_payment"
-          name="terms_of_payment"
-          options={termsOfPaymentOptions}
-          value={
-            termsOfPaymentOptions.find(
-              (option) => option.value === invoiceData.terms_of_payment
-            ) || null
-          }
-          onChange={(selectedOption) =>
-            setInvoiceData((prev) => ({
-              ...prev,
-              terms_of_payment: selectedOption ? selectedOption.value : "",
-            }))
-          }
-          placeholder="انتخاب شرایط پرداخت"
-        />
-      </div>
-      <div className="form-group">
         <label htmlFor="means_of_transport">وسیله حمل:</label>
         <Select
           id="means_of_transport"
@@ -364,17 +340,6 @@ function InvoiceForm() {
       </div>
 
       <div className="form-group">
-        <label htmlFor="partial_shipment">حمل به دفعات:</label>
-        <input
-          type="checkbox"
-          id="partial_shipment"
-          name="partial_shipment"
-          checked={invoiceData.partial_shipment}
-          onChange={handleChange}
-        />
-      </div>
-
-      <div className="form-group">
         <label htmlFor="relevant_location">گمرک مقصد:</label>
         <input
           type="text"
@@ -383,27 +348,6 @@ function InvoiceForm() {
           value={invoiceData.relevant_location}
           onChange={handleChange}
           placeholder="گمرک مقصد را وارد کنید"
-        />
-      </div>
-
-      <div className="form-group">
-        <label htmlFor="standard">استاندارد:</label>
-        <Select
-          id="standard"
-          name="standard"
-          options={standardOptions}
-          value={
-            standardOptions.find(
-              (option) => option.value === invoiceData.standard
-            ) || null
-          }
-          onChange={(selectedOption) =>
-            setInvoiceData((prev) => ({
-              ...prev,
-              standard: selectedOption ? selectedOption.value : "",
-            }))
-          }
-          placeholder="انتخاب استاندارد"
         />
       </div>
 

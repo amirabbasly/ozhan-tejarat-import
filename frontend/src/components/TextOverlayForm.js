@@ -62,7 +62,7 @@ const TextOverlayForm = () => {
 
     try {
       const response = await axiosInstance.post(
-        "/documents/origin-cert/",
+        "/documents/origin-cert-V2/",
         requestData,
         {
           headers: { "Content-Type": "application/json" },
@@ -118,19 +118,16 @@ const TextOverlayForm = () => {
         </div>
 
         <div className="form-group">
-          <label>
-            گیرنده:
-            </label>
-            <textarea
-              type="text"
-              className="form-textarea"
-              name="consignee"
-              value={formData.consignee}
-              onChange={(e) =>
-                setFormData({ ...formData, consignee: e.target.value })
-              }
-            />
-
+          <label>گیرنده:</label>
+          <textarea
+            type="text"
+            className="form-textarea"
+            name="consignee"
+            value={formData.consignee}
+            onChange={(e) =>
+              setFormData({ ...formData, consignee: e.target.value })
+            }
+          />
         </div>
 
         <div className="form-group">

@@ -9,7 +9,8 @@ function BuyerForm() {
   const [formData, setFormData] = useState({
     buyer_name: "",
     buyer_card_number: "",
-    buyer_country: "",
+    buyer_address: "",
+    buyer_tel: "",
   });
 
   const handleChange = (e) => {
@@ -60,14 +61,26 @@ function BuyerForm() {
       </div>
 
       <div className="form-group">
-        <label htmlFor="buyer_country">کشور خریدار:</label>
+        <label htmlFor="buyer_address">کشور خریدار:</label>
         <input
           type="text"
-          id="buyer_country"
-          name="buyer_country"
-          value={formData.buyer_country}
+          id="buyer_address"
+          name="buyer_address"
+          value={formData.buyer_address}
           onChange={handleChange}
           placeholder="کشور خریدار را وارد کنید"
+          required
+        />
+      </div>
+      <div className="form-group">
+        <label htmlFor="buyer_tel">شماره تلفن خریدار:</label>
+        <input
+          type="text"
+          id="buyer_tel"
+          name="buyer_tel"
+          value={formData.buyer_tel}
+          onChange={handleChange}
+          placeholder="شماره تلفن خریدار را وارد کنید"
           required
         />
       </div>

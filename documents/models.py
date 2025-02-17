@@ -29,7 +29,6 @@ class ImageTemplate(models.Model):
 class Seller(models.Model):
     seller_name = models.CharField (max_length=255)
     seller_address = models.TextField(max_length=2000)
-    seller_refrence = models.CharField(max_length=255, null=True, blank=True)
     seller_country = models.CharField(max_length=55, null=True, blank=True)
     seller_bank_name = models.CharField(max_length=55, null=True, blank=True)
     seller_account_name = models.CharField(max_length=255, null=True, blank=True)
@@ -41,29 +40,29 @@ class Seller(models.Model):
 class Buyer(models.Model):
     buyer_name = models.CharField(max_length=255)
     buyer_card_number = models.CharField(max_length=55)
-    buyer_country = models.CharField(max_length=55)
+    buyer_address = models.CharField(max_length=555)
+    buyer_tel = models.CharField(max_length=55,null=True, blank=True)
 
 
 class Invoice(models.Model):
     seller = models.ForeignKey('Seller', on_delete=models.CASCADE)
     buyer = models.ForeignKey('Buyer', on_delete=models.CASCADE)
+    sub_total = models.DecimalField(max_digits=20, decimal_places=2, default=0)
     total_amount = models.DecimalField(max_digits=20, decimal_places=2, default=0)
-    invoice_date = models.DateField(auto_now_add=True)
+    invoice_date = models.DateField()
     # e.g. an automatically generated invoice number
     invoice_id = models.CharField(max_length=50, unique=True)
     invoice_number = models.CharField(max_length=50)
     freight_charges = models.IntegerField(max_length=50)
     invoice_currency = models.CharField(max_length=50)
     terms_of_delivery = models.CharField(max_length=50)
-    terms_of_payment = models.CharField(max_length=50)
-    partial_shipment = models.BooleanField(default=False)
     relevant_location = models.CharField(max_length=50)
     means_of_transport = models.CharField(max_length=50)
     country_of_origin = models.CharField(max_length=50)
     port_of_loading = models.CharField(max_length=50)
-    standard = models.CharField(max_length=50)
     total_gw = models.DecimalField(default=0, max_digits=12, decimal_places=2,)
     total_nw = models.DecimalField(default=0, max_digits=12, decimal_places=2,)
+    total_qty = models.DecimalField(default=0, max_digits=12, decimal_places=2,)
     total_pack = models.IntegerField(default=0)
     
 

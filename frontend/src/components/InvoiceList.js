@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axiosInstance from "../utils/axiosInstance";
 import "./InvoiceList.css"; // Import the CSS file
-
+import { Link } from "react-router-dom";
 function InvoiceList() {
   const [invoices, setInvoices] = useState([]);
   const [templates, setTemplates] = useState([]);
@@ -103,6 +103,7 @@ function InvoiceList() {
             <th>صورتحساب</th>
             <th>بسته‌بندی</th>
             <th>گواهی مبدأ</th>
+            <th>جزئیات</th>
           </tr>
         </thead>
         <tbody>
@@ -149,6 +150,12 @@ function InvoiceList() {
                 >
                   دانلود گواهی مبدا
                 </button>
+              </td>
+              <td>
+                <Link to={`/invoices/details/${inv.invoice_number}`}>
+                  {" "}
+                  جزئیات
+                </Link>
               </td>
             </tr>
           ))}

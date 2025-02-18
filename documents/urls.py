@@ -1,5 +1,5 @@
 from django.urls import path, include
-from .views import OverlayTextView , TemplateListView, SellerViewSet, BuyerViewSet, InvoiceViewSet,InvoicePDFView, InvoiceExcelView, PackingPDFView, CertiOriginView
+from .views import OverlayTextView , TemplateListView, SellerViewSet, BuyerViewSet, InvoiceViewSet,InvoicePDFView, InvoiceExcelView, PackingPDFView, CertiOriginView,ProformaInvoicePDFView
 from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
@@ -16,5 +16,6 @@ urlpatterns = [
     path('invoices/<int:pk>/pdf/', InvoicePDFView.as_view(), name='invoice-pdf'),
     path('invoices/<int:pk>/excel/', InvoiceExcelView.as_view(), name='invoice-excel'),
     path('packing/<int:pk>/pdf/', PackingPDFView.as_view(), name='packing-pdf'),
-
+    path('proforma-invoice/<int:pk>/pdf/', PackingPDFView.as_view(), name='proforma-pdf'),
+    
 ]

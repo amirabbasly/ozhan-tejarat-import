@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import ImageTemplate, Seller, Buyer, Invoice, InvoiceItem
+from .models import ImageTemplate, Seller, Buyer, Invoice, InvoiceItem, ProformaInvoice, ProformaInvoiceItem
 
 
 
@@ -21,5 +21,13 @@ class InvoiceAdmin(admin.ModelAdmin):
    list_display = ("invoice_number",)
 
 @admin.register(InvoiceItem)
-class InvoiceAdmin(admin.ModelAdmin):
+class InvoiceItemAdmin(admin.ModelAdmin):
+   list_display = ("description",)
+
+@admin.register(ProformaInvoice)
+class ProformaInvoiceAdmin(admin.ModelAdmin):
+   list_display = ("proforma_invoice_number",)
+
+@admin.register(ProformaInvoiceItem)
+class ProformaInvoiceItemAdmin(admin.ModelAdmin):
    list_display = ("description",)

@@ -73,7 +73,7 @@ class Invoice(models.Model):
 
 class InvoiceItem(models.Model):
     invoice = models.ForeignKey(Invoice, related_name='items', on_delete=models.CASCADE)
-    description = models.CharField(max_length=255)
+    description = models.TextField(max_length=1555)
     quantity = models.IntegerField(default=1)
     commodity_code = models.IntegerField(max_length=9)
     unit_price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
@@ -88,3 +88,45 @@ class InvoiceItem(models.Model):
 
     def __str__(self):
         return f"Item for Invoice {self.invoice.invoice_number}"
+class ProformaInvoice(models.Model):
+    seller = models.ForeignKey('Seller', on_delete=models.CASCADE)
+    buyer = models.ForeignKey('Buyer', on_delete=models.CASCADE)
+    sub_total = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+    total_amount = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+    proforma_invoice_date = models.DateField()
+    # e.g. an automatically generated invoice number
+    proforma_invoice_id = models.CharField(max_length=50, unique=True)
+    proforma_invoice_number = models.CharField(max_length=50)
+    proforma_freight_charges = models.IntegerField(max_length=50)
+    proforma_invoice_currency = models.CharField(max_length=50)
+    terms_of_delivery = models.CharField(max_length=50)
+    terms_of_payment = models.CharField(max_length=50)
+    relevant_location = models.CharField(max_length=50)
+    means_of_transport = models.CharField(max_length=50)
+    country_of_origin = models.CharField(max_length=50)
+    port_of_loading = models.CharField(max_length=50)
+    total_gw = models.DecimalField(default=0, max_digits=12, decimal_places=2,)
+    total_nw = models.DecimalField(default=0, max_digits=12, decimal_places=2,)
+    total_qty = models.DecimalField(default=0, max_digits=12, decimal_places=2,)
+    
+
+    
+    def __str__(self):
+        return f"Invoice {self.invoice_number}"
+
+class ProformaInvoiceItem(models.Model):
+    proforma_invoice = models.ForeignKey(ProformaInvoice, related_name='items', on_delete=models.CASCADE)
+    description = models.TextField(max_length=1555)
+    quantity = models.IntegerField(default=1)
+    commodity_code = models.IntegerField(max_length=9)
+    unit_price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    unit = models.CharField(max_length=55, default="U")
+    nw_kg = models.DecimalField(default=1, max_digits=12, decimal_places=2,)
+    gw_kg = models.DecimalField(default=1, max_digits=12, decimal_places=2,)
+    origin = models.CharField(max_length=55)
+    @property
+    def line_total(self):
+        return self.quantity * self.unit_price
+
+    def __str__(self):
+        return f"Item for Invoice {self.profroma_invoice.proforma_invoice_number}"

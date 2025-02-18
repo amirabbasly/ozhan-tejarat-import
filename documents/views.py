@@ -5,8 +5,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from PIL import Image, ImageDraw, ImageFont
 import io
-from .serializers import OverlayTextSerializer, ImageTemplateSerializer, FillExcelSerializer,  SellerSerializer, BuyerSerializer, InvoiceSerializer, OriginSerializer
-from .models import ImageTemplate, Seller, Buyer, Invoice
+from .serializers import OverlayTextSerializer, ImageTemplateSerializer,  SellerSerializer, BuyerSerializer, InvoiceSerializer, OriginSerializer
+from .models import ImageTemplate, Seller, Buyer, Invoice, ProformaInvoice
 import os
 import openpyxl
 from reportlab.lib.pagesizes import letter
@@ -52,18 +52,18 @@ class OverlayTextView(APIView):
             return Response({"error": "Invoice not found."}, status=status.HTTP_404_NOT_FOUND)
 
         # 5) Fetch related data from the models
-        exporter = invoice.seller.seller_name  # Get the seller's name
-        consignee = invoice.buyer.buyer_name  # Get the buyer's name
-        means_of_transport = invoice.means_of_transport  # Assuming this is a field in the Invoice model
+        exporter = invoice.seller.seller_name + "\n" + invoice.seller.seller_address 
+        consignee = invoice.buyer.buyer_name + "\n" + invoice.buyer.buyer_address  
+        means_of_transport = invoice.means_of_transport + " from " + invoice.port_of_loading + " to " + invoice.relevant_location
         goods = []
 
         # Collect goods data (items from the invoice)
         for item in invoice.items.all():
             goods.append({
-                'description': item.description,
+                'description': str(item.pack) + " PCK"+"   "  + item.description,
                 'hscode': item.commodity_code,
-                'quantity': str(item.quantity),  # Make sure it's a string
-                'number_of_invoices': str(item.quantity)  # Assuming each item is tied to the number of invoices
+                'quantity': str(item.gw_kg) + "KG",  # Make sure it's a string
+                'number_of_invoices': str(invoice.invoice_number) + "\n" + str(invoice.invoice_date)
             })
 
         # 6) Load the template image and prepare for drawing
@@ -149,6 +149,22 @@ class BuyerViewSet(viewsets.ModelViewSet):
 
 class InvoiceViewSet(viewsets.ModelViewSet):
     queryset = Invoice.objects.all()
+    serializer_class = InvoiceSerializer
+
+    @action(detail=False, methods=['get'], url_path='by-number/(?P<invoice_number>[^/.]+)')
+    def get_by_invoice_number(self, request, invoice_number=None):
+        try:
+            invoice = Invoice.objects.get(invoice_number=invoice_number)
+            serializer = InvoiceSerializer(invoice)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Invoice.DoesNotExist:
+            return Response(
+                {"error": "Invoice not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+class ProformaInvoiceViewSet(viewsets.ModelViewSet):
+    queryset = ProformaInvoice.objects.all()
     serializer_class = InvoiceSerializer
 
     @action(detail=False, methods=['get'], url_path='by-number/(?P<invoice_number>[^/.]+)')
@@ -366,13 +382,13 @@ class InvoicePDFView(APIView):
             nw_kg = str(item.nw_kg)
             gw_kg = str(item.gw_kg)
             unit = Paragraph(str(item.unit), styles["Cnt"])
-            quantity = str(item.quantity)
+            quantity = Paragraph(str(item.quantity), styles["Cnt"])
             unit_price = str(item.unit_price)
             try:
                 amount_val = float(item.quantity) * float(item.unit_price)
             except (ValueError, TypeError):
                 amount_val = 0
-            amount = f"{amount_val:.2f}"
+            amount = Paragraph(f"{amount_val:.2f}")
 
             table_data.append([
                 str(idx),
@@ -404,7 +420,7 @@ class InvoicePDFView(APIView):
         ]))
         story.append(Spacer(1, 0.5 * inch))
         story.append(items_table)
-        sub_total_cell = Paragraph("Sub total: " + str(invoice.total_amount),styles['Cnt'])
+        sub_total_cell = Paragraph("<b>Sub total: </b>" + str(invoice.total_amount),styles['Cnt'])
 
         # ===================================================================
         # 11) Cost Summary Table (displayed under the items table)
@@ -417,8 +433,8 @@ class InvoicePDFView(APIView):
                 [sub_total_cell]
             ],
         ]
-        freight_charge_cell = Paragraph("Freight charge: " + str(invoice.freight_charges),styles['Cnt'])
-        total_amount_cell = Paragraph("Total amount: " + str(invoice.total_amount),styles['Cnt'])
+        freight_charge_cell = Paragraph("<b>Freight charge:</b> " + str(invoice.freight_charges),styles['Cnt'])
+        total_amount_cell = Paragraph("<b>Total amount:</b> " + str(invoice.total_amount),styles['Cnt'])
 
         cost_summary_data = [
 
@@ -433,10 +449,10 @@ class InvoicePDFView(APIView):
         ]
         cost_summary_table = Table(total_amount_data, colWidths=[3.3 * inch, 0.8 * inch, 0.8 * inch,0.7 * inch, 2.3 * inch])
         cost_summary_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('BACKGROUND', (0, 0), (-1, 0), colors.white),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica'),
             ('BOTTOMPADDING', (0, 0), (-1, 0), 6),
             ('GRID', (0, 0), (-1, -1), 1, colors.black),
         ]))
@@ -467,15 +483,6 @@ class InvoicePDFView(APIView):
         story.append(total_amount_table)
 
         
-
-        total_amount = f"""
-        <b>Sub Total:</b> {invoice.total_amount-invoice.freight_charges} {invoice.invoice_currency}<br/><br/>
-        <b>Freight Charges:</b> {invoice.freight_charges} {invoice.invoice_currency} <br/><br/>
-        <b>Total Amount:</b> {invoice.total_amount} {invoice.invoice_currency}<br/>
-        """
-        story.append(Spacer(0.2, 0.1 * inch))
-        story.append(Paragraph(total_amount, styles["RightAlignTable"]))  # Right-aligned title
-
    # ===================================================================
         # 12) Banking Info & Seller Seal Table (displayed under cost summary)
         # Left column: Banking info; Right column: Seller seal image (if available)
@@ -948,3 +955,355 @@ class TemplateListView(APIView):
         templates = ImageTemplate.objects.all()
         serializer = ImageTemplateSerializer(templates, many=True)
         return Response(serializer.data)
+
+class ProformaInvoicePDFView(APIView):
+    """
+    Returns a PDF with the invoice number and date on the right side,
+    and other sections laid out as per the template.
+    """
+    def get(self, request, pk, format=None):
+        try:
+            invoice = ProformaInvoice.objects.get(pk=pk)
+        except Invoice.DoesNotExist:
+            return Response({"detail": "Invoice not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Register the Broadway font
+        pdfmetrics.registerFont(TTFont('Broadway', 'static/fonts/broadway.ttf'))
+
+        # 1) Create the HttpResponse for the PDF
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="proforma_{pk}.pdf"'
+
+        # Set up the SimpleDocTemplate with custom margins (left, right, top, bottom)
+        doc = SimpleDocTemplate(
+            response,
+            pagesize=A4,
+            title=f"Proforma {invoice.proforma_invoice_number}",
+            author="Your Company",
+            leftMargin=0.1 * inch,   # 0.5 inch left margin
+            rightMargin=0.1 * inch,  # 0.5 inch right margin
+            topMargin=0.2 * inch,    # 0.2 inch top margin
+            bottomMargin=0.5 * inch  # 0.5 inch bottom margin
+        )
+
+        # 3) Get default styles and add custom styles
+        styles = getSampleStyleSheet()
+
+        styles.add(ParagraphStyle(
+            name="InvoiceTitle",
+            fontSize=24,
+            textColor=colors.black,
+            alignment=1,  # Center align
+            spaceAfter=0
+        ))
+
+        styles.add(ParagraphStyle(
+            name="SellerName",
+            fontName="Broadway",
+            fontSize=26,
+            textColor=colors.red,
+            alignment=1,  # Center align
+            spaceAfter=20,
+        ))
+
+        styles.add(ParagraphStyle(
+            name="RightAlign",
+            parent=styles["Normal"],
+            alignment=2,  # Right align
+            fontSize=12,
+            textColor=colors.black,
+            spaceAfter=10,
+        ))
+
+        styles.add(ParagraphStyle(
+            name="LeftAlign",
+            parent=styles["Normal"],
+            alignment=0,  # Left align
+            fontSize=10,
+            textColor=colors.black,
+            spaceAfter=-50,
+        ))
+
+        # A custom style for small centered text in the table cells.
+        styles.add(ParagraphStyle(
+            name="Cnt",
+            parent=styles["Normal"],
+            alignment=1,
+            fontSize=9,
+            textColor=colors.black,
+        ))
+        styles.add(ParagraphStyle(
+            name="RightAlignTable",
+            parent=styles["Normal"],
+            alignment=2,  # Right align
+            fontSize=10,
+            textColor=colors.black,
+            spaceAfter=10,
+        ))
+
+
+        # Story list to hold content
+        story = []
+
+        # Create a drawing container with full width (ignoring margins)
+        drawing = Drawing(doc.pagesize[0] + doc.leftMargin + doc.rightMargin, 0.1 * inch)
+        line = Line(-doc.leftMargin, 0, doc.pagesize[0] + doc.rightMargin, 0)
+        drawing.add(line)
+
+        # ===================================================================
+        # 6) Seller Info Section
+        seller_name = f"{invoice.seller.seller_name}"
+        story.append(Paragraph(seller_name, styles["SellerName"]))
+
+        # ===================================================================
+        # 4) Add the word "INVOICE" (Centered and styled)
+        invoice_title = "PROFROMA"
+        story.append(Paragraph(invoice_title, styles["InvoiceTitle"]))
+
+        # ===================================================================
+        # 5) Invoice Info (Right-aligned - Invoice Number and Date)
+        invoice_info = f"""
+        <b>proforma number:</b> {invoice.proforma_invoice_number}<br/>
+        <b>proforma date:</b> {invoice.proforma_invoice_date}
+        """
+        story.append(Paragraph(invoice_info, styles["LeftAlign"]))
+        story.append(Spacer(1, 0.5 * inch))
+
+        # Seller Address, Country, Reference
+        seller_info = f"""
+        <b>Seller name and address:</b><br/>{invoice.seller.seller_name}<br/>{invoice.seller.seller_address}<br/>
+        <b> Country of beneficiary:</b> {invoice.seller.seller_country}<br/>
+        """
+
+        # ===================================================================
+        # 8) Buyer Info Section
+        buyer_info = f"""
+        <b>Buyer’s Commercial Card No:</b> {invoice.buyer.buyer_card_number}<br/>
+        <b> Buyer’s Name:</b> {invoice.buyer.buyer_name}<br/>
+        <b> Buyer’s Country:</b> {invoice.buyer.buyer_address}<br/>
+        <b> Buyer’s Tel:</b> {invoice.buyer.buyer_tel}
+
+        """
+        table_data = [
+            [Paragraph(seller_info, styles["Normal"]), Paragraph(buyer_info, styles["Normal"])]
+        ]
+        
+        # Table for Seller and Buyer Info
+        info_table = Table(table_data, colWidths=[3.6 * inch, 3.6 * inch])
+        info_table.setStyle(TableStyle([
+            ('ALIGN', (0, 0), (0, 0), 'CENTER'),
+            ('ALIGN', (1, 0), (1, 0), 'LEFT'),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('FONTNAME', (0, 0), (-1, -1), 'Broadway'),
+        ]))
+        story.append(Paragraph("Seller and Buyer Info", styles["LeftAlign"]))
+        story.append(drawing)
+        story.append(info_table)
+        story.append(Spacer(0.5, 0.5 * inch))
+
+        # ===================================================================
+        # 9) Shipping Info Section (rendered in a two-column table)
+        story.append(Paragraph("Shipping Info", styles["LeftAlign"]))
+        story.append(drawing)
+        story.append(Spacer(0.3, 0.3 * inch))
+
+        shipping_table_data = [
+            [
+                Paragraph("<b>Transaction Currency:</b> " + invoice.proforma_invoice_currency, styles["Normal"]),
+                Paragraph("<b>Final delivery place:</b> " + invoice.relevant_location, styles["Normal"])
+
+            ],
+            [
+                Paragraph("<b>Terms of Delivery:</b> " + invoice.terms_of_delivery, styles["Normal"]),
+                Paragraph("<b>Transport mode and means:</b> " + getattr(invoice, 'means_of_transport', ''), styles["Normal"])
+            ],
+            [
+                Paragraph("<b>Country of origin:</b> " + getattr(invoice, 'country_of_origin', ''), styles["Normal"]),
+                Paragraph("<b>Port/airport of loading:</b> " + getattr(invoice, 'port_of_loading', ''), styles["Normal"])
+            ],
+        ]
+        shipping_info_table = Table(shipping_table_data, colWidths=[3.5 * inch, 3.5 * inch])
+        shipping_info_table.setStyle(TableStyle([
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('LEFTPADDING', (0, 0), (-1, -1), 4),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 4),
+            ('TOPPADDING', (0, 0), (-1, -1), 2),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
+        ]))
+        story.append(shipping_info_table)
+        story.append(Spacer(1, 1 * inch))
+        story.append(Paragraph("Invoice Items", styles["LeftAlign"]))
+        story.append(drawing)
+        # --- End Shipping Info Table ---
+
+        # ===================================================================
+        # 10) Items Table
+        table_data = [[
+            "No",
+            "Item Description",
+            "Origin",
+            "HS Code",
+            "Nw. kg",
+            "Gw. kg",
+            "Quantity",
+            "Unit",
+            "Unit Price",
+            "Amount"
+        ]]
+
+        for idx, item in enumerate(invoice.items.all(), 1):
+            description = Paragraph(item.description, styles["Cnt"])
+            origin = Paragraph(item.origin, styles["Cnt"])
+            commodity_code = Paragraph(str(item.commodity_code), styles["Cnt"])
+            nw_kg = str(item.nw_kg)
+            gw_kg = str(item.gw_kg)
+            unit = Paragraph(str(item.unit), styles["Cnt"])
+            quantity = str(item.quantity)
+            unit_price = str(item.unit_price)
+            try:
+                amount_val = float(item.quantity) * float(item.unit_price)
+            except (ValueError, TypeError):
+                amount_val = 0
+            amount = f"{amount_val:.2f}"
+
+            table_data.append([
+                str(idx),
+                description,
+                origin,
+                commodity_code,
+                nw_kg,
+                gw_kg,
+                quantity,
+                unit,
+                unit_price,
+                amount
+            ])
+
+        col_widths = [
+            0.3 * inch, 1.5 * inch, 0.6 * inch, 0.9 * inch,
+            0.8 * inch, 0.8 * inch, 0.7 * inch, 0.5 * inch,
+            0.9 * inch, 0.9 * inch
+        ]
+        items_table = Table(table_data, colWidths=col_widths)
+        items_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ]))
+        story.append(Spacer(1, 0.5 * inch))
+        story.append(items_table)
+        sub_total_cell = Paragraph("Sub total: " + str(invoice.total_amount),styles['Cnt'])
+
+        # ===================================================================
+        # 11) Cost Summary Table (displayed under the items table)
+        total_amount_data = [
+
+            [   "Total", 
+                str(invoice.total_nw),
+                str(invoice.total_gw),
+                str(invoice.total_qty),
+                [sub_total_cell]
+            ],
+        ]
+        freight_charge_cell = Paragraph("Freight charge: " + str(invoice.freight_charges),styles['Cnt'])
+        total_amount_cell = Paragraph("Total amount: " + str(invoice.total_amount),styles['Cnt'])
+
+        cost_summary_data = [
+
+            [                   
+              [freight_charge_cell],
+
+            ],
+            [
+            [total_amount_cell],
+
+            ]
+        ]
+        cost_summary_table = Table(total_amount_data, colWidths=[3.3 * inch, 0.8 * inch, 0.8 * inch,0.7 * inch, 2.3 * inch])
+        cost_summary_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 6),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ]))
+        story.append(cost_summary_table)
+        # Set the table style for Total Amount Table
+        total_amount_table = Table(cost_summary_data, colWidths=[2.3 * inch])
+        total_amount_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.white),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica'),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 2),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ]))
+
+        # Set the column widths and adjust the width to make it fit on the right side
+        col_widths = [0.8 * inch, 0.7 * inch, 2.4 * inch]  # Adjust the column widths as needed
+
+        # Wrap the table in a container to position it correctly
+        table_width = sum(col_widths)  # Get the total width of the table
+
+        # Create a drawing to simulate right-aligning the table
+        drawing = Drawing(doc.pagesize[0] - table_width, 0)  # Position the table on the right side
+        story.append(drawing)  # Add the drawing to the story
+        total_amount_table.hAlign = 'RIGHT'
+
+        # Append the table to the story
+        story.append(total_amount_table)
+
+        
+
+        total_amount = f"""
+        <b>Sub Total:</b> {invoice.total_amount-invoice.freight_charges} {invoice.invoice_currency}<br/><br/>
+        <b>Freight Charges:</b> {invoice.freight_charges} {invoice.invoice_currency} <br/><br/>
+        <b>Total Amount:</b> {invoice.total_amount} {invoice.invoice_currency}<br/>
+        """
+        story.append(Spacer(0.2, 0.1 * inch))
+        story.append(Paragraph(total_amount, styles["RightAlignTable"]))  # Right-aligned title
+
+   # ===================================================================
+        # 12) Banking Info & Seller Seal Table (displayed under cost summary)
+        # Left column: Banking info; Right column: Seller seal image (if available)
+        banking_info = f"""
+        <b>Bank Name:</b> {invoice.seller.seller_bank_name}<br/>
+        <b>Account Name:</b> {invoice.seller.seller_account_name}<br/>
+        <b>IBAN:</b> {invoice.seller.seller_iban}<br/>
+        <b>SWIFT:</b> {invoice.seller.seller_swift}
+        """
+        right_cell = Paragraph(banking_info, styles["Normal"])
+
+        # Prepare the right cell with seller seal (if available)
+        if invoice.seller.seller_seal:
+            try:
+                seal_image = RLImage(invoice.seller.seller_seal.path, width= 3 *inch, height= 0.75 *inch)
+                left_cell = seal_image
+            except Exception:
+                left_cell = Paragraph("Seal image not available", styles["Normal"])
+        else:
+            left_cell = Paragraph("No Seal Available", styles["Normal"])
+
+        banking_table_data = [[left_cell, right_cell]]
+        banking_info_table = Table(banking_table_data, colWidths=[4 * inch, 4 * inch])
+        banking_info_table.setStyle(TableStyle([
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('LEFTPADDING', (0, 0), (-1, -1), 6),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+            ('TOPPADDING', (0, 0), (-1, -1), 4),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+
+        ]))
+        story.append(Spacer(1, 0.5 * inch))
+        story.append(banking_info_table)
+
+        # ===================================================================
+        # 13) Finalize the PDF
+        doc.build(story)
+        return response

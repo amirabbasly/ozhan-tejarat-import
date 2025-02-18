@@ -155,7 +155,7 @@ function InvoiceForm() {
     try {
       await axiosInstance.post("documents/invoices/", payload);
       alert("فاکتور با موفقیت ایجاد شد!");
-      navigate("/isnvoice-list");
+      navigate("/invoice-list");
     } catch (error) {
       console.error("خطا در ایجاد فاکتور:", error);
       alert("ایجاد فاکتور با خطا مواجه شد.");
@@ -364,7 +364,7 @@ function InvoiceForm() {
         >
           <div className="form-group">
             <label htmlFor={`description-${index}`}>شرح کالا:</label>
-            <input
+            <textarea
               type="text"
               id={`description-${index}`}
               name="description"

@@ -52,6 +52,7 @@ import InvoiceForm from "./components/InvoiceForm";
 import SellerForm from "./components/SellerForm";
 import BuyerForm from "./components/BuyerForm";
 import InvoiceList from "./components/InvoiceList";
+import InvoiceDetail from "./components/InvoiceDetail";
 import "./App.css";
 
 function App() {
@@ -367,7 +368,7 @@ function AppContent() {
             }
           />
           <Route
-            path="/inv"
+            path="/invoices/new"
             element={
               <PrivateRoute>
                 <InvoiceForm />
@@ -392,10 +393,18 @@ function AppContent() {
             }
           />
           <Route
-            path="/invoice-list"
+            path="/invoices/list"
             element={
               <PrivateRoute>
                 <InvoiceList />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/invoices/details/:invoiceNumber"
+            element={
+              <PrivateRoute>
+                <InvoiceDetail />
               </PrivateRoute>
             }
           />

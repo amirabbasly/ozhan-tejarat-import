@@ -1,5 +1,5 @@
 from django.urls import path, include
-from .views import OverlayTextView , TemplateListView, SellerViewSet, BuyerViewSet, InvoiceViewSet,InvoicePDFView, InvoiceExcelView, PackingPDFView, CertiOriginView,ProformaInvoicePDFView
+from .views import OverlayTextView , TemplateListView, SellerViewSet, BuyerViewSet, InvoiceViewSet,InvoicePDFView, PackingPDFView, CertiOriginView,ProformaInvoicePDFView, CombinedPDFView
 from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
@@ -14,8 +14,8 @@ urlpatterns = [
     path('origin-cert-V2/', CertiOriginView.as_view(), name='certificate-of-origin'),
     path('templates/', TemplateListView.as_view(), name='template-list'),
     path('invoices/<int:pk>/pdf/', InvoicePDFView.as_view(), name='invoice-pdf'),
-    path('invoices/<int:pk>/excel/', InvoiceExcelView.as_view(), name='invoice-excel'),
     path('packing/<int:pk>/pdf/', PackingPDFView.as_view(), name='packing-pdf'),
     path('proforma-invoice/<int:pk>/pdf/', PackingPDFView.as_view(), name='proforma-pdf'),
+    path('combined-pdf/<int:pk>/', CombinedPDFView.as_view(), name='combined-pdf'),
     
 ]

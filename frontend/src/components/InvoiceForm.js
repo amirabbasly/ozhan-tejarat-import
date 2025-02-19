@@ -33,8 +33,7 @@ function InvoiceForm() {
   ];
   const unitOptions = [
     { value: "U", label: "U" },
-    { value: "KG", label: "KG" },
-    { value: "PCK", label: "PCK" },
+    { value: "KGS", label: "KGS" },
     { value: "M3", label: "M3" },
     { value: "M2", label: "M2" },
     { value: "PCS", label: "PCS" },
@@ -47,13 +46,11 @@ function InvoiceForm() {
     invoice_currency: "USD", // default value
     freight_charges: 0,
     terms_of_delivery: "CPT", // default value
-    terms_of_payment: "TT", // default value
     partial_shipment: false,
     relevant_location: "",
     means_of_transport: "By Sea",
     country_of_origin: "",
     port_of_loading: "",
-    standard: "JIS", // default value
     invoice_date: "", // Add this line
 
     items: [

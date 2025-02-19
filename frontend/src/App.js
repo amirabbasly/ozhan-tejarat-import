@@ -54,6 +54,8 @@ import BuyerForm from "./components/BuyerForm";
 import InvoiceList from "./components/InvoiceList";
 import InvoiceDetail from "./components/InvoiceDetail";
 import "./App.css";
+import CalendarApp from "./components/CalendarApp";
+import CreateEventForm from "./components/CreateEventForm";
 
 function App() {
   return (
@@ -408,7 +410,22 @@ function AppContent() {
               </PrivateRoute>
             }
           />
-
+          <Route
+            path="/calendar"
+            element={
+              <PrivateRoute>
+                <CalendarApp />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/create-event"
+            element={
+              <PrivateRoute>
+                <CreateEventForm />
+              </PrivateRoute>
+            }
+          />
           {/* Add more protected routes as needed */}
         </Routes>
       </main>

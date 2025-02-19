@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axiosInstance from "../utils/axiosInstance";
 import "./InvoiceList.css"; // Import the CSS file
 import { Link } from "react-router-dom";
+
 function InvoiceList() {
   const [invoices, setInvoices] = useState([]);
   const [templates, setTemplates] = useState([]);
@@ -21,9 +22,15 @@ function InvoiceList() {
   }, []);
 
   const downloadPDF = async (invoiceId) => {
+    if (!selectedTemplate) {
+      alert("لطفاً ابتدا یک قالب انتخاب کنید.");
+      return;
+    }
+
     try {
+      // Pass the template_id as a query parameter in the URL
       const response = await axiosInstance.get(
-        `documents/invoices/${invoiceId}/pdf/`,
+        `documents/combined-pdf/${invoiceId}/?template_id=${selectedTemplate}`, // Passing template_id in the URL
         { responseType: "blob" }
       );
 
@@ -50,6 +57,24 @@ function InvoiceList() {
       const fileLink = document.createElement("a");
       fileLink.href = fileURL;
       fileLink.setAttribute("download", `packing_${invoiceId}.pdf`);
+      document.body.appendChild(fileLink);
+      fileLink.click();
+      fileLink.remove();
+    } catch (error) {
+      console.error("خطا در دانلود بسته‌بندی:", error);
+    }
+  };
+  const downloadInvoice = async (invoiceId) => {
+    try {
+      const response = await axiosInstance.get(
+        `documents/invoices/${invoiceId}/pdf/`,
+        { responseType: "blob" }
+      );
+
+      const fileURL = window.URL.createObjectURL(new Blob([response.data]));
+      const fileLink = document.createElement("a");
+      fileLink.href = fileURL;
+      fileLink.setAttribute("download", `invoice_${invoiceId}.pdf`);
       document.body.appendChild(fileLink);
       fileLink.click();
       fileLink.remove();
@@ -103,6 +128,7 @@ function InvoiceList() {
             <th>صورتحساب</th>
             <th>بسته‌بندی</th>
             <th>گواهی مبدأ</th>
+            <th>کل مدارک</th>
             <th>جزئیات</th>
           </tr>
         </thead>
@@ -118,7 +144,7 @@ function InvoiceList() {
               <td>
                 <button
                   className="invoice-list-btn"
-                  onClick={() => downloadPDF(inv.id)}
+                  onClick={() => downloadInvoice(inv.id)}
                 >
                   دانلود اینوویس
                 </button>
@@ -149,6 +175,14 @@ function InvoiceList() {
                   onClick={() => downloadOverlayImage(inv.id)}
                 >
                   دانلود گواهی مبدا
+                </button>
+              </td>
+              <td>
+                <button
+                  className="invoice-list-btn"
+                  onClick={() => downloadPDF(inv.id)}
+                >
+                  دانلود پکینگ
                 </button>
               </td>
               <td>

@@ -25,6 +25,9 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
+from PyPDF2 import PdfMerger
+from rest_framework.test import APIRequestFactory
+from django.http import HttpResponse, HttpRequest
 
 class OverlayTextView(APIView):
     def post(self, request):
@@ -53,8 +56,9 @@ class OverlayTextView(APIView):
 
         # 5) Fetch related data from the models
         exporter = invoice.seller.seller_name + "\n" + invoice.seller.seller_address 
-        consignee = invoice.buyer.buyer_name + "\n" + invoice.buyer.buyer_address  
+        consignee = invoice.buyer.buyer_name + "\n" + invoice.buyer.buyer_address  + "\n" + invoice.buyer.buyer_tel 
         means_of_transport = invoice.means_of_transport + " from " + invoice.port_of_loading + " to " + invoice.relevant_location
+        number_of_invoices = invoice.invoice_number+ "\n" + str(invoice.invoice_date)
         goods = []
 
         # Collect goods data (items from the invoice)
@@ -77,11 +81,14 @@ class OverlayTextView(APIView):
         exporter_x, exporter_y = map(int, template.exporter_position.split(','))
         consignee_x, consignee_y = map(int, template.consignee_position.split(','))
         transport_x, transport_y = map(int, template.means_of_transport_position.split(','))
+        invoices_x, invoices_y = map(int, template.number_of_invoices_position.split(','))
 
         # Draw static fields (exporter, consignee, transport)
         draw.multiline_text((exporter_x, exporter_y), exporter, fill="black", font=font)
         draw.multiline_text((consignee_x, consignee_y), consignee, fill="black", font=font)
         draw.multiline_text((transport_x, transport_y), means_of_transport , fill="black", font=font)
+        draw.multiline_text((invoices_x, invoices_y), number_of_invoices , fill="black", font=font)
+
 
         # 8) Use the same positions for seller_name and buyer_name (as they are the same as consignee and exporter)
         seller_name_x, seller_name_y = map(int, template.exporter_position.split(','))
@@ -93,7 +100,6 @@ class OverlayTextView(APIView):
         description_x = int(template.description_position)  # Just X coordinate as integer
         hscode_x = int(template.hscode_position)  # Just X coordinate as integer
         quantity_x = int(template.quantity_position)  # Just X coordinate as integer
-        invoices_x = int(template.number_of_invoices_position)  # Just X coordinate as integer
 
         goods_start_x, goods_start_y = map(int, template.goods_start_position.split(','))
         current_y = goods_start_y
@@ -111,7 +117,6 @@ class OverlayTextView(APIView):
             draw.multiline_text((description_x, current_y), description_text, fill="black", font=font)
             draw.multiline_text((hscode_x, current_y), hscode_text, fill="black", font=font)
             draw.multiline_text((quantity_x, current_y), quantity_text, fill="black", font=font)
-            draw.multiline_text((invoices_x, current_y), invoices_text, fill="black", font=font)
 
             # Move down to the next row
             current_y += line_height
@@ -956,7 +961,9 @@ class TemplateListView(APIView):
         serializer = ImageTemplateSerializer(templates, many=True)
         return Response(serializer.data)
 
+
 class ProformaInvoicePDFView(APIView):
+
     """
     Returns a PDF with the invoice number and date on the right side,
     and other sections laid out as per the template.
@@ -1307,3 +1314,84 @@ class ProformaInvoicePDFView(APIView):
         # 13) Finalize the PDF
         doc.build(story)
         return response
+
+
+class CombinedPDFView(APIView):
+    def get(self, request, pk, format=None):
+        # Extract the template_id from the request data
+        template_id = request.query_params.get('template_id')
+        if not template_id:
+            return Response({"error": "Template ID is required."}, status=400)
+
+        # Initialize PDF merger
+        merger = PdfMerger()
+
+        # Create a factory to simulate a POST request for OverlayTextView
+        factory = APIRequestFactory()
+        overlay_text_request = factory.post(
+            '/overlay/', 
+            data={'template_id': template_id, 'invoice_id': pk},  # Passing template_id and invoice_id in the payload
+            format='json'
+        )
+        overlay_text_request.META['HTTP_AUTHORIZATION'] = request.headers.get('Authorization')
+
+        # Overlay Text PDF generation (using OverlayTextView)
+        overlay_text_view = OverlayTextView.as_view()
+        overlay_text_response = overlay_text_view(overlay_text_request)
+        
+        # Check if the response content is a valid PDF
+        if self.is_valid_pdf(overlay_text_response.content):
+            overlay_text_pdf = BytesIO(overlay_text_response.content)
+            merger.append(overlay_text_pdf)
+        else:
+            return Response({"error": "Invalid PDF generated for Overlay Text"}, status=400)
+
+        # Invoice PDF generation (using InvoicePDFView)
+        invoice_http_request = factory.get(f'/api/documents/invoice/{pk}/pdf/', format='pdf')
+        invoice_http_request.META['HTTP_AUTHORIZATION'] = request.headers.get('Authorization')
+        
+        invoice_pdf_view = InvoicePDFView.as_view()
+        invoice_pdf_response = invoice_pdf_view(invoice_http_request, pk)
+
+        if self.is_valid_pdf(invoice_pdf_response.content):
+            invoice_pdf = BytesIO(invoice_pdf_response.content)
+            merger.append(invoice_pdf)
+        else:
+            return Response({"error": "Invalid PDF generated for Invoice"}, status=400)
+
+        # Packing PDF generation (using PackingPDFView)
+        packing_http_request = factory.get(f'/api/documents/packing/{pk}/pdf/', format='pdf')
+        packing_http_request.META['HTTP_AUTHORIZATION'] = request.headers.get('Authorization')
+        
+        packing_pdf_view = PackingPDFView.as_view()
+        packing_pdf_response = packing_pdf_view(packing_http_request, pk)
+
+        if self.is_valid_pdf(packing_pdf_response.content):
+            packing_pdf = BytesIO(packing_pdf_response.content)
+            merger.append(packing_pdf)
+        else:
+            return Response({"error": "Invalid PDF generated for Packing"}, status=400)
+
+        # Create a final combined PDF
+        final_pdf = BytesIO()
+        merger.write(final_pdf)
+        final_pdf.seek(0)
+
+        # Prepare the HttpResponse to serve the combined PDF
+        response = HttpResponse(final_pdf, content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="combined_invoice.pdf"'
+        
+        return response
+
+    def is_valid_pdf(self, content):
+        """Helper method to check if the content is a valid PDF."""
+        try:
+            # Try reading the content as a PDF
+            pdf = BytesIO(content)
+            pdf.seek(0)
+            merger = PdfMerger()
+            merger.append(pdf)
+            return True
+        except Exception as e:
+            print(f"PDF validation error: {e}")
+            return False

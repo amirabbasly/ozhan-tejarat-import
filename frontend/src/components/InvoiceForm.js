@@ -3,6 +3,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../utils/axiosInstance";
 import Select from "react-select"; // Import ReactSelect
+import "./CottageForm.css";
+import { iranCustoms } from "../data/iranCustoms";
 
 function InvoiceForm() {
   const navigate = useNavigate();
@@ -15,40 +17,53 @@ function InvoiceForm() {
   const currencyOptions = [
     { value: "USD", label: "دلار آمریکا" },
     { value: "EUR", label: "یورو" },
+    { value: "CNY", label: "یوان چین" },
+
     { value: "GBP", label: "پوند استرلینگ" },
     { value: "IRR", label: "ریال" },
     { value: "AED", label: "درهم امارات" },
   ];
   const meansOfTransportOptions = [
-    { value: "By Sea", label: "By Sea" },
+    { value: "By Truck", label: "By Truck" },
+    { value: "By AirPlane", label: "By AirPlane" },
     { value: "By Ship", label: "By Ship" },
+    { value: "By Train", label: "By Train" },
   ];
 
   const termsOfDeliveryOptions = [
-    { value: "EXW", label: "EXW" },
-    { value: "FOB", label: "FOB" },
+    { value: "CFR", label: "CFR" },
     { value: "CIF", label: "CIF" },
+    { value: "CIP", label: "CIP" },
     { value: "CPT", label: "CPT" },
     { value: "DAP", label: "DAP" },
+    { value: "DDP", label: "DDP" },
+    { value: "DPU", label: "DPU" },
+    { value: "EXW", label: "EXW" },
+    { value: "FAS", label: "FAS" },
+    { value: "FCA", label: "FCA" },
+    { value: "FOB", label: "FOB" },
   ];
+
   const unitOptions = [
-    { value: "U", label: "U" },
     { value: "KGS", label: "KGS" },
     { value: "M3", label: "M3" },
     { value: "M2", label: "M2" },
     { value: "PCS", label: "PCS" },
   ];
-
+  const iranCustomsOptions = iranCustoms.map((custom) => ({
+    value: custom.ctmNameStr, // or combine with ctmNameStr if needed
+    label: `${custom.ctmNameStr} (${custom.ctmVCodeInt})`,
+  }));
   const [invoiceData, setInvoiceData] = useState({
     seller: "",
     buyer: "",
     invoice_number: "",
-    invoice_currency: "USD", // default value
+    invoice_currency: "AED", // default value
     freight_charges: 0,
     terms_of_delivery: "CPT", // default value
     partial_shipment: false,
     relevant_location: "",
-    means_of_transport: "By Sea",
+    means_of_transport: "By Ship",
     country_of_origin: "",
     port_of_loading: "",
     invoice_date: "", // Add this line
@@ -60,7 +75,7 @@ function InvoiceForm() {
         unit_price: 0,
         nw_kg: 0,
         gw_kg: 0,
-        unit: "U",
+        unit: "PCS",
         commodity_code: "",
         pack: 1,
         origin: "",
@@ -152,7 +167,7 @@ function InvoiceForm() {
     try {
       await axiosInstance.post("documents/invoices/", payload);
       alert("فاکتور با موفقیت ایجاد شد!");
-      navigate("/invoice-list");
+      navigate("/invoices/list");
     } catch (error) {
       console.error("خطا در ایجاد فاکتور:", error);
       alert("ایجاد فاکتور با خطا مواجه شد.");
@@ -180,6 +195,7 @@ function InvoiceForm() {
           id="seller"
           name="seller"
           options={sellerOptions}
+          className="selectPrf"
           value={
             sellerOptions.find(
               (option) => option.value === invoiceData.seller
@@ -200,6 +216,7 @@ function InvoiceForm() {
         <Select
           id="buyer"
           name="buyer"
+          className="selectPrf"
           options={buyerOptions}
           value={
             buyerOptions.find((option) => option.value === invoiceData.buyer) ||
@@ -242,6 +259,7 @@ function InvoiceForm() {
       <div className="form-group">
         <label htmlFor="invoice_currency">ارز:</label>
         <Select
+          className="selectPrf"
           id="invoice_currency"
           name="invoice_currency"
           options={currencyOptions}
@@ -300,6 +318,7 @@ function InvoiceForm() {
           id="terms_of_delivery"
           name="terms_of_delivery"
           options={termsOfDeliveryOptions}
+          className="selectPrf"
           value={
             termsOfDeliveryOptions.find(
               (option) => option.value === invoiceData.terms_of_delivery
@@ -320,6 +339,8 @@ function InvoiceForm() {
         <Select
           id="means_of_transport"
           name="means_of_transport"
+          className="selectPrf"
+          isMulti
           options={meansOfTransportOptions}
           value={
             meansOfTransportOptions.find(
@@ -338,13 +359,34 @@ function InvoiceForm() {
 
       <div className="form-group">
         <label htmlFor="relevant_location">گمرک مقصد:</label>
-        <input
-          type="text"
+        <Select
+          className="selectPrf"
           id="relevant_location"
           name="relevant_location"
-          value={invoiceData.relevant_location}
-          onChange={handleChange}
-          placeholder="گمرک مقصد را وارد کنید"
+          options={iranCustomsOptions}
+          isMulti
+          value={
+            invoiceData.relevant_location
+              ? invoiceData.relevant_location
+                  .split("-")
+                  .map((val) =>
+                    iranCustomsOptions.find(
+                      (option) => option.value === val.trim()
+                    )
+                  )
+              : []
+          }
+          onChange={(selectedOptions) => {
+            // When user changes selection, join the option values with "-"
+            const selectedValues = selectedOptions
+              ? selectedOptions.map((option) => option.value)
+              : [];
+            setInvoiceData((prev) => ({
+              ...prev,
+              relevant_location: selectedValues.join("-"),
+            }));
+          }}
+          placeholder="انتخاب گمرک مقصد"
         />
       </div>
 
@@ -362,6 +404,7 @@ function InvoiceForm() {
           <div className="form-group">
             <label htmlFor={`description-${index}`}>شرح کالا:</label>
             <textarea
+              className="form-textarea"
               type="text"
               id={`description-${index}`}
               name="description"
@@ -402,9 +445,10 @@ function InvoiceForm() {
           <div className="form-group">
             <label htmlFor={`commodity_code-${index}`}>کد کالا (HS):</label>
             <input
-              type="text"
+              type="number"
               id={`commodity_code-${index}`}
               name="commodity_code"
+              min={0}
               value={item.commodity_code}
               onChange={(e) => handleItemChange(index, e)}
               placeholder="کد کالا"
@@ -416,6 +460,7 @@ function InvoiceForm() {
               id={`unit-${index}`}
               name="unit"
               options={unitOptions}
+              className="selectPrf"
               value={
                 unitOptions.find((option) => option.value === item.unit) || null
               }
@@ -458,7 +503,7 @@ function InvoiceForm() {
             />
           </div>
           <div className="form-group">
-            <label htmlFor={`paزk-${index}`}>تعداد بسته بندی :</label>
+            <label htmlFor={`pack-${index}`}>تعداد بسته بندی :</label>
             <input
               type="number"
               id={`pack-${index}`}

@@ -156,10 +156,10 @@ class InvoiceViewSet(viewsets.ModelViewSet):
     queryset = Invoice.objects.all()
     serializer_class = InvoiceSerializer
 
-    @action(detail=False, methods=['get'], url_path='by-number/(?P<invoice_number>[^/.]+)')
-    def get_by_invoice_number(self, request, invoice_number=None):
+    @action(detail=False, methods=['get'], url_path='by-number/(?P<invoice_id>[^/.]+)')
+    def get_by_invoice_number(self, request, invoice_id=None):
         try:
-            invoice = Invoice.objects.get(invoice_number=invoice_number)
+            invoice = Invoice.objects.get(invoice_id=invoice_id)
             serializer = InvoiceSerializer(invoice)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Invoice.DoesNotExist:
@@ -425,7 +425,7 @@ class InvoicePDFView(APIView):
         ]))
         story.append(Spacer(1, 0.5 * inch))
         story.append(items_table)
-        sub_total_cell = Paragraph("<b>Sub total: </b>" + str(invoice.total_amount),styles['Cnt'])
+        sub_total_cell = Paragraph("<b>Sub total: </b>" + str(invoice.total_amount) +" "+ invoice.invoice_currency,styles['Cnt'])
 
         # ===================================================================
         # 11) Cost Summary Table (displayed under the items table)
@@ -438,8 +438,8 @@ class InvoicePDFView(APIView):
                 [sub_total_cell]
             ],
         ]
-        freight_charge_cell = Paragraph("<b>Freight charge:</b> " + str(invoice.freight_charges),styles['Cnt'])
-        total_amount_cell = Paragraph("<b>Total amount:</b> " + str(invoice.total_amount),styles['Cnt'])
+        freight_charge_cell = Paragraph("<b>Freight charge:</b> " + str(invoice.freight_charges)+" "+ invoice.invoice_currency,styles['Cnt'])
+        total_amount_cell = Paragraph("<b>Total amount:</b> " + str(invoice.total_amount)+ " "+ invoice.invoice_currency,styles['Cnt'])
 
         cost_summary_data = [
 

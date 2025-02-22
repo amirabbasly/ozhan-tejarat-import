@@ -1,6 +1,7 @@
 // src/components/InvoiceDetails.jsx
 import React from "react";
 import Select from "react-select";
+import { iranCustoms } from "../data/iranCustoms";
 
 const InvoiceDetails = ({
   invoice,
@@ -11,12 +12,17 @@ const InvoiceDetails = ({
   termsOfDeliveryOptions,
   meansOfTransportOptions,
 }) => {
+  const iranCustomsOptions = iranCustoms.map((custom) => ({
+    value: custom.ctmNameStr, // or combine with ctmNameStr if needed
+    label: `${custom.ctmNameStr} (${custom.ctmVCodeInt})`,
+  }));
   return (
     <div>
       {/* Seller */}
       <div className="form-group">
         <label htmlFor="seller">فروشنده:</label>
         <Select
+          className="selectPrf"
           id="seller"
           name="seller"
           options={sellerOptions}
@@ -35,6 +41,7 @@ const InvoiceDetails = ({
       <div className="form-group">
         <label htmlFor="buyer">خریدار:</label>
         <Select
+          className="selectPrf"
           id="buyer"
           name="buyer"
           options={buyerOptions}
@@ -82,6 +89,7 @@ const InvoiceDetails = ({
       <div className="form-group">
         <label htmlFor="invoice_currency">ارز:</label>
         <Select
+          className="selectPrf"
           id="invoice_currency"
           name="invoice_currency"
           options={currencyOptions}
@@ -146,6 +154,7 @@ const InvoiceDetails = ({
       <div className="form-group">
         <label htmlFor="terms_of_delivery">شرایط تحویل:</label>
         <Select
+          className="selectPrf"
           id="terms_of_delivery"
           name="terms_of_delivery"
           options={termsOfDeliveryOptions}
@@ -168,6 +177,7 @@ const InvoiceDetails = ({
       <div className="form-group">
         <label htmlFor="means_of_transport">وسیله حمل:</label>
         <Select
+          className="selectPrf"
           id="means_of_transport"
           name="means_of_transport"
           options={meansOfTransportOptions}
@@ -186,17 +196,33 @@ const InvoiceDetails = ({
         />
       </div>
 
-      {/* Relevant Location */}
+      {/* Customs Destination */}
       <div className="form-group">
         <label htmlFor="relevant_location">گمرک مقصد:</label>
-        <input
-          type="text"
+        <Select
+          className="selectPrf"
           id="relevant_location"
           name="relevant_location"
-          value={invoice.relevant_location || ""}
-          onChange={(e) => onFieldChange("relevant_location", e.target.value)}
-          placeholder="گمرک مقصد را وارد کنید"
-          className="editable-input"
+          options={iranCustomsOptions}
+          isMulti
+          value={
+            invoice.relevant_location
+              ? invoice.relevant_location
+                  .split("-")
+                  .map((val) =>
+                    iranCustomsOptions.find(
+                      (option) => option.value === val.trim()
+                    )
+                  )
+              : []
+          }
+          onChange={(selectedOptions) => {
+            const selectedValues = selectedOptions
+              ? selectedOptions.map((option) => option.value)
+              : [];
+            onFieldChange("relevant_location", selectedValues.join("-"));
+          }}
+          placeholder="انتخاب گمرک مقصد"
         />
       </div>
     </div>

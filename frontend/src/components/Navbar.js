@@ -289,7 +289,7 @@ const Navbar = () => {
                           </li>
                         </Link>
                         <Link className="submenu-link" to="/rep-from-excel">
-                          <li className="submenu-item">ورود وکالتنامه</li>
+                          <li className="submenu-item"></li>
                         </Link>
                       </ul>
                     )}

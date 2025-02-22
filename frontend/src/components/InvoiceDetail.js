@@ -25,16 +25,24 @@ const InvoiceDetail = () => {
   ];
 
   const meansOfTransportOptions = [
-    { value: "By Sea", label: "By Sea" },
+    { value: "By Truck", label: "By Truck" },
+    { value: "By AirPlane", label: "By AirPlane" },
     { value: "By Ship", label: "By Ship" },
+    { value: "By Train", label: "By Train" },
   ];
 
   const termsOfDeliveryOptions = [
-    { value: "EXW", label: "EXW" },
-    { value: "FOB", label: "FOB" },
+    { value: "CFR", label: "CFR" },
     { value: "CIF", label: "CIF" },
+    { value: "CIP", label: "CIP" },
     { value: "CPT", label: "CPT" },
     { value: "DAP", label: "DAP" },
+    { value: "DDP", label: "DDP" },
+    { value: "DPU", label: "DPU" },
+    { value: "EXW", label: "EXW" },
+    { value: "FAS", label: "FAS" },
+    { value: "FCA", label: "FCA" },
+    { value: "FOB", label: "FOB" },
   ];
 
   const unitOptions = [

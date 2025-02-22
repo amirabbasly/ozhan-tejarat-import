@@ -182,14 +182,11 @@ function InvoiceList() {
                   className="invoice-list-btn"
                   onClick={() => downloadPDF(inv.id)}
                 >
-                  دانلود پکینگ
+                  دانلود مدارک
                 </button>
               </td>
               <td>
-                <Link to={`/invoices/details/${inv.invoice_number}`}>
-                  {" "}
-                  جزئیات
-                </Link>
+                <Link to={`/invoices/details/${inv.invoice_id}`}> جزئیات</Link>
               </td>
             </tr>
           ))}

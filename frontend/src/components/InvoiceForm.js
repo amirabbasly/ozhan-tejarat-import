@@ -342,15 +342,15 @@ function InvoiceForm() {
           className="selectPrf"
           isMulti
           options={meansOfTransportOptions}
-          value={
-            meansOfTransportOptions.find(
-              (option) => option.value === invoiceData.means_of_transport
-            ) || null
-          }
-          onChange={(selectedOption) =>
+          value={meansOfTransportOptions.filter((option) =>
+            invoiceData.means_of_transport.includes(option.value)
+          )}
+          onChange={(selectedOptions) =>
             setInvoiceData((prev) => ({
               ...prev,
-              means_of_transport: selectedOption ? selectedOption.value : "",
+              means_of_transport: selectedOptions
+                ? selectedOptions.map((option) => option.value)
+                : [],
             }))
           }
           placeholder="انتخاب وسیله حمل"

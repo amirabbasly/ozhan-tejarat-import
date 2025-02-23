@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from PIL import Image, ImageDraw, ImageFont
 import io
-from .serializers import OverlayTextSerializer, ImageTemplateSerializer,  SellerSerializer, BuyerSerializer, InvoiceSerializer, OriginSerializer
+from .serializers import OverlayTextSerializer, ImageTemplateSerializer,  SellerSerializer, BuyerSerializer, InvoiceSerializer, OriginSerializer, ProformaInvoiceSerializer
 from .models import ImageTemplate, Seller, Buyer, Invoice, ProformaInvoice
 import os
 import openpyxl
@@ -17,6 +17,7 @@ from reportlab.pdfgen import canvas
 from reportlab.platypus import (
     SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image as RLImage
 )
+
 from rest_framework.decorators import action
 from reportlab.graphics.shapes import Drawing, Line
 from io import BytesIO
@@ -170,15 +171,15 @@ class InvoiceViewSet(viewsets.ModelViewSet):
 
 class ProformaInvoiceViewSet(viewsets.ModelViewSet):
     queryset = ProformaInvoice.objects.all()
-    serializer_class = InvoiceSerializer
+    serializer_class = ProformaInvoiceSerializer
 
     @action(detail=False, methods=['get'], url_path='by-number/(?P<invoice_number>[^/.]+)')
     def get_by_invoice_number(self, request, invoice_number=None):
         try:
-            invoice = Invoice.objects.get(invoice_number=invoice_number)
-            serializer = InvoiceSerializer(invoice)
+            proforma_invoice = ProformaInvoice.objects.get(invoice_number=invoice_number)
+            serializer = InvoiceSerializer(proforma_invoice)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        except Invoice.DoesNotExist:
+        except Proforma.DoesNotExist:
             return Response(
                 {"error": "Invoice not found."},
                 status=status.HTTP_404_NOT_FOUND

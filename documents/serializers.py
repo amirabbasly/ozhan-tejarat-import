@@ -237,11 +237,11 @@ class ProformaInvoiceSerializer(serializers.ModelSerializer):
     total_qty = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
     sub_total = serializers.DecimalField(max_digits=20, decimal_places=2, read_only=True)
 
-    invoice_date = serializers.DateField(read_only=False)
+    proforma_invoice_date = serializers.DateField(read_only=False)
     
     # If you want to generate `invoice_id` automatically, you can make it read-only,
     # otherwise let clients supply it. Or you can handle generation in the model's `save()`.
-    invoice_id = serializers.CharField(required=False)
+    proforma_invoice_id = serializers.CharField(required=False)
 
     class Meta:
         model = ProformaInvoice
@@ -249,11 +249,11 @@ class ProformaInvoiceSerializer(serializers.ModelSerializer):
             'id',
             'seller',
             'buyer',
-            'invoice_id',       # Unique invoice ID
-            'invoice_number',
-            'freight_charges',
-            'invoice_currency',
-            'invoice_date',
+            'proforma_invoice_id',       # Unique invoice ID
+            'proforma_invoice_number',
+            'proforma_freight_charges',
+            'proforma_invoice_currency',
+            'proforma_invoice_date',
             'means_of_transport',
             'country_of_origin',
             'port_of_loading',
@@ -273,15 +273,15 @@ class ProformaInvoiceSerializer(serializers.ModelSerializer):
         items_data = validated_data.pop('items', [])
 
         # Optionally auto-generate `invoice_id` if not provided
-        if not validated_data.get('invoice_id'):
-            validated_data['invoice_id'] = 'INV-' + str(uuid.uuid4())[:8].upper()
+        if not validated_data.get('proforma_invoice_id'):
+            validated_data['proforma_invoice_id'] = 'INV-' + str(uuid.uuid4())[:8].upper()
 
         # Create the Invoice
         invoice = Invoice.objects.create(**validated_data)
 
         # Create the InvoiceItems
         for item_data in items_data:
-            InvoiceItem.objects.create(invoice=invoice, **item_data)
+            ProformaInvoiceItem.objects.create(invoice=invoice, **item_data)
 
         # Calculate total amount = sum of line_total + freight_charges (if that’s your logic)
         total_lines = sum(item.line_total for item in invoice.items.all())

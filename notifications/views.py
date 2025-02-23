@@ -1,7 +1,9 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
-from .models import Notification
+from .models import Notification, Events
+from rest_framework import viewsets
+from .serializers import CalendarEventSerializer
 
 class NotificationListView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -45,3 +47,7 @@ class MarkAllNotificationsReadView(APIView):
         notifications = Notification.objects.filter(user=request.user, is_read=False)
         notifications.update(is_read=True)
         return Response({'message': 'All notifications marked as read.'}, status=status.HTTP_200_OK)
+
+class CalendarEventViewSet(viewsets.ModelViewSet):
+    queryset = Events.objects.all()
+    serializer_class = CalendarEventSerializer

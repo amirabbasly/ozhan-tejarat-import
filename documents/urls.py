@@ -1,11 +1,12 @@
 from django.urls import path, include
-from .views import OverlayTextView , TemplateListView, SellerViewSet, BuyerViewSet, InvoiceViewSet,InvoicePDFView, PackingPDFView, CertiOriginView,ProformaInvoicePDFView, CombinedPDFView
+from .views import OverlayTextView , TemplateListView, SellerViewSet, BuyerViewSet, InvoiceViewSet,InvoicePDFView, PackingPDFView, CertiOriginView,ProformaInvoicePDFView, CombinedPDFView, ProformaInvoiceViewSet
 from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
 router.register(r'sellers', SellerViewSet, basename='seller')
 router.register(r'buyers', BuyerViewSet, basename='buyer')
 router.register(r'invoices', InvoiceViewSet, basename='invoice')
+router.register(r'proforma-invoices', ProformaInvoiceViewSet, basename='proforma-invoice')
 
 
 urlpatterns = [

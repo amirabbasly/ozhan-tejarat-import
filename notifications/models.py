@@ -17,3 +17,8 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"Notification for {self.user.username}: {self.message[:20]}"
+
+class Events(models.Model):
+    title = models.CharField(max_length=50)
+    description = models.TextField(null=True, blank=True)
+    date = models.DateField()

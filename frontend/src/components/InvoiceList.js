@@ -115,17 +115,17 @@ function InvoiceList() {
 
   return (
     <div className="invoice-list-container">
-      <h2>فهرست صورتحساب</h2>
+      <h2>فهرست فاکتور ها</h2>
       <table className="invoice-list-table">
         <thead>
           <tr>
-            <th>شناسه صورتحساب</th>
-            <th>شماره صورتحساب</th>
+            <th>شناسه فاکتور</th>
+            <th>شماره فاکتور</th>
             <th>مبلغ کل</th>
             <th>هزینه حمل</th>
             <th>واحد پول</th>
             <th>تاریخ</th>
-            <th>صورتحساب</th>
+            <th>اینوویس</th>
             <th>بسته‌بندی</th>
             <th>گواهی مبدأ</th>
             <th>کل مدارک</th>

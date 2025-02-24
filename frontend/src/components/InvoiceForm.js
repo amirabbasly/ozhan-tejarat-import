@@ -333,7 +333,6 @@ function InvoiceForm() {
           placeholder="انتخاب شرایط تحویل"
         />
       </div>
-
       <div className="form-group">
         <label htmlFor="means_of_transport">وسیله حمل:</label>
         <Select
@@ -342,17 +341,27 @@ function InvoiceForm() {
           className="selectPrf"
           isMulti
           options={meansOfTransportOptions}
-          value={meansOfTransportOptions.filter((option) =>
-            invoiceData.means_of_transport.includes(option.value)
-          )}
-          onChange={(selectedOptions) =>
+          value={
+            invoiceData.means_of_transport
+              ? invoiceData.means_of_transport
+                  .split("-")
+                  .map((val) =>
+                    meansOfTransportOptions.find(
+                      (option) => option.value === val.trim()
+                    )
+                  )
+              : []
+          }
+          onChange={(selectedOptions) => {
+            // When user changes selection, join the option values with "-"
+            const selectedValues = selectedOptions
+              ? selectedOptions.map((option) => option.value)
+              : [];
             setInvoiceData((prev) => ({
               ...prev,
-              means_of_transport: selectedOptions
-                ? selectedOptions.map((option) => option.value)
-                : [],
-            }))
-          }
+              means_of_transport: selectedValues.join("-"),
+            }));
+          }}
           placeholder="انتخاب وسیله حمل"
         />
       </div>

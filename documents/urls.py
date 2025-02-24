@@ -16,7 +16,7 @@ urlpatterns = [
     path('templates/', TemplateListView.as_view(), name='template-list'),
     path('invoices/<int:pk>/pdf/', InvoicePDFView.as_view(), name='invoice-pdf'),
     path('packing/<int:pk>/pdf/', PackingPDFView.as_view(), name='packing-pdf'),
-    path('proforma-invoice/<int:pk>/pdf/', PackingPDFView.as_view(), name='proforma-pdf'),
+    path('proforma-invoice/<int:pk>/pdf/', ProformaInvoicePDFView.as_view(), name='proforma-pdf'),
     path('combined-pdf/<int:pk>/', CombinedPDFView.as_view(), name='combined-pdf'),
     
 ]

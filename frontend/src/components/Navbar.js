@@ -288,8 +288,17 @@ const Navbar = () => {
                             لیست اینوویس/پکینگ/گواهی مبدا
                           </li>
                         </Link>
-                        <Link className="submenu-link" to="/rep-from-excel">
-                          <li className="submenu-item"></li>
+                        <Link
+                          className="submenu-link"
+                          to="/proforma-invoices/new"
+                        >
+                          <li className="submenu-item">ایجاد پروفورما</li>
+                        </Link>
+                        <Link
+                          className="submenu-link"
+                          to="/proforma-invoices/list"
+                        >
+                          <li className="submenu-item">لیست پروفورما</li>
                         </Link>
                       </ul>
                     )}

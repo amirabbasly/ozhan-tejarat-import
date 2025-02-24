@@ -107,6 +107,7 @@ class ProformaInvoiceItemSerializer(serializers.ModelSerializer):
             'quantity',
             'unit_price',
             'line_total',
+            'unit',
             'nw_kg',
             'gw_kg',
             'origin',
@@ -228,7 +229,7 @@ class ProformaInvoiceSerializer(serializers.ModelSerializer):
     Invoice serializer supporting nested creation of InvoiceItems.
     """
     # Let the client send items in nested format
-    items = ProformaInvoiceItemSerializer(many=True, write_only=True, required=False)
+    items = ProformaInvoiceItemSerializer(many=True, write_only=False, required=False)
 
     # Read-only fields
     total_amount = serializers.DecimalField(max_digits=20, decimal_places=2, read_only=True)
@@ -274,22 +275,21 @@ class ProformaInvoiceSerializer(serializers.ModelSerializer):
 
         # Optionally auto-generate `invoice_id` if not provided
         if not validated_data.get('proforma_invoice_id'):
-            validated_data['proforma_invoice_id'] = 'INV-' + str(uuid.uuid4())[:8].upper()
+            validated_data['proforma_invoice_id'] = 'PRF-' + str(uuid.uuid4())[:8].upper()
 
         # Create the Invoice
-        invoice = Invoice.objects.create(**validated_data)
+        invoice = ProformaInvoice.objects.create(**validated_data)
 
         # Create the InvoiceItems
         for item_data in items_data:
-            ProformaInvoiceItem.objects.create(invoice=invoice, **item_data)
+            ProformaInvoiceItem.objects.create(proforma_invoice=invoice, **item_data)
 
         # Calculate total amount = sum of line_total + freight_charges (if that’s your logic)
         total_lines = sum(item.line_total for item in invoice.items.all())
-        freight = invoice.freight_charges or 0
+        freight = invoice.proforma_freight_charges or 0
         invoice.total_amount = total_lines + freight
         invoice.sub_total = total_lines
         invoice.total_gw = sum(item.gw_kg for item in invoice.items.all())
-        invoice.total_pack = sum(item.pack for item in invoice.items.all())
         invoice.total_nw = sum(item.nw_kg for item in invoice.items.all())
         invoice.total_qty = sum(item.quantity for item in invoice.items.all())
         invoice.save()
@@ -314,19 +314,18 @@ class ProformaInvoiceSerializer(serializers.ModelSerializer):
             # Clear existing items or selectively update 
             instance.items.all().delete()
             for item_data in items_data:
-                InvoiceItem.objects.create(invoice=instance, **item_data)
+                ProformaInvoiceItem.objects.create(proforma_invoice=instance, **item_data)
 
         # Recompute total
         total_lines = sum(item.line_total for item in instance.items.all())
-        total_gw = sum(item.gw_kg for item in invoice.items.all())
-        total_nw = sum(item.nw_kg for item in invoice.items.all())
-        freight = instance.freight_charges or 0
+        total_gw = sum(item.gw_kg for item in instance.items.all())
+        total_nw = sum(item.nw_kg for item in instance.items.all())
+        freight = instance.proforma_freight_charges or 0
         instance.total_amount = total_lines + freight
         instance.sub_total = total_lines       
-        instance.total_gw = sum(item.gw_kg for item in invoice.items.all())
-        instance.total_pack = sum(item.pack for item in invoice.items.all())
-        instance.total_nw = sum(item.nw_kg for item in invoice.items.all())
-        instance.total_qty = sum(item.quantity for item in invoice.items.all())
+        instance.total_gw = sum(item.gw_kg for item in instance.items.all())
+        instance.total_nw = sum(item.nw_kg for item in instance.items.all())
+        instance.total_qty = sum(item.quantity for item in instance.items.all())
         instance.save()
 
         return instance

@@ -114,7 +114,7 @@ class ProformaInvoice(models.Model):
 
     
     def __str__(self):
-        return f"Invoice {self.invoice_number}"
+        return f"Invoice {self.proforma_invoice_number}"
 
 class ProformaInvoiceItem(models.Model):
     proforma_invoice = models.ForeignKey(ProformaInvoice, related_name='items', on_delete=models.CASCADE)
@@ -131,4 +131,4 @@ class ProformaInvoiceItem(models.Model):
         return self.quantity * self.unit_price
 
     def __str__(self):
-        return f"Item for Invoice {self.profroma_invoice.proforma_invoice_number}"
+        return f"Item for Invoice {self.proforma_invoice.proforma_invoice_number}"

@@ -57,6 +57,8 @@ import "./App.css";
 import CalendarApp from "./components/CalendarApp";
 import CreateEventForm from "./components/CreateEventForm";
 import ProformaInvoiceForm from "./components/ProformaInvoiceForm";
+import ProformaInvoiceList from "./components/ProformaInvoiceList";
+import ProformaInvoiceDetail from "./components/ProformaInvoiceDetail";
 function App() {
   return (
     <Provider store={store}>
@@ -411,10 +413,26 @@ function AppContent() {
             }
           />
           <Route
+            path="/proforma-invoices/list"
+            element={
+              <PrivateRoute>
+                <ProformaInvoiceList />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/invoices/details/:invoiceNumber"
             element={
               <PrivateRoute>
                 <InvoiceDetail />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/proforma-invoices/details/:invoiceNumber"
+            element={
+              <PrivateRoute>
+                <ProformaInvoiceDetail />
               </PrivateRoute>
             }
           />

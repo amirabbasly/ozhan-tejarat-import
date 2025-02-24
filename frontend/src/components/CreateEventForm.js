@@ -29,27 +29,31 @@ const CreateEventForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <label>Title:</label>
+    <form className="cottage-form" onSubmit={handleSubmit}>
+      <h2>یادآوری جدید</h2>
+      <div className="form-group">
+        <label>عنوان:</label>
         <input
           type="text"
+          placeholder="عنوان یادآوری را وارد کنید"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
         />
       </div>
-      <div>
-        <label>Description:</label>
+      <div className="form-group">
+        <label>توضیحات:</label>
         <textarea
+          placeholder="توضیحاتی درباره یادآوری وارد کنید"
+          className="form-textarea"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          required
         />
       </div>
-      <div>
-        <label>Start Time:</label>
-        <DatePicker
+      <div className="form-group">
+        <label>تاریخ:</label>
+        <input
+          type="date"
           selected={date}
           onChange={(date) => setDate(date)}
           dateFormat="yyyy-MM-dd"
@@ -57,7 +61,7 @@ const CreateEventForm = () => {
         />
       </div>
 
-      <button type="submit">Create Event</button>
+      <button type="submit">ایجاد یادآوری</button>
     </form>
   );
 };

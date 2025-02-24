@@ -44,6 +44,20 @@ function ProformaInvoiceForm() {
     { value: "FOB", label: "FOB" },
   ];
 
+  const termsOfPaymentOptions = [
+    { value: "CFR", label: "CFR" },
+    { value: "CIF", label: "CIF" },
+    { value: "CIP", label: "CIP" },
+    { value: "CPT", label: "CPT" },
+    { value: "DAP", label: "DAP" },
+    { value: "DDP", label: "DDP" },
+    { value: "DPU", label: "DPU" },
+    { value: "EXW", label: "EXW" },
+    { value: "FAS", label: "FAS" },
+    { value: "FCA", label: "FCA" },
+    { value: "FOB", label: "FOB" },
+  ];
+
   const unitOptions = [
     { value: "KGS", label: "KGS" },
     { value: "M3", label: "M3" },
@@ -57,16 +71,17 @@ function ProformaInvoiceForm() {
   const [invoiceData, setInvoiceData] = useState({
     seller: "",
     buyer: "",
-    invoice_number: "",
-    invoice_currency: "AED", // default value
-    freight_charges: 0,
+    proforma_invoice_number: "",
+    proforma_invoice_currency: "AED", // default value
+    proforma_freight_charges: 0,
     terms_of_delivery: "CPT", // default value
+    terms_of_payment: "TT",
     partial_shipment: false,
     relevant_location: "",
     means_of_transport: "By Ship",
     country_of_origin: "",
     port_of_loading: "",
-    invoice_date: "", // Add this line
+    proforma_invoice_date: "", // Add this line
 
     items: [
       {
@@ -150,7 +165,8 @@ function ProformaInvoiceForm() {
     e.preventDefault();
     const payload = {
       ...invoiceData,
-      freight_charges: parseFloat(invoiceData.freight_charges) || 0,
+      proforma_freight_charges:
+        parseFloat(invoiceData.proforma_freight_charges) || 0,
       items: invoiceData.items.map((item) => ({
         description: item.description,
         quantity: parseInt(item.quantity, 10) || 0,
@@ -167,7 +183,7 @@ function ProformaInvoiceForm() {
     try {
       await axiosInstance.post("documents/proforma-invoices/", payload);
       alert("فاکتور با موفقیت ایجاد شد!");
-      navigate("/invoices/list");
+      navigate("/proforma-invoices/list");
     } catch (error) {
       console.error("خطا در ایجاد فاکتور:", error);
       alert("ایجاد فاکتور با خطا مواجه شد.");
@@ -236,42 +252,44 @@ function ProformaInvoiceForm() {
         <label htmlFor="invoice_number">شماره فاکتور:</label>
         <input
           type="text"
-          id="invoice_number"
-          name="invoice_number"
-          value={invoiceData.invoice_number}
+          id="proforma_invoice_number"
+          name="proforma_invoice_number"
+          value={invoiceData.proforma_invoice_number}
           onChange={handleChange}
           placeholder="شماره فاکتور را وارد کنید"
           required
         />
       </div>
       <div className="form-group">
-        <label htmlFor="invoice_date">تاریخ فاکتور:</label>
+        <label htmlFor="proforma_invoice_date">تاریخ فاکتور:</label>
         <input
           type="date"
-          id="invoice_date"
-          name="invoice_date"
-          value={invoiceData.invoice_date}
+          id="proforma_invoice_date"
+          name="proforma_invoice_date"
+          value={invoiceData.proforma_invoice_date}
           onChange={handleChange}
           required
         />
       </div>
 
       <div className="form-group">
-        <label htmlFor="invoice_currency">ارز:</label>
+        <label htmlFor="proforma_invoice_currency">ارز:</label>
         <Select
           className="selectPrf"
-          id="invoice_currency"
-          name="invoice_currency"
+          id="proforma_invoice_currency"
+          name="proforma_invoice_currency"
           options={currencyOptions}
           value={
             currencyOptions.find(
-              (option) => option.value === invoiceData.invoice_currency
+              (option) => option.value === invoiceData.proforma_invoice_currency
             ) || null
           }
           onChange={(selectedOption) =>
             setInvoiceData((prev) => ({
               ...prev,
-              invoice_currency: selectedOption ? selectedOption.value : "",
+              proforma_invoice_currency: selectedOption
+                ? selectedOption.value
+                : "",
             }))
           }
           placeholder="انتخاب ارز"
@@ -279,16 +297,27 @@ function ProformaInvoiceForm() {
       </div>
 
       <div className="form-group">
-        <label htmlFor="freight_charges">هزینه حمل:</label>
+        <label htmlFor="proforma_freight_charges">هزینه حمل:</label>
         <input
           type="number"
-          id="freight_charges"
-          name="freight_charges"
-          value={invoiceData.freight_charges}
+          id="proforma_freight_charges"
+          name="proforma_freight_charges"
+          value={invoiceData.proforma_freight_charges}
           onChange={handleChange}
           placeholder="هزینه حمل"
         />
       </div>
+      <div className="form-group">
+        <label htmlFor="partial_shipment">حمل به دفعات:</label>
+        <input
+          type="checkbox"
+          id="partial_shipment"
+          name="partial_shipment"
+          checked={invoiceData.partial_shipment} // Use checked instead of value
+          onChange={handleChange} // Correctly update state
+        />
+      </div>
+
       <div className="form-group">
         <label htmlFor="country_of_origin"> کشور مبدا:</label>
         <input
@@ -331,6 +360,27 @@ function ProformaInvoiceForm() {
             }))
           }
           placeholder="انتخاب شرایط تحویل"
+        />
+      </div>
+      <div className="form-group">
+        <label htmlFor="terms_of_payment">شرایط پرداخت:</label>
+        <Select
+          id="terms_of_payment"
+          name="terms_of_payment"
+          options={termsOfPaymentOptions}
+          className="selectPrf"
+          value={
+            termsOfPaymentOptions.find(
+              (option) => option.value === invoiceData.terms_of_payment
+            ) || null
+          }
+          onChange={(selectedOption) =>
+            setInvoiceData((prev) => ({
+              ...prev,
+              terms_of_payment: selectedOption ? selectedOption.value : "",
+            }))
+          }
+          placeholder="انتخاب شرایط پرداخت"
         />
       </div>
 

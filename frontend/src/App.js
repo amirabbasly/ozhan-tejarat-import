@@ -59,6 +59,8 @@ import CreateEventForm from "./components/CreateEventForm";
 import ProformaInvoiceForm from "./components/ProformaInvoiceForm";
 import ProformaInvoiceList from "./components/ProformaInvoiceList";
 import ProformaInvoiceDetail from "./components/ProformaInvoiceDetail";
+import SellerList from "./components/SellerList";
+import SellerDetails from "./components/SellerDetails";
 function App() {
   return (
     <Provider store={store}>
@@ -449,6 +451,22 @@ function AppContent() {
             element={
               <PrivateRoute>
                 <CreateEventForm />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/sellers/list"
+            element={
+              <PrivateRoute>
+                <SellerList />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/sellers/details/:sellerId"
+            element={
+              <PrivateRoute>
+                <SellerDetails />
               </PrivateRoute>
             }
           />

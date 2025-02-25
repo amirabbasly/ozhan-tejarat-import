@@ -85,6 +85,7 @@ function SellerForm() {
         <label htmlFor="seller_address">آدرس فروشنده:</label>
         <textarea
           id="seller_address"
+          className="form-textarea"
           name="seller_address"
           value={formData.seller_address}
           onChange={handleChange}

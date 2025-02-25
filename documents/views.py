@@ -144,13 +144,33 @@ class SellerViewSet(viewsets.ModelViewSet):
     queryset = Seller.objects.all()
     serializer_class = SellerSerializer
     pagination_class = None  # Disable pagination here
-    
+    @action(detail=False, methods=['get'], url_path='by-id/(?P<seller_id>[^/.]+)')
+    def get_seller_by_id(self, request, seller_id=None):
+        try:
+            seller = Seller.objects.get(id=seller_id)
+            serializer = SellerSerializer(seller)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Seller.DoesNotExist:
+            return Response(
+                {"error": "Seller not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
 class BuyerViewSet(viewsets.ModelViewSet):
     queryset = Buyer.objects.all()
     serializer_class = BuyerSerializer
     pagination_class = None  # Disable pagination here
-
+    @action(detail=False, methods=['get'], url_path='by-id/(?P<buyer_id>[^/.]+)')
+    def get_buyer_by_id(self, request, buyer_id=None):
+        try:
+            buyer = Buyer.objects.get(id=buyer_id)
+            serializer = BuyerSerializer(invoice)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Buyer.DoesNotExist:
+            return Response(
+                {"error": "Seller not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
 
 class InvoiceViewSet(viewsets.ModelViewSet):

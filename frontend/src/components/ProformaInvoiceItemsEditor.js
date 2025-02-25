@@ -57,7 +57,6 @@ const ProformaInvoiceItemsEditor = ({ items, onItemsChange, unitOptions }) => {
       gw_kg: 0,
       unit: "U",
       commodity_code: "",
-      pack: 1,
       origin: "",
     };
     onItemsChange([...items, newItem]);
@@ -100,7 +99,6 @@ const ProformaInvoiceItemsEditor = ({ items, onItemsChange, unitOptions }) => {
                 <th>کد کالا</th>
                 <th>قیمت واحد</th>
                 <th>واحد</th>
-                <th>بسته‌بندی</th>
                 <th>وزن ناخالص (کیلوگرم)</th>
                 <th>وزن خالص (کیلوگرم)</th>
                 <th>مبدأ</th>
@@ -116,7 +114,6 @@ const ProformaInvoiceItemsEditor = ({ items, onItemsChange, unitOptions }) => {
                   <td>{item.commodity_code}</td>
                   <td>{item.unit_price}</td>
                   <td>{item.unit}</td>
-                  <td>{item.pack}</td>
                   <td>{item.gw_kg}</td>
                   <td>{item.nw_kg}</td>
                   <td>{item.origin}</td>
@@ -293,17 +290,7 @@ const ProformaInvoiceItemsEditor = ({ items, onItemsChange, unitOptions }) => {
                 placeholder="وزن ناخالص"
               />
             </div>
-            <div className="form-group">
-              <label htmlFor="modal_pack">تعداد بسته بندی:</label>
-              <input
-                type="number"
-                id="modal_pack"
-                name="pack"
-                value={modalItemData.pack || ""}
-                onChange={handleModalChange}
-                placeholder="تعداد بسته بندی"
-              />
-            </div>
+
             <div className="form-group">
               <label htmlFor="modal_origin">مبدأ:</label>
               <input

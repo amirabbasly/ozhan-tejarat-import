@@ -29,6 +29,10 @@ function ProformaInvoiceForm() {
     { value: "By Ship", label: "By Ship" },
     { value: "By Train", label: "By Train" },
   ];
+  const standardOptions = [
+    { value: "JIS", label: "JIS" },
+    { value: "ISO", label: "ISO" },
+  ];
 
   const termsOfDeliveryOptions = [
     { value: "CFR", label: "CFR" },
@@ -45,17 +49,10 @@ function ProformaInvoiceForm() {
   ];
 
   const termsOfPaymentOptions = [
-    { value: "CFR", label: "CFR" },
-    { value: "CIF", label: "CIF" },
-    { value: "CIP", label: "CIP" },
-    { value: "CPT", label: "CPT" },
-    { value: "DAP", label: "DAP" },
-    { value: "DDP", label: "DDP" },
-    { value: "DPU", label: "DPU" },
-    { value: "EXW", label: "EXW" },
-    { value: "FAS", label: "FAS" },
-    { value: "FCA", label: "FCA" },
-    { value: "FOB", label: "FOB" },
+    { value: "T/T", label: "T/T" },
+    { value: "L/C", label: "L/C" },
+    { value: "D/P", label: "D/P" },
+    { value: "D/A", label: "D/A" },
   ];
 
   const unitOptions = [
@@ -75,7 +72,8 @@ function ProformaInvoiceForm() {
     proforma_invoice_currency: "AED", // default value
     proforma_freight_charges: 0,
     terms_of_delivery: "CPT", // default value
-    terms_of_payment: "TT",
+    terms_of_payment: "T/T",
+    standard: "JIS",
     partial_shipment: false,
     relevant_location: "",
     means_of_transport: "By Ship",
@@ -381,6 +379,27 @@ function ProformaInvoiceForm() {
             }))
           }
           placeholder="انتخاب شرایط پرداخت"
+        />
+      </div>
+      <div className="form-group">
+        <label htmlFor="standard">استاندارد:</label>
+        <Select
+          id="standard"
+          name="stabdard"
+          options={standardOptions}
+          className="selectPrf"
+          value={
+            standardOptions.find(
+              (option) => option.value === invoiceData.standard
+            ) || null
+          }
+          onChange={(selectedOption) =>
+            setInvoiceData((prev) => ({
+              ...prev,
+              terms_of_payment: selectedOption ? selectedOption.value : "",
+            }))
+          }
+          placeholder="انتخاب استاندارد"
         />
       </div>
 

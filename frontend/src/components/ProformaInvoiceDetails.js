@@ -11,6 +11,8 @@ const InvoiceDetails = ({
   currencyOptions,
   termsOfDeliveryOptions,
   meansOfTransportOptions,
+  termsOfPaymentOptions,
+  standardOptions,
 }) => {
   const iranCustomsOptions = iranCustoms.map((custom) => ({
     value: custom.ctmNameStr, // or combine with ctmNameStr if needed
@@ -64,7 +66,9 @@ const InvoiceDetails = ({
           id="proforma_invoice_number"
           name="proforma_invoice_number"
           value={invoice.proforma_invoice_number || ""}
-          onChange={(e) => onFieldChange("invoice_number", e.target.value)}
+          onChange={(e) =>
+            onFieldChange("proforma_invoice_number", e.target.value)
+          }
           placeholder="شماره فاکتور را وارد کنید"
           required
           className="editable-input"
@@ -170,6 +174,50 @@ const InvoiceDetails = ({
             )
           }
           placeholder="انتخاب شرایط تحویل"
+        />
+      </div>
+      {/* Terms of Payment */}
+      <div className="form-group">
+        <label htmlFor="terms_of_payment">شرایط پرداخت:</label>
+        <Select
+          className="selectPrf"
+          id="terms_of_payment"
+          name="terms_of_payment"
+          options={termsOfPaymentOptions}
+          value={
+            termsOfPaymentOptions.find(
+              (option) => option.value === invoice.terms_of_payment
+            ) || null
+          }
+          onChange={(selectedOption) =>
+            onFieldChange(
+              "terms_of_payment",
+              selectedOption ? selectedOption.value : ""
+            )
+          }
+          placeholder="انتخاب استاندارد"
+        />
+      </div>
+      {/* Standard */}
+      <div className="form-group">
+        <label htmlFor="standard">standard:</label>
+        <Select
+          className="selectPrf"
+          id="standard"
+          name="standard"
+          options={standardOptions}
+          value={
+            standardOptions.find(
+              (option) => option.value === invoice.standard
+            ) || null
+          }
+          onChange={(selectedOption) =>
+            onFieldChange(
+              "standard",
+              selectedOption ? selectedOption.value : ""
+            )
+          }
+          placeholder="انتخاب استاندارد"
         />
       </div>
 

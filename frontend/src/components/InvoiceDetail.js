@@ -46,9 +46,7 @@ const InvoiceDetail = () => {
   ];
 
   const unitOptions = [
-    { value: "U", label: "U" },
     { value: "KG", label: "KG" },
-    { value: "PCK", label: "PCK" },
     { value: "M3", label: "M3" },
     { value: "M2", label: "M2" },
     { value: "PCS", label: "PCS" },

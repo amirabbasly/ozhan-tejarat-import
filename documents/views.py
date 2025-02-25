@@ -426,7 +426,7 @@ class InvoicePDFView(APIView):
         ]))
         story.append(Spacer(1, 0.5 * inch))
         story.append(items_table)
-        sub_total_cell = Paragraph("<b>Sub total: </b>" + str(invoice.total_amount) +" "+ invoice.invoice_currency,styles['Cnt'])
+        sub_total_cell = Paragraph("<b>Sub total: </b>" + str(invoice.sub_total) +" "+ invoice.invoice_currency,styles['Cnt'])
 
         # ===================================================================
         # 11) Cost Summary Table (displayed under the items table)
@@ -1129,6 +1129,13 @@ class ProformaInvoicePDFView(APIView):
                 Paragraph("<b>Country of origin:</b> " + getattr(invoice, 'country_of_origin', ''), styles["Normal"]),
                 Paragraph("<b>Port/airport of loading:</b> " + getattr(invoice, 'port_of_loading', ''), styles["Normal"])
             ],
+            [
+                Paragraph("<b>Terms of Payment:</b> " + getattr(invoice, 'terms_of_payment', ''), styles["Normal"]),
+                Paragraph("<b>Partial Shipment:</b> " + ("Allowed" if getattr(invoice, 'partial_shipment', False) else "Not Allowed"), styles["Normal"])
+            ],            [
+                Paragraph("<b>Standard:</b> " + getattr(invoice, 'standard', ''), styles["Normal"]),
+
+            ],
         ]
         shipping_info_table = Table(shipping_table_data, colWidths=[3.5 * inch, 3.5 * inch])
         shipping_info_table.setStyle(TableStyle([
@@ -1205,7 +1212,7 @@ class ProformaInvoicePDFView(APIView):
         ]))
         story.append(Spacer(1, 0.5 * inch))
         story.append(items_table)
-        sub_total_cell = Paragraph("<b>Sub total: </b>" + str(invoice.total_amount) +" "+ invoice.proforma_invoice_currency,styles['Cnt'])
+        sub_total_cell = Paragraph("<b>Sub total: </b>" + str(invoice.sub_total) +" "+ invoice.proforma_invoice_currency,styles['Cnt'])
 
         # ===================================================================
         # 11) Cost Summary Table (displayed under the items table)

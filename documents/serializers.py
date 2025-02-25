@@ -263,6 +263,7 @@ class ProformaInvoiceSerializer(serializers.ModelSerializer):
             'items',
             'terms_of_delivery',
             'terms_of_payment',
+            'standard',
             'relevant_location',
             'total_gw',
             'total_nw',

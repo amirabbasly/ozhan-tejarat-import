@@ -44,14 +44,22 @@ const ProformaInvoiceDetail = () => {
     { value: "FCA", label: "FCA" },
     { value: "FOB", label: "FOB" },
   ];
+  const standardOptions = [
+    { value: "JIS", label: "JIS" },
+    { value: "ISO", label: "ISO" },
+  ];
 
   const unitOptions = [
-    { value: "U", label: "U" },
     { value: "KG", label: "KG" },
-    { value: "PCK", label: "PCK" },
     { value: "M3", label: "M3" },
     { value: "M2", label: "M2" },
     { value: "PCS", label: "PCS" },
+  ];
+  const termsOfPaymentOptions = [
+    { value: "T/T", label: "T/T" },
+    { value: "L/C", label: "L/C" },
+    { value: "D/P", label: "D/P" },
+    { value: "D/A", label: "D/A" },
   ];
 
   const sellerOptions = sellers.map((sel) => ({
@@ -125,6 +133,8 @@ const ProformaInvoiceDetail = () => {
           currencyOptions={currencyOptions}
           termsOfDeliveryOptions={termsOfDeliveryOptions}
           meansOfTransportOptions={meansOfTransportOptions}
+          termsOfPaymentOptions={termsOfPaymentOptions}
+          standardOptions={standardOptions}
         />
         <ProformaInvoiceItemsEditor
           items={invoice.items}

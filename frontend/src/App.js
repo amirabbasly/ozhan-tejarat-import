@@ -61,6 +61,8 @@ import ProformaInvoiceList from "./components/ProformaInvoiceList";
 import ProformaInvoiceDetail from "./components/ProformaInvoiceDetail";
 import SellerList from "./components/SellerList";
 import SellerDetails from "./components/SellerDetails";
+import BuyerDetails from "./components/BuyerDetails";
+import BuyerList from "./components/BuyerList";
 function App() {
   return (
     <Provider store={store}>
@@ -467,6 +469,22 @@ function AppContent() {
             element={
               <PrivateRoute>
                 <SellerDetails />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/buyers/list"
+            element={
+              <PrivateRoute>
+                <BuyerList />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/buyers/details/:buyerId"
+            element={
+              <PrivateRoute>
+                <BuyerDetails />
               </PrivateRoute>
             }
           />

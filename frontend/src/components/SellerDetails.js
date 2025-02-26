@@ -1,4 +1,3 @@
-// src/components/InvoiceDetail.jsx
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axiosInstance from "../utils/axiosInstance";
@@ -6,7 +5,7 @@ import "../pages/CottageDetails.css";
 
 const SellerDetails = () => {
   const { sellerId } = useParams();
-  const [seller, setInvoice] = useState(null);
+  const [seller, setSeller] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
@@ -17,8 +16,7 @@ const SellerDetails = () => {
         const sellerResponse = await axiosInstance.get(
           `/documents/sellers/by-id/${sellerId}/`
         );
-
-        setInvoice(sellerResponse.data);
+        setSeller(sellerResponse.data);
         setLoading(false);
       } catch (err) {
         setError("خطا در دریافت اطلاعات");
@@ -28,20 +26,69 @@ const SellerDetails = () => {
 
     fetchData();
   }, [sellerId]);
+  const handleDelete = async () => {
+    if (
+      !window.confirm("آیا مطمئن هستید که می‌خواهید این فروشنده را حذف کنید؟")
+    ) {
+      return;
+    }
 
-  const handleSubmit = (e) => {
+    try {
+      await axiosInstance.delete(`/documents/sellers/${sellerId}/`);
+      alert("فروشنده با موفقیت حذف شد.");
+      window.location.href = "/sellers/list"; // Redirect to the seller list page
+    } catch (err) {
+      setError("خطا در حذف فروشنده.");
+    }
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setSeller((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleFileChange = (e) => {
+    const { name, files } = e.target;
+    setSeller((prev) => ({ ...prev, [name]: files[0] }));
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    axiosInstance
-      .put(`/documents/sellers/by-id/${sellerId}/`, seller)
-      .then((response) => {
-        setInvoice(response.data);
-        setSuccessMessage("تغییرات با موفقیت ذخیره شدند.");
-        setError("");
-      })
-      .catch((err) => {
-        setError("خطا در ذخیره تغییرات.");
-        setSuccessMessage("");
-      });
+    const formData = new FormData();
+
+    // Append text fields
+    formData.append("seller_name", seller.seller_name);
+    formData.append("seller_address", seller.seller_address);
+    formData.append("seller_country", seller.seller_country);
+    formData.append("seller_bank_name", seller.seller_bank_name);
+    formData.append("seller_iban", seller.seller_iban);
+    formData.append("seller_swift", seller.seller_swift);
+
+    // Append file fields if they exist
+    if (seller.seller_seal instanceof File) {
+      formData.append("seller_seal", seller.seller_seal);
+    }
+    if (seller.seller_logo instanceof File) {
+      formData.append("seller_logo", seller.seller_logo);
+    }
+
+    try {
+      const response = await axiosInstance.put(
+        `/documents/sellers/${sellerId}/`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      setSeller(response.data);
+      setSuccessMessage("تغییرات با موفقیت ذخیره شدند.");
+      setError("");
+    } catch (err) {
+      setError("خطا در ذخیره تغییرات.");
+      setSuccessMessage("");
+    }
   };
 
   if (loading) return <div className="loading">در حال بارگذاری...</div>;
@@ -50,8 +97,7 @@ const SellerDetails = () => {
   return (
     <div className="cottage-details-container">
       <div className="header">جزئیات فروشنده</div>
-      <form onSubmit={handleSubmit}>
-        {/* Port of Loading */}
+      <form onSubmit={handleSubmit} encType="multipart/form-data">
         <div className="form-group">
           <label htmlFor="seller_name">نام فروشنده:</label>
           <input
@@ -59,18 +105,17 @@ const SellerDetails = () => {
             id="seller_name"
             name="seller_name"
             value={seller.seller_name || ""}
-            placeholder="نام فروشنده"
+            onChange={handleChange}
             className="editable-input"
           />
         </div>
         <div className="form-group">
           <label htmlFor="seller_address">آدرس فروشنده:</label>
           <textarea
-            type="text"
             id="seller_address"
             name="seller_address"
             value={seller.seller_address || ""}
-            placeholder="نام فروشنده"
+            onChange={handleChange}
             className="editable-input form-textarea"
           />
         </div>
@@ -81,7 +126,7 @@ const SellerDetails = () => {
             id="seller_country"
             name="seller_country"
             value={seller.seller_country || ""}
-            placeholder="کشور فروشنده"
+            onChange={handleChange}
             className="editable-input"
           />
         </div>
@@ -92,30 +137,29 @@ const SellerDetails = () => {
             id="seller_bank_name"
             name="seller_bank_name"
             value={seller.seller_bank_name || ""}
-            placeholder="نام بانک"
+            onChange={handleChange}
             className="editable-input"
           />
         </div>
-
         <div className="form-group">
-          <label htmlFor="seller_iban">iban:</label>
+          <label htmlFor="seller_iban">IBAN:</label>
           <input
             type="text"
             id="seller_iban"
             name="seller_iban"
             value={seller.seller_iban || ""}
-            placeholder="iban"
+            onChange={handleChange}
             className="editable-input"
           />
         </div>
         <div className="form-group">
-          <label htmlFor="seller_swift">swift:</label>
+          <label htmlFor="seller_swift">SWIFT:</label>
           <input
             type="text"
             id="seller_swift"
             name="seller_swift"
             value={seller.seller_swift || ""}
-            placeholder="swift"
+            onChange={handleChange}
             className="editable-input"
           />
         </div>
@@ -125,16 +169,27 @@ const SellerDetails = () => {
             type="file"
             id="seller_seal"
             name="seller_seal"
-            onChange={(e) => {
-              const file = e.target.files[0]; // Get the selected file
-              onFieldChange("seller_seal", file); // Assuming you have an `onFieldChange` function to update the state
-            }}
+            accept="image/*"
+            onChange={handleFileChange}
             className="editable-input"
           />
         </div>
-
+        <div className="form-group">
+          <label htmlFor="seller_logo">لوگو فروشنده:</label>
+          <input
+            type="file"
+            id="seller_logo"
+            name="seller_logo"
+            accept="image/*"
+            onChange={handleFileChange}
+            className="editable-input"
+          />
+        </div>
         <button type="submit" className="primary-button">
           ثبت تغییرات
+        </button>
+        <button type="button" className="delete-button" onClick={handleDelete}>
+          حذف فروشنده
         </button>
       </form>
       {successMessage && <div className="cottage-info">{successMessage}</div>}

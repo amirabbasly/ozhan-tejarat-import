@@ -27,13 +27,14 @@ function SellerForm() {
 
   const handleFileChange = (e) => {
     const { name, files } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: files[0] }));
+    if (files.length > 0) {
+      setFormData((prev) => ({ ...prev, [name]: files[0] }));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // We need multipart/form-data to upload the images (if any)
     const data = new FormData();
     data.append("seller_name", formData.seller_name);
     data.append("seller_address", formData.seller_address);
@@ -43,16 +44,25 @@ function SellerForm() {
     data.append("seller_account_name", formData.seller_account_name);
     data.append("seller_iban", formData.seller_iban);
     data.append("seller_swift", formData.seller_swift);
-    if (formData.seller_seal) {
+
+    if (formData.seller_seal instanceof File) {
       data.append("seller_seal", formData.seller_seal);
     }
-    if (formData.seller_logo) {
+    if (formData.seller_logo instanceof File) {
       data.append("seller_logo", formData.seller_logo);
     }
+
+    // Debugging: Log the FormData values
+    for (let pair of data.entries()) {
+      console.log(pair[0], pair[1]);
+    }
+
     try {
-      await axiosInstance.post("documents/sellers/", data);
+      await axiosInstance.post("documents/sellers/", data, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
       alert("فروشنده با موفقیت ایجاد شد!");
-      navigate("/"); // redirect as needed
+      navigate("/");
     } catch (error) {
       console.error("خطا در ایجاد فروشنده:", error);
       alert("ایجاد فروشنده با خطا مواجه شد.");

@@ -164,7 +164,7 @@ class BuyerViewSet(viewsets.ModelViewSet):
     def get_buyer_by_id(self, request, buyer_id=None):
         try:
             buyer = Buyer.objects.get(id=buyer_id)
-            serializer = BuyerSerializer(invoice)
+            serializer = BuyerSerializer(buyer)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Buyer.DoesNotExist:
             return Response(

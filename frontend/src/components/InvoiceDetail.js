@@ -107,6 +107,21 @@ const InvoiceDetail = () => {
         setSuccessMessage("");
       });
   };
+  const handleDelete = async () => {
+    if (
+      !window.confirm("آیا مطمئن هستید که می‌خواهید این فاکتور را حذف کنید؟")
+    ) {
+      return;
+    }
+
+    try {
+      await axiosInstance.delete(`/documents/invoices/${invoice.id}/`);
+      alert("فاکتور با موفقیت حذف شد.");
+      window.location.href = "/invoices/list"; // Redirect to the seller list page
+    } catch (err) {
+      setError("خطا در حذف فاکتور.");
+    }
+  };
 
   if (loading) return <div className="loading">در حال بارگذاری...</div>;
   if (!invoice) return <div className="error">{error}</div>;
@@ -131,6 +146,9 @@ const InvoiceDetail = () => {
         />
         <button type="submit" className="primary-button">
           ثبت تغییرات
+        </button>
+        <button type="button" className="delete-button" onClick={handleDelete}>
+          حذف فاکتور
         </button>
       </form>
       {successMessage && <div className="cottage-info">{successMessage}</div>}

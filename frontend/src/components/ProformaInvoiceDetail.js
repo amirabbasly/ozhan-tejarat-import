@@ -48,6 +48,21 @@ const ProformaInvoiceDetail = () => {
     { value: "JIS", label: "JIS" },
     { value: "ISO", label: "ISO" },
   ];
+  const handleDelete = async () => {
+    if (
+      !window.confirm("آیا مطمئن هستید که می‌خواهید این پروفورما را حذف کنید؟")
+    ) {
+      return;
+    }
+
+    try {
+      await axiosInstance.delete(`/documents/proforma-invoices/${invoice.id}/`);
+      alert("پروفورما با موفقیت حذف شد.");
+      window.location.href = "/proforma-invoices/list"; // Redirect to the seller list page
+    } catch (err) {
+      setError("خطا در حذف پروفورما.");
+    }
+  };
 
   const unitOptions = [
     { value: "KG", label: "KG" },
@@ -143,6 +158,9 @@ const ProformaInvoiceDetail = () => {
         />
         <button type="submit" className="primary-button">
           ثبت تغییرات
+        </button>
+        <button type="button" className="delete-button" onClick={handleDelete}>
+          حذف پروفورما
         </button>
       </form>
       {successMessage && <div className="cottage-info">{successMessage}</div>}

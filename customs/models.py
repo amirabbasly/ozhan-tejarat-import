@@ -13,9 +13,9 @@ class Tag(models.Model):
         
 class Commercial(models.Model):
     rule_id = models.CharField(max_length=50, blank=True, null=True)  # <-- Add this
-    condition = models.CharField(max_length=255)
-    result = models.CharField(max_length=255)
-    title = models.CharField(max_length=255)
+    condition = models.CharField(max_length=1000)
+    result = models.CharField(max_length=1000)
+    title = models.CharField(max_length=1000)
     def __str__(self):
         return f"{self.title}"
 

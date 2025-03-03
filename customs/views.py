@@ -16,6 +16,7 @@ import re
 from django.utils.timezone import now
 from django.db import transaction
 from bs4 import BeautifulSoup
+import json
 
 class CustomPageNumberPagination(PageNumberPagination):
     page_size_query_param = 'page_size'
@@ -465,3 +466,98 @@ class CurrencyExchangeRateView(APIView):
                 currencies.append({'label': currency_name, 'value': currency_price})
 
         return Response(currencies, status=status.HTTP_200_OK)
+class ImportHSDataView(APIView):
+    """
+    A DRF view that:
+      1. Reads an uploaded Excel file with columns HSCode, commercials, importantInfoTagsList.
+      2. Finds matching HSCode objects in the database.
+      3. Uses get_or_create on each Commercial and Tag to avoid duplicates.
+    """
+
+    def post(self, request, *args, **kwargs):
+        excel_file = request.FILES.get('file')
+        if not excel_file:
+            return Response(
+                {"error": "No file uploaded."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            # Force HSCode column to string so leading zeros are preserved
+            df = pd.read_excel(excel_file, dtype={'HSCode': str})
+        except Exception as e:
+            return Response(
+                {"error": "Failed to read Excel file.", "details": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        for index, row in df.iterrows():
+            hs_code_value = row.get("HSCode")
+            if not hs_code_value:
+                continue
+
+            try:
+                hscode_obj = HSCode.objects.get(code=hs_code_value)
+            except HSCode.DoesNotExist:
+                # Skip if the HS code doesn't exist in the database
+                continue
+
+            # ---------------------------
+            # Process the commercials
+            # ---------------------------
+            commercials_cell = row.get("commercials")
+            if commercials_cell:
+                try:
+                    commercials_list = json.loads(commercials_cell)
+                except Exception:
+                    commercials_list = []
+
+                for commercial_data in commercials_list:
+                    condition = commercial_data.get("shart", "")
+                    result = commercial_data.get("natije", "")
+                    title = commercial_data.get("ruleTitle", "")
+
+                    # Use get_or_create to avoid duplicates
+                    commercial_obj, _ = Commercial.objects.get_or_create(
+                        condition=condition,
+                        result=result,
+                        title=title
+                    )
+                    hscode_obj.commercials.add(commercial_obj)
+
+            # ---------------------------
+            # Process the importantInfoTagsList (tags)
+            # ---------------------------
+            tags_cell = row.get("tags")
+            if tags_cell:
+                try:
+                    tags_list = json.loads(tags_cell)
+                except Exception:
+                    tags_list = []
+
+                for tag_entry in tags_list:
+                    # If angle quotes exist, split them out
+                    if "«" in tag_entry and "»" in tag_entry:
+                        main_title = tag_entry.split("«")[0].strip()
+                        extracted_tags = re.findall(r"«(.*?)»", tag_entry)
+
+                        for extracted_tag in extracted_tags:
+                            tag_obj, _ = Tag.objects.get_or_create(
+                                title=main_title if main_title else None,
+                                tag=extracted_tag.strip()
+                            )
+                            hscode_obj.tags.add(tag_obj)
+                    else:
+                        # If no angle quotes, entire string is tag, no title
+                        tag_obj, _ = Tag.objects.get_or_create(
+                            title=None,
+                            tag=tag_entry.strip()
+                        )
+                        hscode_obj.tags.add(tag_obj)
+
+            hscode_obj.save()
+
+        return Response(
+            {"message": "File processed and HS codes updated successfully."},
+            status=status.HTTP_200_OK
+        )

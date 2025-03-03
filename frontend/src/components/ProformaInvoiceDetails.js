@@ -120,7 +120,9 @@ const InvoiceDetails = ({
           id="proforma_freight_charges"
           name="proforma_freight_charges"
           value={invoice.proforma_freight_charges}
-          onChange={(e) => onFieldChange("freight_charges", e.target.value)}
+          onChange={(e) =>
+            onFieldChange("proforma_freight_charges", e.target.value)
+          }
           placeholder="هزینه حمل"
           className="editable-input"
         />
@@ -229,18 +231,35 @@ const InvoiceDetails = ({
           id="means_of_transport"
           name="means_of_transport"
           options={meansOfTransportOptions}
+          isMulti
           value={
-            meansOfTransportOptions.find(
-              (option) => option.value === invoice.means_of_transport
-            ) || null
+            invoice.means_of_transport
+              ? invoice.means_of_transport
+                  .split("-")
+                  .map((val) =>
+                    meansOfTransportOptions.find(
+                      (option) => option.value === val.trim()
+                    )
+                  )
+              : []
           }
-          onChange={(selectedOption) =>
-            onFieldChange(
-              "means_of_transport",
-              selectedOption ? selectedOption.value : ""
-            )
-          }
+          onChange={(selectedOptions) => {
+            const selectedValues = selectedOptions
+              ? selectedOptions.map((option) => option.value)
+              : [];
+            onFieldChange("means_of_transport", selectedValues.join("-"));
+          }}
           placeholder="انتخاب وسیله حمل"
+        />
+      </div>
+      <div className="form-group">
+        <label htmlFor="partial_shipment">حمل به دفعات :</label>
+        <input
+          type="checkbox"
+          id="partial_shipment"
+          name="partial_shipment"
+          checked={invoice.partial_shipment || false}
+          onChange={(e) => onFieldChange("partial_shipment", e.target.checked)}
         />
       </div>
 

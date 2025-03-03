@@ -68,6 +68,7 @@ const ProformaInvoiceDetail = () => {
     { value: "KG", label: "KG" },
     { value: "M3", label: "M3" },
     { value: "M2", label: "M2" },
+    { value: "M", label: "M" },
     { value: "PCS", label: "PCS" },
   ];
   const termsOfPaymentOptions = [

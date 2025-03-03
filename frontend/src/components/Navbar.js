@@ -303,6 +303,34 @@ const Navbar = () => {
                       </ul>
                     )}
                   </li>
+                  <li
+                    className="submenu-item"
+                    onMouseEnter={() =>
+                      handleSubmenuMouseEnter("receive-order")
+                    }
+                    onMouseLeave={() =>
+                      handleSubmenuMouseLeave("receive-order")
+                    }
+                  >
+                    <span>طرفین</span>
+                    {/* Submenu within Submenu */}
+                    {showSubSubmenu["receive-order"] && (
+                      <ul className="sub-submenu">
+                        <Link className="submenu-link" to="/sellers/new">
+                          <li className="submenu-item">ایجاد فروشنده</li>
+                        </Link>
+                        <Link className="submenu-link" to="/sellers/list">
+                          <li className="submenu-item">لیست فروشنده ها</li>
+                        </Link>
+                        <Link className="submenu-link" to="/buyers/new">
+                          <li className="submenu-item">ایجاد خریدار</li>
+                        </Link>
+                        <Link className="submenu-link" to="/buyers/list">
+                          <li className="submenu-item">لیست خریدار ها</li>
+                        </Link>
+                      </ul>
+                    )}
+                  </li>
                   {/* 
                   <Link className='submenu-link' to="/chatbot">
                   <li className="submenu-item">

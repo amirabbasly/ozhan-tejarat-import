@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import HSCode, Heading, Tag, Season
+from .models import HSCode, Heading, Tag, Season, Commercial
 
 @admin.register(Heading)
 class HeadingAdmin(admin.ModelAdmin):
@@ -15,3 +15,7 @@ class HSCodeAdmin (admin.ModelAdmin):
 @admin.register(Season)
 class SeasonAdmin (admin.ModelAdmin):
     list_display = ('code','description')
+
+@admin.register(Commercial)
+class CommercialAdmin (admin.ModelAdmin):
+    list_display = ('result','title')

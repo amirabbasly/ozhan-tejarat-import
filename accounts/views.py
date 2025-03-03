@@ -9,6 +9,7 @@ from .serializers import UserSerializer, LoginSerializer, CostumerSerializer
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import action
 
 class RegisterView(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
@@ -45,6 +46,18 @@ class UserRolesView(APIView):
 class costumerViewSet(ModelViewSet):
     queryset = Costumer.objects.all()
     serializer_class = CostumerSerializer
+    @action(detail=False, methods=['get'], url_path='by-id/(?P<costumer_id>[^/.]+)')
+    def get_costumer_by_id(self, request, costumer_id=None):
+        try:
+            costumer = Costumer.objects.get(id=costumer_id)
+            serializer = CostumerSerializer(seller)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Seller.DoesNotExist:
+            return Response(
+                {"error": "Seller not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
 class CostumerListView(APIView):
     def get(self, request):
         # Retrieve all Performa instances

@@ -259,6 +259,7 @@ class ProformaInvoiceSerializer(serializers.ModelSerializer):
             'country_of_origin',
             'port_of_loading',
             'total_amount',
+            'partial_shipment',
             'sub_total',
             'items',
             'terms_of_delivery',

@@ -10,8 +10,7 @@ export const iranCustoms = [
   { ctmVCodeInt: 10105, ctmNameStr: "Passenger Zone 4", ctmCodeStr: "0" },
   {
     ctmVCodeInt: 10110,
-    ctmNameStr:
-      "Free Trade-Industrial Zone at Imam Khomeini Airport City Customs",
+    ctmNameStr: "Free Trade Zone Imam Khomeini Airport",
     ctmCodeStr: "53",
   },
   { ctmVCodeInt: 10200, ctmNameStr: "West Tehran", ctmCodeStr: "119" },

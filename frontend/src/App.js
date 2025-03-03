@@ -63,6 +63,8 @@ import SellerList from "./components/SellerList";
 import SellerDetails from "./components/SellerDetails";
 import BuyerDetails from "./components/BuyerDetails";
 import BuyerList from "./components/BuyerList";
+import ImportTags from "./components/ImportTags";
+import CustomerList from "./components/CustomerList";
 function App() {
   return (
     <Provider store={store}>
@@ -334,11 +336,28 @@ function AppContent() {
               </PrivateRoute>
             }
           />
+
           <Route
-            path="/new-customer"
+            path="/import-tags"
+            element={
+              <PrivateRoute>
+                <ImportTags />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/customers/new"
             element={
               <PrivateRoute>
                 <CustomerCreateForm />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/customers/list"
+            element={
+              <PrivateRoute>
+                <CustomerList />
               </PrivateRoute>
             }
           />

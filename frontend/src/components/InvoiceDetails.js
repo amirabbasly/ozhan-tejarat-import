@@ -181,17 +181,24 @@ const InvoiceDetails = ({
           id="means_of_transport"
           name="means_of_transport"
           options={meansOfTransportOptions}
+          isMulti
           value={
-            meansOfTransportOptions.find(
-              (option) => option.value === invoice.means_of_transport
-            ) || null
+            invoice.means_of_transport
+              ? invoice.means_of_transport
+                  .split("-")
+                  .map((val) =>
+                    meansOfTransportOptions.find(
+                      (option) => option.value === val.trim()
+                    )
+                  )
+              : []
           }
-          onChange={(selectedOption) =>
-            onFieldChange(
-              "means_of_transport",
-              selectedOption ? selectedOption.value : ""
-            )
-          }
+          onChange={(selectedOptions) => {
+            const selectedValues = selectedOptions
+              ? selectedOptions.map((option) => option.value)
+              : [];
+            onFieldChange("means_of_transport", selectedValues.join("-"));
+          }}
           placeholder="انتخاب وسیله حمل"
         />
       </div>

@@ -104,7 +104,7 @@ const CustomerCreateForm = () => {
           )}
         </div>
 
-        <button type="submit" disabled={isSubmitting} className="btn-grad">
+        <button type="submit" disabled={isSubmitting} className="btn-grad1">
           {isSubmitting ? "در حال ایجاد..." : "ایجاد مشتری"}
         </button>
       </form>

@@ -50,11 +50,11 @@ class costumerViewSet(ModelViewSet):
     def get_costumer_by_id(self, request, costumer_id=None):
         try:
             costumer = Costumer.objects.get(id=costumer_id)
-            serializer = CostumerSerializer(seller)
+            serializer = CostumerSerializer(costumer)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        except Seller.DoesNotExist:
+        except Costumer.DoesNotExist:
             return Response(
-                {"error": "Seller not found."},
+                {"error": "Customer not found."},
                 status=status.HTTP_404_NOT_FOUND
             )
 

@@ -1,6 +1,8 @@
 // src/components/InvoiceForm.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { fetchCostumers } from "../actions/authActions";
 import axiosInstance from "../utils/axiosInstance";
 import Select from "react-select"; // Import ReactSelect
 import "./CottageForm.css";
@@ -8,10 +10,25 @@ import { iranCustoms } from "../data/iranCustoms";
 
 function ProformaInvoiceForm() {
   const navigate = useNavigate();
+  const costumerstate = useSelector((state) => state.costumers);
+  const { costumerList, customersLoading, customersError } = costumerstate || {
+    costumerList: [],
+    costumersLoading: false,
+    costumersError: null,
+  };
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(fetchCostumers());
+  }, [dispatch]);
 
   // Fetch sellers & buyers to populate dropdowns
   const [sellers, setSellers] = useState([]);
   const [buyers, setBuyers] = useState([]);
+  const customerOptions = costumerList.map((cmr) => ({
+    value: cmr.id,
+    label: cmr.full_name,
+  }));
 
   // Options for currency, delivery terms, payment terms, and standard types
   const currencyOptions = [
@@ -59,6 +76,8 @@ function ProformaInvoiceForm() {
     { value: "KGS", label: "KGS" },
     { value: "M3", label: "M3" },
     { value: "M2", label: "M2" },
+    { value: "M", label: "M" },
+
     { value: "PCS", label: "PCS" },
   ];
   const iranCustomsOptions = iranCustoms.map((custom) => ({
@@ -604,7 +623,30 @@ function ProformaInvoiceForm() {
               placeholder="مبدأ کالا"
             />
           </div>
-
+          <div className="form-group">
+            <label htmlFor="customer">مشتری:</label>
+            <Select
+              id={`customer-${index}`}
+              name="customer"
+              options={customerOptions}
+              className="selectPrf"
+              value={
+                customerOptions.find(
+                  (option) => option.value === item.customer
+                ) || null
+              }
+              onChange={(selectedOption) =>
+                setInvoiceData((prev) => {
+                  const updatedItems = [...prev.items];
+                  updatedItems[index].customer = selectedOption
+                    ? selectedOption.value
+                    : "";
+                  return { ...prev, items: updatedItems };
+                })
+              }
+              placeholder="انتخاب مشتری"
+            />
+          </div>
           <button
             type="button"
             onClick={() => removeItemRow(index)}

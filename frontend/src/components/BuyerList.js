@@ -20,7 +20,7 @@ function BuyerList() {
         <thead>
           <tr>
             <th>نام فروشنده</th>
-            <th>کشور فروشنده</th>
+            <th>آدرس فروشنده</th>
             <th>نام بانک</th>
             <th>جزئیات</th>
           </tr>
@@ -29,7 +29,7 @@ function BuyerList() {
           {buyers.map((byr) => (
             <tr key={byr.id}>
               <td>{byr.buyer_name}</td>
-              <td>{byr.buyer_country}</td>
+              <td>{byr.buyer_address}</td>
               <td>{byr.buyer_tel}</td>
 
               <td>

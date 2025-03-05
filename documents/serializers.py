@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import ImageTemplate, Seller, Buyer, Invoice, InvoiceItem, ProformaInvoice, ProformaInvoiceItem
+from accounts.serializers import CostumerSerializer
 import uuid
 from decimal import Decimal, InvalidOperation
 
@@ -98,7 +99,7 @@ class ProformaInvoiceItemSerializer(serializers.ModelSerializer):
     line_total = serializers.DecimalField(
         max_digits=10, decimal_places=2, read_only=True
     )
-    
+
     class Meta:
         model = ProformaInvoiceItem
         fields = [
@@ -111,6 +112,7 @@ class ProformaInvoiceItemSerializer(serializers.ModelSerializer):
             'nw_kg',
             'gw_kg',
             'origin',
+            'customer',
             'commodity_code'
         ]
 

@@ -1,4 +1,5 @@
 from django.db import models
+from accounts.models import Costumer
 
 class ImageTemplate(models.Model):
     name = models.CharField(max_length=255)
@@ -126,6 +127,8 @@ class ProformaInvoiceItem(models.Model):
     nw_kg = models.DecimalField(default=1, max_digits=12, decimal_places=2,)
     gw_kg = models.DecimalField(default=1, max_digits=12, decimal_places=2,)
     origin = models.CharField(max_length=55)
+    customer = models.ForeignKey(Costumer,null=True, blank=True, related_name='items', on_delete=models.SET_NULL)
+
     @property
     def line_total(self):
         return self.quantity * self.unit_price

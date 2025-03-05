@@ -38,7 +38,7 @@ function CustomerList() {
               <td>{cmr.national_code}</td>
 
               <td>
-                <Link to={`/sellers/details/${cmr.id}`}> جزئیات</Link>
+                <Link to={`/customers/details/${cmr.id}`}> جزئیات</Link>
               </td>
             </tr>
           ))}

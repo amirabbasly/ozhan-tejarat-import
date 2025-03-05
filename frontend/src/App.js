@@ -65,6 +65,7 @@ import BuyerDetails from "./components/BuyerDetails";
 import BuyerList from "./components/BuyerList";
 import ImportTags from "./components/ImportTags";
 import CustomerList from "./components/CustomerList";
+import CustomerDetails from "./components/CustomerDetails";
 function App() {
   return (
     <Provider store={store}>
@@ -358,6 +359,14 @@ function AppContent() {
             element={
               <PrivateRoute>
                 <CustomerList />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/customers/details/:customerId"
+            element={
+              <PrivateRoute>
+                <CustomerDetails />
               </PrivateRoute>
             }
           />

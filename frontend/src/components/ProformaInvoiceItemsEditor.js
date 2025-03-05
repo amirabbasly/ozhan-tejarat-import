@@ -1,8 +1,22 @@
 // src/components/InvoiceItemsEditor.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Select from "react-select";
-
+import { fetchCostumers } from "../actions/authActions";
+import { useDispatch, useSelector } from "react-redux";
 const ProformaInvoiceItemsEditor = ({ items, onItemsChange, unitOptions }) => {
+  const costumerstate = useSelector((state) => state.costumers);
+
+  const { costumerList, customersLoading, customersError } = costumerstate || {
+    costumerList: [],
+    costumersLoading: false,
+    costumersError: null,
+  };
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(fetchCostumers());
+  }, [dispatch]);
+
   // Local state for modal editing
   const [modalOpen, setModalOpen] = useState(false);
   const [editingItemIndex, setEditingItemIndex] = useState(null);
@@ -14,6 +28,12 @@ const ProformaInvoiceItemsEditor = ({ items, onItemsChange, unitOptions }) => {
     setModalItemData({ ...items[index] });
     setModalOpen(true);
   };
+  const handleSelectChange = (name, value) => {
+    setModalItemData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
   // Close modal
   const closeModal = () => {
@@ -21,6 +41,10 @@ const ProformaInvoiceItemsEditor = ({ items, onItemsChange, unitOptions }) => {
     setEditingItemIndex(null);
     setModalItemData({});
   };
+  const customerOptions = costumerList.map((cmr) => ({
+    value: cmr.id,
+    label: cmr.full_name,
+  }));
 
   // Handle modal input changes
   const handleModalChange = (e) => {
@@ -103,6 +127,8 @@ const ProformaInvoiceItemsEditor = ({ items, onItemsChange, unitOptions }) => {
                 <th>وزن خالص (کیلوگرم)</th>
                 <th>مبدأ</th>
                 <th>جمع خطی</th>
+                <th>مشتری</th>
+
                 <th>عملیات</th>
               </tr>
             </thead>
@@ -118,11 +144,13 @@ const ProformaInvoiceItemsEditor = ({ items, onItemsChange, unitOptions }) => {
                   <td>{item.nw_kg}</td>
                   <td>{item.origin}</td>
                   <td>{(item.quantity * item.unit_price).toFixed(2)}</td>
+                  <td>{item.customer ? item.customer.full_name : ""}</td>
+
                   <td>
                     <button
-                      type="button"
+                      type="primary-button"
                       onClick={() => openEditModal(index)}
-                      className="btn-grad1"
+                      className=""
                     >
                       ویرایش
                     </button>
@@ -212,6 +240,7 @@ const ProformaInvoiceItemsEditor = ({ items, onItemsChange, unitOptions }) => {
               <textarea
                 id="modal_description"
                 name="description"
+                className="form-textarea"
                 value={modalItemData.description || ""}
                 onChange={handleModalChange}
                 placeholder="شرح کالا"
@@ -256,6 +285,7 @@ const ProformaInvoiceItemsEditor = ({ items, onItemsChange, unitOptions }) => {
               <Select
                 id="modal_unit"
                 name="unit"
+                className="selectPrf"
                 options={unitOptions}
                 value={
                   unitOptions.find(
@@ -300,6 +330,32 @@ const ProformaInvoiceItemsEditor = ({ items, onItemsChange, unitOptions }) => {
                 value={modalItemData.origin || ""}
                 onChange={handleModalChange}
                 placeholder="مبدأ کالا"
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="customer">مشتری:</label>
+              <Select
+                className="selectPrf"
+                id="customer"
+                name="customer"
+                options={customerOptions}
+                // remove isMulti or set it to false
+                value={
+                  customerOptions.find(
+                    (option) => option.value === modalItemData.customer
+                  ) || null
+                }
+                onChange={(selectedOption) => {
+                  // single select returns a single object or null
+                  if (!selectedOption) {
+                    // user cleared
+                    handleModalChange("customer", "");
+                    return;
+                  }
+                  // single object: no need to map
+                  handleSelectChange("customer", selectedOption.value);
+                }}
+                placeholder="انتخاب مشتری"
               />
             </div>
             <div style={{ marginTop: "1rem" }}>

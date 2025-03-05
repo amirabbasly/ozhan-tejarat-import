@@ -329,7 +329,7 @@ class InvoicePDFView(APIView):
         buyer_info = f"""
         <b>Buyer’s Commercial Card No:</b> {invoice.buyer.buyer_card_number}<br/>
         <b> Buyer’s Name:</b> {invoice.buyer.buyer_name}<br/>
-        <b> Buyer’s Country:</b> {invoice.buyer.buyer_address}<br/>
+        <b> Buyer’s Address:</b> {invoice.buyer.buyer_address}<br/>
         <b> Buyer’s Tel:</b> {invoice.buyer.buyer_tel}
 
         """
@@ -720,7 +720,7 @@ class PackingPDFView(APIView):
         buyer_info = f"""
         <b>Buyer’s Commercial Card No:</b> {invoice.buyer.buyer_card_number}<br/>
         <b> Buyer’s Name:</b> {invoice.buyer.buyer_name}<br/>
-        <b> Buyer’s Country:</b> {invoice.buyer.buyer_address}<br/>
+        <b> Buyer’s Address:</b> {invoice.buyer.buyer_address}<br/>
         <b> Buyer’s Tel:</b> {invoice.buyer.buyer_tel}
 
         """
@@ -1108,7 +1108,7 @@ class ProformaInvoicePDFView(APIView):
         buyer_info = f"""
         <b>Buyer’s Commercial Card No:</b> {invoice.buyer.buyer_card_number}<br/>
         <b> Buyer’s Name:</b> {invoice.buyer.buyer_name}<br/>
-        <b> Buyer’s Country:</b> {invoice.buyer.buyer_address}<br/>
+        <b> Buyer’s Address:</b> {invoice.buyer.buyer_address}<br/>
         <b> Buyer’s Tel:</b> {invoice.buyer.buyer_tel}
 
         """

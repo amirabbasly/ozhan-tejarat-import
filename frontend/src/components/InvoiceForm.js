@@ -26,7 +26,7 @@ function InvoiceForm() {
   const meansOfTransportOptions = [
     { value: "By Truck", label: "By Truck" },
     { value: "By AirPlane", label: "By AirPlane" },
-    { value: "By Ship", label: "By Ship" },
+    { value: "By Vessel", label: "By Vessel" },
     { value: "By Train", label: "By Train" },
   ];
 

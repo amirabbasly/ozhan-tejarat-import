@@ -1085,7 +1085,7 @@ class ProformaInvoicePDFView(APIView):
 
         # ===================================================================
         # 4) Add the word "INVOICE" (Centered and styled)
-        invoice_title = "PROFROMA"
+        invoice_title = "PROFROMA INVOICE"
         story.append(Paragraph(invoice_title, styles["InvoiceTitle"]))
 
         # ===================================================================
@@ -1093,6 +1093,8 @@ class ProformaInvoicePDFView(APIView):
         invoice_info = f"""
         <b>proforma number:</b> {invoice.proforma_invoice_number}<br/>
         <b>proforma date:</b> {invoice.proforma_invoice_date}
+        <b>proforma validity date:</b> {invoice.proforma_invoice_date}
+
         """
         story.append(Paragraph(invoice_info, styles["LeftAlign"]))
         story.append(Spacer(1, 0.5 * inch))
@@ -1105,12 +1107,13 @@ class ProformaInvoicePDFView(APIView):
 
         # ===================================================================
         # 8) Buyer Info Section
+        buyer_tel = invoice.customer_tel if invoice.customer_tel is not None else invoice.buyer.buyer_tel
+
         buyer_info = f"""
         <b>Buyer’s Commercial Card No:</b> {invoice.buyer.buyer_card_number}<br/>
         <b> Buyer’s Name:</b> {invoice.buyer.buyer_name}<br/>
         <b> Buyer’s Address:</b> {invoice.buyer.buyer_address}<br/>
-        <b> Buyer’s Tel:</b> {invoice.buyer.buyer_tel}
-
+        <b>Buyer’s Tel:</b> {buyer_tel}
         """
         table_data = [
             [Paragraph(seller_info, styles["Normal"]), Paragraph(buyer_info, styles["Normal"])]
@@ -1137,24 +1140,24 @@ class ProformaInvoicePDFView(APIView):
 
         shipping_table_data = [
             [
-                Paragraph("<b>Transaction Currency:</b> " + invoice.proforma_invoice_currency, styles["Normal"]),
-                Paragraph("<b>Final delivery place:</b> " + invoice.relevant_location, styles["Normal"])
+                Paragraph("<b>Country of origin:</b> " + getattr(invoice, 'country_of_origin', ''), styles["Normal"]),
+                Paragraph("<b>Country of Destination:</b> " + invoice.buyer.buyer_address, styles["Normal"])
 
             ],
             [
                 Paragraph("<b>Terms of Delivery:</b> " + invoice.terms_of_delivery, styles["Normal"]),
-                Paragraph("<b>Transport mode and means:</b> " + getattr(invoice, 'means_of_transport', ''), styles["Normal"])
-            ],
-            [
-                Paragraph("<b>Country of origin:</b> " + getattr(invoice, 'country_of_origin', ''), styles["Normal"]),
-                Paragraph("<b>Port/airport of loading:</b> " + getattr(invoice, 'port_of_loading', ''), styles["Normal"])
+                Paragraph("<b>Port/Air port of Discharge:</b> " + invoice.relevant_location, styles["Normal"])
             ],
             [
                 Paragraph("<b>Terms of Payment:</b> " + getattr(invoice, 'terms_of_payment', ''), styles["Normal"]),
-                Paragraph("<b>Partial Shipment:</b> " + ("Allowed" if getattr(invoice, 'partial_shipment', False) else "Not Allowed"), styles["Normal"])
+                Paragraph("<b>Transport mode and means:</b> " + getattr(invoice, 'means_of_transport', ''), styles["Normal"])
+            ],
+            [
+                Paragraph("<b>Transaction Currency:</b> " + invoice.proforma_invoice_currency, styles["Normal"]),
+                Paragraph("<b>Port/airport of loading:</b> " + getattr(invoice, 'port_of_loading', ''), styles["Normal"])
             ],            [
                 Paragraph("<b>Standard:</b> " + getattr(invoice, 'standard', ''), styles["Normal"]),
-
+                Paragraph("<b>Partial Shipment:</b> " + ("Allowed" if getattr(invoice, 'partial_shipment', False) else "Not Allowed"), styles["Normal"])
             ],
         ]
         shipping_info_table = Table(shipping_table_data, colWidths=[3.5 * inch, 3.5 * inch])
@@ -1237,12 +1240,12 @@ class ProformaInvoicePDFView(APIView):
         # ===================================================================
         # 11) Cost Summary Table (displayed under the items table)
         total_amount_data = [
-
-            [   "Total", 
-                str(invoice.total_nw),
-                str(invoice.total_gw),
-                str(invoice.total_qty),
-                [sub_total_cell]
+            [
+                Paragraph("<b>Total</b>", styles['Cnt']),
+                Paragraph(f"<b>{invoice.total_nw}</b>", styles['Cnt']),
+                Paragraph(f"<b>{invoice.total_gw}</b>", styles['Cnt']),
+                Paragraph(f"<b>{invoice.total_qty}</b>", styles['Cnt']),
+                sub_total_cell  # Already has its own formatting, if needed adjust similarly.
             ],
         ]
         freight_charge_cell = Paragraph("<b>Freight charge:</b> " + str(invoice.proforma_freight_charges)+" "+ invoice.proforma_invoice_currency,styles['Cnt'])

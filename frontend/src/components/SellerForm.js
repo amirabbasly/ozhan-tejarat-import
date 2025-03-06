@@ -103,19 +103,6 @@ function SellerForm() {
           required
         />
       </div>
-
-      <div className="form-group">
-        <label htmlFor="seller_refrence">ارجاع:</label>
-        <input
-          type="text"
-          id="seller_refrence"
-          name="seller_refrence"
-          value={formData.seller_refrence}
-          onChange={handleChange}
-          placeholder="ارجاع را وارد کنید"
-        />
-      </div>
-
       <div className="form-group">
         <label htmlFor="seller_country">کشور:</label>
         <input

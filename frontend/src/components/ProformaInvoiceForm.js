@@ -43,7 +43,7 @@ function ProformaInvoiceForm() {
   const meansOfTransportOptions = [
     { value: "By Truck", label: "By Truck" },
     { value: "By AirPlane", label: "By AirPlane" },
-    { value: "By Ship", label: "By Ship" },
+    { value: "By Vessel", label: "By Vessel" },
     { value: "By Train", label: "By Train" },
   ];
   const standardOptions = [
@@ -97,8 +97,10 @@ function ProformaInvoiceForm() {
     relevant_location: "",
     means_of_transport: "By Ship",
     country_of_origin: "",
+    customer_tel:"",
     port_of_loading: "",
     proforma_invoice_date: "", // Add this line
+    proforma_invoice_exp_date: "", // Add this line
 
     items: [
       {
@@ -288,6 +290,17 @@ function ProformaInvoiceForm() {
           required
         />
       </div>
+      <div className="form-group">
+        <label htmlFor="proforma_invoice_exp_date">تاریخ اعتبار:</label>
+        <input
+          type="date"
+          id="proforma_invoice_exp_date"
+          name="proforma_invoice_exp_date"
+          value={invoiceData.proforma_invoice_exp_date}
+          onChange={handleChange}
+          required
+        />
+      </div>
 
       <div className="form-group">
         <label htmlFor="proforma_invoice_currency">ارز:</label>
@@ -454,7 +467,17 @@ function ProformaInvoiceForm() {
           placeholder="انتخاب وسیله حمل"
         />
       </div>
-
+      <div className="form-group">
+        <label htmlFor="customer_tel"> شماره مشتری:</label>
+        <input
+          type="text"
+          id="customer_tel"
+          name="customer_tel"
+          value={invoiceData.customer_tel}
+          onChange={handleChange}
+          placeholder="شماره مشتری"
+        />
+      </div>
       <div className="form-group">
         <label htmlFor="relevant_location">گمرک مقصد:</label>
         <Select
@@ -503,7 +526,9 @@ function ProformaInvoiceForm() {
             <label htmlFor={`description-${index}`}>شرح کالا:</label>
             <textarea
               className="form-textarea"
-              type="text"
+              autoCorrect="on"
+              autoCapitalize="sentences"
+              spellCheck={true}
               id={`description-${index}`}
               name="description"
               value={item.description}

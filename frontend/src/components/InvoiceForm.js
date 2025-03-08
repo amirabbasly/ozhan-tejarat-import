@@ -5,6 +5,7 @@ import axiosInstance from "../utils/axiosInstance";
 import Select from "react-select"; // Import ReactSelect
 import "./CottageForm.css";
 import { iranCustoms } from "../data/iranCustoms";
+import { countries } from "../data/countryList";
 
 function InvoiceForm() {
   const navigate = useNavigate();
@@ -29,6 +30,10 @@ function InvoiceForm() {
     { value: "By Vessel", label: "By Vessel" },
     { value: "By Train", label: "By Train" },
   ];
+    const countryOptions = countries.map((country) => ({
+      value: country.name, // or combine with ctmNameStr if needed
+      label: `${country.name} (${country.persianName})`,
+    }));
 
   const termsOfDeliveryOptions = [
     { value: "CFR", label: "CFR" },
@@ -48,6 +53,7 @@ function InvoiceForm() {
     { value: "KGS", label: "KGS" },
     { value: "M3", label: "M3" },
     { value: "M2", label: "M2" },
+    { value: "M", label: "M" },
     { value: "PCS", label: "PCS" },
   ];
   const iranCustomsOptions = iranCustoms.map((custom) => ({
@@ -66,7 +72,8 @@ function InvoiceForm() {
     means_of_transport: "By Ship",
     country_of_origin: "",
     port_of_loading: "",
-    invoice_date: "", // Add this line
+    customer_tel:"",
+    invoice_date: "",
 
     items: [
       {
@@ -287,28 +294,84 @@ function InvoiceForm() {
           value={invoiceData.freight_charges}
           onChange={handleChange}
           placeholder="هزینه حمل"
+          onWheel={(e) => e.target.blur()}  // <-- add this line
+
         />
       </div>
       <div className="form-group">
-        <label htmlFor="country_of_origin"> کشور مبدا:</label>
-        <input
-          type="text"
+      <label htmlFor="country_of_origin"> کشور مبدأ</label>
+      <Select
+          className="selectPrf"
           id="country_of_origin"
           name="country_of_origin"
-          value={invoiceData.country_of_origin}
-          onChange={handleChange}
-          placeholder="کشور مبدا"
+          options={countryOptions}
+          isMulti
+          value={
+            invoiceData.country_of_origin
+              ? invoiceData.country_of_origin
+                  .split("-")
+                  .map((val) =>
+                    countryOptions.find(
+                      (option) => option.value === val.trim()
+                    )
+                  )
+              : []
+          }
+          onChange={(selectedOptions) => {
+            // When user changes selection, join the option values with "-"
+            const selectedValues = selectedOptions
+              ? selectedOptions.map((option) => option.value)
+              : [];
+            setInvoiceData((prev) => ({
+              ...prev,
+              country_of_origin: selectedValues.join("-"),
+            }));
+          }}
+          placeholder="انتخاب کشور مبدأ"
         />
       </div>
       <div className="form-group">
-        <label htmlFor="port_of_loading"> بندر بارگیری:</label>
+        <label htmlFor="customer_tel"> شماره مشتری:</label>
         <input
           type="text"
+          id="customer_tel"
+          name="customer_tel"
+          value={invoiceData.customer_tel}
+          onChange={handleChange}
+          placeholder="شماره مشتری"
+        />
+      </div>
+
+      <div className="form-group">
+      <label htmlFor="port_of_loading"> بندر بارگیری:</label>
+      <Select
+          className="selectPrf"
           id="port_of_loading"
           name="port_of_loading"
-          value={invoiceData.port_of_loading}
-          onChange={handleChange}
-          placeholder="بندر بارگیری"
+          options={countryOptions}
+          isMulti
+          value={
+            invoiceData.port_of_loading
+              ? invoiceData.port_of_loading
+                  .split("-")
+                  .map((val) =>
+                    countryOptions.find(
+                      (option) => option.value === val.trim()
+                    )
+                  )
+              : []
+          }
+          onChange={(selectedOptions) => {
+            // When user changes selection, join the option values with "-"
+            const selectedValues = selectedOptions
+              ? selectedOptions.map((option) => option.value)
+              : [];
+            setInvoiceData((prev) => ({
+              ...prev,
+              port_of_loading: selectedValues.join("-"),
+            }));
+          }}
+          placeholder="انتخاب بندر بارگیری"
         />
       </div>
 
@@ -433,6 +496,8 @@ function InvoiceForm() {
               value={item.quantity}
               onChange={(e) => handleItemChange(index, e)}
               placeholder="تعداد"
+              onWheel={(e) => e.target.blur()}  // <-- add this line
+
               required
             />
           </div>
@@ -447,6 +512,7 @@ function InvoiceForm() {
               value={item.unit_price}
               onChange={(e) => handleItemChange(index, e)}
               placeholder="قیمت واحد"
+              onWheel={(e) => e.target.blur()}  // <-- add this line
               required
             />
           </div>
@@ -461,6 +527,8 @@ function InvoiceForm() {
               value={item.commodity_code}
               onChange={(e) => handleItemChange(index, e)}
               placeholder="کد کالا"
+              onWheel={(e) => e.target.blur()}  // <-- add this line
+
             />
           </div>
           <div className="form-group">
@@ -496,6 +564,8 @@ function InvoiceForm() {
               value={item.nw_kg}
               onChange={(e) => handleItemChange(index, e)}
               placeholder="وزن خالص"
+              onWheel={(e) => e.target.blur()}  // <-- add this line
+
             />
           </div>
 
@@ -509,6 +579,9 @@ function InvoiceForm() {
               value={item.gw_kg}
               onChange={(e) => handleItemChange(index, e)}
               placeholder="وزن ناخالص"
+              onWheel={(e) => e.target.blur()}  // <-- add this line
+
+
             />
           </div>
           <div className="form-group">
@@ -520,18 +593,32 @@ function InvoiceForm() {
               value={item.pack}
               onChange={(e) => handleItemChange(index, e)}
               placeholder="تعداد بسته بندی"
+              onWheel={(e) => e.target.blur()}  // <-- add this line
+
             />
           </div>
-
           <div className="form-group">
-            <label htmlFor={`origin-${index}`}>مبدأ:</label>
-            <input
-              type="text"
+          <label htmlFor={`origin-${index}`}>مبدأ:</label>
+          <Select
               id={`origin-${index}`}
               name="origin"
-              value={item.origin}
-              onChange={(e) => handleItemChange(index, e)}
-              placeholder="مبدأ کالا"
+              options={countryOptions}
+              className="selectPrf"
+              value={
+                countryOptions.find(
+                  (option) => option.value === item.origin
+                ) || null
+              }
+              onChange={(selectedOption) =>
+                setInvoiceData((prev) => {
+                  const updatedItems = [...prev.items];
+                  updatedItems[index].origin = selectedOption
+                    ? selectedOption.value
+                    : "";
+                  return { ...prev, items: updatedItems };
+                })
+              }
+              placeholder="انتخاب مبدأ"
             />
           </div>
 

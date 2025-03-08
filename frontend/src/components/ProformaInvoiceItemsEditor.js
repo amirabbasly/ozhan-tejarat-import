@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import Select from "react-select";
 import { fetchCostumers } from "../actions/authActions";
 import { useDispatch, useSelector } from "react-redux";
-const ProformaInvoiceItemsEditor = ({ items, onItemsChange, unitOptions }) => {
+const ProformaInvoiceItemsEditor = ({ items, onItemsChange, unitOptions, countryOptions }) => {
   const costumerstate = useSelector((state) => state.costumers);
 
   const { costumerList, customersLoading, customersError } = costumerstate || {
@@ -255,6 +255,8 @@ const ProformaInvoiceItemsEditor = ({ items, onItemsChange, unitOptions }) => {
                 value={modalItemData.quantity || ""}
                 onChange={handleModalChange}
                 placeholder="تعداد"
+                onWheel={(e) => e.target.blur()}  // <-- add this line
+
               />
             </div>
             <div className="form-group">
@@ -267,6 +269,8 @@ const ProformaInvoiceItemsEditor = ({ items, onItemsChange, unitOptions }) => {
                 value={modalItemData.unit_price || ""}
                 onChange={handleModalChange}
                 placeholder="قیمت واحد"
+                onWheel={(e) => e.target.blur()}  // <-- add this line
+
               />
             </div>
             <div className="form-group">
@@ -306,6 +310,8 @@ const ProformaInvoiceItemsEditor = ({ items, onItemsChange, unitOptions }) => {
                 value={modalItemData.nw_kg || ""}
                 onChange={handleModalChange}
                 placeholder="وزن خالص"
+                onWheel={(e) => e.target.blur()}  // <-- add this line
+
               />
             </div>
             <div className="form-group">
@@ -318,18 +324,35 @@ const ProformaInvoiceItemsEditor = ({ items, onItemsChange, unitOptions }) => {
                 value={modalItemData.gw_kg || ""}
                 onChange={handleModalChange}
                 placeholder="وزن ناخالص"
+                onWheel={(e) => e.target.blur()}  // <-- add this line
+
               />
             </div>
 
             <div className="form-group">
               <label htmlFor="modal_origin">مبدأ:</label>
-              <input
-                type="text"
+              <Select
+                className="selectPrf"
                 id="modal_origin"
                 name="origin"
-                value={modalItemData.origin || ""}
-                onChange={handleModalChange}
-                placeholder="مبدأ کالا"
+                options={countryOptions}
+                // remove isMulti or set it to false
+                value={
+                  countryOptions.find(
+                    (option) => option.value === modalItemData.origin
+                  ) || null
+                }
+                onChange={(selectedOption) => {
+                  // single select returns a single object or null
+                  if (!selectedOption) {
+                    // user cleared
+                    handleModalChange("origin", "");
+                    return;
+                  }
+                  // single object: no need to map
+                  handleSelectChange("origin", selectedOption.value);
+                }}
+                placeholder="انتخاب مبدأ کالا"
               />
             </div>
             <div className="form-group">

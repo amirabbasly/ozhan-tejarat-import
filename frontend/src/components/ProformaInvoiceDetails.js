@@ -13,6 +13,7 @@ const InvoiceDetails = ({
   meansOfTransportOptions,
   termsOfPaymentOptions,
   standardOptions,
+  countryOptions,
 }) => {
   const iranCustomsOptions = iranCustoms.map((custom) => ({
     value: custom.ctmNameStr, // or combine with ctmNameStr if needed
@@ -124,35 +125,67 @@ const InvoiceDetails = ({
             onFieldChange("proforma_freight_charges", e.target.value)
           }
           placeholder="هزینه حمل"
+          onWheel={(e) => e.target.blur()}  // <-- add this line
           className="editable-input"
         />
       </div>
 
       {/* Country of Origin */}
       <div className="form-group">
-        <label htmlFor="country_of_origin">کشور مبدا:</label>
-        <input
-          type="text"
+        <label htmlFor="country_of_origin">کشور مبدأ:</label>
+        <Select
+          className="selectPrf"
           id="country_of_origin"
           name="country_of_origin"
-          value={invoice.country_of_origin || ""}
-          onChange={(e) => onFieldChange("country_of_origin", e.target.value)}
-          placeholder="کشور مبدا"
-          className="editable-input"
+          options={countryOptions}
+          isMulti
+          value={
+            invoice.country_of_origin
+              ? invoice.country_of_origin
+                  .split("-")
+                  .map((val) =>
+                    countryOptions.find(
+                      (option) => option.value === val.trim()
+                    )
+                  )
+              : []
+          }
+          onChange={(selectedOptions) => {
+            const selectedValues = selectedOptions
+              ? selectedOptions.map((option) => option.value)
+              : [];
+            onFieldChange("country_of_origin", selectedValues.join("-"));
+          }}
+          placeholder="انتخاب کشور مبدأ"
         />
       </div>
-
       {/* Port of Loading */}
       <div className="form-group">
-        <label htmlFor="port_of_loading">بندر بارگیری:</label>
-        <input
-          type="text"
+        <label htmlFor="port_of_loading">کشور مبدأ:</label>
+        <Select
+          className="selectPrf"
           id="port_of_loading"
           name="port_of_loading"
-          value={invoice.port_of_loading || ""}
-          onChange={(e) => onFieldChange("port_of_loading", e.target.value)}
-          placeholder="بندر بارگیری"
-          className="editable-input"
+          options={countryOptions}
+          isMulti
+          value={
+            invoice.port_of_loading
+              ? invoice.port_of_loading
+                  .split("-")
+                  .map((val) =>
+                    countryOptions.find(
+                      (option) => option.value === val.trim()
+                    )
+                  )
+              : []
+          }
+          onChange={(selectedOptions) => {
+            const selectedValues = selectedOptions
+              ? selectedOptions.map((option) => option.value)
+              : [];
+            onFieldChange("port_of_loading", selectedValues.join("-"));
+          }}
+          placeholder="انتخاب بندر بارگیری"
         />
       </div>
 

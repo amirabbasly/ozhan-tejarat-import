@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "../actions/authActions";
 import { useNavigate } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
 import "./Login.css";
 
 const Login = () => {
@@ -15,6 +16,8 @@ const Login = () => {
     email: "",
     password: "",
   });
+
+  const [showPassword, setShowPassword] = useState(false);
 
   const { email, password } = formData;
 
@@ -55,16 +58,20 @@ const Login = () => {
               placeholder="نام کاربری"
             />
           </div>
-          <div className="form-group">
-            <input
-              type="password"
-              name="password"
-              value={password}
-              onChange={onChange}
-              required
-              placeholder="رمز عبور"
-            />
-          </div>
+          <div className="form-group password-field">
+  <input
+    type={showPassword ? "text" : "password"}
+    name="password"
+    value={password}
+    onChange={onChange}
+    required
+    placeholder="رمز عبور"
+  />
+  <span className="password-toggle-icon" onClick={() => setShowPassword(!showPassword)}>
+    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+  </span>
+</div>
+
           <div className="remember-me">
             <input type="checkbox" id="rememberMe" />
             <label htmlFor="rememberMe">مرا به خاطر بسپار</label>

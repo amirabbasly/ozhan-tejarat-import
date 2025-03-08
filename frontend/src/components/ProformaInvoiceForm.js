@@ -7,7 +7,7 @@ import axiosInstance from "../utils/axiosInstance";
 import Select from "react-select"; // Import ReactSelect
 import "./CottageForm.css";
 import { iranCustoms } from "../data/iranCustoms";
-
+import { countries} from "../data/countryList"
 function ProformaInvoiceForm() {
   const navigate = useNavigate();
   const costumerstate = useSelector((state) => state.costumers);
@@ -71,18 +71,24 @@ function ProformaInvoiceForm() {
     { value: "D/P", label: "D/P" },
     { value: "D/A", label: "D/A" },
   ];
-
+  const preventScrollChange = (e) => {
+    e.target.blur();
+  };
+  
   const unitOptions = [
     { value: "KGS", label: "KGS" },
     { value: "M3", label: "M3" },
     { value: "M2", label: "M2" },
     { value: "M", label: "M" },
-
     { value: "PCS", label: "PCS" },
   ];
   const iranCustomsOptions = iranCustoms.map((custom) => ({
     value: custom.ctmNameStr, // or combine with ctmNameStr if needed
     label: `${custom.ctmNameStr} (${custom.ctmVCodeInt})`,
+  }));
+  const countryOptions = countries.map((country) => ({
+    value: country.name, // or combine with ctmNameStr if needed
+    label: `${country.name} (${country.persianName})`,
   }));
   const [invoiceData, setInvoiceData] = useState({
     seller: "",
@@ -335,6 +341,8 @@ function ProformaInvoiceForm() {
           value={invoiceData.proforma_freight_charges}
           onChange={handleChange}
           placeholder="هزینه حمل"
+          onWheel={(e) => e.target.blur()}  // <-- add this line
+
         />
       </div>
       <div className="form-group">
@@ -349,25 +357,69 @@ function ProformaInvoiceForm() {
       </div>
 
       <div className="form-group">
-        <label htmlFor="country_of_origin"> کشور مبدا:</label>
-        <input
-          type="text"
+      <label htmlFor="country_of_origin"> کشور مبدأ</label>
+      <Select
+          className="selectPrf"
           id="country_of_origin"
           name="country_of_origin"
-          value={invoiceData.country_of_origin}
-          onChange={handleChange}
-          placeholder="کشور مبدا"
+          options={countryOptions}
+          isMulti
+          value={
+            invoiceData.country_of_origin
+              ? invoiceData.country_of_origin
+                  .split("-")
+                  .map((val) =>
+                    countryOptions.find(
+                      (option) => option.value === val.trim()
+                    )
+                  )
+              : []
+          }
+          onChange={(selectedOptions) => {
+            // When user changes selection, join the option values with "-"
+            const selectedValues = selectedOptions
+              ? selectedOptions.map((option) => option.value)
+              : [];
+            setInvoiceData((prev) => ({
+              ...prev,
+              country_of_origin: selectedValues.join("-"),
+            }));
+          }}
+          placeholder="انتخاب کشور مبدأ"
         />
       </div>
+
+
       <div className="form-group">
-        <label htmlFor="port_of_loading"> بندر بارگیری:</label>
-        <input
-          type="text"
+      <label htmlFor="port_of_loading"> بندر بارگیری:</label>
+      <Select
+          className="selectPrf"
           id="port_of_loading"
           name="port_of_loading"
-          value={invoiceData.port_of_loading}
-          onChange={handleChange}
-          placeholder="بندر بارگیری"
+          options={countryOptions}
+          isMulti
+          value={
+            invoiceData.port_of_loading
+              ? invoiceData.port_of_loading
+                  .split("-")
+                  .map((val) =>
+                    countryOptions.find(
+                      (option) => option.value === val.trim()
+                    )
+                  )
+              : []
+          }
+          onChange={(selectedOptions) => {
+            // When user changes selection, join the option values with "-"
+            const selectedValues = selectedOptions
+              ? selectedOptions.map((option) => option.value)
+              : [];
+            setInvoiceData((prev) => ({
+              ...prev,
+              port_of_loading: selectedValues.join("-"),
+            }));
+          }}
+          placeholder="انتخاب بندر بارگیری"
         />
       </div>
 
@@ -548,6 +600,8 @@ function ProformaInvoiceForm() {
               onChange={(e) => handleItemChange(index, e)}
               placeholder="تعداد"
               required
+              onWheel={(e) => e.target.blur()}  // <-- add this line
+
             />
           </div>
 
@@ -562,6 +616,8 @@ function ProformaInvoiceForm() {
               onChange={(e) => handleItemChange(index, e)}
               placeholder="قیمت واحد"
               required
+              onWheel={(e) => e.target.blur()}  // <-- add this line
+
             />
           </div>
 
@@ -575,6 +631,8 @@ function ProformaInvoiceForm() {
               value={item.commodity_code}
               onChange={(e) => handleItemChange(index, e)}
               placeholder="کد کالا"
+              onWheel={(e) => e.target.blur()}  // <-- add this line
+
             />
           </div>
           <div className="form-group">
@@ -610,6 +668,8 @@ function ProformaInvoiceForm() {
               value={item.nw_kg}
               onChange={(e) => handleItemChange(index, e)}
               placeholder="وزن خالص"
+              onWheel={(e) => e.target.blur()}  // <-- add this line
+
             />
           </div>
 
@@ -623,31 +683,37 @@ function ProformaInvoiceForm() {
               value={item.gw_kg}
               onChange={(e) => handleItemChange(index, e)}
               placeholder="وزن ناخالص"
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor={`pack-${index}`}>تعداد بسته بندی :</label>
-            <input
-              type="number"
-              id={`pack-${index}`}
-              name="pack"
-              value={item.pack}
-              onChange={(e) => handleItemChange(index, e)}
-              placeholder="تعداد بسته بندی"
+              onWheel={(e) => e.target.blur()}  // <-- add this line
+
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor={`origin-${index}`}>مبدأ:</label>
-            <input
-              type="text"
+          <label htmlFor={`origin-${index}`}>مبدأ:</label>
+          <Select
               id={`origin-${index}`}
               name="origin"
-              value={item.origin}
-              onChange={(e) => handleItemChange(index, e)}
-              placeholder="مبدأ کالا"
+              options={countryOptions}
+              className="selectPrf"
+              value={
+                countryOptions.find(
+                  (option) => option.value === item.origin
+                ) || null
+              }
+              onChange={(selectedOption) =>
+                setInvoiceData((prev) => {
+                  const updatedItems = [...prev.items];
+                  updatedItems[index].origin = selectedOption
+                    ? selectedOption.value
+                    : "";
+                  return { ...prev, items: updatedItems };
+                })
+              }
+              placeholder="انتخاب مبدأ"
             />
           </div>
+
+
           <div className="form-group">
             <label htmlFor="customer">مشتری:</label>
             <Select

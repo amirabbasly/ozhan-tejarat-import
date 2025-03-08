@@ -323,6 +323,7 @@ class InvoicePDFView(APIView):
         <b>Seller name and address:</b><br/>{invoice.seller.seller_name}<br/>{invoice.seller.seller_address}<br/>
         <b> Country of beneficiary:</b> {invoice.seller.seller_country}<br/>
         """
+        buyer_tel = invoice.customer_tel if invoice.customer_tel is not None else invoice.buyer.buyer_tel
 
         # ===================================================================
         # 8) Buyer Info Section
@@ -330,7 +331,7 @@ class InvoicePDFView(APIView):
         <b>Buyer’s Commercial Card No:</b> {invoice.buyer.buyer_card_number}<br/>
         <b> Buyer’s Name:</b> {invoice.buyer.buyer_name}<br/>
         <b> Buyer’s Address:</b> {invoice.buyer.buyer_address}<br/>
-        <b> Buyer’s Tel:</b> {invoice.buyer.buyer_tel}
+        <b>Buyer’s Tel:</b> {buyer_tel}
 
         """
         table_data = [
@@ -714,6 +715,7 @@ class PackingPDFView(APIView):
         <b>Seller name and address:</b><br/>{invoice.seller.seller_name}<br/>{invoice.seller.seller_address}<br/>
         <b> Country of beneficiary:</b> {invoice.seller.seller_country}<br/>
         """
+        buyer_tel = invoice.customer_tel if invoice.customer_tel is not None else invoice.buyer.buyer_tel
 
         # ===================================================================
         # 8) Buyer Info Section
@@ -721,7 +723,7 @@ class PackingPDFView(APIView):
         <b>Buyer’s Commercial Card No:</b> {invoice.buyer.buyer_card_number}<br/>
         <b> Buyer’s Name:</b> {invoice.buyer.buyer_name}<br/>
         <b> Buyer’s Address:</b> {invoice.buyer.buyer_address}<br/>
-        <b> Buyer’s Tel:</b> {invoice.buyer.buyer_tel}
+        <b>Buyer’s Tel:</b> {buyer_tel}
 
         """
         table_data = [
@@ -1092,7 +1094,7 @@ class ProformaInvoicePDFView(APIView):
         # 5) Invoice Info (Right-aligned - Invoice Number and Date)
         invoice_info = f"""
         <b>proforma number:</b> {invoice.proforma_invoice_number}<br/>
-        <b>proforma date:</b> {invoice.proforma_invoice_date}
+        <b>proforma date:</b> {invoice.proforma_invoice_date}<br/>
         <b>proforma validity date:</b> {invoice.proforma_invoice_date}
 
         """

@@ -5,6 +5,7 @@ import axiosInstance from "../utils/axiosInstance";
 import ProformaInvoiceDetails from "./ProformaInvoiceDetails";
 import ProformaInvoiceItemsEditor from "./ProformaInvoiceItemsEditor";
 import "../pages/CottageDetails.css";
+import { countries} from "../data/countryList"
 
 const ProformaInvoiceDetail = () => {
   const { invoiceNumber } = useParams();
@@ -87,6 +88,10 @@ const ProformaInvoiceDetail = () => {
     value: buyer.id,
     label: buyer.buyer_name,
   }));
+  const countryOptions = countries.map((country) => ({
+      value: country.name, // or combine with ctmNameStr if needed
+      label: `${country.name} (${country.persianName})`,
+    }));
 
   useEffect(() => {
     const fetchData = async () => {
@@ -151,11 +156,14 @@ const ProformaInvoiceDetail = () => {
           meansOfTransportOptions={meansOfTransportOptions}
           termsOfPaymentOptions={termsOfPaymentOptions}
           standardOptions={standardOptions}
+          countryOptions={countryOptions}
         />
         <ProformaInvoiceItemsEditor
           items={invoice.items}
           onItemsChange={handleItemsChange}
           unitOptions={unitOptions}
+          countryOptions={countryOptions}
+
         />
         <button type="submit" className="primary-button">
           ثبت تغییرات

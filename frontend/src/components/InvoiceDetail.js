@@ -5,6 +5,7 @@ import axiosInstance from "../utils/axiosInstance";
 import InvoiceDetails from "./InvoiceDetails";
 import InvoiceItemsEditor from "./InvoiceItemsEditor";
 import "../pages/CottageDetails.css";
+import { countries } from "../data/countryList";
 
 const InvoiceDetail = () => {
   const { invoiceNumber } = useParams();
@@ -57,6 +58,10 @@ const InvoiceDetail = () => {
     value: sel.id,
     label: sel.seller_name,
   }));
+    const countryOptions = countries.map((country) => ({
+        value: country.name, // or combine with ctmNameStr if needed
+        label: `${country.name} (${country.persianName})`,
+      }));
 
   const buyerOptions = buyers.map((buyer) => ({
     value: buyer.id,
@@ -139,11 +144,15 @@ const InvoiceDetail = () => {
           currencyOptions={currencyOptions}
           termsOfDeliveryOptions={termsOfDeliveryOptions}
           meansOfTransportOptions={meansOfTransportOptions}
+          countryOptions={countryOptions}
+
         />
         <InvoiceItemsEditor
           items={invoice.items}
           onItemsChange={handleItemsChange}
           unitOptions={unitOptions}
+          countryOptions={countryOptions}
+
         />
         <button type="submit" className="primary-button">
           ثبت تغییرات

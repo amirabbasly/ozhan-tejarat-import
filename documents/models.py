@@ -51,10 +51,11 @@ class Invoice(models.Model):
     sub_total = models.DecimalField(max_digits=20, decimal_places=2, default=0)
     total_amount = models.DecimalField(max_digits=20, decimal_places=2, default=0)
     invoice_date = models.DateField()
+    customer_tel = models.CharField(max_length=15, null=True, blank=True)
     # e.g. an automatically generated invoice number
     invoice_id = models.CharField(max_length=50, unique=True)
     invoice_number = models.CharField(max_length=50)
-    freight_charges = models.IntegerField(max_length=50)
+    freight_charges = models.DecimalField(max_digits=18, decimal_places=2)
     invoice_currency = models.CharField(max_length=50)
     terms_of_delivery = models.CharField(max_length=50)
     relevant_location = models.CharField(max_length=555)
@@ -75,7 +76,7 @@ class Invoice(models.Model):
 class InvoiceItem(models.Model):
     invoice = models.ForeignKey(Invoice, related_name='items', on_delete=models.CASCADE)
     description = models.TextField(max_length=1555)
-    quantity = models.IntegerField(default=1)
+    quantity = models.DecimalField(default=1, max_digits=18, decimal_places=2)
     commodity_code = models.IntegerField(max_length=9)
     unit_price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     unit = models.CharField(max_length=55, default="U")
@@ -122,7 +123,7 @@ class ProformaInvoice(models.Model):
 class ProformaInvoiceItem(models.Model):
     proforma_invoice = models.ForeignKey(ProformaInvoice, related_name='items', on_delete=models.CASCADE)
     description = models.TextField(max_length=1555)
-    quantity = models.IntegerField(default=1)
+    quantity = models.DecimalField(default=1, max_digits=18, decimal_places=2)
     commodity_code = models.IntegerField(max_length=9)
     unit_price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     unit = models.CharField(max_length=55, default="U")

@@ -220,7 +220,7 @@ export const iranCustoms = [
     ctmNameStr: "Lamerd Special Economic Zone",
     ctmCodeStr: "68",
   },
-  { ctmVCodeInt: 45200, ctmNameStr: "Ganaveh", ctmCodeStr: "141" },
+  { ctmVCodeInt: 45200, ctmNameStr: "Genaveh", ctmCodeStr: "141" },
   { ctmVCodeInt: 45201, ctmNameStr: "Deylam", ctmCodeStr: "193" },
   { ctmVCodeInt: 45202, ctmNameStr: "Bandar Rig", ctmCodeStr: "177" },
   { ctmVCodeInt: 45300, ctmNameStr: "Shiraz", ctmCodeStr: "6" },

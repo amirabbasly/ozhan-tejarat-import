@@ -124,6 +124,20 @@ const InvoiceDetails = ({
 
         />
       </div>
+            {/* Customer Tel */}
+            <div className="form-group">
+        <label htmlFor="customer_tel">شماره مشتری :</label>
+        <input
+          type="text"
+          id="customer_tel"
+          name="customer_tel"
+          value={invoice.customer_tel || ""}
+          onChange={(e) => onFieldChange("customer_tel", e.target.value)}
+          placeholder="شماره تماس مشتری را وارد کنید"
+          className="editable-input"
+        />
+      </div>
+
 
       {/* Country of Origin */}
       <div className="form-group">

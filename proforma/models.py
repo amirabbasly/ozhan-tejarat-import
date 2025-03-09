@@ -9,7 +9,7 @@ def get_default_currency_type():
     return 94
 
 class Performa(models.Model):
-    prf_order_no = models.CharField(max_length=100, default="asd", unique=True)
+    prf_order_no = models.CharField(max_length=100, null=True,blank=True, unique=True)
     prf_number = models.CharField(max_length=100, unique=True, default="asd")
     prf_freight_price = models.DecimalField(max_digits=20, decimal_places=2, default=1)
     FOB = models.DecimalField(max_digits=20, decimal_places=2, default=1)
@@ -20,7 +20,7 @@ class Performa(models.Model):
     prf_status = models.CharField(max_length=50, default="asd")
     prf_date = jmodels.jDateField(null=True, blank=True)
     prf_expire_date = jmodels.jDateField(null=True, blank=True)
-    prfVCodeInt = models.CharField(max_length=50, unique=True)
+    prfVCodeInt = models.CharField(max_length=50, unique=True,)
     remaining_total = models.DecimalField(max_digits=20, decimal_places=2, default=0)
     registrant = models.CharField(max_length=100)
     goods_type = models.CharField(max_length=100, null=True, blank=True)

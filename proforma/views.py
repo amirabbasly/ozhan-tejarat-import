@@ -62,9 +62,9 @@ class PerformaListView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class PerformaDetailView(APIView):
-    def get(self, request, prf_order_no):
+    def get(self, request, prfVCodeInt):
         try:
-            performa = Performa.objects.get(prf_order_no=prf_order_no)
+            performa = Performa.objects.get(prfVCodeInt=prfVCodeInt)
             # Serialize the data
             performa_serializer = PerformaSerializer(performa)
             return Response({
@@ -127,9 +127,9 @@ class GUIDApiView(APIView):
 
             performa_list = []
             for proforma_data in performa_list_filtered:
-                prf_order_no = proforma_data.get('prfOrderNoStr')
+                prfVCodeInt = proforma_data.get('prfVCodeInt')
 
-                if prf_order_no:
+                if prfVCodeInt:
                     performa_list.append({
                         'prf_number': proforma_data.get('prfNumberStr'),
                         'prfVCodeInt': proforma_data.get('prfVCodeInt'),
@@ -141,7 +141,7 @@ class GUIDApiView(APIView):
                         'prf_currency_type': proforma_data.get('prfCurrencyTypeStr'),
                         'prf_seller_country': proforma_data.get('prfCountryNameStr'),
                         'registrant': proforma_data.get('registrant'),
-                        'prf_order_no': prf_order_no,
+                        'prf_order_no': proforma_data.get('prfOrderNoStr'),
                         'bank_info': proforma_data.get('bnkNameStr'),
                         'prf_status': proforma_data.get('prfStatusStr'),
                         'activity': proforma_data.get('prfActiveStatusStr'),
@@ -165,87 +165,138 @@ class GUIDApiView(APIView):
             logger.error(f"An unexpected error occurred: {e}")
             return Response({'error': 'An unexpected error occurred while processing the data.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
 class SaveSelectedPerformas(APIView):
 
     def post(self, request):
-        selected_performas = request.data.get('selected_performas', [])
-        if not selected_performas:
-            return Response({'error': 'No performas selected.'}, status=status.HTTP_400_BAD_REQUEST)
-
+        # Expect a single proforma's data in the request
+        performa_data = request.data
+        if not performa_data:
+            return Response({'error': 'No proforma data provided.'}, status=status.HTTP_400_BAD_REQUEST)
+        ssdsshGUID = request.data.get('ssdsshGUID')
+        urlVcodeInt = request.data.get('urlVCodeInt')
         try:
             with transaction.atomic():
-                for performa_data in selected_performas:
-                    # Log date strings
-                    prf_date_str = performa_data.get('prf_date')
-                    logger.debug(f"Received prf_date_str: {prf_date_str}")
+                # --- Parse Date Fields ---
+                prf_date_str = performa_data.get('prf_date')
+                logger.debug(f"Received prf_date_str: {prf_date_str}")
 
-                    prf_expire_date_str = performa_data.get('prf_expire_date')
-                    logger.debug(f"Received prf_expire_date_str: {prf_expire_date_str}")
+                prf_expire_date_str = performa_data.get('prf_expire_date')
+                logger.debug(f"Received prf_expire_date_str: {prf_expire_date_str}")
 
-                    # Parse date strings using the correct format
-                    if prf_date_str:
-                        try:
-                            # Parse Jalali date string 'YYYY/MM/DD' using jdatetime
-                            prf_date = jdatetime.datetime.strptime(prf_date_str, '%Y/%m/%d').date().togregorian()
-                        except ValueError as e:
-                            logger.error(f"Error parsing prf_date '{prf_date_str}': {e}")
-                            prf_date = None
-                    else:
+                if prf_date_str:
+                    try:
+                        prf_date = jdatetime.datetime.strptime(prf_date_str, '%Y/%m/%d').date().togregorian()
+                    except ValueError as e:
+                        logger.error(f"Error parsing prf_date '{prf_date_str}': {e}")
                         prf_date = None
+                else:
+                    prf_date = None
 
-                    if prf_expire_date_str:
-                        try:
-                            prf_expire_date = jdatetime.datetime.strptime(prf_expire_date_str, '%Y/%m/%d').date().togregorian()
-                        except ValueError as e:
-                            logger.error(f"Error parsing prf_expire_date '{prf_expire_date_str}': {e}")
-                            prf_expire_date = None
-                    else:
+                if prf_expire_date_str:
+                    try:
+                        prf_expire_date = jdatetime.datetime.strptime(prf_expire_date_str, '%Y/%m/%d').date().togregorian()
+                    except ValueError as e:
+                        logger.error(f"Error parsing prf_expire_date '{prf_expire_date_str}': {e}")
                         prf_expire_date = None
+                else:
+                    prf_expire_date = None
 
-                    # Convert monetary fields to Decimal
-                    try:
-                        prf_freight_price = Decimal(str(performa_data.get('prf_freight_price', '0')))
-                    except (InvalidOperation, TypeError) as e:
-                        logger.error(f"Error converting prf_freight_price '{performa_data.get('prf_freight_price')}': {e}")
-                        prf_freight_price = Decimal('0.00')
+                # --- Convert Monetary Fields to Decimal ---
+                try:
+                    prf_freight_price = Decimal(str(performa_data.get('prf_freight_price', '0')))
+                except (InvalidOperation, TypeError) as e:
+                    logger.error(f"Error converting prf_freight_price '{performa_data.get('prf_freight_price')}': {e}")
+                    prf_freight_price = Decimal('0.00')
 
-                    try:
-                        prf_total_price = Decimal(str(performa_data.get('prf_total_price', '0')))
-                    except (InvalidOperation, TypeError) as e:
-                        logger.error(f"Error converting prf_total_price '{performa_data.get('prf_total_price')}': {e}")
-                        prf_total_price = Decimal('0.00')
+                try:
+                    prf_total_price = Decimal(str(performa_data.get('prf_total_price', '0')))
+                except (InvalidOperation, TypeError) as e:
+                    logger.error(f"Error converting prf_total_price '{performa_data.get('prf_total_price')}': {e}")
+                    prf_total_price = Decimal('0.00')
 
-                    try:
-                        FOB = Decimal(str(performa_data.get('FOB', '0')))
-                    except (InvalidOperation, TypeError) as e:
-                        logger.error(f"Error converting FOB '{performa_data.get('FOB')}': {e}")
-                        FOB = Decimal('0.00')
+                try:
+                    FOB = Decimal(str(performa_data.get('FOB', '0')))
+                except (InvalidOperation, TypeError) as e:
+                    logger.error(f"Error converting FOB '{performa_data.get('FOB')}': {e}")
+                    FOB = Decimal('0.00')
 
-                    # Create or update Performa instances
-                    proforma, created = Performa.objects.update_or_create(
-                        prf_number=performa_data.get('prf_number'),
-                        defaults={
-                            'prfVCodeInt': performa_data.get('prfVCodeInt'),
-                            'prf_date': prf_date,
-                            'prf_freight_price': prf_freight_price,
-                            'FOB': FOB,
-                            'prf_expire_date': prf_expire_date,
-                            'prf_total_price': prf_total_price,
-                            'prf_currency_type': performa_data.get('prf_currency_type'),
-                            'prf_seller_country': performa_data.get('prf_seller_country'),
-                            'prf_order_no': performa_data.get('prf_order_no'),
-                            'prf_status': performa_data.get('prf_status'),
-                            'registrant': performa_data.get('registrant'),
-                        }
+                # --- Create or Update Proforma Record ---
+                proforma, created = Performa.objects.update_or_create(
+                    prf_number=performa_data.get('prf_number'),
+                    defaults={
+                        'prfVCodeInt': performa_data.get('prfVCodeInt'),
+                        'prf_date': prf_date,
+                        'prf_freight_price': prf_freight_price,
+                        'FOB': FOB,
+                        'prf_expire_date': prf_expire_date,
+                        'prf_total_price': prf_total_price,
+                        'prf_currency_type': performa_data.get('prf_currency_type'),
+                        'prf_seller_country': performa_data.get('prf_seller_country'),
+                        'prf_order_no': performa_data.get('prf_order_no'),
+                        'prf_status': performa_data.get('prf_status'),
+                        'registrant': performa_data.get('registrant'),
+                    }
+                )
+                logger.info(f"Created or updated Proforma: {proforma}")
+
+                # --- New Step: Fetch Additional Details from External API ---
+                external_api_url = "https://www.ntsw.ir/users/Ac/Gateway/FacadeRest/api/Proforma/GetRegedOrderDetails"
+                external_payload = {
+                    "prfVCodeInt": performa_data.get('prfVCodeInt'),
+                    "ssdsshGUID": ssdsshGUID,  # extra parameter required by external API
+                    "urlVcodeInt": urlVcodeInt  # extra parameter required by external API
+                }
+                logger.debug(f"Sending payload to external API: {external_payload}")
+
+                try:
+                    external_response = requests.post(
+                        external_api_url,
+                        json=external_payload,
+                        headers={"Content-Type": "application/json"},
+                        timeout=30
                     )
-                    logger.info(f"Created or updated Performa: {proforma}")
+                    external_response.raise_for_status()
+                    external_data = external_response.json()
+                    logger.debug(f"Response from external API: {external_data}")
+                except requests.RequestException as e:
+                    logger.error(f"External API RequestException for prf_number={performa_data.get('prf_number')}: {e}")
+                    return Response({
+                        "error": "Error calling the external API for proforma details."
+                    }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                except ValueError as e:
+                    logger.error(f"JSON decode error from external API for prf_number={performa_data.get('prf_number')}: {e}")
+                    return Response({
+                        "error": "Invalid JSON response from external API for proforma details."
+                    }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-            return Response({'message': 'Selected performas saved successfully.'}, status=status.HTTP_200_OK)
+                if external_data.get("ErrorCode") != 0:
+                    error_desc = external_data.get("ErrorDesc", "Unknown error from external API.")
+                    logger.error(f"External API error for prf_number={performa_data.get('prf_number')}: {error_desc}")
+                    return Response({
+                        "error": error_desc
+                    }, status=status.HTTP_400_BAD_REQUEST)
+
+                result = external_data.get("Result", {})
+                proforma_struct = result.get("proformaStruct", {})
+                bank_info = proforma_struct.get("bnkNameStr")
+                bch_adrs = proforma_struct.get("bchAdrsStr")
+                bch_code = proforma_struct.get("prfbchBranchCodeStr")
+
+                # Update the proforma record with external API data if available
+                if bank_info is not None or bch_adrs is not None:
+                    proforma.bank_info = bank_info + " " + bch_adrs + " " + bch_code
+                    proforma.save()
+                    logger.info(f"Updated proforma {proforma.prf_number} with external API data: "
+                                f"bnkNameStr={bank_info}, bchAdrsStr={bch_adrs}")
+
+            return Response({'message': 'Proforma saved successfully.'}, status=status.HTTP_200_OK)
 
         except Exception as e:
-            logger.error(f"Error saving selected performas: {e}", exc_info=True)
-            return Response({'error': 'An error occurred while saving the selected performas.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            logger.error(f"Error saving proforma: {e}", exc_info=True)
+            return Response({'error': 'An error occurred while saving the proforma.'},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 class UpdatePerformaView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
@@ -293,16 +344,16 @@ class PerformaDeleteView(APIView):
     def delete(self, request):
         """
         Delete one or multiple Performa instances.
-        Expects a list of `prf_order_no` in the request body.
+        Expects a list of `prfVCodeInt` in the request body.
         """
         try:
-            performa_ids = request.data.get('prf_order_no_list', [])
+            performa_ids = request.data.get('prfVCodeInt_list', [])
 
             if not isinstance(performa_ids, list) or not performa_ids:
-                return Response({'error': 'Please provide a valid list of `prf_order_no`.'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'error': 'Please provide a valid list of `prfVCodeInt`.'}, status=status.HTTP_400_BAD_REQUEST)
 
             # Fetch and delete the specified performas
-            performas = Performa.objects.filter(prf_order_no__in=performa_ids)
+            performas = Performa.objects.filter(prfVCodeInt__in=performa_ids)
             if not performas.exists():
                 return Response({'error': 'No matching performas found for the provided IDs.'}, status=status.HTTP_404_NOT_FOUND)
 

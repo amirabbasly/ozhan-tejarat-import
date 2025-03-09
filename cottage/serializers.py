@@ -55,7 +55,7 @@ class CottageGoodsSerializer(serializers.ModelSerializer):
 class CottageSerializer(serializers.ModelSerializer):
     proforma = serializers.SlugRelatedField(
         queryset=Performa.objects.all(),
-        slug_field='prf_order_no'
+        slug_field='prfVCodeInt'
     )
     cottage_goods = CottageGoodsSerializer(many=True, read_only=False)
     

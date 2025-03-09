@@ -62,25 +62,26 @@ export const fetchOrders = () => async (dispatch) => {
 
 
 
-export const saveSelectedPerformas = (selectedPerformas, ssdsshGUID, urlVCodeInt) => async (dispatch) => {
+export const saveSelectedPerformas = (performa, ssdsshGUID, urlVCodeInt) => async (dispatch) => {
     dispatch({ type: SAVE_SELECTED_PERFORMAS_REQUEST });
     try {
-        const response = await axiosInstance.post('save-selected-performas/', {
-            selected_performas: selectedPerformas,
-            ssdsshGUID,
-            urlVCodeInt,
-        });
-        dispatch({
-            type: SAVE_SELECTED_PERFORMAS_SUCCESS,
-            payload: response.data.message,
-        });
+      const response = await axiosInstance.post('save-selected-performas/', {
+        ...performa,
+        ssdsshGUID,
+        urlVCodeInt,
+      });
+      dispatch({
+        type: SAVE_SELECTED_PERFORMAS_SUCCESS,
+        payload: response.data.message,
+      });
     } catch (error) {
-        dispatch({
-            type: SAVE_SELECTED_PERFORMAS_FAILURE,
-            payload: error.response ? error.response.data.error : 'An error occurred.',
-        });
+      dispatch({
+        type: SAVE_SELECTED_PERFORMAS_FAILURE,
+        payload: error.response ? error.response.data.error : 'An error occurred.',
+      });
     }
-};
+  };
+  
 export const updateOrderStatus = (orderId, formData) => async (dispatch) => {
     dispatch({ type: UPDATE_ORDER_STATUS_REQUEST, payload: { orderId } });
     try {
@@ -100,10 +101,10 @@ export const updateOrderStatus = (orderId, formData) => async (dispatch) => {
     }
 };
 
-  export const fetchOrderById = (prfOrderNo) => async (dispatch) => {
+  export const fetchOrderById = (prfVCodeInt) => async (dispatch) => {
     dispatch({ type: FETCH_PERFORMA_REQUEST });
     try {
-        const response = await axiosInstance.get(`performas/${prfOrderNo}/`);
+        const response = await axiosInstance.get(`performas/${prfVCodeInt}/`);
         dispatch({
             type: FETCH_PERFORMA_SUCCESS,
             payload: response.data.performa,
@@ -116,15 +117,15 @@ export const updateOrderStatus = (orderId, formData) => async (dispatch) => {
     }
 };
 
-export const deletePerformas = (prfOrderNoList) => async (dispatch) => {
+export const deletePerformas = (prfVCodeIntList) => async (dispatch) => {
     dispatch({ type: DELETE_PERFORMAS_REQUEST });
     try {
         await axiosInstance.delete('performas/delete/', {
-            data: { prf_order_no_list: prfOrderNoList },
+            data: { prfVCodeInt_list: prfVCodeIntList },
         });
         dispatch({
             type: DELETE_PERFORMAS_SUCCESS,
-            payload: prfOrderNoList, // Return the deleted order numbers
+            payload: prfVCodeIntList, // Return the deleted order numbers
         });
     } catch (error) {
         dispatch({

@@ -96,13 +96,20 @@ const ImportPf = () => {
     }
   };
 
-  const handleSendSelected = () => {
+  const handleSendSelected = async () => {
     if (selectedPerformas.length === 0) {
       alert('لطفاً حداقل یک مورد را انتخاب کنید.');
       return;
     }
-    dispatch(saveSelectedPerformas(selectedPerformas, formData.ssdsshGUID, formData.urlVCodeInt));
+    // Loop over selected performas and dispatch individual API calls
+    await Promise.all(
+      selectedPerformas.map((performa) =>
+        dispatch(saveSelectedPerformas(performa, formData.ssdsshGUID, formData.urlVCodeInt))
+      )
+    );
+    // Optionally, you can show a consolidated success message here.
   };
+  
 
   return (
     <div className="import-prf-container">

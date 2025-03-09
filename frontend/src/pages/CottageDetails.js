@@ -321,7 +321,7 @@ const CottageDetails = () => {
 
         <div className="input-group">
           <label htmlFor="proforma">
-            <strong>شماره ثبت سفارش :</strong>
+            <strong>شماره پرونده ثبت سفارش :</strong>
           </label>
 
           <span className="readonly-text">

@@ -170,7 +170,7 @@ const RegedOrderList = () => {
     onChange={(e) => {
       const isChecked = e.target.checked;
       if (isChecked) {
-        setSelectedOrders(filteredOrders.map((order) => order.prf_order_no));
+        setSelectedOrders(filteredOrders.map((order) => order.prfVCodeInt));
       } else {
         setSelectedOrders([]);
       }
@@ -194,13 +194,13 @@ const RegedOrderList = () => {
                     <td>
                     <input
                       type="checkbox"
-                      checked={selectedOrders.includes(order.prf_order_no)}
+                      checked={selectedOrders.includes(order.prfVCodeInt)}
                       onChange={(e) => {
                         const isChecked = e.target.checked;
                         setSelectedOrders((prev) =>
                           isChecked
-                            ? [...prev, order.prf_order_no]
-                            : prev.filter((id) => id !== order.prf_order_no)
+                            ? [...prev, order.prfVCodeInt]
+                            : prev.filter((id) => id !== order.prfVCodeInt)
                         );
                       }}
                     />
@@ -223,7 +223,7 @@ const RegedOrderList = () => {
 
                     <td>{order.prf_status || '—'}</td>
                     <td>
-                      <Link to={`/order-details/${order.prf_order_no}`}>جزئیات</Link>
+                      <Link to={`/order-details/${order.prfVCodeInt}`}>جزئیات</Link>
                     </td>
                   </tr>
                 ))}

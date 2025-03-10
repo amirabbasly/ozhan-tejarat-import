@@ -19,7 +19,13 @@ class CottagePSerializer(serializers.ModelSerializer):
             'cottage_status'
         ]
 
-logger = logging.getLogger(__name__)
+class ProformaCSerializer(serializers.ModelSerializer):
+       class Meta:
+        model = Performa
+        fields = [
+            'prf_number',
+            'prf_order_no'
+        ]
 class PerformaSerializer(serializers.ModelSerializer):
 
     cottages = CottagePSerializer(many=True, read_only=True)  # Nested serializer

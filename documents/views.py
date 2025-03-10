@@ -1109,13 +1109,11 @@ class ProformaInvoicePDFView(APIView):
 
         # ===================================================================
         # 8) Buyer Info Section
-        buyer_tel = invoice.customer_tel if invoice.customer_tel is not None else invoice.buyer.buyer_tel
-
         buyer_info = f"""
         <b>Buyer’s Commercial Card No:</b> {invoice.buyer.buyer_card_number}<br/>
         <b> Buyer’s Name:</b> {invoice.buyer.buyer_name}<br/>
         <b> Buyer’s Address:</b> {invoice.buyer.buyer_address}<br/>
-        <b>Buyer’s Tel:</b> {buyer_tel}
+        <b>Buyer’s Tel:</b> {invoice.buyer.buyer_tel}
         """
         table_data = [
             [Paragraph(seller_info, styles["Normal"]), Paragraph(buyer_info, styles["Normal"])]

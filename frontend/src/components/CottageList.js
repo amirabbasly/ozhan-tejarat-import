@@ -357,7 +357,9 @@ const CottageList = () => {
                     <th>ردیف</th>
                     <th>شماره کوتاژ</th>
                     <th>تاریخ</th>
+                    <th>شماره پرفورم</th>
                     <th>شماره ثبت سفارش</th>
+
                     <th>ارزش کل</th>
                     <th>نرخ ارز</th>
                     <th></th>
@@ -387,7 +389,8 @@ const CottageList = () => {
                         <td>{index + 1}</td>
                         <td>{cottage.cottage_number}</td>
                         <td>{cottage.cottage_date}</td>
-                        <td>{cottage.proforma}</td>
+                        <td>{cottage.proforma.prf_number}</td>
+                        <td>{cottage.proforma.prf_order_no}</td>
                         <td>{cottage.total_value}</td>
                         <td>
                           {isUpdating ? (

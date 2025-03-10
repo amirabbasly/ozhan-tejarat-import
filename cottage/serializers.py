@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import Cottage, CottageGoods, ExportedCottages
 from proforma.models import Performa
 import jdatetime
+from proforma.serializers import  ProformaCSerializer
 from decimal import Decimal
 from django.conf import settings
 from django.db import models
@@ -53,10 +54,7 @@ class CottageGoodsSerializer(serializers.ModelSerializer):
         read_only_fields = ['id']
 
 class CottageSerializer(serializers.ModelSerializer):
-    proforma = serializers.SlugRelatedField(
-        queryset=Performa.objects.all(),
-        slug_field='prfVCodeInt'
-    )
+    proforma = ProformaCSerializer(many=False, read_only=True)
     cottage_goods = CottageGoodsSerializer(many=True, read_only=False)
     
     # Override the cottage_date field to handle Jalali dates
@@ -132,7 +130,7 @@ class GreenCustomsDeclarationInputSerializer(serializers.Serializer):
 class CottageSaveSerializer(serializers.ModelSerializer):
     proforma = serializers.SlugRelatedField(
         queryset=Performa.objects.all(),
-        slug_field='prf_order_no'
+        slug_field='prfVCodeInt'
     )    
     # Override the cottage_date field to handle Jalali dates
     cottage_date = serializers.CharField()

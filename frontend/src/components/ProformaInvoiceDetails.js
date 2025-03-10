@@ -161,7 +161,7 @@ const InvoiceDetails = ({
       </div>
       {/* Port of Loading */}
       <div className="form-group">
-        <label htmlFor="port_of_loading">کشور مبدأ:</label>
+        <label htmlFor="port_of_loading">بندر بارگیری:</label>
         <Select
           className="selectPrf"
           id="port_of_loading"
@@ -295,7 +295,22 @@ const InvoiceDetails = ({
           onChange={(e) => onFieldChange("partial_shipment", e.target.checked)}
         />
       </div>
-
+      {/* Invoice Number */}
+      <div className="form-group">
+        <label htmlFor="customer_tel">شماره مشتری:</label>
+        <input
+          type="text"
+          id="customer_tel"
+          name="customer_tel"
+          value={invoice.customer_tel || ""}
+          onChange={(e) =>
+            onFieldChange("customer_tel", e.target.value)
+          }
+          placeholder="شماره مشتری را وارد کنید"
+          required
+          className="editable-input"
+        />
+      </div>
       {/* Customs Destination */}
       <div className="form-group">
         <label htmlFor="relevant_location">گمرک مقصد:</label>

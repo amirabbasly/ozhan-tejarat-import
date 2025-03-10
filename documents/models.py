@@ -109,7 +109,6 @@ class ProformaInvoice(models.Model):
     means_of_transport = models.CharField(max_length=50)
     country_of_origin = models.CharField(max_length=555)
     port_of_loading = models.CharField(max_length=555)
-    customer_tel = models.CharField(max_length=15, null=True, blank=True)
     standard = models.CharField(max_length=50)
     total_gw = models.DecimalField(default=0, max_digits=12, decimal_places=2,)
     total_nw = models.DecimalField(default=0, max_digits=12, decimal_places=2,)

@@ -519,17 +519,7 @@ function ProformaInvoiceForm() {
           placeholder="انتخاب وسیله حمل"
         />
       </div>
-      <div className="form-group">
-        <label htmlFor="customer_tel"> شماره مشتری:</label>
-        <input
-          type="text"
-          id="customer_tel"
-          name="customer_tel"
-          value={invoiceData.customer_tel}
-          onChange={handleChange}
-          placeholder="شماره مشتری"
-        />
-      </div>
+
       <div className="form-group">
         <label htmlFor="relevant_location">گمرک مقصد:</label>
         <Select

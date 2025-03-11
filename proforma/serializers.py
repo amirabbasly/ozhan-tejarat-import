@@ -24,7 +24,8 @@ class ProformaCSerializer(serializers.ModelSerializer):
         model = Performa
         fields = [
             'prf_number',
-            'prf_order_no'
+            'prf_order_no',
+            'prfVCodeInt'
         ]
 class PerformaSerializer(serializers.ModelSerializer):
 

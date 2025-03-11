@@ -42,6 +42,8 @@ const CottageDetails = () => {
   const [customer, setCustomer] = useState("");
   const [refrenceNumber, setRefrenceNumber] = useState("");
   const navigate = useNavigate();
+  const [intermediary, setIntermediary] = useState("");
+  
   const costumerstate = useSelector((state) => state.costumers);
   const { costumerList, costumersLoading, costumersError } = costumerstate || {
     costumerList: [],
@@ -85,13 +87,14 @@ const CottageDetails = () => {
       setRefrenceNumber(cottage.refrence_number || "");
       setTotalValue(cottage.total_value || "");
       setQuantity(cottage.quantity || "");
-      setProforma(cottage.proforma || "");
+      setProforma(cottage.proforma.prfVCodeInt || "");
       setDocuments(cottage.documents || "");
       setStatus(cottage.cottage_status || "");
       setCustomer(cottage.cottage_customer?.toString() || "");
       setRafeeTaahod(cottage.rafee_taahod === true ? "true" : "false"); // Ensure proper boolean handling
       setDocsRecieved(cottage.docs_recieved === true ? "true" : "false");
       setRewatch(cottage.rewatch === true ? "true" : "false");
+      setIntermediary(cottage.Intermediary || "")
 
       if (cottage.cottage_date) {
         const dateObject = new DateObject({
@@ -130,6 +133,7 @@ const CottageDetails = () => {
           quantity: quantity,
           cottage_status: status,
           cottage_customer: customer,
+          Intermediary: intermediary,
           proforma: proforma,
           currency_price: currencyPrice,
           rafee_taahod: rafeeTaahod,
@@ -297,6 +301,23 @@ const CottageDetails = () => {
                 ? selectedCustomer.full_name
                 : " مشتری را انتخاب کنید"}
             </span>
+          )}
+        </div>
+        <div className="input-group">
+          <label htmlFor="intermediary">
+            <strong>واسط :</strong>
+          </label>
+          {isEditing ? (
+            <input
+              type="text"
+              id="intermediary"
+              value={intermediary}
+              onChange={(e) => setIntermediary(e.target.value)}
+              className="editable-input"
+              placeholder="نام واسط را وارد کنید"
+            />
+          ) : (
+            <span className="readonly-text">{intermediary ||"نام واسط را وارد کنید" }</span>
           )}
         </div>
         <div className="input-group">

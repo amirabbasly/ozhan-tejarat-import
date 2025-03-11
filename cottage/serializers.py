@@ -6,6 +6,7 @@ from proforma.serializers import  ProformaCSerializer
 from decimal import Decimal
 from django.conf import settings
 from django.db import models
+from accounts.models import Costumer
 class JalaliDateField(serializers.Field):
     """
     Custom serializer field to handle Jalali (Persian) dates.
@@ -56,7 +57,8 @@ class CottageGoodsSerializer(serializers.ModelSerializer):
 class CottageSerializer(serializers.ModelSerializer):
     proforma = ProformaCSerializer(many=False, read_only=True)
     cottage_goods = CottageGoodsSerializer(many=True, read_only=False)
-    
+    cottage_customer = serializers.PrimaryKeyRelatedField(queryset=Costumer.objects.all())
+ 
     # Override the cottage_date field to handle Jalali dates
     cottage_date = serializers.CharField()
     documents = serializers.SerializerMethodField()  # Use SerializerMethodField for full URL
@@ -68,7 +70,7 @@ class CottageSerializer(serializers.ModelSerializer):
             'cottage_number', 'cottage_date', 'proforma','refrence_number',
             'total_value', 'quantity', 'currency_price', 'cottage_customer',
             'cottage_status', 'rafee_taahod', 'documents', 'docs_recieved',
-            'rewatch', 'cottage_goods', 'id'
+            'rewatch', 'id',"Intermediary", 'cottage_goods'
         ]
         read_only_fields = ['final_price','id']
 
@@ -145,6 +147,17 @@ class CottageSaveSerializer(serializers.ModelSerializer):
             'rewatch', 'id'
         ]
         read_only_fields = ['final_price','id']
+
+    def get_documents(self, obj):
+        """
+        Generate the full URL for the documents field.
+        """
+        request = self.context.get('request')
+        if obj.documents and request:
+            return request.build_absolute_uri(obj.documents.url)
+        elif obj.documents:
+            return f"{settings.MEDIA_URL}{obj.documents}"
+        return None
     
 
     # Remove the create and update methods

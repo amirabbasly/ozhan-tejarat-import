@@ -15,6 +15,7 @@ import DatePicker from "react-multi-date-picker";
 import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
 import moment from "moment-jalaali";
+import { fetchCostumers } from "../actions/authActions";
 
 const CottageList = () => {
   const navigate = useNavigate();
@@ -24,6 +25,12 @@ const CottageList = () => {
     value: order.prf_order_no,
     label: order.prf_order_no,
   }));
+    const costumerstate = useSelector((state) => state.costumers);
+    const { costumerList, costumersLoading, costumersError } = costumerstate || {
+      costumerList: [],
+      costumersLoading: false,
+      costumersError: null,
+    };
 
   useEffect(() => {
     if (auth.isAuthenticated === false) {
@@ -92,6 +99,8 @@ const CottageList = () => {
 
   // On mount or on `currentPage` change, fetch that page
   useEffect(() => {
+        dispatch(fetchCostumers());
+    
     dispatch(fetchOrders());
     const filters = {
       search: query, // using the renamed variable
@@ -359,65 +368,63 @@ const CottageList = () => {
                     <th>تاریخ</th>
                     <th>شماره پرفورم</th>
                     <th>شماره ثبت سفارش</th>
-
+                    <th>نام مشتری</th> {/* New column header */}
                     <th>ارزش کل</th>
                     <th>نرخ ارز</th>
                     <th></th>
                   </tr>
                 </thead>
-                <tbody>
-                  {cottages.map((cottage, index) => {
-                    const isChecked = selectedCottages.some(
-                      (selectedCottage) => selectedCottage.id === cottage.id
-                    );
-                    const isUpdating =
-                      updatingCurrencyPrice &&
-                      updatingCurrencyPrice[cottage.id];
-                    const updateError =
-                      updateCurrencyPriceError &&
-                      updateCurrencyPriceError[cottage.id];
+<tbody>
+  {cottages.map((cottage, index) => {
+    // Adjust the property names as needed.
+    // For example, if costumerList items have an "id" property that corresponds to cottage.cottage_customer:
+    const customer = costumerList.find(
+      (cust) => cust.id === cottage.cottage_customer
+    );
 
-                    return (
-                      <tr key={cottage.id}>
-                        <td>
-                          <input
-                            type="checkbox"
-                            checked={isChecked}
-                            onChange={(e) => handleSelectCottage(e, cottage)}
-                          />
-                        </td>
-                        <td>{index + 1}</td>
-                        <td>{cottage.cottage_number}</td>
-                        <td>{cottage.cottage_date}</td>
-                        <td>{cottage.proforma.prf_number}</td>
-                        <td>{cottage.proforma.prf_order_no}</td>
-                        <td>{cottage.total_value}</td>
-                        <td>
-                          {isUpdating ? (
-                            <span className="loading">
-                              در حال به‌روزرسانی...
-                            </span>
-                          ) : updateError ? (
-                            <span className="error">
-                              {typeof updateError === "string"
-                                ? updateError
-                                : JSON.stringify(updateError)}
-                            </span>
-                          ) : cottage.currency_price ? (
-                            `${cottage.currency_price} ریال`
-                          ) : (
-                            "—"
-                          )}
-                        </td>
-                        <td>
-                          <Link to={`/cottages/${cottage.cottage_number}`}>
-                            جزئیات
-                          </Link>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
+    return (
+      <tr key={cottage.id}>
+        <td>
+          <input
+            type="checkbox"
+            checked={selectedCottages.some(
+              (selectedCottage) => selectedCottage.id === cottage.id
+            )}
+            onChange={(e) => handleSelectCottage(e, cottage)}
+          />
+        </td>
+        <td>{index + 1}</td>
+        <td>{cottage.cottage_number}</td>
+        <td>{cottage.cottage_date}</td>
+        <td>{cottage.proforma.prf_number}</td>
+        <td>{cottage.proforma.prf_order_no}</td>
+        <td>{customer ? customer.full_name : "—"}</td> {/* Display customer name */}
+        <td>{cottage.total_value}</td>
+        <td>
+          {updatingCurrencyPrice && updatingCurrencyPrice[cottage.id] ? (
+            <span className="loading">در حال به‌روزرسانی...</span>
+          ) : updateCurrencyPriceError && updateCurrencyPriceError[cottage.id] ? (
+            <span className="error">
+              {typeof updateCurrencyPriceError[cottage.id] === "string"
+                ? updateCurrencyPriceError[cottage.id]
+                : JSON.stringify(updateCurrencyPriceError[cottage.id])}
+            </span>
+          ) : cottage.currency_price ? (
+            `${cottage.currency_price} ریال`
+          ) : (
+            "—"
+          )}
+        </td>
+        <td>
+          <Link to={`/cottages/${cottage.cottage_number}`}>
+            جزئیات
+          </Link>
+        </td>
+      </tr>
+    );
+  })}
+</tbody>
+
               </table>
 
               {/* -- BOTTOM PAGINATION -- */}

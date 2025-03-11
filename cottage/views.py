@@ -361,7 +361,12 @@ class CottageViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_class = CottageFilter
     search_fields = ["cottage_number", "proforma__prf_order_no",]  # fields you want to search
-
+    def get_serializer_class(self):
+        if self.action == 'post':
+            return CottageSaveSerializer
+        elif self.action == 'create':
+            return CottageSaveSerializer
+        return super().get_serializer_class()
 
     # Custom action to get a cottage by number (read-only)
     @action(detail=False, methods=['get'], url_path='by-number/(?P<cottage_number>[^/.]+)')

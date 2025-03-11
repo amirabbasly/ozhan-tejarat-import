@@ -37,6 +37,7 @@ const CottageForm = () => {
     rafee_taahod: false,
     cottage_customer: "",
     cottage_status: "",
+    Intermediary:"",
   });
   const handleFileChange = (e) => {
     setFormData({ ...formData, documents: e.target.files[0] });
@@ -133,7 +134,7 @@ const CottageForm = () => {
 
   // Prepare options for react-select
   const orderOptions = orders.map((order) => ({
-    value: order.prf_order_no,
+    value: order.prfVCodeInt,
     label: order.prf_order_no,
   }));
 
@@ -271,6 +272,14 @@ const CottageForm = () => {
               ? "مشتری موجود نیست"
               : "در حال بارگذاری..."
           }
+        />
+                <span>واسط</span>
+        <input
+          type="text"
+          name="Intermediary"
+          value={formData.Intermediary}
+          onChange={handleChange}
+          placeholder="واسط"
         />
         <span>وضعیت</span>
         <input

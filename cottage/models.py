@@ -18,6 +18,7 @@ class Cottage(models.Model):
     rafee_taahod = models.BooleanField(default=False)
     docs_recieved = models.BooleanField(default=False)
     rewatch = models.BooleanField(default=False)
+    Intermediary = models.CharField(max_length=50, null=True, blank=True)
     documents = models.FileField(null=True,blank=True )
     class Meta:
         ordering = ["-cottage_date"] 
@@ -31,7 +32,7 @@ class Cottage(models.Model):
             self.currency_price = self.proforma.prf_currency_price
         with transaction.atomic():
             # Lock the related proforma for concurrency safety
-            proforma = Performa.objects.select_for_update().get(prf_order_no=self.proforma.prf_order_no)
+            proforma = Performa.objects.select_for_update().get(prfVCodeInt=self.proforma.prfVCodeInt)
 
             # Save the cottage
             super().save(*args, **kwargs)
@@ -45,7 +46,7 @@ class Cottage(models.Model):
 
     def delete(self, *args, **kwargs):
         with transaction.atomic():
-            proforma = Performa.objects.select_for_update().get(prf_order_no=self.proforma.prf_order_no)
+            proforma = Performa.objects.select_for_update().get(prfVCodeInt=self.proforma.prfVCodeInt)
             super().delete(*args, **kwargs)
             # Re-save the proforma to update the remain totals
             proforma.save()

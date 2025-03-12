@@ -1,5 +1,7 @@
 from django.db import models
 from accounts.models import Costumer
+from chatbot.views import translate_farsi_to_english
+
 
 class ImageTemplate(models.Model):
     name = models.CharField(max_length=255)
@@ -121,7 +123,8 @@ class ProformaInvoice(models.Model):
 
 class ProformaInvoiceItem(models.Model):
     proforma_invoice = models.ForeignKey(ProformaInvoice, related_name='items', on_delete=models.CASCADE)
-    description = models.TextField(max_length=1555)
+    original_description = models.TextField(max_length=1555)
+    translated_description = models.TextField(max_length=1555, blank=True, null=True)
     quantity = models.DecimalField(default=1, max_digits=18, decimal_places=2)
     commodity_code = models.IntegerField(max_length=9)
     unit_price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
@@ -131,9 +134,22 @@ class ProformaInvoiceItem(models.Model):
     origin = models.CharField(max_length=55)
     customer = models.ForeignKey(Costumer,null=True, blank=True, related_name='items', on_delete=models.SET_NULL)
 
+
     @property
     def line_total(self):
         return self.quantity * self.unit_price
+
+    def save(self, *args, **kwargs):
+        # Only translate if we have Farsi text and no English translation yet
+        if self.original_description and not self.translated_description:
+            try:
+                self.translated_description = translate_farsi_to_english(
+                    self.original_description
+                )
+            except Exception as e:
+                # If there's an error, you might log it or ignore it
+                print(f"Error translating description: {e}")
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Item for Invoice {self.proforma_invoice.proforma_invoice_number}"

@@ -4,10 +4,11 @@ import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchCostumers } from "../actions/authActions";
 import axiosInstance from "../utils/axiosInstance";
-import Select from "react-select"; // Import ReactSelect
+import Select from "react-select";
 import "./CottageForm.css";
 import { iranCustoms } from "../data/iranCustoms";
-import { countries} from "../data/countryList"
+import { countries } from "../data/countryList";
+
 function ProformaInvoiceForm() {
   const navigate = useNavigate();
   const costumerstate = useSelector((state) => state.costumers);
@@ -16,9 +17,60 @@ function ProformaInvoiceForm() {
     costumersLoading: false,
     costumersError: null,
   };
+
   const dispatch = useDispatch();
 
+  // Toggle state to show/hide translations
+  const [enableTranslation, setEnableTranslation] = useState(false);
+
+  // Toggling translation logic
+  const handleToggleTranslation = async () => {
+    const newValue = !enableTranslation;
+    setEnableTranslation(newValue);
+
+    if (newValue === true) {
+      // Translation is turning ON
+      try {
+        // For each item, request an English translation from /documents/translate/
+        const updatedItems = await Promise.all(
+          invoiceData.items.map(async (item) => {
+            // If no Farsi text, skip calling the API
+            if (!item.original_description.trim()) {
+              return { ...item, translated_description: "" };
+            }
+            const response = await axiosInstance.post("/translate/", {
+              text: item.original_description,
+            });
+            const translatedText = response.data.translation || "";
+            return {
+              ...item,
+              translated_description: translatedText,
+            };
+          })
+        );
+        setInvoiceData((prev) => ({
+          ...prev,
+          items: updatedItems,
+        }));
+      } catch (err) {
+        console.error("Translation error:", err);
+        // You can show a user-friendly error here if you wish
+      }
+    } else {
+      // Translation is turning OFF -> clear existing translations or just hide them in the UI
+      const clearedItems = invoiceData.items.map((item) => ({
+        ...item,
+        translated_description: "",
+      }));
+      setInvoiceData((prev) => ({
+        ...prev,
+        items: clearedItems,
+      }));
+    }
+  };
+
   useEffect(() => {
+    // Fetch the list of costumers (buyers/sellers)
     dispatch(fetchCostumers());
   }, [dispatch]);
 
@@ -29,99 +81,6 @@ function ProformaInvoiceForm() {
     value: cmr.id,
     label: cmr.full_name,
   }));
-
-  // Options for currency, delivery terms, payment terms, and standard types
-  const currencyOptions = [
-    { value: "USD", label: "دلار آمریکا" },
-    { value: "EUR", label: "یورو" },
-    { value: "CNY", label: "یوان چین" },
-
-    { value: "GBP", label: "پوند استرلینگ" },
-    { value: "IRR", label: "ریال" },
-    { value: "AED", label: "درهم امارات" },
-  ];
-  const meansOfTransportOptions = [
-    { value: "By Truck", label: "By Truck" },
-    { value: "By AirPlane", label: "By AirPlane" },
-    { value: "By Vessel", label: "By Vessel" },
-    { value: "By Train", label: "By Train" },
-  ];
-  const standardOptions = [
-    { value: "JIS", label: "JIS" },
-    { value: "ISO", label: "ISO" },
-  ];
-
-  const termsOfDeliveryOptions = [
-    { value: "CFR", label: "CFR" },
-    { value: "CIF", label: "CIF" },
-    { value: "CIP", label: "CIP" },
-    { value: "CPT", label: "CPT" },
-    { value: "DAP", label: "DAP" },
-    { value: "DDP", label: "DDP" },
-    { value: "DPU", label: "DPU" },
-    { value: "EXW", label: "EXW" },
-    { value: "FAS", label: "FAS" },
-    { value: "FCA", label: "FCA" },
-    { value: "FOB", label: "FOB" },
-  ];
-
-  const termsOfPaymentOptions = [
-    { value: "T/T", label: "T/T" },
-    { value: "L/C", label: "L/C" },
-    { value: "D/P", label: "D/P" },
-    { value: "D/A", label: "D/A" },
-  ];
-  const preventScrollChange = (e) => {
-    e.target.blur();
-  };
-  
-  const unitOptions = [
-    { value: "KGS", label: "KGS" },
-    { value: "M3", label: "M3" },
-    { value: "M2", label: "M2" },
-    { value: "M", label: "M" },
-    { value: "PCS", label: "PCS" },
-  ];
-  const iranCustomsOptions = iranCustoms.map((custom) => ({
-    value: custom.ctmNameStr, // or combine with ctmNameStr if needed
-    label: `${custom.ctmNameStr} (${custom.ctmVCodeInt})`,
-  }));
-  const countryOptions = countries.map((country) => ({
-    value: country.name, // or combine with ctmNameStr if needed
-    label: `${country.name} (${country.persianName})`,
-  }));
-  const [invoiceData, setInvoiceData] = useState({
-    seller: "",
-    buyer: "",
-    proforma_invoice_number: "",
-    proforma_invoice_currency: "AED", // default value
-    proforma_freight_charges: 0,
-    terms_of_delivery: "CPT", // default value
-    terms_of_payment: "T/T",
-    standard: "JIS",
-    partial_shipment: false,
-    relevant_location: "",
-    means_of_transport: "By Ship",
-    country_of_origin: "",
-    customer_tel:"",
-    port_of_loading: "",
-    proforma_invoice_date: "", // Add this line
-    proforma_invoice_exp_date: "", // Add this line
-
-    items: [
-      {
-        description: "",
-        quantity: 1,
-        unit_price: 0,
-        nw_kg: 0,
-        gw_kg: 0,
-        unit: "PCS",
-        commodity_code: "",
-        pack: 1,
-        origin: "",
-      },
-    ],
-  });
 
   useEffect(() => {
     // Fetch sellers
@@ -137,7 +96,106 @@ function ProformaInvoiceForm() {
       .catch((err) => console.error(err));
   }, []);
 
-  // Handle input changes (including checkboxes)
+  // Create options for ReactSelect from fetched sellers and buyers
+  const sellerOptions = sellers.map((sel) => ({
+    value: sel.id,
+    label: sel.seller_name,
+  }));
+  const buyerOptions = buyers.map((buyer) => ({
+    value: buyer.id,
+    label: buyer.buyer_name,
+  }));
+
+  // Options for various dropdowns
+  const currencyOptions = [
+    { value: "USD", label: "دلار آمریکا" },
+    { value: "EUR", label: "یورو" },
+    { value: "CNY", label: "یوان چین" },
+    { value: "GBP", label: "پوند استرلینگ" },
+    { value: "IRR", label: "ریال" },
+    { value: "AED", label: "درهم امارات" },
+  ];
+  const meansOfTransportOptions = [
+    { value: "By Truck", label: "By Truck" },
+    { value: "By AirPlane", label: "By AirPlane" },
+    { value: "By Vessel", label: "By Vessel" },
+    { value: "By Train", label: "By Train" },
+  ];
+  const standardOptions = [
+    { value: "JIS", label: "JIS" },
+    { value: "ISO", label: "ISO" },
+  ];
+  const termsOfDeliveryOptions = [
+    { value: "CFR", label: "CFR" },
+    { value: "CIF", label: "CIF" },
+    { value: "CIP", label: "CIP" },
+    { value: "CPT", label: "CPT" },
+    { value: "DAP", label: "DAP" },
+    { value: "DDP", label: "DDP" },
+    { value: "DPU", label: "DPU" },
+    { value: "EXW", label: "EXW" },
+    { value: "FAS", label: "FAS" },
+    { value: "FCA", label: "FCA" },
+    { value: "FOB", label: "FOB" },
+  ];
+  const termsOfPaymentOptions = [
+    { value: "T/T", label: "T/T" },
+    { value: "L/C", label: "L/C" },
+    { value: "D/P", label: "D/P" },
+    { value: "D/A", label: "D/A" },
+  ];
+  const unitOptions = [
+    { value: "KGS", label: "KGS" },
+    { value: "M3", label: "M3" },
+    { value: "M2", label: "M2" },
+    { value: "M", label: "M" },
+    { value: "PCS", label: "PCS" },
+  ];
+  const iranCustomsOptions = iranCustoms.map((custom) => ({
+    value: custom.ctmNameStr,
+    label: `${custom.ctmNameStr} (${custom.ctmVCodeInt})`,
+  }));
+  const countryOptions = countries.map((country) => ({
+    value: country.name,
+    label: `${country.name} (${country.persianName})`,
+  }));
+
+  // Main invoice form data
+  const [invoiceData, setInvoiceData] = useState({
+    seller: "",
+    buyer: "",
+    proforma_invoice_number: "",
+    proforma_invoice_currency: "AED",
+    proforma_freight_charges: 0,
+    terms_of_delivery: "CPT",
+    terms_of_payment: "T/T",
+    standard: "JIS",
+    partial_shipment: false,
+    relevant_location: "",
+    means_of_transport: "By Ship",
+    country_of_origin: "",
+    customer_tel: "",
+    port_of_loading: "",
+    proforma_invoice_date: "",
+    proforma_invoice_exp_date: "",
+    items: [
+      {
+        original_description: "",
+        quantity: 1,
+        unit_price: 0,
+        nw_kg: 0,
+        gw_kg: 0,
+        unit: "PCS",
+        commodity_code: "",
+        pack: 1,
+        origin: "",
+        // We'll store the translation here when toggle is ON
+        translated_description: "",
+      },
+    ],
+  });
+
+  // Handle changes for top-level fields (including checkboxes)
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setInvoiceData((prev) => ({
@@ -146,6 +204,7 @@ function ProformaInvoiceForm() {
     }));
   };
 
+  // Handle changes for item-level fields
   const handleItemChange = (index, e) => {
     const { name, value, type, checked } = e.target;
     setInvoiceData((prev) => {
@@ -158,13 +217,14 @@ function ProformaInvoiceForm() {
     });
   };
 
+  // Add another item row
   const addItemRow = () => {
     setInvoiceData((prev) => ({
       ...prev,
       items: [
         ...prev.items,
         {
-          description: "",
+          original_description: "",
           quantity: 1,
           unit_price: 0,
           nw_kg: 0,
@@ -173,11 +233,13 @@ function ProformaInvoiceForm() {
           commodity_code: "",
           pack: 1,
           origin: "",
+          translated_description: "",
         },
       ],
     }));
   };
 
+  // Remove an item row
   const removeItemRow = (index) => {
     setInvoiceData((prev) => {
       const updatedItems = [...prev.items];
@@ -186,6 +248,7 @@ function ProformaInvoiceForm() {
     });
   };
 
+  // Submit the form
   const handleSubmit = async (e) => {
     e.preventDefault();
     const payload = {
@@ -193,7 +256,7 @@ function ProformaInvoiceForm() {
       proforma_freight_charges:
         parseFloat(invoiceData.proforma_freight_charges) || 0,
       items: invoiceData.items.map((item) => ({
-        description: item.description,
+        original_description: item.original_description,
         quantity: parseInt(item.quantity, 10) || 0,
         unit_price: parseFloat(item.unit_price) || 0,
         nw_kg: parseFloat(item.nw_kg) || 0,
@@ -202,6 +265,8 @@ function ProformaInvoiceForm() {
         pack: parseInt(item.pack, 10) || 0,
         unit: item.unit,
         origin: item.origin,
+        // If you want to store the translation in the DB, include it here
+        // translated_description: item.translated_description
       })),
     };
 
@@ -215,21 +280,11 @@ function ProformaInvoiceForm() {
     }
   };
 
-  // Create options for ReactSelect from fetched sellers and buyers
-  const sellerOptions = sellers.map((sel) => ({
-    value: sel.id,
-    label: sel.seller_name,
-  }));
-
-  const buyerOptions = buyers.map((buyer) => ({
-    value: buyer.id,
-    label: buyer.buyer_name,
-  }));
-
   return (
     <form className="cottage-form" dir="rtl" onSubmit={handleSubmit}>
       <h2>ایجاد پروفورم</h2>
 
+      {/* Seller */}
       <div className="form-group">
         <label htmlFor="seller">فروشنده:</label>
         <Select
@@ -238,9 +293,8 @@ function ProformaInvoiceForm() {
           options={sellerOptions}
           className="selectPrf"
           value={
-            sellerOptions.find(
-              (option) => option.value === invoiceData.seller
-            ) || null
+            sellerOptions.find((option) => option.value === invoiceData.seller) ||
+            null
           }
           onChange={(selectedOption) =>
             setInvoiceData((prev) => ({
@@ -252,6 +306,7 @@ function ProformaInvoiceForm() {
         />
       </div>
 
+      {/* Buyer */}
       <div className="form-group">
         <label htmlFor="buyer">خریدار:</label>
         <Select
@@ -273,8 +328,9 @@ function ProformaInvoiceForm() {
         />
       </div>
 
+      {/* Invoice Number */}
       <div className="form-group">
-        <label htmlFor="invoice_number">شماره فاکتور:</label>
+        <label htmlFor="proforma_invoice_number">شماره فاکتور:</label>
         <input
           type="text"
           id="proforma_invoice_number"
@@ -285,6 +341,8 @@ function ProformaInvoiceForm() {
           required
         />
       </div>
+
+      {/* Invoice Date */}
       <div className="form-group">
         <label htmlFor="proforma_invoice_date">تاریخ فاکتور:</label>
         <input
@@ -296,6 +354,8 @@ function ProformaInvoiceForm() {
           required
         />
       </div>
+
+      {/* Invoice Expiration Date */}
       <div className="form-group">
         <label htmlFor="proforma_invoice_exp_date">تاریخ اعتبار:</label>
         <input
@@ -308,6 +368,7 @@ function ProformaInvoiceForm() {
         />
       </div>
 
+      {/* Invoice Currency */}
       <div className="form-group">
         <label htmlFor="proforma_invoice_currency">ارز:</label>
         <Select
@@ -332,6 +393,7 @@ function ProformaInvoiceForm() {
         />
       </div>
 
+      {/* Freight Charges */}
       <div className="form-group">
         <label htmlFor="proforma_freight_charges">هزینه حمل:</label>
         <input
@@ -341,24 +403,26 @@ function ProformaInvoiceForm() {
           value={invoiceData.proforma_freight_charges}
           onChange={handleChange}
           placeholder="هزینه حمل"
-          onWheel={(e) => e.target.blur()}  // <-- add this line
-
+          onWheel={(e) => e.target.blur()}
         />
       </div>
+
+      {/* Partial Shipment */}
       <div className="form-group">
         <label htmlFor="partial_shipment">حمل به دفعات:</label>
         <input
           type="checkbox"
           id="partial_shipment"
           name="partial_shipment"
-          checked={invoiceData.partial_shipment} // Use checked instead of value
-          onChange={handleChange} // Correctly update state
+          checked={invoiceData.partial_shipment}
+          onChange={handleChange}
         />
       </div>
 
+      {/* Country of Origin (Multi) */}
       <div className="form-group">
-      <label htmlFor="country_of_origin"> کشور مبدأ</label>
-      <Select
+        <label htmlFor="country_of_origin">کشور مبدأ</label>
+        <Select
           className="selectPrf"
           id="country_of_origin"
           name="country_of_origin"
@@ -366,17 +430,12 @@ function ProformaInvoiceForm() {
           isMulti
           value={
             invoiceData.country_of_origin
-              ? invoiceData.country_of_origin
-                  .split("-")
-                  .map((val) =>
-                    countryOptions.find(
-                      (option) => option.value === val.trim()
-                    )
-                  )
+              ? invoiceData.country_of_origin.split("-").map((val) =>
+                  countryOptions.find((option) => option.value === val.trim())
+                )
               : []
           }
           onChange={(selectedOptions) => {
-            // When user changes selection, join the option values with "-"
             const selectedValues = selectedOptions
               ? selectedOptions.map((option) => option.value)
               : [];
@@ -389,10 +448,10 @@ function ProformaInvoiceForm() {
         />
       </div>
 
-
+      {/* Port of Loading (Multi) */}
       <div className="form-group">
-      <label htmlFor="port_of_loading"> بندر بارگیری:</label>
-      <Select
+        <label htmlFor="port_of_loading">بندر بارگیری:</label>
+        <Select
           className="selectPrf"
           id="port_of_loading"
           name="port_of_loading"
@@ -400,17 +459,12 @@ function ProformaInvoiceForm() {
           isMulti
           value={
             invoiceData.port_of_loading
-              ? invoiceData.port_of_loading
-                  .split("-")
-                  .map((val) =>
-                    countryOptions.find(
-                      (option) => option.value === val.trim()
-                    )
-                  )
+              ? invoiceData.port_of_loading.split("-").map((val) =>
+                  countryOptions.find((option) => option.value === val.trim())
+                )
               : []
           }
           onChange={(selectedOptions) => {
-            // When user changes selection, join the option values with "-"
             const selectedValues = selectedOptions
               ? selectedOptions.map((option) => option.value)
               : [];
@@ -423,6 +477,7 @@ function ProformaInvoiceForm() {
         />
       </div>
 
+      {/* Terms of Delivery */}
       <div className="form-group">
         <label htmlFor="terms_of_delivery">شرایط تحویل:</label>
         <Select
@@ -444,6 +499,8 @@ function ProformaInvoiceForm() {
           placeholder="انتخاب شرایط تحویل"
         />
       </div>
+
+      {/* Terms of Payment */}
       <div className="form-group">
         <label htmlFor="terms_of_payment">شرایط پرداخت:</label>
         <Select
@@ -465,11 +522,13 @@ function ProformaInvoiceForm() {
           placeholder="انتخاب شرایط پرداخت"
         />
       </div>
+
+      {/* Standard */}
       <div className="form-group">
         <label htmlFor="standard">استاندارد:</label>
         <Select
           id="standard"
-          name="stabdard"
+          name="standard"
           options={standardOptions}
           className="selectPrf"
           value={
@@ -480,13 +539,14 @@ function ProformaInvoiceForm() {
           onChange={(selectedOption) =>
             setInvoiceData((prev) => ({
               ...prev,
-              terms_of_payment: selectedOption ? selectedOption.value : "",
+              standard: selectedOption ? selectedOption.value : "",
             }))
           }
           placeholder="انتخاب استاندارد"
         />
       </div>
 
+      {/* Means of Transport (Multi) */}
       <div className="form-group">
         <label htmlFor="means_of_transport">وسیله حمل:</label>
         <Select
@@ -497,17 +557,14 @@ function ProformaInvoiceForm() {
           options={meansOfTransportOptions}
           value={
             invoiceData.means_of_transport
-              ? invoiceData.means_of_transport
-                  .split("-")
-                  .map((val) =>
-                    meansOfTransportOptions.find(
-                      (option) => option.value === val.trim()
-                    )
+              ? invoiceData.means_of_transport.split("-").map((val) =>
+                  meansOfTransportOptions.find(
+                    (option) => option.value === val.trim()
                   )
+                )
               : []
           }
           onChange={(selectedOptions) => {
-            // When user changes selection, join the option values with "-"
             const selectedValues = selectedOptions
               ? selectedOptions.map((option) => option.value)
               : [];
@@ -520,6 +577,7 @@ function ProformaInvoiceForm() {
         />
       </div>
 
+      {/* Relevant Location (Iran Customs) */}
       <div className="form-group">
         <label htmlFor="relevant_location">گمرک مقصد:</label>
         <Select
@@ -530,17 +588,14 @@ function ProformaInvoiceForm() {
           isMulti
           value={
             invoiceData.relevant_location
-              ? invoiceData.relevant_location
-                  .split("-")
-                  .map((val) =>
-                    iranCustomsOptions.find(
-                      (option) => option.value === val.trim()
-                    )
+              ? invoiceData.relevant_location.split("-").map((val) =>
+                  iranCustomsOptions.find(
+                    (option) => option.value === val.trim()
                   )
+                )
               : []
           }
           onChange={(selectedOptions) => {
-            // When user changes selection, join the option values with "-"
             const selectedValues = selectedOptions
               ? selectedOptions.map((option) => option.value)
               : [];
@@ -551,6 +606,19 @@ function ProformaInvoiceForm() {
           }}
           placeholder="انتخاب گمرک مقصد"
         />
+      </div>
+
+      {/* Toggle for translating all items */}
+      <div className="form-group" style={{ margin: "1rem 0" }}>
+        <label>
+          <input
+            type="checkbox"
+            checked={enableTranslation}
+            onChange={handleToggleTranslation}
+            style={{ marginLeft: "0.5rem" }}
+          />
+          نمایش ترجمه انگلیسی تمامی اقلام
+        </label>
       </div>
 
       <h3>کالاها</h3>
@@ -564,22 +632,34 @@ function ProformaInvoiceForm() {
             marginBottom: "1rem",
           }}
         >
+          {/* Original Description */}
           <div className="form-group">
-            <label htmlFor={`description-${index}`}>شرح کالا:</label>
+            <label htmlFor={`original_description-${index}`}>شرح کالا:</label>
             <textarea
               className="form-textarea"
               autoCorrect="on"
               autoCapitalize="sentences"
               spellCheck={true}
-              id={`description-${index}`}
-              name="description"
-              value={item.description}
+              id={`original_description-${index}`}
+              name="original_description"
+              value={item.original_description}
               onChange={(e) => handleItemChange(index, e)}
               placeholder="شرح کالا"
               required
             />
           </div>
 
+          {/* Show translated text if translations are enabled */}
+          {enableTranslation && item.translated_description && (
+            <div className="form-group" style={{ marginBottom: "1rem" }}>
+              <label>ترجمه انگلیسی:</label>
+              <div className="translation-preview">
+                {item.translated_description}
+              </div>
+            </div>
+          )}
+
+          {/* Quantity */}
           <div className="form-group">
             <label htmlFor={`quantity-${index}`}>تعداد:</label>
             <input
@@ -590,11 +670,11 @@ function ProformaInvoiceForm() {
               onChange={(e) => handleItemChange(index, e)}
               placeholder="تعداد"
               required
-              onWheel={(e) => e.target.blur()}  // <-- add this line
-
+              onWheel={(e) => e.target.blur()}
             />
           </div>
 
+          {/* Unit Price */}
           <div className="form-group">
             <label htmlFor={`unit_price-${index}`}>قیمت واحد:</label>
             <input
@@ -606,11 +686,11 @@ function ProformaInvoiceForm() {
               onChange={(e) => handleItemChange(index, e)}
               placeholder="قیمت واحد"
               required
-              onWheel={(e) => e.target.blur()}  // <-- add this line
-
+              onWheel={(e) => e.target.blur()}
             />
           </div>
 
+          {/* Commodity Code (HS) */}
           <div className="form-group">
             <label htmlFor={`commodity_code-${index}`}>کد کالا (HS):</label>
             <input
@@ -621,20 +701,19 @@ function ProformaInvoiceForm() {
               value={item.commodity_code}
               onChange={(e) => handleItemChange(index, e)}
               placeholder="کد کالا"
-              onWheel={(e) => e.target.blur()}  // <-- add this line
-
+              onWheel={(e) => e.target.blur()}
             />
           </div>
+
+          {/* Unit */}
           <div className="form-group">
-            <label htmlFor="unit">واحد:</label>
+            <label htmlFor={`unit-${index}`}>واحد:</label>
             <Select
               id={`unit-${index}`}
               name="unit"
               options={unitOptions}
               className="selectPrf"
-              value={
-                unitOptions.find((option) => option.value === item.unit) || null
-              }
+              value={unitOptions.find((opt) => opt.value === item.unit) || null}
               onChange={(selectedOption) =>
                 setInvoiceData((prev) => {
                   const updatedItems = [...prev.items];
@@ -648,6 +727,7 @@ function ProformaInvoiceForm() {
             />
           </div>
 
+          {/* NW (kg) */}
           <div className="form-group">
             <label htmlFor={`nw_kg-${index}`}>وزن خالص (کیلوگرم):</label>
             <input
@@ -658,11 +738,11 @@ function ProformaInvoiceForm() {
               value={item.nw_kg}
               onChange={(e) => handleItemChange(index, e)}
               placeholder="وزن خالص"
-              onWheel={(e) => e.target.blur()}  // <-- add this line
-
+              onWheel={(e) => e.target.blur()}
             />
           </div>
 
+          {/* GW (kg) */}
           <div className="form-group">
             <label htmlFor={`gw_kg-${index}`}>وزن ناخالص (کیلوگرم):</label>
             <input
@@ -673,22 +753,20 @@ function ProformaInvoiceForm() {
               value={item.gw_kg}
               onChange={(e) => handleItemChange(index, e)}
               placeholder="وزن ناخالص"
-              onWheel={(e) => e.target.blur()}  // <-- add this line
-
+              onWheel={(e) => e.target.blur()}
             />
           </div>
 
+          {/* Origin */}
           <div className="form-group">
-          <label htmlFor={`origin-${index}`}>مبدأ:</label>
-          <Select
+            <label htmlFor={`origin-${index}`}>مبدأ:</label>
+            <Select
               id={`origin-${index}`}
               name="origin"
               options={countryOptions}
               className="selectPrf"
               value={
-                countryOptions.find(
-                  (option) => option.value === item.origin
-                ) || null
+                countryOptions.find((opt) => opt.value === item.origin) || null
               }
               onChange={(selectedOption) =>
                 setInvoiceData((prev) => {
@@ -703,18 +781,17 @@ function ProformaInvoiceForm() {
             />
           </div>
 
-
+          {/* Customer */}
           <div className="form-group">
-            <label htmlFor="customer">مشتری:</label>
+            <label htmlFor={`customer-${index}`}>مشتری:</label>
             <Select
               id={`customer-${index}`}
               name="customer"
               options={customerOptions}
               className="selectPrf"
               value={
-                customerOptions.find(
-                  (option) => option.value === item.customer
-                ) || null
+                customerOptions.find((opt) => opt.value === item.customer) ||
+                null
               }
               onChange={(selectedOption) =>
                 setInvoiceData((prev) => {
@@ -728,6 +805,8 @@ function ProformaInvoiceForm() {
               placeholder="انتخاب مشتری"
             />
           </div>
+
+          {/* Remove Item Button */}
           <button
             type="button"
             onClick={() => removeItemRow(index)}
@@ -738,12 +817,15 @@ function ProformaInvoiceForm() {
         </div>
       ))}
 
+      {/* Add Item Button */}
       <button type="button" onClick={addItemRow} className="btn-grad1">
         افزودن کالا
       </button>
 
       <br />
       <br />
+
+      {/* Submit Button */}
       <button type="submit" className="btn-grad1">
         ذخیره فاکتور
       </button>

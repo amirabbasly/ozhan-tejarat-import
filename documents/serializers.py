@@ -104,7 +104,8 @@ class ProformaInvoiceItemSerializer(serializers.ModelSerializer):
         model = ProformaInvoiceItem
         fields = [
             'id',
-            'description',
+            'original_description',
+            'translated_description',
             'quantity',
             'unit_price',
             'line_total',

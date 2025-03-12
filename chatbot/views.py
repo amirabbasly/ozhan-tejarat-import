@@ -13,6 +13,81 @@ GEMINI_API_URL = (
     "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
     f"?key={API_KEY}"
 )
+class TranslateToEnglishView(APIView):
+    """
+    Translate Farsi text to English in a foreign trade context using Gemini.
+    Expects JSON: { "text": "متن فارسی" }
+    Returns JSON: { "translation": "English translation" }
+    """
+
+    def post(self, request, *args, **kwargs):
+        # 1. Validate request data
+        farsi_text = request.data.get("text", "").strip()
+        if not farsi_text:
+            return Response(
+                {"error": "No text provided."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # 2. Build the Gemini prompt in Farsi
+        prompt_text = f"""
+        لطفا متن زیر را در زمینه تجارت خارجی از فارسی به انگلیسی ترجمه کن:
+        {farsi_text}
+
+        فقط یک پاسخ بازگردان، بدون توضیحات اضافه.
+        """
+
+        # 3. Prepare the request data in the same structure as your working chatbot view
+        data = {
+            "contents": [
+                {
+                    "parts": [
+                        {
+                            "text": prompt_text
+                        }
+                    ]
+                }
+            ]
+        }
+
+        # 4. Call Gemini API
+        try:
+            response = requests.post(
+                GEMINI_API_URL,
+                json=data,
+                headers={"Content-Type": "application/json"},
+                verify=False  # For dev only; configure properly in production
+            )
+        except requests.exceptions.RequestException as e:
+            return Response(
+                {"error": f"Connection error: {e}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        # 5. Parse the Gemini response
+        if response.status_code == 200:
+            try:
+                response_data = response.json()
+                # Typically: {"candidates": [{"content": {"parts": [{"text": "..."}]}}]}
+                candidates = response_data.get("candidates", [])
+                if candidates:
+                    parts = candidates[0].get("content", {}).get("parts", [])
+                    if parts:
+                        translated_text = parts[0].get("text", "").strip()
+                        return Response({"translation": translated_text}, status=status.HTTP_200_OK)
+                # If we got here, we didn't find any valid text in the response
+                return Response({"translation": ""}, status=status.HTTP_200_OK)
+
+            except ValueError:
+                return Response(
+                    {"error": "Invalid JSON returned by Gemini."},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        else:
+            return Response(
+                {"error": f"Gemini error {response.status_code}: {response.text}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 class ChatbotAPIView(APIView):
     """
@@ -201,3 +276,63 @@ class ChatbotAPIView(APIView):
                 {"error": f"خطا در برقراری ارتباط با Gemini: {e}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+def translate_farsi_to_english(farsi_text: str) -> str:
+    """
+    Translate Farsi text to English in a foreign trade context,
+    using the same 'contents' -> 'parts' JSON structure that
+    works with your Gemini endpoint.
+    """
+    # Prompt instructing Gemini to translate from Farsi to English.
+    prompt_text = f"""
+                        "You are a translator. "
+                        "Translate the following text from Farsi to English in international import/export and customs context. "
+                        "Output ONLY the translated word or phrase in international import/export and customs context. "
+                        "No explanations. No commentary.\n\n
+    {farsi_text}
+    """
+
+    # Follow your working ChatbotAPIView structure:
+    data = {
+        "contents": [
+            {
+                "parts": [
+                    {
+                        "text": prompt_text
+                    }
+                ]
+            }
+        ]
+    }
+
+    try:
+        response = requests.post(
+            GEMINI_API_URL,
+            json=data,
+            headers={"Content-Type": "application/json"},
+            verify=False  # same as in your working code; remove or handle securely in prod
+        )
+
+        # Check for success
+        if response.status_code == 200:
+            response_data = response.json()
+            # The structure you expect: response_data["candidates"][0]["content"]["parts"][0]["text"]
+            candidates = response_data.get("candidates", [])
+            if not candidates:
+                return ""  # or raise an exception, your choice
+
+            content_data = candidates[0].get("content", {})
+            parts = content_data.get("parts", [])
+            if not parts:
+                return ""
+
+            translated_text = parts[0].get("text", "").strip()
+            return translated_text
+        else:
+            # Handle non-200 status codes
+            raise Exception(
+                f"Gemini returned status {response.status_code}: {response.text}"
+            )
+
+    except requests.exceptions.RequestException as e:
+        # Handle network or request errors
+        raise Exception(f"Error connecting to Gemini: {e}")

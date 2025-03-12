@@ -30,4 +30,4 @@ class ProformaInvoiceAdmin(admin.ModelAdmin):
 
 @admin.register(ProformaInvoiceItem)
 class ProformaInvoiceItemAdmin(admin.ModelAdmin):
-   list_display = ("description",)
+   list_display = ("original_description",)

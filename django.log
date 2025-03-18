@@ -1,0 +1,109 @@
+INFO 2025-03-17 00:30:25,624 basehttp 644 11016 "POST /api/documents/create-order/ HTTP/1.1" 200 1861
+INFO 2025-03-17 00:34:39,410 autoreload 644 9344 D:\OzhanTejarat\documents\automation.py changed, reloading.
+INFO 2025-03-17 00:34:44,134 autoreload 16264 17088 Watching for file changes with StatReloader
+WARNING 2025-03-17 00:34:48,120 basehttp 16264 3904 "POST /api/documents/create-order/ HTTP/1.1" 401 183
+INFO 2025-03-17 00:34:48,136 basehttp 16264 3904 "POST /api/accounts/token/refresh/ HTTP/1.1" 200 241
+INFO 2025-03-17 00:34:48,167 basehttp 16264 3904 "POST /api/documents/create-order/ HTTP/1.1" 200 949
+INFO 2025-03-17 00:34:52,245 basehttp 16264 3904 "POST /api/documents/create-order/ HTTP/1.1" 200 949
+INFO 2025-03-17 00:35:28,675 autoreload 16264 17088 D:\OzhanTejarat\documents\automation.py changed, reloading.
+INFO 2025-03-17 00:35:29,355 autoreload 15100 8688 Watching for file changes with StatReloader
+INFO 2025-03-17 00:37:07,905 autoreload 15100 8688 D:\OzhanTejarat\documents\automation.py changed, reloading.
+INFO 2025-03-17 00:37:08,571 autoreload 7760 8680 Watching for file changes with StatReloader
+INFO 2025-03-17 00:38:11,328 basehttp 7760 17024 "POST /api/documents/create-order/ HTTP/1.1" 200 932
+INFO 2025-03-17 00:40:07,151 autoreload 7760 8680 D:\OzhanTejarat\documents\automation.py changed, reloading.
+INFO 2025-03-17 00:40:09,863 autoreload 17336 4920 Watching for file changes with StatReloader
+INFO 2025-03-17 00:41:32,405 basehttp 17336 13828 "POST /api/documents/create-order/ HTTP/1.1" 200 932
+INFO 2025-03-17 00:41:49,910 basehttp 17336 13828 "OPTIONS /api/documents/create-order/ HTTP/1.1" 200 0
+INFO 2025-03-17 00:42:32,274 basehttp 17336 13828 "POST /api/documents/create-order/ HTTP/1.1" 200 948
+INFO 2025-03-17 00:49:58,396 basehttp 17336 15684 "POST /api/documents/create-order/ HTTP/1.1" 200 932
+INFO 2025-03-17 00:54:05,977 autoreload 17336 4920 D:\OzhanTejarat\documents\automation.py changed, reloading.
+INFO 2025-03-17 00:54:12,730 autoreload 16420 808 Watching for file changes with StatReloader
+WARNING 2025-03-17 00:54:28,700 basehttp 16420 12312 "POST /api/documents/create-order/ HTTP/1.1" 401 183
+INFO 2025-03-17 00:54:28,710 basehttp 16420 12312 "OPTIONS /api/accounts/token/refresh/ HTTP/1.1" 200 0
+INFO 2025-03-17 00:54:28,712 basehttp 16420 12312 "POST /api/accounts/token/refresh/ HTTP/1.1" 200 241
+INFO 2025-03-17 00:54:28,747 basehttp 16420 12312 "POST /api/documents/create-order/ HTTP/1.1" 200 894
+INFO 2025-03-17 00:54:36,531 basehttp 16420 12312 "POST /api/documents/create-order/ HTTP/1.1" 200 894
+INFO 2025-03-17 00:55:35,364 autoreload 16420 808 D:\OzhanTejarat\documents\automation.py changed, reloading.
+INFO 2025-03-17 00:55:36,000 autoreload 16532 9392 Watching for file changes with StatReloader
+INFO 2025-03-17 00:55:41,749 basehttp 16532 1756 "POST /api/documents/create-order/ HTTP/1.1" 200 894
+INFO 2025-03-17 00:55:47,150 basehttp 16532 1756 "POST /api/documents/create-order/ HTTP/1.1" 200 894
+INFO 2025-03-17 00:57:01,553 autoreload 16532 9392 D:\OzhanTejarat\documents\automation.py changed, reloading.
+INFO 2025-03-17 00:57:02,229 autoreload 7784 4604 Watching for file changes with StatReloader
+INFO 2025-03-17 00:58:35,648 basehttp 7784 11404 "POST /api/documents/create-order/ HTTP/1.1" 200 932
+INFO 2025-03-17 00:59:54,250 autoreload 7784 4604 D:\OzhanTejarat\documents\automation.py changed, reloading.
+INFO 2025-03-17 00:59:57,001 autoreload 1136 3624 Watching for file changes with StatReloader
+INFO 2025-03-17 01:01:12,720 basehttp 1136 8832 "POST /api/documents/create-order/ HTTP/1.1" 200 1789
+INFO 2025-03-17 01:02:50,048 autoreload 1136 3624 D:\OzhanTejarat\documents\automation.py changed, reloading.
+INFO 2025-03-17 01:02:52,725 autoreload 7576 5948 Watching for file changes with StatReloader
+INFO 2025-03-17 01:04:21,322 basehttp 7576 10592 "POST /api/documents/create-order/ HTTP/1.1" 200 932
+INFO 2025-03-17 01:05:17,605 autoreload 7576 5948 D:\OzhanTejarat\documents\automation.py changed, reloading.
+INFO 2025-03-17 01:05:20,336 autoreload 8308 5860 Watching for file changes with StatReloader
+INFO 2025-03-17 01:06:54,134 basehttp 8308 10572 "POST /api/documents/create-order/ HTTP/1.1" 200 1789
+INFO 2025-03-17 01:07:48,342 basehttp 8308 10572 "POST /api/documents/create-order/ HTTP/1.1" 200 932
+WARNING 2025-03-17 01:41:53,672 basehttp 8308 16548 "POST /api/documents/create-order/ HTTP/1.1" 401 183
+INFO 2025-03-17 01:41:53,694 basehttp 8308 16548 "POST /api/accounts/token/refresh/ HTTP/1.1" 200 241
+INFO 2025-03-17 01:42:53,015 basehttp 8308 16548 "POST /api/documents/create-order/ HTTP/1.1" 200 932
+WARNING 2025-03-17 02:36:44,773 basehttp 8308 15732 "POST /api/documents/create-order/ HTTP/1.1" 401 183
+INFO 2025-03-17 02:36:44,786 basehttp 8308 15732 "POST /api/accounts/token/refresh/ HTTP/1.1" 200 241
+INFO 2025-03-17 02:38:01,939 basehttp 8308 15732 "POST /api/documents/create-order/ HTTP/1.1" 200 965
+INFO 2025-03-17 02:39:58,283 basehttp 8308 15732 "POST /api/documents/create-order/ HTTP/1.1" 200 932
+INFO 2025-03-17 02:42:00,338 autoreload 8308 5860 D:\OzhanTejarat\documents\automation.py changed, reloading.
+INFO 2025-03-17 02:42:05,064 autoreload 3328 7404 Watching for file changes with StatReloader
+INFO 2025-03-17 02:42:21,194 basehttp 3328 13684 "OPTIONS /api/documents/create-order/ HTTP/1.1" 200 0
+INFO 2025-03-17 02:44:30,346 basehttp 3328 13684 "POST /api/documents/create-order/ HTTP/1.1" 200 1841
+INFO 2025-03-17 02:45:10,468 basehttp 3328 13684 "POST /api/documents/create-order/ HTTP/1.1" 200 1841
+INFO 2025-03-17 02:49:04,374 basehttp 3328 13684 "POST /api/documents/create-order/ HTTP/1.1" 200 1915
+WARNING 2025-03-17 02:51:57,315 basehttp 3328 13684 "POST /api/documents/create-order/ HTTP/1.1" 401 183
+INFO 2025-03-17 02:51:57,331 basehttp 3328 13684 "POST /api/accounts/token/refresh/ HTTP/1.1" 200 241
+INFO 2025-03-17 02:57:15,764 basehttp 3328 13684 "POST /api/documents/create-order/ HTTP/1.1" 200 1789
+INFO 2025-03-17 02:58:04,458 basehttp 3328 10612 "POST /api/documents/create-order/ HTTP/1.1" 200 1915
+INFO 2025-03-17 02:58:45,398 basehttp 3328 9464 "POST /api/documents/create-order/ HTTP/1.1" 200 1915
+INFO 2025-03-17 03:01:23,801 basehttp 3328 10612 "POST /api/documents/create-order/ HTTP/1.1" 200 932
+WARNING 2025-03-17 03:07:00,432 basehttp 3328 11908 "POST /api/documents/create-order/ HTTP/1.1" 401 183
+INFO 2025-03-17 03:07:00,448 basehttp 3328 11908 "OPTIONS /api/accounts/token/refresh/ HTTP/1.1" 200 0
+INFO 2025-03-17 03:07:00,450 basehttp 3328 11908 "POST /api/accounts/token/refresh/ HTTP/1.1" 200 241
+INFO 2025-03-17 03:07:02,679 basehttp 3328 11908 "POST /api/documents/create-order/ HTTP/1.1" 200 1917
+INFO 2025-03-17 03:09:12,133 basehttp 3328 11908 "POST /api/documents/create-order/ HTTP/1.1" 200 1789
+INFO 2025-03-17 03:14:24,715 basehttp 3328 11908 "POST /api/documents/create-order/ HTTP/1.1" 200 1789
+WARNING 2025-03-17 03:31:14,410 basehttp 3328 5864 "POST /api/documents/create-order/ HTTP/1.1" 401 183
+INFO 2025-03-17 03:31:14,421 basehttp 3328 5864 "POST /api/accounts/token/refresh/ HTTP/1.1" 200 241
+INFO 2025-03-17 03:32:23,864 basehttp 3328 5864 "POST /api/documents/create-order/ HTTP/1.1" 200 965
+WARNING 2025-03-17 04:29:13,193 basehttp 3328 1704 "POST /api/documents/create-order/ HTTP/1.1" 401 183
+INFO 2025-03-17 04:29:13,207 basehttp 3328 1704 "POST /api/accounts/token/refresh/ HTTP/1.1" 200 241
+INFO 2025-03-17 04:31:18,070 basehttp 3328 1704 "POST /api/documents/create-order/ HTTP/1.1" 200 1005
+INFO 2025-03-17 04:58:22,130 basehttp 3328 14948 "OPTIONS /api/rep-dashboard/ HTTP/1.1" 200 0
+INFO 2025-03-17 04:58:22,130 basehttp 3328 4008 "OPTIONS /api/prf-summary/ HTTP/1.1" 200 0
+INFO 2025-03-17 04:58:22,131 basehttp 3328 8148 "OPTIONS /api/cot-summary/ HTTP/1.1" 200 0
+WARNING 2025-03-17 04:58:22,133 basehttp 3328 4008 "GET /api/rep-dashboard/ HTTP/1.1" 401 183
+WARNING 2025-03-17 04:58:22,133 basehttp 3328 8148 "GET /api/prf-summary/ HTTP/1.1" 401 183
+INFO 2025-03-17 04:58:22,136 basehttp 3328 8148 "OPTIONS /api/accounts/token/refresh/ HTTP/1.1" 200 0
+INFO 2025-03-17 04:58:22,138 basehttp 3328 8148 "POST /api/accounts/token/refresh/ HTTP/1.1" 200 241
+INFO 2025-03-17 04:58:22,177 basehttp 3328 4008 "GET /api/prf-summary/ HTTP/1.1" 200 398
+INFO 2025-03-17 04:58:22,178 basehttp 3328 8148 "GET /api/rep-dashboard/ HTTP/1.1" 200 167
+WARNING 2025-03-17 04:58:24,135 basehttp 3328 14948 "GET /api/cot-summary/ HTTP/1.1" 401 183
+INFO 2025-03-17 04:58:24,140 basehttp 3328 14948 "POST /api/accounts/token/refresh/ HTTP/1.1" 200 241
+INFO 2025-03-17 04:58:24,182 basehttp 3328 14948 "GET /api/cot-summary/ HTTP/1.1" 200 106
+INFO 2025-03-17 04:58:30,095 basehttp 3328 14948 "OPTIONS /api/documents/proforma-invoices/ HTTP/1.1" 200 0
+INFO 2025-03-17 04:58:30,274 basehttp 3328 14948 "GET /api/documents/proforma-invoices/ HTTP/1.1" 200 1745
+INFO 2025-03-17 04:58:32,439 basehttp 3328 14948 "OPTIONS /api/documents/create-order/ HTTP/1.1" 200 0
+INFO 2025-03-17 04:59:36,403 basehttp 3328 14948 "POST /api/documents/create-order/ HTTP/1.1" 200 934
+INFO 2025-03-17 05:04:51,771 autoreload 3328 7404 D:\OzhanTejarat\documents\automation.py changed, reloading.
+INFO 2025-03-17 05:05:01,000 autoreload 4928 6268 Watching for file changes with StatReloader
+INFO 2025-03-17 05:06:45,846 basehttp 4928 7400 "POST /api/documents/create-order/ HTTP/1.1" 200 965
+INFO 2025-03-17 05:07:51,321 basehttp 4928 7400 "POST /api/documents/create-order/ HTTP/1.1" 200 1917
+INFO 2025-03-17 05:09:24,324 basehttp 4928 7400 "POST /api/documents/create-order/ HTTP/1.1" 200 932
+INFO 2025-03-17 05:11:29,455 autoreload 4928 6268 D:\OzhanTejarat\documents\automation.py changed, reloading.
+INFO 2025-03-17 05:11:36,201 autoreload 15732 2192 Watching for file changes with StatReloader
+INFO 2025-03-17 05:12:09,279 basehttp 15732 10780 "POST /api/documents/create-order/ HTTP/1.1" 200 948
+INFO 2025-03-17 05:13:18,598 basehttp 15732 10780 "POST /api/documents/create-order/ HTTP/1.1" 200 1861
+INFO 2025-03-17 05:13:28,276 basehttp 15732 10780 "OPTIONS /api/notifications/ HTTP/1.1" 200 0
+WARNING 2025-03-17 05:13:28,279 basehttp 15732 10780 "GET /api/notifications/ HTTP/1.1" 401 183
+INFO 2025-03-17 05:13:28,283 basehttp 15732 10780 "POST /api/accounts/token/refresh/ HTTP/1.1" 200 241
+INFO 2025-03-17 05:13:28,321 basehttp 15732 10780 "GET /api/notifications/ HTTP/1.1" 200 2092
+INFO 2025-03-17 05:13:38,969 autoreload 15732 2192 D:\OzhanTejarat\documents\automation.py changed, reloading.
+INFO 2025-03-17 05:13:39,600 autoreload 10980 4464 Watching for file changes with StatReloader
+INFO 2025-03-17 05:14:42,617 autoreload 10980 4464 D:\OzhanTejarat\documents\automation.py changed, reloading.
+INFO 2025-03-17 05:14:43,270 autoreload 928 16996 Watching for file changes with StatReloader
+INFO 2025-03-17 05:15:59,852 basehttp 928 5712 "POST /api/documents/create-order/ HTTP/1.1" 200 965
+INFO 2025-03-17 05:18:38,657 basehttp 928 5712 "POST /api/documents/create-order/ HTTP/1.1" 200 967
+INFO 2025-03-17 05:19:45,641 basehttp 928 5712 "POST /api/documents/create-order/ HTTP/1.1" 200 965

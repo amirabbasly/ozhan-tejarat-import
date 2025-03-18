@@ -132,7 +132,7 @@ class GreenCustomsDeclarationInputSerializer(serializers.Serializer):
 class CottageSaveSerializer(serializers.ModelSerializer):
     proforma = serializers.SlugRelatedField(
         queryset=Performa.objects.all(),
-        slug_field='prfVCodeInt'
+        slug_field='prf_order_no'
     )    
     # Override the cottage_date field to handle Jalali dates
     cottage_date = serializers.CharField()

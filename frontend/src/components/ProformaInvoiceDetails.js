@@ -307,7 +307,6 @@ const InvoiceDetails = ({
             onFieldChange("customer_tel", e.target.value)
           }
           placeholder="شماره مشتری را وارد کنید"
-          required
           className="editable-input"
         />
       </div>

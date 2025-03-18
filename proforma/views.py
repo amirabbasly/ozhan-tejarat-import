@@ -301,11 +301,11 @@ class UpdatePerformaView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
-    def patch(self, request, prf_order_no):
+    def patch(self, request, prfVCodeInt):
         try:
-            performa = Performa.objects.get(prf_order_no=prf_order_no)
+            performa = Performa.objects.get(prfVCodeInt=prfVCodeInt)
         except Performa.DoesNotExist:
-            logger.error(f"Performa with order number {prf_order_no} not found.")
+            logger.error(f"Performa with order number {prfVCodeInt} not found.")
             return Response({'error': 'Performa not found.'}, status=status.HTTP_404_NOT_FOUND)
 
         # Parsing dates for updating
@@ -329,10 +329,10 @@ class UpdatePerformaView(APIView):
         serializer = PerformaSerializer(performa, data=data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            logger.info(f"Updated Performa with order number {prf_order_no}")
+            logger.info(f"Updated Performa with order number {prfVCodeInt}")
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
-            logger.error(f"Validation error while updating Performa order number {prf_order_no}: {serializer.errors}")
+            logger.error(f"Validation error while updating Performa order number {prfVCodeInt}: {serializer.errors}")
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 class PerformaDeleteView(APIView):
     """

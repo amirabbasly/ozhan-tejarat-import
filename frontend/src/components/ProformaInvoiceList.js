@@ -17,10 +17,9 @@ function ProformaInvoiceList() {
     try {
       // Pass the template_id as a query parameter in the URL
       const response = await axiosInstance.get(
-        `documents/proforma-invoice/${invoiceId}/pdf`, // Passing template_id in the URL
+        `documents/proforma-invoice/${invoiceId}/pdf`, // Update if needed
         { responseType: "blob" }
       );
-
       const fileURL = window.URL.createObjectURL(new Blob([response.data]));
       const fileLink = document.createElement("a");
       fileLink.href = fileURL;
@@ -30,6 +29,18 @@ function ProformaInvoiceList() {
       fileLink.remove();
     } catch (error) {
       console.error("خطا در دانلود PDF:", error);
+    }
+  };
+
+  const registerOrder = async (invoiceId) => {
+    try {
+      // This endpoint should be implemented to handle coordinating order creation
+      const response = await axiosInstance.post("documents/create-order/", { invoice_id: invoiceId });
+      console.log("Order registered: ", response.data);
+      alert("سفارش هماهنگ با موفقیت ثبت شد.");
+    } catch (error) {
+      console.error("خطا در ثبت سفارش هماهنگ:", error);
+      alert("خطا در ثبت سفارش هماهنگ.");
     }
   };
 
@@ -47,6 +58,7 @@ function ProformaInvoiceList() {
             <th>تاریخ</th>
             <th>پروفورما</th>
             <th>جزئیات</th>
+            <th>ثبت سفارش هماهنگ</th>
           </tr>
         </thead>
         <tbody>
@@ -58,7 +70,6 @@ function ProformaInvoiceList() {
               <td>{inv.proforma_freight_charges}</td>
               <td>{inv.proforma_invoice_currency}</td>
               <td>{inv.proforma_invoice_date}</td>
-
               <td>
                 <button
                   className="invoice-list-btn"
@@ -68,12 +79,17 @@ function ProformaInvoiceList() {
                 </button>
               </td>
               <td>
-                <Link
-                  to={`/proforma-invoices/details/${inv.proforma_invoice_id}`}
-                >
-                  {" "}
+                <Link to={`/proforma-invoices/details/${inv.proforma_invoice_id}`}>
                   جزئیات
                 </Link>
+              </td>
+              <td>
+                <button
+                  className="invoice-list-btn"
+                  onClick={() => registerOrder(inv.id)}
+                >
+                  ثبت سفارش هماهنگ
+                </button>
               </td>
             </tr>
           ))}

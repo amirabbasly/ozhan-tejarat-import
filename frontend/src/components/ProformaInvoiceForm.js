@@ -610,15 +610,15 @@ function ProformaInvoiceForm() {
 
       {/* Toggle for translating all items */}
       <div className="form-group" style={{ margin: "1rem 0" }}>
-        <label>
+        <label>نمایش ترجمه انگلیسی تمامی اقلام
+        </label>
           <input
             type="checkbox"
             checked={enableTranslation}
             onChange={handleToggleTranslation}
             style={{ marginLeft: "0.5rem" }}
           />
-          نمایش ترجمه انگلیسی تمامی اقلام
-        </label>
+
       </div>
 
       <h3>کالاها</h3>

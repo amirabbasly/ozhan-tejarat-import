@@ -17,6 +17,7 @@ from reportlab.pdfgen import canvas
 from reportlab.platypus import (
     SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image as RLImage
 )
+from .automation import register_order_on_ntsw
 
 from rest_framework.decorators import action
 from reportlab.graphics.shapes import Drawing, Line
@@ -1191,7 +1192,7 @@ class ProformaInvoicePDFView(APIView):
         ]]
 
         for idx, item in enumerate(invoice.items.all(), 1):
-            description = Paragraph(item.description, styles["Cnt"])
+            description = Paragraph(item.translated_description, styles["Cnt"])
             origin = Paragraph(item.origin, styles["Cnt"])
             commodity_code = Paragraph(str(item.commodity_code), styles["Cnt"])
             nw_kg = str(item.nw_kg)
@@ -1417,3 +1418,33 @@ class CombinedPDFView(APIView):
         except Exception as e:
             print(f"PDF validation error: {e}")
             return False
+
+
+class OrderCreateAPIView(APIView):
+    """
+    API endpoint to register an order on ntsw.ir for an existing ProformaInvoice.
+    Expects a POST request with:
+      { "invoice_id": <id> }
+    """
+    def post(self, request, format=None):
+        invoice_id = request.data.get("invoice_id")
+        if not invoice_id:
+            return Response({"error": "invoice_id is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            invoice = ProformaInvoice.objects.get(id=invoice_id)
+        except ProformaInvoice.DoesNotExist:
+            return Response({"error": "Invoice not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Serialize the invoice to fill in all necessary details
+        serializer = ProformaInvoiceSerializer(invoice)
+        order_data = serializer.data
+        
+        # Call the Selenium automation function with the invoice details
+        automation_result = register_order_on_ntsw(order_data)
+        
+        return Response({
+            "status": "success",
+            "invoice": order_data,
+            "automation": automation_result,
+        }, status=status.HTTP_200_OK)

@@ -54,7 +54,6 @@ class Invoice(models.Model):
     total_amount = models.DecimalField(max_digits=20, decimal_places=2, default=0)
     invoice_date = models.DateField()
     customer_tel = models.CharField(max_length=15, null=True, blank=True)
-    # e.g. an automatically generated invoice number
     invoice_id = models.CharField(max_length=50, unique=True)
     invoice_number = models.CharField(max_length=50)
     freight_charges = models.DecimalField(max_digits=18, decimal_places=2)

@@ -46,7 +46,7 @@ function ProformaInvoiceList() {
 
   return (
     <div className="invoice-list-container">
-      <h2>فهرست فاکتور ها</h2>
+      <h2>فهرست پروفورما ها</h2>
       <table className="invoice-list-table">
         <thead>
           <tr>

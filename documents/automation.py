@@ -82,7 +82,7 @@ def register_order_on_ntsw(order_data):
             driver.execute_script("arguments[0].scrollIntoView(true);", input_field)
             print("[DEBUG] Found input field. Clicking to open date picker.")
             ActionChains(driver).move_to_element(input_field).click().perform()
-            time.sleep(1)  # Let the date picker open
+            time.sleep(1)  # Allow time for the date picker to open
 
             # 2) Wait for the date picker to be visible
             date_picker = WebDriverWait(driver, 10).until(
@@ -90,11 +90,9 @@ def register_order_on_ntsw(order_data):
             )
             print("[DEBUG] Date picker is now visible.")
 
-            # 3) Click the year switch element to move from day/month view to year selection
-            #    For example: <span tabindex="0" style="cursor: pointer;">۲۰۲۴</span>
+            # 3) Click the year switch element to move to year selection view
             year_switch = WebDriverWait(date_picker, 10).until(
                 EC.element_to_be_clickable(
-                    # target the 4-digit Persian year
                     (By.XPATH, ".//span[@tabindex='0' and string-length(normalize-space(text()))=4]")
                 )
             )
@@ -113,7 +111,7 @@ def register_order_on_ntsw(order_data):
             year_el.click()
             time.sleep(0.5)
 
-            # 5) Now click the month switch element to bring up the full month list (e.g. <span tabindex="0" style="cursor: pointer;">مارس</span>)
+            # 5) Click the month switch element to display the full month list
             print("[DEBUG] Clicking the month switch element so we can select the correct month.")
             month_switch = WebDriverWait(date_picker, 10).until(
                 EC.element_to_be_clickable(
@@ -151,12 +149,12 @@ def register_order_on_ntsw(order_data):
             raise e
 
     ###########################################################################
-    # Create the driver IN THIS SCOPE
+    # Create the driver within this scope
     ###########################################################################
     chrome_options = Options()
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--ignore-certificate-errors")  # helps bypass SSL handshake failures
+    chrome_options.add_argument("--ignore-certificate-errors")
 
     driver = webdriver.Chrome(options=chrome_options)
 
@@ -170,7 +168,7 @@ def register_order_on_ntsw(order_data):
         )
         print("Manual login detected.")
 
-        # 2) Select 'بازرگان' & confirm
+        # 2) Select 'بازرگان' role & confirm
         WebDriverWait(driver, 20).until(
             EC.element_to_be_clickable((By.ID, "select2-roleSelector-container"))
         ).click()
@@ -179,7 +177,6 @@ def register_order_on_ntsw(order_data):
         ).click()
         print("Role 'بازرگان' selected.")
 
-        # Accept confirmation modal
         WebDriverWait(driver, 20).until(
             EC.element_to_be_clickable((By.ID, "btnAccept"))
         ).click()
@@ -189,24 +186,41 @@ def register_order_on_ntsw(order_data):
 
         # 3) Navigate to externalTradeFileManagement
         driver.get("https://www.ntsw.ir/Users/AC/Commercial/externalTradeFileManagement")
-        rows = WebDriverWait(driver, 30).until(
+        WebDriverWait(driver, 30).until(
             EC.presence_of_all_elements_located((By.CSS_SELECTOR, "tbody.ant-table-tbody > tr"))
         )
 
         # 4) Find invoice row & click 'جزئیات'
         invoice_number = order_data["proforma_invoice_number"].strip().lower()
         matched = False
-        for row in rows:
-            cells = row.find_elements(By.TAG_NAME, "td")
-            if len(cells) >= 3 and cells[2].text.strip().lower() == invoice_number:
-                details_btn = WebDriverWait(row, 10).until(
-                    EC.element_to_be_clickable((By.XPATH, ".//button[contains(text(),'جزئیات')]"))
-                )
-                driver.execute_script("arguments[0].click();", details_btn)
-                matched = True
-                break
+        max_attempts = 3
+        attempt = 0
+
+        while attempt < max_attempts and not matched:
+            rows = WebDriverWait(driver, 30).until(
+                EC.presence_of_all_elements_located((By.CSS_SELECTOR, "tbody.ant-table-tbody > tr"))
+            )
+            print(f"[DEBUG] Attempt {attempt + 1}: Checking {len(rows)} rows for invoice '{invoice_number}'")
+            for row in rows:
+                cells = row.find_elements(By.TAG_NAME, "td")
+                if len(cells) >= 3:
+                    cell_value = cells[2].text.strip().lower()
+                    print(f"[DEBUG] Found invoice in row: '{cell_value}'")
+                    if cell_value == invoice_number:
+                        details_btn = WebDriverWait(row, 10).until(
+                            EC.element_to_be_clickable((By.XPATH, ".//button[contains(text(),'جزئیات')]"))
+                        )
+                        driver.execute_script("arguments[0].click();", details_btn)
+                        matched = True
+                        print("[DEBUG] Invoice found and details button clicked.")
+                        break
+            if not matched:
+                attempt += 1
+                print(f"[DEBUG] Invoice not found on attempt {attempt}. Retrying after a brief pause...")
+                time.sleep(2)
+
         if not matched:
-            raise Exception(f"Invoice '{invoice_number}' not found.")
+            raise Exception(f"Invoice '{invoice_number}' not found after {max_attempts} attempts.")
 
         # Click 'ویرایش پرونده'
         edit_button = WebDriverWait(driver, 20).until(
@@ -242,6 +256,6 @@ def register_order_on_ntsw(order_data):
         return {"status": "error", "message": str(e)}
 
     finally:
-        # Uncomment this if you wish to close the browser automatically
+        # Uncomment the following line to close the browser automatically after execution
         # driver.quit()
         pass

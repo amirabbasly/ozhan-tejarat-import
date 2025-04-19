@@ -11,12 +11,6 @@ import { countries } from "../data/countryList";
 
 function ProformaInvoiceForm() {
   const navigate = useNavigate();
-  const costumerstate = useSelector((state) => state.costumers);
-  const { costumerList, customersLoading, customersError } = costumerstate || {
-    costumerList: [],
-    costumersLoading: false,
-    costumersError: null,
-  };
 
   const dispatch = useDispatch();
 
@@ -77,10 +71,7 @@ function ProformaInvoiceForm() {
   // Fetch sellers & buyers to populate dropdowns
   const [sellers, setSellers] = useState([]);
   const [buyers, setBuyers] = useState([]);
-  const customerOptions = costumerList.map((cmr) => ({
-    value: cmr.id,
-    label: cmr.full_name,
-  }));
+
 
   useEffect(() => {
     // Fetch sellers
@@ -249,14 +240,22 @@ function ProformaInvoiceForm() {
   };
 
   // Submit the form
+  // Submit the form
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // build payload, respecting enableTranslation
     const payload = {
       ...invoiceData,
       proforma_freight_charges:
         parseFloat(invoiceData.proforma_freight_charges) || 0,
       items: invoiceData.items.map((item) => ({
-        original_description: item.original_description,
+        // decide which description goes where
+        original_description: enableTranslation
+          ? item.original_description
+          : null,
+        translated_description: enableTranslation
+          ? item.translated_description
+          : item.original_description,
         quantity: parseInt(item.quantity, 10) || 0,
         unit_price: parseFloat(item.unit_price) || 0,
         nw_kg: parseFloat(item.nw_kg) || 0,
@@ -265,8 +264,6 @@ function ProformaInvoiceForm() {
         pack: parseInt(item.pack, 10) || 0,
         unit: item.unit,
         origin: item.origin,
-        // If you want to store the translation in the DB, include it here
-        // translated_description: item.translated_description
       })),
     };
 
@@ -279,6 +276,7 @@ function ProformaInvoiceForm() {
       alert("ایجاد فاکتور با خطا مواجه شد.");
     }
   };
+
 
   return (
     <form className="cottage-form" dir="rtl" onSubmit={handleSubmit}>
@@ -781,30 +779,7 @@ function ProformaInvoiceForm() {
             />
           </div>
 
-          {/* Customer */}
-          <div className="form-group">
-            <label htmlFor={`customer-${index}`}>مشتری:</label>
-            <Select
-              id={`customer-${index}`}
-              name="customer"
-              options={customerOptions}
-              className="selectPrf"
-              value={
-                customerOptions.find((opt) => opt.value === item.customer) ||
-                null
-              }
-              onChange={(selectedOption) =>
-                setInvoiceData((prev) => {
-                  const updatedItems = [...prev.items];
-                  updatedItems[index].customer = selectedOption
-                    ? selectedOption.value
-                    : "";
-                  return { ...prev, items: updatedItems };
-                })
-              }
-              placeholder="انتخاب مشتری"
-            />
-          </div>
+
 
           {/* Remove Item Button */}
           <button

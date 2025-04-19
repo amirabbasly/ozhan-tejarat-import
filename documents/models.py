@@ -122,8 +122,8 @@ class ProformaInvoice(models.Model):
 
 class ProformaInvoiceItem(models.Model):
     proforma_invoice = models.ForeignKey(ProformaInvoice, related_name='items', on_delete=models.CASCADE)
-    original_description = models.TextField(max_length=1555)
-    translated_description = models.TextField(max_length=1555, blank=True, null=True)
+    original_description = models.TextField(max_length=1555, blank=True, null=True)
+    translated_description = models.TextField(max_length=1555)
     quantity = models.DecimalField(default=1, max_digits=18, decimal_places=2)
     commodity_code = models.IntegerField(max_length=9)
     unit_price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
@@ -131,7 +131,6 @@ class ProformaInvoiceItem(models.Model):
     nw_kg = models.DecimalField(default=1, max_digits=12, decimal_places=2,)
     gw_kg = models.DecimalField(default=1, max_digits=12, decimal_places=2,)
     origin = models.CharField(max_length=55)
-    customer = models.ForeignKey(Costumer,null=True, blank=True, related_name='items', on_delete=models.SET_NULL)
 
 
     @property

@@ -4,13 +4,7 @@ import Select from "react-select";
 import { fetchCostumers } from "../actions/authActions";
 import { useDispatch, useSelector } from "react-redux";
 const ProformaInvoiceItemsEditor = ({ items, onItemsChange, unitOptions, countryOptions }) => {
-  const costumerstate = useSelector((state) => state.costumers);
 
-  const { costumerList, customersLoading, customersError } = costumerstate || {
-    costumerList: [],
-    costumersLoading: false,
-    costumersError: null,
-  };
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -41,10 +35,7 @@ const ProformaInvoiceItemsEditor = ({ items, onItemsChange, unitOptions, country
     setEditingItemIndex(null);
     setModalItemData({});
   };
-  const customerOptions = costumerList.map((cmr) => ({
-    value: cmr.id,
-    label: cmr.full_name,
-  }));
+
 
   // Handle modal input changes
   const handleModalChange = (e) => {
@@ -127,7 +118,7 @@ const ProformaInvoiceItemsEditor = ({ items, onItemsChange, unitOptions, country
                 <th>وزن خالص (کیلوگرم)</th>
                 <th>مبدأ</th>
                 <th>جمع خطی</th>
-                <th>مشتری</th>
+
 
                 <th>عملیات</th>
               </tr>
@@ -135,7 +126,7 @@ const ProformaInvoiceItemsEditor = ({ items, onItemsChange, unitOptions, country
             <tbody>
               {items.map((item, index) => (
                 <tr key={index}>
-                  <td>{item.description}</td>
+                  <td>{item.translated_description}</td>
                   <td>{item.quantity}</td>
                   <td>{item.commodity_code}</td>
                   <td>{item.unit_price}</td>
@@ -144,7 +135,6 @@ const ProformaInvoiceItemsEditor = ({ items, onItemsChange, unitOptions, country
                   <td>{item.nw_kg}</td>
                   <td>{item.origin}</td>
                   <td>{(item.quantity * item.unit_price).toFixed(2)}</td>
-                  <td>{item.customer ? item.customer.full_name : ""}</td>
 
                   <td>
                     <button
@@ -236,14 +226,27 @@ const ProformaInvoiceItemsEditor = ({ items, onItemsChange, unitOptions, country
           <div className="modal-content">
             <h3>ویرایش کالا</h3>
             <div className="form-group">
-              <label htmlFor="modal_description">شرح کالا:</label>
+              <label htmlFor="modal_description">شرح کالا لاتین:</label>
               <textarea
                 id="modal_description"
                 name="description"
                 className="form-textarea"
-                value={modalItemData.description || ""}
+                value={modalItemData.translated_description || ""}
                 onChange={handleModalChange}
                 placeholder="شرح کالا"
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="modal_description">شرح کالا فارسی:</label>
+              <textarea
+                id="modal_description"
+                name="description"
+                className="form-textarea"
+                value={modalItemData.original_description || ""}
+                onChange={handleModalChange}
+                placeholder="شرح کالا فارسی"
+                required
               />
             </div>
             <div className="form-group">
@@ -355,32 +358,7 @@ const ProformaInvoiceItemsEditor = ({ items, onItemsChange, unitOptions, country
                 placeholder="انتخاب مبدأ کالا"
               />
             </div>
-            <div className="form-group">
-              <label htmlFor="customer">مشتری:</label>
-              <Select
-                className="selectPrf"
-                id="customer"
-                name="customer"
-                options={customerOptions}
-                // remove isMulti or set it to false
-                value={
-                  customerOptions.find(
-                    (option) => option.value === modalItemData.customer
-                  ) || null
-                }
-                onChange={(selectedOption) => {
-                  // single select returns a single object or null
-                  if (!selectedOption) {
-                    // user cleared
-                    handleModalChange("customer", "");
-                    return;
-                  }
-                  // single object: no need to map
-                  handleSelectChange("customer", selectedOption.value);
-                }}
-                placeholder="انتخاب مشتری"
-              />
-            </div>
+
             <div style={{ marginTop: "1rem" }}>
               <button
                 type="button"

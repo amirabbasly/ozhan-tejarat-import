@@ -57,7 +57,6 @@ class CottageGoodsSerializer(serializers.ModelSerializer):
 class CottageSerializer(serializers.ModelSerializer):
     proforma = ProformaCSerializer(many=False, read_only=True)
     cottage_goods = CottageGoodsSerializer(many=True, read_only=False)
-    cottage_customer = serializers.PrimaryKeyRelatedField(queryset=Costumer.objects.all())
  
     # Override the cottage_date field to handle Jalali dates
     cottage_date = serializers.CharField()
@@ -72,6 +71,10 @@ class CottageSerializer(serializers.ModelSerializer):
             'cottage_status', 'rafee_taahod', 'documents', 'docs_recieved',
             'rewatch', 'id',"Intermediary", 'cottage_goods'
         ]
+        extra_kwargs = {
+            'cottage_customer': {'allow_null': True, 'required': False}
+        }
+
         read_only_fields = ['final_price','id']
 
     def get_documents(self, obj):
@@ -136,7 +139,8 @@ class CottageSaveSerializer(serializers.ModelSerializer):
     )    
     # Override the cottage_date field to handle Jalali dates
     cottage_date = serializers.CharField()
-    documents = serializers.SerializerMethodField()  # Use SerializerMethodField for full URL
+    documents = serializers.SerializerMethodField()  
+    # Use SerializerMethodField for full URL
 
     class Meta:
         model = Cottage
@@ -147,6 +151,9 @@ class CottageSaveSerializer(serializers.ModelSerializer):
             'rewatch', 'id'
         ]
         read_only_fields = ['final_price','id']
+        extra_kwargs = {
+            'cottage_customer': {'allow_null': True, 'required': False}
+        }
 
     def get_documents(self, obj):
         """

@@ -113,7 +113,6 @@ class ProformaInvoiceItemSerializer(serializers.ModelSerializer):
             'nw_kg',
             'gw_kg',
             'origin',
-            'customer',
             'commodity_code'
         ]
 

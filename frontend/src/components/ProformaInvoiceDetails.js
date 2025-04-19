@@ -84,7 +84,20 @@ const InvoiceDetails = ({
           id="proforma_invoice_date"
           name="proforma_invoice_date"
           value={invoice.proforma_invoice_date || ""}
-          onChange={(e) => onFieldChange("invoice_date", e.target.value)}
+          onChange={(e) => onFieldChange("proforma_invoice_date", e.target.value)}
+          required
+          className="editable-datepicker"
+        />
+      </div>
+            {/* Invoice exp Date */}
+            <div className="form-group">
+        <label htmlFor="proforma_invoice_date">تاریخ اعتبار فاکتور:</label>
+        <input
+          type="date"
+          id="proforma_exp_invoice_date"
+          name="proforma_exp_invoice_date"
+          value={invoice.proforma_invoice_exp_date || ""}
+          onChange={(e) => onFieldChange("proforma_invoice_exp_date", e.target.value)}
           required
           className="editable-datepicker"
         />
@@ -295,21 +308,7 @@ const InvoiceDetails = ({
           onChange={(e) => onFieldChange("partial_shipment", e.target.checked)}
         />
       </div>
-      {/* Invoice Number */}
-      <div className="form-group">
-        <label htmlFor="customer_tel">شماره مشتری:</label>
-        <input
-          type="text"
-          id="customer_tel"
-          name="customer_tel"
-          value={invoice.customer_tel || ""}
-          onChange={(e) =>
-            onFieldChange("customer_tel", e.target.value)
-          }
-          placeholder="شماره مشتری را وارد کنید"
-          className="editable-input"
-        />
-      </div>
+
       {/* Customs Destination */}
       <div className="form-group">
         <label htmlFor="relevant_location">گمرک مقصد:</label>

@@ -40,7 +40,9 @@ class JalaliDateField(serializers.Field):
         except (ValueError, TypeError) as e:
             raise serializers.ValidationError('Invalid date object.')
 class serializerForGoods(serializers.ModelSerializer):
-      class Meta:
+    proforma = ProformaCSerializer(many=False, read_only=True)
+    
+    class Meta:
         model = Cottage
         fields = [
             'cottage_number', 
@@ -183,3 +185,8 @@ class FetchCotageRemainAmountSerializer(serializers.Serializer):
     quantity = serializers.CharField(max_length=50)
     currency_type = serializers.CharField(max_length=50)
     status = serializers.CharField(max_length=50)
+
+class CottageNumberSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cottage
+        fields = ("id", "cottage_number")

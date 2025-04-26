@@ -9,7 +9,7 @@ from django.http import HttpResponse, JsonResponse
 from urllib.parse import urljoin
 from django.views.decorators.http import require_http_methods
 from django.middleware.csrf import get_token
-from .serializers import CottageSerializer,CottageGoodsSerializer ,CustomsDeclarationInputSerializer, GreenCustomsDeclarationInputSerializer, CottageSaveSerializer, ExportedCottagesSerializer, FetchCotageRemainAmountSerializer
+from .serializers import CottageSerializer,CottageGoodsSerializer ,CustomsDeclarationInputSerializer, GreenCustomsDeclarationInputSerializer, CottageSaveSerializer, ExportedCottagesSerializer, FetchCotageRemainAmountSerializer, CottageNumberSerializer
 import requests
 import logging
 from django.conf import settings
@@ -361,6 +361,7 @@ class CottageViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_class = CottageFilter
     search_fields = ["cottage_number", "proforma__prf_order_no",]  # fields you want to search
+
     def get_serializer_class(self):
         if self.action == 'post':
             return CottageSaveSerializer
@@ -380,6 +381,15 @@ class CottageViewSet(viewsets.ModelViewSet):
                 {"error": "Cottage not found."},
                 status=status.HTTP_404_NOT_FOUND
             )
+    @action(detail=False, methods=["get"], url_path="numbers")
+    def list_numbers(self, request):
+        """
+        /api/cottages/numbers/ → [{id:…, cottage_number:…}, …]
+        """
+        qs = self.get_queryset()
+        page = self.paginate_queryset(qs)
+        serializer = CottageNumberSerializer(page or qs, many=True)
+        return self.get_paginated_response(serializer.data) if page else Response(serializer.data)
 
 
     # New custom action to delete selected cottages

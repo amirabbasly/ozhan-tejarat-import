@@ -15,6 +15,7 @@ const InvoiceDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [cottages, setCottages] = useState([]);
 
   // Options for selects
   const currencyOptions = [
@@ -53,6 +54,7 @@ const InvoiceDetail = () => {
     { value: "M", label: "M" },
     { value: "PCS", label: "PCS" },
   ];
+  const cottageOptions = cottages.map((c) => ({ value: c.cottage_number, label: String(c.cottage_number) }));
 
   const sellerOptions = sellers.map((sel) => ({
     value: sel.id,
@@ -71,23 +73,35 @@ const InvoiceDetail = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const invoiceResponse = await axiosInstance.get(
-          `/documents/invoices/by-number/${invoiceNumber}/`
-        );
-        const [buyersResponse, sellersResponse] = await Promise.all([
-          axiosInstance.get("/documents/buyers/"),
+        const [
+          invoiceRes,
+          sellersRes,
+          buyersRes,
+          cottagesRes
+        ] = await Promise.all([
+          axiosInstance.get(`/documents/invoices/by-number/${invoiceNumber}/`),
           axiosInstance.get("/documents/sellers/"),
+          axiosInstance.get("/documents/buyers/"),
+          axiosInstance.get("cottages/numbers/"),
         ]);
-        setInvoice(invoiceResponse.data);
-        setBuyers(buyersResponse.data);
-        setSellers(sellersResponse.data);
+
+        setInvoice(invoiceRes.data);
+        setSellers(sellersRes.data);
+        setBuyers(buyersRes.data);
+        // Extract array of {id, cottage_number}
+        const list = Array.isArray(cottagesRes.data)
+          ? cottagesRes.data
+          : Array.isArray(cottagesRes.data.results)
+            ? cottagesRes.data.results
+            : [];
+        setCottages(list);
         setLoading(false);
       } catch (err) {
+        console.error(err);
         setError("خطا در دریافت اطلاعات");
         setLoading(false);
       }
     };
-
     fetchData();
   }, [invoiceNumber]);
 
@@ -145,7 +159,7 @@ const InvoiceDetail = () => {
           termsOfDeliveryOptions={termsOfDeliveryOptions}
           meansOfTransportOptions={meansOfTransportOptions}
           countryOptions={countryOptions}
-
+          cottageOptions={cottageOptions}  // pass new prop
         />
         <InvoiceItemsEditor
           items={invoice.items}

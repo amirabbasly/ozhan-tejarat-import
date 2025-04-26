@@ -32,10 +32,103 @@ def register_order_on_ntsw(order_data):
         '0': '۰', '1': '۱', '2': '۲', '3': '۳', '4': '۴',
         '5': '۵', '6': '۶', '7': '۷', '8': '۸', '9': '۹'
     }
+    
 
     def to_persian_digits(num_str):
         """Converts '2025' -> '۲۰۲۵' or '14' -> '۱۴' by mapping ASCII to Persian digits."""
         return ''.join(ascii_to_persian.get(ch, ch) for ch in num_str)
+
+    # ──────────────────────────────────────────────────────────────────────────────
+#  NEW HELPER  ➜  chooses "نوع قرارداد" that matches terms_of_delivery
+# ──────────────────────────────────────────────────────────────────────────────
+    def choose_contract_type(delivery_term: str):
+        """
+        Clicks the Ant‑Design dropdown labelled 'نوع قرارداد' and picks the exact
+        option whose text equals `delivery_term` (e.g. CPT, FOB, CIF …).
+        """
+        dropdown_css = "div[name='contractType'] .ant-select-selector"
+
+        # 1️⃣ open the dropdown
+        dropdown = WebDriverWait(driver, 20).until(
+            EC.element_to_be_clickable((By.CSS_SELECTOR, dropdown_css))
+        )
+        driver.execute_script("arguments[0].scrollIntoView(true);", dropdown)
+        dropdown.click()
+
+        # 2️⃣ the search box appears *inside* the open dropdown – type to filter
+        search_input = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located(
+                (By.CSS_SELECTOR, "input[aria-controls='contractType_list']"))
+        )
+        search_input.send_keys(delivery_term)
+
+        # 3️⃣ wait for matching option and click it
+        option_xpath = (
+            f"//div[@id='contractType_list']"
+            f"//div[contains(@class,'ant-select-item-option')"
+            f" and normalize-space()='{delivery_term}']"
+        )
+        option = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.XPATH, option_xpath))
+        )
+        option.click()
+    # ──────────────────────────────────────────────────────────────────────────────
+    def choose_shipping_methods(means_of_transport: str):
+        """
+        Accepts the DB string (e.g. 'By Vessel-By AirPlane'), converts each token
+        to its Persian counterpart, *clears* any pre‑selected tags, then selects
+        every requested option inside the Ant‑Design multiselect.
+        """
+        # ── normalise & map to Persian ────────────────────────────────────────────
+        targets = [
+            TRANSPORT_MAP[t.strip().lower()]
+            for t in means_of_transport.split("-")
+            if t.strip() and t.strip().lower() in TRANSPORT_MAP
+        ]
+        if not targets:
+            raise ValueError(f"No recognised transport modes in '{means_of_transport}'")
+
+        dropdown_css = "div[name='shippingMethods'] .ant-select-selector"
+
+        # ── 1️⃣ open the dropdown ────────────────────────────────────────────────
+        selector = WebDriverWait(driver, 20).until(
+            EC.element_to_be_clickable((By.CSS_SELECTOR, dropdown_css))
+        )
+        driver.execute_script("arguments[0].scrollIntoView(true);", selector)
+        selector.click()
+
+        # ── 2️⃣ clear any tags already selected (X icon on each tag) ─────────────
+        #     (ant renders the little close button as <span role="img"...>)
+        for close_icon in driver.find_elements(
+            By.CSS_SELECTOR,
+            "div[name='shippingMethods'] .ant-select-selection-item-remove"
+        ):
+            close_icon.click()
+
+        # ── 3️⃣ loop through required Persian labels and add them ────────────────
+        for label in targets:
+            # typing the label filters the list so it appears on top
+            search_input = WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located(
+                    (By.CSS_SELECTOR,
+                    "div[name='shippingMethods'] input[aria-controls='shippingMethods_list']")
+                )
+            )
+            # clear what was typed last iteration
+            search_input.clear()
+            search_input.send_keys(label)
+
+            option_xpath = (
+                f"//div[@id='shippingMethods_list']"
+                f"//div[contains(@class,'ant-select-item-option')"
+                f" and normalize-space()='{label}']"
+            )
+            option = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((By.XPATH, option_xpath))
+            )
+            option.click()
+
+
 
     ###########################################################################
     # 2) Month name map for numeric months -> Persian month names
@@ -45,6 +138,13 @@ def register_order_on_ntsw(order_data):
         5: "مه", 6: "ژوئن", 7: "ژوئیه", 8: "اوت",
         9: "سپتامبر", 10: "اکتبر", 11: "نوامبر", 12: "دسامبر"
     }
+    TRANSPORT_MAP = {
+    "by vessel":   "دریایی",
+    "by airplane": "هوایی",
+    "by truck":    "جاده ای",
+    "by train":    "ریلی",
+    }
+
 
     ###########################################################################
     # 3) parse_date: from "YYYY-MM-DD" or "YYYY/MM/DD" -> (persianYear, persianMonth, persianDay)
@@ -238,16 +338,26 @@ def register_order_on_ntsw(order_data):
         WebDriverWait(driver, 20).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "section.admin-layout"))
         )
+        time.sleep(2)  # Allow time for the date picker to open
 
         select_date(1, order_data["proforma_invoice_date"])    # تاریخ صدور پیش فاکتور
         select_date(2, order_data["proforma_invoice_exp_date"]) # تاریخ اعتبار پیش فاکتور
 
-        # 6) Click 'بعدی'
         next_button = WebDriverWait(driver, 20).until(
             EC.element_to_be_clickable((By.XPATH, "//button[contains(text(), 'بعدی')]"))
         )
         driver.execute_script("arguments[0].scrollIntoView(true);", next_button)
         next_button.click()
+
+        # 7) Wait until the second‑step form (گمرکی و حمل و نقل) is present
+        WebDriverWait(driver, 30).until(
+            EC.presence_of_element_located(
+                (By.XPATH, "//label[contains(., 'نوع قرارداد')]"))
+        )
+
+        # 8) Select the contract type that matches your terms_of_delivery
+        choose_contract_type(order_data["terms_of_delivery"])
+        choose_shipping_methods(order_data["means_of_transport"])
 
         return {"status": "success", "message": "Dates selected and proceeded to next step."}
 

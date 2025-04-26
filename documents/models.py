@@ -1,7 +1,7 @@
 from django.db import models
 from accounts.models import Costumer
 from chatbot.views import translate_farsi_to_english
-
+from cottage.models import Cottage
 
 class ImageTemplate(models.Model):
     name = models.CharField(max_length=255)
@@ -51,6 +51,7 @@ class Invoice(models.Model):
     seller = models.ForeignKey('Seller', on_delete=models.CASCADE)
     buyer = models.ForeignKey('Buyer', on_delete=models.CASCADE)
     sub_total = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+    cottage = models.ForeignKey(Cottage, to_field='cottage_number', on_delete=models.SET_NULL, null=True, blank=True)
     total_amount = models.DecimalField(max_digits=20, decimal_places=2, default=0)
     invoice_date = models.DateField()
     customer_tel = models.CharField(max_length=15, null=True, blank=True)

@@ -144,6 +144,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
             'id',
             'seller',
             'buyer',
+            'cottage',
             'invoice_id',       # Unique invoice ID
             'invoice_number',
             'freight_charges',

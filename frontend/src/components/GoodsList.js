@@ -122,7 +122,7 @@ const GoodsList = () => {
                     <tr key={good.id}>
                       <td>{index + 1}</td>
                       <td>{good.goodscode}</td>
-                      <td><Link to={`/order-details/${good.cottage.proforma}`}>{good.cottage.proforma}</Link></td>
+                      <td><Link to={`/order-details/${good.cottage.proforma.prfVCodeInt}`}>{good.cottage.proforma.prf_order_no}</Link></td>
                       <td><Link to={`/cottages/${good.cottage.cottage_number}`}>{good.cottage.cottage_number}</Link></td>
                       <td>{good.goods_description}</td>
                       <td>{good.quantity}</td>

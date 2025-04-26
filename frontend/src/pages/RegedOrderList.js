@@ -42,10 +42,11 @@ const RegedOrderList = () => {
   useEffect(() => {
     const filtered = orders.filter((order) => {
       const matchesSearchTerm =
-        searchTerm.trim() === '' ||
-        order.prf_order_no.toString().includes(searchTerm) ||
-        (order.prf_seller_name && order.prf_seller_name.includes(searchTerm)) ||
-        (order.prf_status && order.prf_status.includes(searchTerm));
+      searchTerm.trim() === '' ||
+      String(order.prf_order_no ?? '').includes(searchTerm) ||
+      (order.prf_seller_name ?? '').includes(searchTerm) ||
+      (order.prf_status ?? '').includes(searchTerm);
+    
   
       const matchesStatus =
         statusFilter === '' || (order.prf_status && order.prf_status === statusFilter);

@@ -12,6 +12,7 @@ const InvoiceDetails = ({
   termsOfDeliveryOptions,
   meansOfTransportOptions,
   countryOptions,
+  cottageOptions,
 }) => {
   const iranCustomsOptions = iranCustoms.map((custom) => ({
     value: custom.ctmNameStr, // or combine with ctmNameStr if needed
@@ -19,6 +20,18 @@ const InvoiceDetails = ({
   }));
   return (
     <div>
+            {/* Cottage selector */}
+            <div className="form-group">
+        <label htmlFor="cottage">شماره اظهارنامه:</label>
+        <Select
+          id="cottage"
+          name="cottage"
+          options={cottageOptions}
+          value={cottageOptions.find((o) => o.value === invoice.cottage) || null}
+          onChange={(opt) => onFieldChange("cottage", opt ? opt.value : "")}
+          placeholder="-- انتخاب شماره اظهارنامه --"
+        />
+      </div>
       {/* Seller */}
       <div className="form-group">
         <label htmlFor="seller">فروشنده:</label>

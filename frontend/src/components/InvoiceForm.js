@@ -30,10 +30,11 @@ function InvoiceForm() {
     { value: "By Vessel", label: "By Vessel" },
     { value: "By Train", label: "By Train" },
   ];
-    const countryOptions = countries.map((country) => ({
+   const countryOptions = countries.map((country) => ({
       value: country.name, // or combine with ctmNameStr if needed
       label: `${country.name} (${country.persianName})`,
     }));
+  const [cottages, setCottages] = useState([]);
 
   const termsOfDeliveryOptions = [
     { value: "CFR", label: "CFR" },
@@ -63,6 +64,7 @@ function InvoiceForm() {
   const [invoiceData, setInvoiceData] = useState({
     seller: "",
     buyer: "",
+    cottage: "",    
     invoice_number: "",
     invoice_currency: "AED", // default value
     freight_charges: 0,
@@ -92,6 +94,20 @@ function InvoiceForm() {
 
   useEffect(() => {
     // Fetch sellers
+    axiosInstance
+    .get("cottages/numbers/")
+    .then((res) => {
+      // if you used @action(detail=False) you'll get a paginated payload:
+      //    { count, next, previous, results: [ {id, cottage_number}, … ] }
+      // so drill into .results
+      const list = Array.isArray(res.data)
+        ? res.data
+        : Array.isArray(res.data.results)
+          ? res.data.results
+          : [];
+      setCottages(list);
+    })
+    .catch((err) => console.error(err));
     axiosInstance
       .get("documents/sellers/")
       .then((res) => setSellers(res.data))
@@ -167,6 +183,7 @@ function InvoiceForm() {
         commodity_code: item.commodity_code,
         pack: parseInt(item.pack, 10) || 0,
         unit: item.unit,
+        cottage: invoiceData.cottage,
         origin: item.origin,
       })),
     };
@@ -180,6 +197,10 @@ function InvoiceForm() {
       alert("ایجاد فاکتور با خطا مواجه شد.");
     }
   };
+  const cottageOptions = cottages.map((c) => ({
+    value: c.cottage_number,
+    label: c.cottage_number,
+  }));
 
   // Create options for ReactSelect from fetched sellers and buyers
   const sellerOptions = sellers.map((sel) => ({
@@ -195,7 +216,26 @@ function InvoiceForm() {
   return (
     <form className="cottage-form" dir="rtl" onSubmit={handleSubmit}>
       <h2>ایجاد فاکتور</h2>
-
+      {/* 4. Cottage selector */}
+      <div className="form-group">
+        <label htmlFor="cottage">اظهارنامه:</label>
+        <Select
+          id="cottage"
+          name="cottage"
+          options={cottageOptions}
+          value={
+            cottageOptions.find((opt) => opt.value === invoiceData.cottage) ||
+            null
+          }
+          onChange={(opt) =>
+            setInvoiceData((prev) => ({
+              ...prev,
+              cottage: opt ? opt.value : "",
+            }))
+          }
+          placeholder="-- انتخاب اظهارنامه --"
+        />
+      </div>
       <div className="form-group">
         <label htmlFor="seller">فروشنده:</label>
         <Select

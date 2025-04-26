@@ -30,6 +30,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 from PyPDF2 import PdfMerger
 from rest_framework.test import APIRequestFactory
 from django.http import HttpResponse, HttpRequest
+from rest_framework import filters
 
 class OverlayTextView(APIView):
     def post(self, request):
@@ -177,6 +178,8 @@ class BuyerViewSet(viewsets.ModelViewSet):
 class InvoiceViewSet(viewsets.ModelViewSet):
     queryset = Invoice.objects.all()
     serializer_class = InvoiceSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ["invoice_number", "invoice_id",]  # fields you want to search
 
     @action(detail=False, methods=['get'], url_path='by-number/(?P<invoice_id>[^/.]+)')
     def get_by_invoice_number(self, request, invoice_id=None):
@@ -193,7 +196,8 @@ class InvoiceViewSet(viewsets.ModelViewSet):
 class ProformaInvoiceViewSet(viewsets.ModelViewSet):
     queryset = ProformaInvoice.objects.all()
     serializer_class = ProformaInvoiceSerializer
-
+    filter_backends = [filters.SearchFilter]
+    search_fields = ["proforma_invoice_number", "proforma_invoice_id",]  # fields you want to search
     @action(detail=False, methods=['get'], url_path='by-number/(?P<proforma_invoice_id>[^/.]+)')
     def get_by_invoice_number(self, request, proforma_invoice_id=None):
         try:

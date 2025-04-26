@@ -2,124 +2,121 @@ import React, { useEffect, useState } from "react";
 import axiosInstance from "../utils/axiosInstance";
 import "./InvoiceList.css"; // Import the CSS file
 import { Link } from "react-router-dom";
+import PaginationControls from "./PaginationControls";
 
 function InvoiceList() {
   const [invoices, setInvoices] = useState([]);
+  const [count, setCount] = useState(0);
+  const [next, setNext] = useState(null);
+  const [previous, setPrevious] = useState(null);
   const [templates, setTemplates] = useState([]);
   const [selectedTemplate, setSelectedTemplate] = useState("");
 
+  // Server-side Search & Pagination state
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5); // adjust as needed
+  const pageSizeOptions = [5, 10, 20, 50, 100];
+
+  // Fetch templates once
   useEffect(() => {
     axiosInstance
-      .get("documents/invoices/")
-      .then((res) => setInvoices(res.data.results))
-      .catch((err) => console.error("خطا در دریافت صورتحساب‌ها:", err));
-
-    // دریافت قالب‌ها برای انتخاب
-    axiosInstance
-      .get("documents/templates/")
+      .get(`documents/templates/`)
       .then((res) => setTemplates(res.data))
       .catch((err) => console.error("خطا در دریافت قالب‌ها:", err));
   }, []);
 
-  const downloadPDF = async (invoiceId) => {
-    if (!selectedTemplate) {
-      alert("لطفاً ابتدا یک قالب انتخاب کنید.");
-      return;
-    }
+  // Fetch invoices whenever searchTerm, currentPage, or pageSize changes
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (searchTerm.trim()) params.append("search", searchTerm.trim());
+    params.append("page", currentPage);
+    params.append("page_size", pageSize);
 
-    try {
-      // Pass the template_id as a query parameter in the URL
-      const response = await axiosInstance.get(
-        `documents/combined-pdf/${invoiceId}/?template_id=${selectedTemplate}`, // Passing template_id in the URL
-        { responseType: "blob" }
-      );
+    axiosInstance
+      .get(`documents/invoices/?${params.toString()}`)
+      .then((res) => {
+        setInvoices(res.data.results);
+        setCount(res.data.count);
+        setNext(res.data.next);
+        setPrevious(res.data.previous);
+      })
+      .catch((err) => console.error("خطا در دریافت صورتحساب‌ها:", err));
+  }, [searchTerm, currentPage, pageSize]);
 
-      const fileURL = window.URL.createObjectURL(new Blob([response.data]));
-      const fileLink = document.createElement("a");
-      fileLink.href = fileURL;
-      fileLink.setAttribute("download", `invoice_${invoiceId}.pdf`);
-      document.body.appendChild(fileLink);
-      fileLink.click();
-      fileLink.remove();
-    } catch (error) {
-      console.error("خطا در دانلود PDF:", error);
-    }
+  // Calculate total pages from count
+  const totalPages = Math.ceil(count / pageSize);
+  const hasNext = !!next;
+  const hasPrevious = !!previous;
+
+  // Handlers
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1);
+  };
+  const handlePageChange = (e) => {
+    setCurrentPage(Number(e.target.value));
+  };
+  const handlePageSizeChange = (e) => {
+    setPageSize(Number(e.target.value));
+    setCurrentPage(1);
+  };
+  const handleNextPage = () => {
+    if (hasNext) setCurrentPage((prev) => prev + 1);
+  };
+  const handlePreviousPage = () => {
+    if (hasPrevious) setCurrentPage((prev) => prev - 1);
   };
 
-  const downloadPacking = async (invoiceId) => {
-    try {
-      const response = await axiosInstance.get(
-        `documents/packing/${invoiceId}/pdf/`,
-        { responseType: "blob" }
-      );
-
-      const fileURL = window.URL.createObjectURL(new Blob([response.data]));
-      const fileLink = document.createElement("a");
-      fileLink.href = fileURL;
-      fileLink.setAttribute("download", `packing_${invoiceId}.pdf`);
-      document.body.appendChild(fileLink);
-      fileLink.click();
-      fileLink.remove();
-    } catch (error) {
-      console.error("خطا در دانلود بسته‌بندی:", error);
-    }
-  };
-  const downloadInvoice = async (invoiceId) => {
-    try {
-      const response = await axiosInstance.get(
-        `documents/invoices/${invoiceId}/pdf/`,
-        { responseType: "blob" }
-      );
-
-      const fileURL = window.URL.createObjectURL(new Blob([response.data]));
-      const fileLink = document.createElement("a");
-      fileLink.href = fileURL;
-      fileLink.setAttribute("download", `invoice_${invoiceId}.pdf`);
-      document.body.appendChild(fileLink);
-      fileLink.click();
-      fileLink.remove();
-    } catch (error) {
-      console.error("خطا در دانلود بسته‌بندی:", error);
-    }
-  };
-
-  const downloadOverlayImage = async (invoiceId) => {
-    if (!selectedTemplate) {
-      alert("لطفاً ابتدا یک قالب انتخاب کنید.");
-      return;
-    }
-
-    try {
-      const data = {
-        invoice_id: invoiceId,
-        template_id: selectedTemplate,
-      };
-
-      const response = await axiosInstance.post(
-        `documents/origin-cert/`,
-        data,
-        { responseType: "blob" }
-      );
-
-      const fileURL = window.URL.createObjectURL(new Blob([response.data]));
-      const fileLink = document.createElement("a");
-      fileLink.href = fileURL;
-      fileLink.setAttribute("download", `invoice_overlay_${invoiceId}.jpg`);
-      document.body.appendChild(fileLink);
-      fileLink.click();
-      fileLink.remove();
-    } catch (error) {
-      console.error("خطا در دانلود تصویر اورلی:", error);
-    }
+  // Download helper
+  const downloadBlob = (url, filename) => {
+    axiosInstance
+      .get(url, { responseType: "blob" })
+      .then((response) => {
+        const fileURL = window.URL.createObjectURL(new Blob([response.data]));
+        const fileLink = document.createElement("a");
+        fileLink.href = fileURL;
+        fileLink.setAttribute("download", filename);
+        document.body.appendChild(fileLink);
+        fileLink.click();
+        fileLink.remove();
+      })
+      .catch((error) => console.error("خطا در دانلود فایل:", error));
   };
 
   return (
     <div className="invoice-list-container">
       <h2>فهرست فاکتور ها</h2>
+
+      {/* Search Input */}
+      <div className="filter-container">
+        <input
+          type="text"
+          placeholder="جستجوی فاکتور..."
+          value={searchTerm}
+          onChange={handleSearchChange}
+          className="search-input"
+        />
+      </div>
+
+      {/* Top Pagination Controls */}
+      <PaginationControls
+        currentPage={currentPage}
+        totalPages={totalPages}
+        pageSize={pageSize}
+        pageSizeOptions={pageSizeOptions}
+        hasNext={hasNext}
+        hasPrevious={hasPrevious}
+        onPageChange={handlePageChange}
+        onNextPage={handleNextPage}
+        onPreviousPage={handlePreviousPage}
+        onPageSizeChange={handlePageSizeChange}
+      />
+
       <table className="invoice-list-table">
         <thead>
           <tr>
-            <th>شناسه فاکتور</th>
+            <th>شماره اظهارنامه</th>
             <th>شماره فاکتور</th>
             <th>مبلغ کل</th>
             <th>هزینه حمل</th>
@@ -135,7 +132,7 @@ function InvoiceList() {
         <tbody>
           {invoices.map((inv) => (
             <tr key={inv.id}>
-              <td>{inv.invoice_id}</td>
+              <td><Link to={`/cottages/${inv.cottage}`}>{inv.cottage}</Link></td>
               <td>{inv.invoice_number}</td>
               <td>{inv.total_amount}</td>
               <td>{inv.freight_charges}</td>
@@ -144,7 +141,12 @@ function InvoiceList() {
               <td>
                 <button
                   className="invoice-list-btn"
-                  onClick={() => downloadInvoice(inv.id)}
+                  onClick={() =>
+                    downloadBlob(
+                      `documents/invoices/${inv.id}/pdf/`,
+                      `invoice_${inv.id}.pdf`
+                    )
+                  }
                 >
                   دانلود اینوویس
                 </button>
@@ -152,7 +154,12 @@ function InvoiceList() {
               <td>
                 <button
                   className="invoice-list-btn"
-                  onClick={() => downloadPacking(inv.id)}
+                  onClick={() =>
+                    downloadBlob(
+                      `documents/packing/${inv.id}/pdf/`,
+                      `packing_${inv.id}.pdf`
+                    )
+                  }
                 >
                   دانلود پکینگ
                 </button>
@@ -172,7 +179,12 @@ function InvoiceList() {
                 </select>
                 <button
                   className="invoice-list-btn"
-                  onClick={() => downloadOverlayImage(inv.id)}
+                  onClick={() =>
+                    downloadBlob(
+                      `documents/origin-cert/`,
+                      `invoice_overlay_${inv.id}.jpg`
+                    )
+                  }
                 >
                   دانلود گواهی مبدا
                 </button>
@@ -180,7 +192,12 @@ function InvoiceList() {
               <td>
                 <button
                   className="invoice-list-btn"
-                  onClick={() => downloadPDF(inv.id)}
+                  onClick={() =>
+                    downloadBlob(
+                      `documents/combined-pdf/${inv.id}/?template_id=${selectedTemplate}`,
+                      `invoice_documents_${inv.id}.pdf`
+                    )
+                  }
                 >
                   دانلود مدارک
                 </button>
@@ -192,6 +209,20 @@ function InvoiceList() {
           ))}
         </tbody>
       </table>
+
+      {/* Bottom Pagination Controls */}
+      <PaginationControls
+        currentPage={currentPage}
+        totalPages={totalPages}
+        pageSize={pageSize}
+        pageSizeOptions={pageSizeOptions}
+        hasNext={hasNext}
+        hasPrevious={hasPrevious}
+        onPageChange={handlePageChange}
+        onNextPage={handleNextPage}
+        onPreviousPage={handlePreviousPage}
+        onPageSizeChange={handlePageSizeChange}
+      />
     </div>
   );
 }

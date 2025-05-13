@@ -70,7 +70,7 @@ const LineChartComponent = ({ prf_summary, selectedYear, onYearChange }) => {
         labels,
         datasets: [
           {
-            label: dataType === 'price' ? 'مجموع قیمت پروفرما به تفکیک سال' : 'تعداد پروفرماها به تفکیک سال',
+            label: dataType === 'price' ? 'مجموع قیمت ثبت سفارش  به تفکیک سال' : 'تعداد ثبت سفارش ها به تفکیک سال',
             data: dataPoints,
             borderColor: dataType === 'price' ? 'rgba(75, 192, 192, 1)' : 'rgba(255, 159, 64, 1)',
             backgroundColor: dataType === 'price' ? 'rgba(75, 192, 192, 0.2)' : 'rgba(255, 159, 64, 0.2)',
@@ -94,7 +94,7 @@ const LineChartComponent = ({ prf_summary, selectedYear, onYearChange }) => {
         labels: jalaliMonths,
         datasets: [
           {
-            label: dataType === 'price' ? `مجموع قیمت در سال ${selectedYear}` : `تعداد پروفرماها در سال ${selectedYear}`,
+            label: dataType === 'price' ? `مجموع قیمت در سال ${selectedYear}` : `تعداد ثبت سفارش ها در سال ${selectedYear}`,
             data: monthlyValues,
             borderColor: dataType === 'price' ? 'rgba(153, 102, 255, 1)' : 'rgba(54, 162, 235, 1)',
             backgroundColor: dataType === 'price' ? 'rgba(153, 102, 255, 0.2)' : 'rgba(54, 162, 235, 0.2)',
@@ -117,8 +117,8 @@ const LineChartComponent = ({ prf_summary, selectedYear, onYearChange }) => {
         display: true,
         text:
           selectedYear === 'all'
-            ? (dataType === 'price' ? 'مجموع قیمت پروفرما به تفکیک سال' : 'تعداد پروفرماها به تفکیک سال')
-            : (dataType === 'price' ? `مجموع قیمت در سال ${selectedYear}` : `تعداد پروفرماها در سال ${selectedYear}`),
+            ? (dataType === 'price' ? 'مجموع قیمت ثبت سفارش  به تفکیک سال' : 'تعداد ثبت سفارش ها به تفکیک سال')
+            : (dataType === 'price' ? `مجموع قیمت در سال ${selectedYear}` : `تعداد ثبت سفارش ها در سال ${selectedYear}`),
         font: {
           size: 18,
         },
@@ -233,7 +233,7 @@ const LineChartComponent = ({ prf_summary, selectedYear, onYearChange }) => {
           </>
         ) : (
           <>
-            تعداد پروفرماها: {totalCount.toLocaleString()} عدد
+            تعداد ثبت سفارش ها: {totalCount.toLocaleString()} عدد
           </>
         )}
       </div>

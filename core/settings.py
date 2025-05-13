@@ -13,11 +13,16 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 from datetime import timedelta
 
+from dotenv import load_dotenv
 
 import os
+import dj_database_url
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / '.env')
+
+env = os.environ.get                        # shorthand
 
 
 
@@ -163,10 +168,12 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000", 
-    "http://172.20.20.199", # React frontend URL
-]
+# CORS / CSRF
+raw_cors = env("CORS_ALLOWED_ORIGINS", "")
+CORS_ALLOWED_ORIGINS = [o.strip() for o in raw_cors.split(",") if o]
+
+raw_csrf = env("CSRF_TRUSTED_ORIGINS", "")
+CSRF_TRUSTED_ORIGINS = [o.strip() for o in raw_csrf.split(",") if o]
 CORS_ALLOW_CREDENTIALS = True
 
 REST_FRAMEWORK = {
@@ -216,16 +223,19 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10000  # Increase the limit as needed
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'ozhan',          # Your PostgreSQL database name
-        'USER': 'postgres',        # Your PostgreSQL username
-        'PASSWORD': '4li',     # Your PostgreSQL password
-        'HOST': 'localhost',             # Database host (usually 'localhost' for local development)
-        'PORT': '5432',                  # Default PostgreSQL port
+if "DATABASE_URL" in os.environ:
+    DATABASES = {"default": dj_database_url.parse(env("DATABASE_URL"))}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": env("POSTGRES_DB", "ozhan"),
+            "USER": env("POSTGRES_USER", "postgres"),
+            "PASSWORD": env("POSTGRES_PASSWORD", ""),
+            "HOST": env("POSTGRES_HOST", "localhost"),
+            "PORT": env("POSTGRES_PORT", "5432"),
+        }
     }
-}
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -267,7 +277,9 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-STATIC_ROOT = os.path.join(BASE_DIR, 'statics/')
+STATIC_ROOT = env("STATIC_ROOT", "/static")      # volume mounted in Compose
+MEDIA_ROOT = env("MEDIA_ROOT", os.path.join(BASE_DIR, "media"))
+MEDIA_URL = "/media/"
 
 
 # Default primary key field type

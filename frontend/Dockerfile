@@ -1,7 +1,7 @@
 # ── frontend/Dockerfile ──────────────────────────────────────────────
 FROM node:20-alpine AS build
 WORKDIR /app
-COPY frontend/package*.json ./
+COPY package*.json ./
 RUN npm ci
 COPY frontend/ .
 RUN npm run build                  # output → /app/build

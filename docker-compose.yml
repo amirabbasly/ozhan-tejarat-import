@@ -6,6 +6,8 @@ services:
     env_file: .env
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - static_volume:/backend-static:ro   # change mount point
+
     restart: unless-stopped
 
   backend:

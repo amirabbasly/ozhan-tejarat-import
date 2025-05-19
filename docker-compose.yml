@@ -6,7 +6,7 @@ services:
     env_file: .env
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - static_volume:/backend-static:ro   # change mount point
+      - static_volume:/backend-static   # change mount point
 
     restart: unless-stopped
 
@@ -29,7 +29,7 @@ services:
     image: nginx:alpine
     volumes:
       - ./nginx:/etc/nginx/conf.d:ro  
-      - static_volume:/static:ro
+      - static_volume:/backend-static:ro
     ports:
       - "80:80"
     depends_on:

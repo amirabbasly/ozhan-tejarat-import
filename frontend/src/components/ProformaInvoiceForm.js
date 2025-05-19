@@ -8,10 +8,11 @@ import Select from "react-select";
 import "./CottageForm.css";
 import { iranCustoms } from "../data/iranCustoms";
 import { countries } from "../data/countryList";
+import { fetchOrders } from "../actions/performaActions";
 
 function ProformaInvoiceForm() {
   const navigate = useNavigate();
-
+  
   const dispatch = useDispatch();
 
   // Toggle state to show/hide translations
@@ -64,9 +65,11 @@ function ProformaInvoiceForm() {
   };
 
   useEffect(() => {
+    dispatch(fetchOrders());
     // Fetch the list of costumers (buyers/sellers)
     dispatch(fetchCostumers());
   }, [dispatch]);
+  const [proformas, setProformas] = useState([]);
 
   // Fetch sellers & buyers to populate dropdowns
   const [sellers, setSellers] = useState([]);

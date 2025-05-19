@@ -221,6 +221,8 @@ function InvoiceForm() {
         <label htmlFor="cottage">اظهارنامه:</label>
         <Select
           id="cottage"
+          className="selectPrf"
+
           name="cottage"
           options={cottageOptions}
           value={

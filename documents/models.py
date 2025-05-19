@@ -2,6 +2,7 @@ from django.db import models
 from accounts.models import Costumer
 from chatbot.views import translate_farsi_to_english
 from cottage.models import Cottage
+from proforma.models import Performa
 
 class ImageTemplate(models.Model):
     name = models.CharField(max_length=255)
@@ -95,6 +96,7 @@ class InvoiceItem(models.Model):
 class ProformaInvoice(models.Model):
     seller = models.ForeignKey('Seller', on_delete=models.CASCADE)
     buyer = models.ForeignKey('Buyer', on_delete=models.CASCADE)
+    proforma = models.ForeignKey(Performa, to_field='prfVCodeInt', on_delete=models.SET_NULL, null=True, blank=True)
     sub_total = models.DecimalField(max_digits=20, decimal_places=2, default=0)
     total_amount = models.DecimalField(max_digits=20, decimal_places=2, default=0)
     proforma_invoice_date = models.DateField()

@@ -254,6 +254,7 @@ class ProformaInvoiceSerializer(serializers.ModelSerializer):
             'id',
             'seller',
             'buyer',
+            'proforma',
             'proforma_invoice_id',       # Unique invoice ID
             'proforma_invoice_number',
             'proforma_freight_charges',

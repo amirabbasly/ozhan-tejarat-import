@@ -277,7 +277,7 @@ USE_TZ = True
 
 STATIC_URL = '/backend-static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-STATIC_ROOT = env("STATIC_ROOT", "/backend-static")      # volume mounted in Compose
+STATIC_ROOT =  "/backend-static/"
 MEDIA_ROOT = env("MEDIA_ROOT", os.path.join(BASE_DIR, "media"))
 MEDIA_URL = "/media/"
 

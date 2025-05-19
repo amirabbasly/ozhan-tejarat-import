@@ -16,7 +16,7 @@ services:
       dockerfile: Dockerfile      # backend Dockerfile in project root
     env_file: .env
     volumes:
-      - static_volume:/backend-static     # where collectstatic puts files
+      - static_volume:/static     # where collectstatic puts files
     depends_on:
       - postgres
     restart: unless-stopped
@@ -29,7 +29,7 @@ services:
     image: nginx:alpine
     volumes:
       - ./nginx:/etc/nginx/conf.d:ro  
-      - static_volume:/backend-static:ro
+      - static_volume:/static:ro
     ports:
       - "80:80"
     depends_on:

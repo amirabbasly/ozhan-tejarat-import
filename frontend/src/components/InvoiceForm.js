@@ -245,7 +245,7 @@ function InvoiceForm() {
               proforma: opt ? opt.value : "",
             }))
           }
-          placeholder="-- انتخاب اظهارنامه --"
+          placeholder="-- انتخاب ثبت سفارش --"
         />
       </div>
       <div className="form-group">

@@ -6,10 +6,13 @@ import Select from "react-select"; // Import ReactSelect
 import "./CottageForm.css";
 import { iranCustoms } from "../data/iranCustoms";
 import { countries } from "../data/countryList";
+import { fetchOrders } from "../actions/performaActions";
+import { useSelector, useDispatch } from "react-redux";
 
 function InvoiceForm() {
-  const navigate = useNavigate();
-
+  const navigate = useNavigate(); 
+  const dispatch = useDispatch();
+  const orders = useSelector((state) => state.order?.orders) ?? [];
   // Fetch sellers & buyers to populate dropdowns
   const [sellers, setSellers] = useState([]);
   const [buyers, setBuyers] = useState([]);
@@ -24,6 +27,10 @@ function InvoiceForm() {
     { value: "IRR", label: "ریال" },
     { value: "AED", label: "درهم امارات" },
   ];
+  const proformaOptions = orders.map((o) => ({
+    value: o.prfVCodeInt,
+    label: o.prf_order_no,
+  }));
   const meansOfTransportOptions = [
     { value: "By Truck", label: "By Truck" },
     { value: "By AirPlane", label: "By AirPlane" },
@@ -64,7 +71,8 @@ function InvoiceForm() {
   const [invoiceData, setInvoiceData] = useState({
     seller: "",
     buyer: "",
-    cottage: "",    
+    cottage: "",
+    proforma:"",    
     invoice_number: "",
     invoice_currency: "AED", // default value
     freight_charges: 0,
@@ -94,6 +102,8 @@ function InvoiceForm() {
 
   useEffect(() => {
     // Fetch sellers
+        dispatch(fetchOrders());
+    
     axiosInstance
     .get("cottages/numbers/")
     .then((res) => {
@@ -217,6 +227,27 @@ function InvoiceForm() {
     <form className="cottage-form" dir="rtl" onSubmit={handleSubmit}>
       <h2>ایجاد فاکتور</h2>
       {/* 4. Cottage selector */}
+            <div className="form-group">
+        <label htmlFor="proforma">ثبت سفارش:</label>
+        <Select
+          id="proforma"
+          className="selectPrf"
+
+          name="proforma"
+          options={proformaOptions}
+          value={
+            proformaOptions.find((opt) => opt.value === invoiceData.proforma) ||
+            null
+          }
+          onChange={(opt) =>
+            setInvoiceData((prev) => ({
+              ...prev,
+              proforma: opt ? opt.value : "",
+            }))
+          }
+          placeholder="-- انتخاب اظهارنامه --"
+        />
+      </div>
       <div className="form-group">
         <label htmlFor="cottage">اظهارنامه:</label>
         <Select

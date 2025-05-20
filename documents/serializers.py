@@ -1,8 +1,10 @@
 from rest_framework import serializers
 from .models import ImageTemplate, Seller, Buyer, Invoice, InvoiceItem, ProformaInvoice, ProformaInvoiceItem
 from accounts.serializers import CostumerSerializer
+from proforma.serializers import  ProformaCSerializer
 import uuid
 from decimal import Decimal, InvalidOperation
+from proforma.models import Performa
 
 class ImageTemplateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -131,7 +133,22 @@ class InvoiceSerializer(serializers.ModelSerializer):
     total_gw = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
     total_qty = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
     sub_total = serializers.DecimalField(max_digits=20, decimal_places=2, read_only=True)
-    
+    # ───────────────────────────────────────────────────────────
+    # 1)  WRITE: accept only ONE identifier (id or prfVCodeInt)
+    # ───────────────────────────────────────────────────────────
+    proforma = serializers.SlugRelatedField(
+        slug_field="prfVCodeInt",          # unique field on Performa
+        queryset=Performa.objects.all(),   # required for writes
+        write_only=True                    # show it only on POST / PATCH
+    )
+
+    # ───────────────────────────────────────────────────────────
+    # 2)  READ: return full details under a nicer key
+    # ───────────────────────────────────────────────────────────
+    proforma_details = ProformaCSerializer(
+        source="proforma",
+        read_only=True
+    )
     invoice_date = serializers.DateField(read_only=False)
     
     # If you want to generate `invoice_id` automatically, you can make it read-only,
@@ -145,6 +162,8 @@ class InvoiceSerializer(serializers.ModelSerializer):
             'seller',
             'buyer',
             'cottage',
+            'proforma',
+            'proforma_details',  # Read-only field
             'invoice_id',       # Unique invoice ID
             'invoice_number',
             'freight_charges',

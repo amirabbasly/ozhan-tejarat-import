@@ -6,6 +6,8 @@ import InvoiceDetails from "./InvoiceDetails";
 import InvoiceItemsEditor from "./InvoiceItemsEditor";
 import "../pages/CottageDetails.css";
 import { countries } from "../data/countryList";
+import { fetchOrders } from "../actions/performaActions";
+import { useSelector, useDispatch } from "react-redux";
 
 const InvoiceDetail = () => {
   const { invoiceNumber } = useParams();
@@ -16,7 +18,8 @@ const InvoiceDetail = () => {
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [cottages, setCottages] = useState([]);
-
+  const dispatch = useDispatch();
+  const orders = useSelector((state) => state.order?.orders) ?? [];
   // Options for selects
   const currencyOptions = [
     { value: "USD", label: "دلار آمریکا" },
@@ -55,6 +58,7 @@ const InvoiceDetail = () => {
     { value: "PCS", label: "PCS" },
   ];
   const cottageOptions = cottages.map((c) => ({ value: c.cottage_number, label: String(c.cottage_number) }));
+  const proformaOptions = orders.map((c) => ({ value: c.prfVCodeInt, label: String(c.prf_order_no) }));
 
   const sellerOptions = sellers.map((sel) => ({
     value: sel.id,
@@ -71,6 +75,7 @@ const InvoiceDetail = () => {
   }));
 
   useEffect(() => {
+    dispatch(fetchOrders());
     const fetchData = async () => {
       try {
         const [
@@ -159,7 +164,8 @@ const InvoiceDetail = () => {
           termsOfDeliveryOptions={termsOfDeliveryOptions}
           meansOfTransportOptions={meansOfTransportOptions}
           countryOptions={countryOptions}
-          cottageOptions={cottageOptions}  // pass new prop
+          cottageOptions={cottageOptions}
+          proformaOptions={proformaOptions} 
         />
         <InvoiceItemsEditor
           items={invoice.items}

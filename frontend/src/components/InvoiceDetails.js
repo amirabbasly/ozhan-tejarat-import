@@ -13,6 +13,7 @@ const InvoiceDetails = ({
   meansOfTransportOptions,
   countryOptions,
   cottageOptions,
+  proformaOptions,
 }) => {
   const iranCustomsOptions = iranCustoms.map((custom) => ({
     value: custom.ctmNameStr, // or combine with ctmNameStr if needed
@@ -20,11 +21,27 @@ const InvoiceDetails = ({
   }));
   return (
     <div>
-            {/* Cottage selector */}
-            <div className="form-group">
+        {/* Cottage selector */}
+        <div className="form-group">
+        <label htmlFor="proforma">ثبت سفارش:</label>
+        <Select
+          id="proforma"
+          className="selectPrf"
+          name="proforma"
+          options={proformaOptions}
+ value={
+   proformaOptions.find(
+     o => o.value === (invoice.proforma ?? invoice.proforma_details?.prfVCodeInt)
+   ) || null
+ }          onChange={(opt) => onFieldChange("proforma", opt ? opt.value : "")}
+          placeholder="-- انتخاب ثبت سفارش --"
+        />
+      </div>
+        <div className="form-group">
         <label htmlFor="cottage">شماره اظهارنامه:</label>
         <Select
           id="cottage"
+          className="selectPrf"
           name="cottage"
           options={cottageOptions}
           value={cottageOptions.find((o) => o.value === invoice.cottage) || null}

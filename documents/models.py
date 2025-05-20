@@ -52,6 +52,7 @@ class Invoice(models.Model):
     seller = models.ForeignKey('Seller', on_delete=models.CASCADE)
     buyer = models.ForeignKey('Buyer', on_delete=models.CASCADE)
     sub_total = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+    proforma = models.ForeignKey(Performa, to_field='prfVCodeInt', on_delete=models.SET_NULL, null=True, blank=True)
     cottage = models.ForeignKey(Cottage, to_field='cottage_number', on_delete=models.SET_NULL, null=True, blank=True)
     total_amount = models.DecimalField(max_digits=20, decimal_places=2, default=0)
     invoice_date = models.DateField()
@@ -68,10 +69,7 @@ class Invoice(models.Model):
     total_gw = models.DecimalField(default=0, max_digits=12, decimal_places=2,)
     total_nw = models.DecimalField(default=0, max_digits=12, decimal_places=2,)
     total_qty = models.DecimalField(default=0, max_digits=12, decimal_places=2,)
-    total_pack = models.IntegerField(default=0)
-    
-
-    
+    total_pack = models.IntegerField(default=0)   
     def __str__(self):
         return f"Invoice {self.invoice_number}"
 

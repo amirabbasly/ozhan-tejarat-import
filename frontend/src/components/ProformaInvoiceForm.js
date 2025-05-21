@@ -758,29 +758,42 @@ function ProformaInvoiceForm() {
             />
           </div>
 
-          {/* Origin */}
-          <div className="form-group">
-            <label htmlFor={`origin-${index}`}>مبدأ:</label>
-            <Select
-              id={`origin-${index}`}
-              name="origin"
-              options={countryOptions}
-              className="selectPrf"
-              value={
-                countryOptions.find((opt) => opt.value === item.origin) || null
-              }
-              onChange={(selectedOption) =>
-                setInvoiceData((prev) => {
-                  const updatedItems = [...prev.items];
-                  updatedItems[index].origin = selectedOption
-                    ? selectedOption.value
-                    : "";
-                  return { ...prev, items: updatedItems };
-                })
-              }
-              placeholder="انتخاب مبدأ"
-            />
-          </div>
+{/* Origin */}
+<div className="form-group">
+  <label htmlFor={`origin-${index}`}>مبدأ:</label>
+
+  <Select
+    id={`origin-${index}`}
+    name="origin"
+    options={countryOptions}
+    isMulti
+    className="selectPrf"
+    /* ---------- show the currently-saved values ---------- */
+    value={
+      item.origin
+        ? item.origin
+            .split("-")                         // "IR-TR-CN"  ➜  ["IR","TR","CN"]
+            .map(val =>
+              countryOptions.find(o => o.value === val.trim())
+            )
+        : []
+    }
+    /* ---------- save the newly-picked values ---------- */
+    onChange={selectedOptions => {
+      const selectedValues = selectedOptions
+        ? selectedOptions.map(o => o.value)     // ["IR","TR","CN"]
+        : [];
+
+      setInvoiceData(prev => {
+        const updatedItems = [...prev.items];
+        updatedItems[index].origin = selectedValues.join("-"); // "IR-TR-CN"
+        return { ...prev, items: updatedItems };
+      });
+    }}
+    placeholder="انتخاب مبدأ"
+  />
+</div>
+
 
 
 

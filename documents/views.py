@@ -1100,7 +1100,7 @@ class ProformaInvoicePDFView(APIView):
         invoice_info = f"""
         <b>proforma number:</b> {invoice.proforma_invoice_number}<br/>
         <b>proforma date:</b> {invoice.proforma_invoice_date}<br/>
-        <b>proforma validity date:</b> {invoice.proforma_invoice_date}
+        <b>proforma validity date:</b> {invoice.proforma_invoice_exp_date}
 
         """
         story.append(Paragraph(invoice_info, styles["LeftAlign"]))

@@ -334,29 +334,35 @@ const ProformaInvoiceItemsEditor = ({ items, onItemsChange, unitOptions, country
 
             <div className="form-group">
               <label htmlFor="modal_origin">مبدأ:</label>
-              <Select
-                className="selectPrf"
-                id="modal_origin"
-                name="origin"
-                options={countryOptions}
-                // remove isMulti or set it to false
-                value={
-                  countryOptions.find(
-                    (option) => option.value === modalItemData.origin
-                  ) || null
-                }
-                onChange={(selectedOption) => {
-                  // single select returns a single object or null
-                  if (!selectedOption) {
-                    // user cleared
-                    handleModalChange("origin", "");
-                    return;
-                  }
-                  // single object: no need to map
-                  handleSelectChange("origin", selectedOption.value);
-                }}
-                placeholder="انتخاب مبدأ کالا"
-              />
+            <Select
+              className="selectPrf"
+              id="modal_origin"
+              name="origin"
+              options={countryOptions}
+              isMulti
+              /* ---------- show the saved value ---------- */
+              value={
+                modalItemData.origin
+                  ? modalItemData.origin
+                      .split(",")                         // "Algeria,France" → ["Algeria","France"]
+                      .map((val) =>
+                        countryOptions.find(
+                          (option) => option.value === val.trim()
+                        )
+                      )
+                      .filter(Boolean)                    // drop any unmatched items
+                  : []
+              }
+              /* ---------- push updated value back as CSV ---------- */
+              onChange={(selectedOptions) => {
+                const selectedValues = selectedOptions
+                  ? selectedOptions.map((option) => option.value)  // ["Algeria","France"]
+                  : [];
+                handleSelectChange("origin", selectedValues.join(",")); // "Algeria,France"
+              }}
+              placeholder="انتخاب مبدأ کالا"
+            />
+
             </div>
 
             <div style={{ marginTop: "1rem" }}>

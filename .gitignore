@@ -8,6 +8,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+media/
 
 
 # Ignore Python cache files

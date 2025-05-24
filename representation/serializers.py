@@ -20,6 +20,8 @@ class RepresentationSerializer(serializers.ModelSerializer):
     applicant   = serializers.PrimaryKeyRelatedField(
                       queryset=Costumer.objects.all(),
                       write_only=True
+                      required=False       # <— and here
+
                   )
 
     # nested read-only for GETs

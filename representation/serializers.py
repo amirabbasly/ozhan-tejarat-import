@@ -19,7 +19,7 @@ class RepresentationSerializer(serializers.ModelSerializer):
                   )
     applicant   = serializers.PrimaryKeyRelatedField(
                       queryset=Costumer.objects.all(),
-                      write_only=True
+                      write_only=True,
                       allow_null=True,     # <— here
                       required=False       # <— and here
 

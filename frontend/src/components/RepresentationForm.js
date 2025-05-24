@@ -106,7 +106,6 @@ const RepresentationForm = () => {
           <Select
             inputId="representi"
             name="representi"
-            className="form-input"
             classNamePrefix="form-input"
             options={customerOptions}
             value={customerOptions.find(o => o.value === formData.representi) || null}
@@ -124,7 +123,6 @@ const RepresentationForm = () => {
           <Select
             inputId="representor"
             name="representor"
-            className="form-input"
             classNamePrefix="form-input"
             options={customerOptions}
             value={customerOptions.find(o => o.value === formData.representor) || null}
@@ -142,7 +140,6 @@ const RepresentationForm = () => {
           <Select
             inputId="applicant"
             name="applicant"
-            className="form-input"
             classNamePrefix="form-input"
             options={customerOptions}
             value={customerOptions.find(o => o.value === formData.applicant) || null}
@@ -164,7 +161,6 @@ const RepresentationForm = () => {
           onChange={handleStartDateChange}
           format="YYYY-MM-DD"
           placeholder="----/--/--"
-          className="form-input"
           required
         />
       </div>
@@ -179,33 +175,32 @@ const RepresentationForm = () => {
           onChange={handleEndDateChange}
           format="YYYY-MM-DD"
           placeholder="----/--/--"
-          className="form-input"
           required
         />
       </div>
 
       <div className="form-group checkbox-group">
-        <label className="form-label">
+        <label className="form-label">توکل به غیر
+        </label>
           <input
             type="checkbox"
             name="another_deligation"
             checked={formData.another_deligation}
             onChange={handleChange}
             className="form-checkbox"
-          /> توکل به غیر
-        </label>
+          /> 
       </div>
 
       <div className="form-group checkbox-group">
-        <label className="form-label">
+        <label className="form-label">عزل وکیل
+        </label>
           <input
             type="checkbox"
             name="representor_dismissal"
             checked={formData.representor_dismissal}
             onChange={handleChange}
             className="form-checkbox"
-          /> عزل وکیل
-        </label>
+          /> 
       </div>
 
       <div className="form-group">

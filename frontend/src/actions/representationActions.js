@@ -58,7 +58,7 @@ export const createRepresentation = (representationData) => async (dispatch) => 
 // Update a representation
 export const updateRepresentation = (id, representationData) => async (dispatch) => {
     try {
-        const response = await axiosInstance.patch(`/representations/${id}/`, representationData, {
+        const response = await axiosInstance.put(`/representations/${id}/`, representationData, {
             headers: {
                 'Content-Type': 'multipart/form-data', // Ensure correct encoding for file uploads
             },

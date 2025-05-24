@@ -153,7 +153,6 @@ const RepresentationForm = () => {
             onChange={handleSelectChange('applicant')}
             placeholder="انتخاب درخواست دهنده"
             isClearable
-            required
           />
         )}
       </div>
@@ -182,7 +181,6 @@ const RepresentationForm = () => {
           onChange={handleEndDateChange}
           format="YYYY-MM-DD"
           placeholder="----/--/--"
-          required
         />
       </div>
 

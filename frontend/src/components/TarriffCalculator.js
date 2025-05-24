@@ -11,7 +11,9 @@ function TariffCalculator() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [customCurrency, setCustomCurrency] = useState(false); // Track if user wants to enter custom value
-
+  const formatNumber = (num) => {
+    return num.toFixed(0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  };
   useEffect(() => {
     setLoading(true);
     axiosInstance.get('/customs/currency-exchange-rates/')
@@ -44,7 +46,7 @@ function TariffCalculator() {
   const arzesheRiali = totalValue * exchangeRate;   // Value in Rial
   const bime = arzesheRiali / 2000;                 // Insurance
   const cif = arzesheRiali + bime;                  // CIF
-  const gomraki = cif / tariff;                     // Customs duty
+  const gomraki = cif * tariff / 100;                     // Customs duty
   const mabnayeMaliat = cif + gomraki;              // Tax base
   const dahDarsad = mabnayeMaliat / 10;             // 10%
   const helalAhmar = gomraki / 100;                 // Red Crescent

@@ -11,7 +11,7 @@ class Representation(models.Model):
     representor  = models.ManyToManyField(Costumer,blank=True,related_name='representations_as_attorney'   )    
     applicant = models.ForeignKey(Costumer,to_field='id', on_delete=models.SET_NULL, null=True, blank=True, related_name='applicants')
     start_date = models.CharField(max_length=55)  # Start date in Jalali
-    end_date = models.CharField(max_length=55)  # End date in Jalali
+    end_date = models.CharField(max_length=55, blank=True, null=True)  # End date in Jalali
     another_deligation = models.BooleanField(default=False)  # Delegation to another
     representor_dismissal = models.BooleanField(default=False)  # Dismissal of attorney
     representation_summary = models.CharField(max_length=255)  # Summary of representation

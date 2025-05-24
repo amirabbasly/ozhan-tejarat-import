@@ -66,6 +66,8 @@ import BuyerList from "./components/BuyerList";
 import ImportTags from "./components/ImportTags";
 import CustomerList from "./components/CustomerList";
 import CustomerDetails from "./components/CustomerDetails";
+import RepresentationEdit from './components/RepresentationEdit';
+
 function App() {
   return (
     <Provider store={store}>
@@ -239,11 +241,19 @@ function AppContent() {
               </PrivateRoute>
             }
           />
-          <Route
+                    <Route
             path="/representations"
             element={
               <PrivateRoute>
                 <RepresentationList />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/representations/:id/edit" 
+            element={
+              <PrivateRoute>
+                <RepresentationEdit />
               </PrivateRoute>
             }
           />

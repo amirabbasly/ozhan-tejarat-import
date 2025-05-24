@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axiosInstance from "../utils/axiosInstance";
+import DatePicker from "react-multi-date-picker";
+import persian from "react-date-object/calendars/persian";
+import persian_fa from "react-date-object/locales/persian_fa";
 import "../pages/CottageDetails.css";
 
 const CustomerDetails = () => {
@@ -17,15 +20,16 @@ const CustomerDetails = () => {
           `/accounts/customers/by-id/${customerId}/`
         );
         setCustomer(customerResponse.data);
-        setLoading(false);
       } catch (err) {
         setError("خطا در دریافت اطلاعات");
+      } finally {
         setLoading(false);
       }
     };
 
     fetchData();
   }, [customerId]);
+
   const handleDelete = async () => {
     if (
       !window.confirm("آیا مطمئن هستید که می‌خواهید این مشتری را حذف کنید؟")
@@ -36,18 +40,19 @@ const CustomerDetails = () => {
     try {
       await axiosInstance.delete(`/accounts/customers/${customerId}/`);
       alert("مشتری با موفقیت حذف شد.");
-      window.location.href = "/customers/list"; // Redirect to the customer list page
+      window.location.href = "/customers/list";
     } catch (err) {
       setError("خطا در حذف مشتری.");
     }
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setSuccessMessage("");
 
     try {
-      const response = await axiosInstance.put(
+      await axiosInstance.put(
         `/accounts/customers/${customerId}/`,
         customer
       );
@@ -62,6 +67,13 @@ const CustomerDetails = () => {
     setCustomer((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleDateChange = (date) => {
+    setCustomer((prev) => ({
+      ...prev,
+      customer_birthday: date ? date.format("YYYY-MM-DD") : "",
+    }));
+  };
+
   if (loading) return <div className="loading">در حال بارگذاری...</div>;
   if (!customer) return <div className="error">{error}</div>;
 
@@ -69,38 +81,19 @@ const CustomerDetails = () => {
     <div className="cottage-details-container">
       <div className="header">جزئیات مشتری</div>
       <form onSubmit={handleSubmit} encType="multipart/form-data">
+        {/* Full Name */}
         <div className="form-group">
-          <label htmlFor="customer_name">نام مشتری:</label>
+          <label htmlFor="full_name">نام مشتری:</label>
           <input
             type="text"
-            id="customer_name"
-            name="customer_name"
+            id="full_name"
+            name="full_name"
             value={customer.full_name || ""}
             onChange={handleChange}
             className="editable-input"
           />
         </div>
-        <div className="form-group">
-          <label htmlFor="customer_address">آدرس مشتری:</label>
-          <textarea
-            id="customer_address"
-            name="customer_address"
-            value={customer.customer_address || ""}
-            onChange={handleChange}
-            className="editable-input form-textarea"
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="national_code">کد ملی:</label>
-          <input
-            type="text"
-            id="national_code"
-            name="national_code"
-            value={customer.national_code || ""}
-            onChange={handleChange}
-            className="editable-input"
-          />
-        </div>
+        {/* Phone Number */}
         <div className="form-group">
           <label htmlFor="phone_number">تلفن مشتری:</label>
           <input
@@ -112,15 +105,63 @@ const CustomerDetails = () => {
             className="editable-input"
           />
         </div>
+        {/* Birthday (Jalali) */}
+        <div className="form-group">
+          <label htmlFor="customer_birthday">تاریخ تولد:</label>
+          <DatePicker
+            id="customer_birthday"
+            calendar={persian}
+            locale={persian_fa}
+            value={customer.customer_birthday || ""}
+            onChange={handleDateChange}
+            format="YYYY-MM-DD"
+            placeholder="----/--/--"
+            inputClass="editable-input"
+          />
+        </div>
+        {/* National Code */}
+        <div className="form-group">
+          <label htmlFor="national_code">کد ملی:</label>
+          <input
+            type="text"
+            id="national_code"
+            name="national_code"
+            value={customer.national_code || ""}
+            onChange={handleChange}
+            className="editable-input"
+          />
+        </div>
+
+        {/* Address */}
+        <div className="form-group">
+          <label htmlFor="customer_address">آدرس مشتری:</label>
+          <textarea
+            id="customer_address"
+            name="customer_address"
+            value={customer.customer_address || ""}
+            onChange={handleChange}
+            className="editable-input form-textarea"
+          />
+        </div>
+
+
+
 
         <button type="submit" className="primary-button">
           ثبت تغییرات
         </button>
-        <button type="button" className="delete-button" onClick={handleDelete}>
+        <button
+          type="button"
+          className="delete-button"
+          onClick={handleDelete}
+        >
           حذف مشتری
         </button>
       </form>
-      {successMessage && <div className="cottage-info">{successMessage}</div>}
+
+      {successMessage && (
+        <div className="cottage-info">{successMessage}</div>
+      )}
       {error && <div className="error">{error}</div>}
     </div>
   );

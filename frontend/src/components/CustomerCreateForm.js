@@ -1,12 +1,17 @@
 import React, { useState } from "react";
 import axiosInstance from "../utils/axiosInstance";
 import "./CottageForm.css"; // Your existing CSS
+import persian from "react-date-object/calendars/persian";
+import persian_fa from "react-date-object/locales/persian_fa";
+import DatePicker from "react-multi-date-picker";
 
 const CustomerCreateForm = () => {
   const [formData, setFormData] = useState({
     full_name: "",
     phone_number: "",
     national_code: "",
+    customer_birthday: "",
+    customer_address: "",
   });
 
   const [errors, setErrors] = useState({});
@@ -16,9 +21,16 @@ const CustomerCreateForm = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    setErrors((prev) => ({ ...prev, [name]: "" })); // Clear error for the field
+    setErrors((prev) => ({ ...prev, [name]: "" }));
   };
-
+  const handleDateChange = (date) => {
+    // date.format() gives “YYYY/MM/DD” in Jalali by default
+    setFormData((prev) => ({
+      ...prev,
+      customer_birthday: date.format("YYYY-MM-DD"),
+    }));
+    setErrors((prev) => ({ ...prev, customer_birthday: "" }));
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -32,13 +44,13 @@ const CustomerCreateForm = () => {
         full_name: "",
         phone_number: "",
         national_code: "",
+        customer_birthday: "",
+        customer_address: "",
       });
     } catch (error) {
-      // If the server responds with validation errors:
       if (error.response && error.response.data) {
         setErrors(error.response.data);
       } else {
-        // General fallback error:
         setErrors({
           general: "خطایی رخ داده است. لطفاً بعداً دوباره تلاش کنید.",
         });
@@ -50,15 +62,13 @@ const CustomerCreateForm = () => {
 
   return (
     <div className="cottage-form">
-      <h2>ایجاد مشتری جدید</h2>
+      <h2>ایجاد شخص جدید</h2>
 
-      {/* Success message */}
       {successMessage && <div className="add-success">{successMessage}</div>}
-
-      {/* General errors */}
       {errors.general && <div className="add-error">{errors.general}</div>}
 
       <form onSubmit={handleSubmit}>
+        {/* Full Name */}
         <div className="form-group">
           <label htmlFor="full_name">نام کامل</label>
           <input
@@ -74,6 +84,7 @@ const CustomerCreateForm = () => {
           )}
         </div>
 
+        {/* Phone Number */}
         <div className="form-group">
           <label htmlFor="phone_number">شماره تلفن</label>
           <input
@@ -89,6 +100,7 @@ const CustomerCreateForm = () => {
           )}
         </div>
 
+        {/* National Code */}
         <div className="form-group">
           <label htmlFor="national_code">کد ملی</label>
           <input
@@ -101,6 +113,42 @@ const CustomerCreateForm = () => {
           />
           {errors.national_code && (
             <span className="add-error">{errors.national_code}</span>
+          )}
+        </div>
+
+        {/* Birthday */}
+        <div className="form-group">
+          <label htmlFor="customer_birthday">تاریخ تولد</label>
+          <DatePicker
+            id="customer_birthday"
+            name="customer_birthday"
+            calendar={persian}
+            locale={persian_fa}
+            value={formData.customer_birthday}
+            onChange={handleDateChange}
+            inputClass={errors.customer_birthday ? "error-input" : ""}
+            format="YYYY-MM-DD"
+            placeholder="----/--/--"
+          />
+          {errors.customer_birthday && (
+            <span className="add-error">{errors.customer_birthday}</span>
+          )}
+        </div>
+
+        {/* Address */}
+        <div className="form-group">
+          <label htmlFor="customer_address">آدرس</label>
+          <textarea
+            id="customer_address"
+            name="customer_address"
+            rows="3"
+            value={formData.customer_address}
+            onChange={handleChange}
+            className={errors.customer_address ? "form-textarea error-input" : "form-textarea"}
+            
+          />
+          {errors.customer_address && (
+            <span className="add-error">{errors.customer_address}</span>
           )}
         </div>
 

@@ -7,10 +7,9 @@ from accounts.models import Costumer
 
 
 class Representation(models.Model):
-    representi = models.CharField(max_length=255)  # Client/Principal
-    representor = models.CharField(max_length=255)  # Attorney
-    Costumer = models.ForeignKey(Costumer, on_delete=models.SET_NULL, null=True, blank=True)  # Foreign key to Costumer
-    applicant = models.CharField(max_length=255, null=True, blank=True)  # Requestor
+    representi = models.ForeignKey(Costumer,to_field='id', on_delete=models.SET_NULL, null=True, blank=True, related_name='representations_as_principal')  # Client/Principal
+    representor = models.ForeignKey(Costumer,to_field='id', on_delete=models.SET_NULL, null=True, blank=True, related_name='representations_as_attorney')   # Attorney
+    applicant = models.ForeignKey(Costumer,to_field='id', on_delete=models.SET_NULL, null=True, blank=True, related_name='applicants')
     start_date = models.CharField(max_length=55)  # Start date in Jalali
     end_date = models.CharField(max_length=55)  # End date in Jalali
     another_deligation = models.BooleanField(default=False)  # Delegation to another

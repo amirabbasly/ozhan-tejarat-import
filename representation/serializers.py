@@ -1,10 +1,30 @@
 from rest_framework import serializers
 from .models import Representation, Check
+from accounts.models import Costumer
 
-class RepresentationSerializer(serializers.ModelSerializer):
+class CustomerRepSerializer(serializers.ModelSerializer):
     class Meta:
+        model = Costumer
+        fields = ['id', 'full_name']
+class RepresentationSerializer(serializers.ModelSerializer):
+    representi  = serializers.PrimaryKeyRelatedField(queryset=Costumer.objects.all(), write_only=True)
+    representor = serializers.PrimaryKeyRelatedField(queryset=Costumer.objects.all(), write_only=True)
+    applicant   = serializers.PrimaryKeyRelatedField(queryset=Costumer.objects.all(), write_only=True)
+
+    # If you still want to return full nested customer data on GET, add read-only aliases:
+    principal  = CustomerRepSerializer(source='representi', read_only=True)
+    attorney   = CustomerRepSerializer(source='representor', read_only=True)
+    applicant_info = CustomerRepSerializer(source='applicant', read_only=True)
+    class Meta:
+
         model = Representation
-        fields = '__all__'
+        fields = [
+            'id', 'representi', 'representor', 'applicant',
+            'start_date', 'end_date', 'another_deligation',
+                        'principal', 'attorney', 'applicant_info',
+
+            'representor_dismissal', 'representation_summary',
+            'doc_number', 'verification_code', 'file',]
         extra_kwargs = {
             'file': {'required': False, 'allow_null':True},
         }

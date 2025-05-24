@@ -329,10 +329,10 @@ const Navbar = () => {
                           <li className="submenu-item">لیست خریدار ها</li>
                         </Link>
                         <Link className="submenu-link" to="/customers/new">
-                          <li className="submenu-item">ایجاد مشتری</li>
+                          <li className="submenu-item">ایجاد شخص جدید</li>
                         </Link>
                         <Link className="submenu-link" to="/customers/list">
-                          <li className="submenu-item">لیست مشتری ها</li>
+                          <li className="submenu-item">لیست اشخاص</li>
                         </Link>
                       </ul>
                     )}

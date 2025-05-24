@@ -7,14 +7,37 @@ class CustomerRepSerializer(serializers.ModelSerializer):
         model = Costumer
         fields = ['id', 'full_name']
 class RepresentationSerializer(serializers.ModelSerializer):
-    representi  = serializers.PrimaryKeyRelatedField(queryset=Costumer.objects.all(), write_only=True)
-    representor = serializers.PrimaryKeyRelatedField(queryset=Costumer.objects.all(), write_only=True)
-    applicant   = serializers.PrimaryKeyRelatedField(queryset=Costumer.objects.all(), write_only=True)
+    representi  = serializers.PrimaryKeyRelatedField(
+                      queryset=Costumer.objects.all(),
+                      many=True,
+                      write_only=True
+                  )
+    representor = serializers.PrimaryKeyRelatedField(
+                      queryset=Costumer.objects.all(),
+                      many=True,
+                      write_only=True
+                  )
+    applicant   = serializers.PrimaryKeyRelatedField(
+                      queryset=Costumer.objects.all(),
+                      write_only=True
+                  )
 
-    # If you still want to return full nested customer data on GET, add read-only aliases:
-    principal  = CustomerRepSerializer(source='representi', read_only=True)
-    attorney   = CustomerRepSerializer(source='representor', read_only=True)
-    applicant_info = CustomerRepSerializer(source='applicant', read_only=True)
+    # nested read-only for GETs
+    principal      = CustomerRepSerializer(
+                         source='representi',
+                         many=True,
+                         read_only=True
+                     )
+    attorney       = CustomerRepSerializer(
+                         source='representor',
+                         many=True,
+                         read_only=True
+                     )
+    applicant_info = CustomerRepSerializer(
+                         source='applicant',
+                         read_only=True
+                     )
+
     class Meta:
 
         model = Representation

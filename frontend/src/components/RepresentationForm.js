@@ -22,8 +22,8 @@ const RepresentationForm = () => {
   }, [dispatch]);
 
   const [formData, setFormData] = useState({
-    representi: '',
-    representor: '',
+    representi: [],
+    representor: [],
     applicant: '',
     start_date: '',
     end_date: '',
@@ -72,8 +72,8 @@ const RepresentationForm = () => {
     e.preventDefault();
     const data = new FormData();
     // Manually append relationship IDs
-    data.append('representi', formData.representi);
-    data.append('representor', formData.representor);
+    formData.representi.forEach(id => data.append('representi', id));
+    formData.representor.forEach(id => data.append('representor', id));
     data.append('applicant', formData.applicant);
     // Append other fields explicitly
     data.append('start_date', formData.start_date);
@@ -93,7 +93,12 @@ const RepresentationForm = () => {
       })
       .catch(err => console.error("Error creating representation:", err));
   };
-
+  const handleMultiChange = (field) => (options) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: options ? options.map(o => o.value) : []
+    }));
+  };
   return (
     <form className="cottage-form" onSubmit={handleSubmit}>
       <h2 className="form-title">افزودن وکالت‌نامه</h2>
@@ -104,12 +109,13 @@ const RepresentationForm = () => {
         <label className="form-label">موکل:</label>
         {customersLoading ? (<p>در حال بارگذاری...</p>) : (
           <Select
+            isMulti
             inputId="representi"
             name="representi"
             classNamePrefix="form-input"
             options={customerOptions}
-            value={customerOptions.find(o => o.value === formData.representi) || null}
-            onChange={handleSelectChange('representi')}
+            value={customerOptions.filter(o => formData.representi.includes(o.value))}
+            onChange={handleMultiChange('representi')}
             placeholder="انتخاب موکل"
             isClearable
             required
@@ -121,12 +127,13 @@ const RepresentationForm = () => {
         <label className="form-label">وکیل:</label>
         {customersLoading ? (<p>در حال بارگذاری...</p>) : (
           <Select
+            isMulti
             inputId="representor"
             name="representor"
             classNamePrefix="form-input"
             options={customerOptions}
-            value={customerOptions.find(o => o.value === formData.representor) || null}
-            onChange={handleSelectChange('representor')}
+            value={customerOptions.filter(o => formData.representor.includes(o.value))}
+            onChange={handleMultiChange('representor')}
             placeholder="انتخاب وکیل"
             isClearable
             required

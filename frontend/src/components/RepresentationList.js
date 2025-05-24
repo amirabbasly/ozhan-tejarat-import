@@ -53,8 +53,8 @@ const RepresentationList = () => {
         <tbody>
           {representations.map((rep) => (
             <tr key={rep.id}>
-              <td>{rep.principal?.full_name ?? '-'}</td>
-              <td>{rep.attorney?.full_name ?? '-'}</td>
+              <td>{(rep.principal||[]).map(c=>c.full_name).join(', ')}</td>
+              <td>{(rep.attorney || []).map(c=>c.full_name).join(', ')}</td>
               <td>{rep.applicant_info?.full_name ?? '-'}</td>
               <td>{rep.start_date ?? '-'}</td>
               <td>{rep.end_date ?? '-'}</td>

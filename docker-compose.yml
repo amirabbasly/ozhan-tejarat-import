@@ -16,7 +16,7 @@ services:
       dockerfile: Dockerfile      # backend Dockerfile in project root
     env_file: .env
     volumes:
-      - media_volume:/media  
+      - ./media:/app/media  
       - static_volume:/static     # where collectstatic puts files
     depends_on:
       - postgres
@@ -29,7 +29,7 @@ services:
   nginx:
     image: nginx:alpine
     volumes:
-      - media_volume:/media:ro
+      - ./media_volume:/media:ro
       - ./nginx:/etc/nginx/conf.d:ro  
       - static_volume:/backend-static:ro
     ports:

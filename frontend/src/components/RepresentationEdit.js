@@ -182,7 +182,7 @@ export default function RepresentationEdit() {
             className="editable-input"
             classNamePrefix="editable-input"
             isClearable
-            required
+            
           />
         </div>
 

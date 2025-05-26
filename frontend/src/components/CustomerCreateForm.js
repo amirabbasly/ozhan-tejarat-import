@@ -8,10 +8,10 @@ import DatePicker from "react-multi-date-picker";
 const CustomerCreateForm = () => {
   const [formData, setFormData] = useState({
     full_name: "",
-    phone_number: "",
-    national_code: "",
-    customer_birthday: "",
-    customer_address: "",
+    phone_number: null,
+    national_code: null,
+    customer_birthday: null,
+    customer_address: null,
   });
 
   const [errors, setErrors] = useState({});
@@ -42,10 +42,10 @@ const CustomerCreateForm = () => {
       setSuccessMessage("مشتری با موفقیت ایجاد شد!");
       setFormData({
         full_name: "",
-        phone_number: "",
-        national_code: "",
-        customer_birthday: "",
-        customer_address: "",
+        phone_number: null,
+        national_code: null,
+        customer_birthday: null,
+        customer_address: null,
       });
     } catch (error) {
       if (error.response && error.response.data) {

@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const axiosInstance = axios.create({
-  baseURL: "http://192.168.8.23/api/", // Set your API base URL here
+  baseURL: "http://127.0.0.1:8000/api/", // Set your API base URL here
   headers: {
     "Content-Type": "application/json",
   },
@@ -49,7 +49,7 @@ axiosInstance.interceptors.response.use(
       try {
         // Refresh the access token
         const refreshResponse = await axios.post(
-          "http://192.168.8.23/api/accounts/token/refresh/",
+          "http://127.0.0.1:8000/api/accounts/token/refresh/",
           {
             refresh: localStorage.getItem("refresh_token"),
           }

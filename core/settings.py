@@ -277,8 +277,8 @@ USE_TZ = True
 
 STATIC_URL = "/backend-static/"
 STATIC_ROOT =  "/backend-static/"
-MEDIA_ROOT = env("MEDIA_ROOT", os.path.join(BASE_DIR, "media"))
-MEDIA_URL = "/media/"
+MEDIA_URL  = "/media/"
+MEDIA_ROOT = "/media/"
 
 
 # Default primary key field type

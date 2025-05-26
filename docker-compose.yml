@@ -29,7 +29,7 @@ services:
   nginx:
     image: nginx:alpine
     volumes:
-      - ./media_volume:/media:ro
+      - ./media:/media:ro 
       - ./nginx:/etc/nginx/conf.d:ro  
       - static_volume:/backend-static:ro
     ports:

@@ -278,7 +278,7 @@ USE_TZ = True
 STATIC_URL = "/backend-static/"
 STATIC_ROOT =  "/backend-static/"
 MEDIA_URL  = "/media/"
-MEDIA_ROOT = "/media/"
+MEDIA_ROOT = "/app/media/"
 
 
 # Default primary key field type

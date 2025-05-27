@@ -360,7 +360,7 @@ class CottageViewSet(viewsets.ModelViewSet):
     pagination_class = CustomPageNumberPagination  # Apply pagination here
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_class = CottageFilter
-    search_fields = ["cottage_number", "proforma__prf_order_no",]  # fields you want to search
+    search_fields = ["total_value","cottage_number", "proforma__prf_order_no",]  # fields you want to search
 
     def get_serializer_class(self):
         if self.action == 'post':

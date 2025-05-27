@@ -8,14 +8,18 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+media/
 
 
 # Ignore Python cache files
-**/__pycache__/
+*/*/__pycache__/
 *.py[cod]
 cottage/__pycache__/
 
 proforma/__pycache__/
 *.log
 accounts/__pycache__/
+
+representation/__pycache__/
+
 

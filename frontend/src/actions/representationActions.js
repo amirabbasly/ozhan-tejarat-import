@@ -41,19 +41,22 @@ export const fetchRepresentations = () => async (dispatch) => {
 // Create a new representation
 export const createRepresentation = (representationData) => async (dispatch) => {
     try {
-        const response = await axiosInstance.post('/representations/', representationData,{
+        const response = await axiosInstance.post('/representations/', representationData, {
             headers: {
-                'Content-Type': 'multipart/form-data', // Ensure correct encoding for file uploads
+                'Content-Type': 'multipart/form-data',
             },
         });
         dispatch({ type: CREATE_REPRESENTATION_SUCCESS, payload: response.data });
+        return response.data; // <--- Return data on success
     } catch (error) {
         dispatch({
             type: CREATE_REPRESENTATION_FAILURE,
             payload: error.response?.data || 'Error creating representation',
         });
+        throw error; // <--- Rethrow so .catch runs in the component
     }
 };
+
 
 // Update a representation
 export const updateRepresentation = (id, representationData) => async (dispatch) => {

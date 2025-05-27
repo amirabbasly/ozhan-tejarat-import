@@ -15,8 +15,8 @@ class Representation(models.Model):
     another_deligation = models.BooleanField(default=False)  # Delegation to another
     representor_dismissal = models.BooleanField(default=False)  # Dismissal of attorney
     representation_summary = models.CharField(max_length=255)  # Summary of representation
-    doc_number = models.BigIntegerField(unique=True)  # Document identifier
-    verification_code = models.BigIntegerField()  # Verification code
+    doc_number = models.CharField(unique=True)  # Document identifier
+    verification_code = models.CharField()  # Verification code
     file = models.FileField( null=True, blank=True)  # File upload with validation
     class Meta:
         ordering = ["-id"] 

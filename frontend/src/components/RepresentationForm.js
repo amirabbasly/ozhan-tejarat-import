@@ -1,116 +1,140 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Select from 'react-select';
-import { createRepresentation } from '../actions/representationActions';
-import './CottageForm.css';
 import DatePicker from 'react-multi-date-picker';
-import persian from "react-date-object/calendars/persian";
-import persian_fa from "react-date-object/locales/persian_fa";
+import persian from 'react-date-object/calendars/persian';
+import persian_fa from 'react-date-object/locales/persian_fa';
 import { useNavigate } from 'react-router-dom';
-import { fetchCostumers } from "../actions/authActions";
+import { createRepresentation } from '../actions/representationActions';
+import { fetchCostumers } from '../actions/authActions';
+import './CottageForm.css';
+
+/* ---------- helpers ---------- */
+const extractErrorData = axiosError =>
+  axiosError?.response?.data ?? { detail: axiosError.message };
 
 const RepresentationForm = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+  const navigate  = useNavigate();
 
+  /* -------------- data from store ------------- */
   const { costumerList = [], customersLoading, customersError } = useSelector(
-    (state) => state.costumers || {}
+    s => s.costumers || {}
   );
 
-  useEffect(() => {
-    dispatch(fetchCostumers());
-  }, [dispatch]);
-
+  /* -------------- local state ------------- */
   const [formData, setFormData] = useState({
     representi: [],
     representor: [],
-    applicant: '',
+    applicant:  '',
     start_date: '',
-    end_date: '',
-    another_deligation: false,
-    representor_dismissal: false,
+    end_date:   '',
+    another_deligation:     false,
+    representor_dismissal:  false,
     representation_summary: '',
-    doc_number: '',
+    doc_number:        '',
     verification_code: '',
     file: null,
   });
 
-  // Prepare react-select options
-  const customerOptions = costumerList.map(c => ({ value: c.id.toString(), label: c.full_name }));
+  const [submitting, setSubmitting]   = useState(false);
+  const [serverErrors, setServerErrors] = useState({});   // holds 400‑level errors
 
-  const handleSelectChange = (field) => (option) => {
-    setFormData(prev => ({ ...prev, [field]: option ? option.value : '' }));
-  };
+  /* -------------- fetch customers once ------------- */
+  useEffect(() => { dispatch(fetchCostumers()); }, [dispatch]);
 
-  const handleChange = (e) => {
+  /* -------------- helper generators ------------- */
+  const customerOptions = costumerList.map(c => ({
+    value: c.id.toString(), label: c.full_name,
+  }));
+
+  const handleMultiChange = field => options =>
+    setFormData(p => ({ ...p, [field]: options ? options.map(o => o.value) : [] }));
+
+  const handleSelectChange = field => option =>
+    setFormData(p => ({ ...p, [field]: option ? option.value : '' }));
+
+  const handleChange = e => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
+    setFormData(p => ({ ...p, [name]: type === 'checkbox' ? checked : value }));
   };
 
-  const handleStartDateChange = (value) => {
-    setFormData(prev => ({
-      ...prev,
-      start_date: value?.format("YYYY-MM-DD") || "",
-    }));
-  };
+  const handleStartDateChange = v =>
+    setFormData(p => ({ ...p, start_date: v?.format('YYYY-MM-DD') || '' }));
+  const handleEndDateChange   = v =>
+    setFormData(p => ({ ...p,   end_date: v?.format('YYYY-MM-DD') || '' }));
 
-  const handleEndDateChange = (value) => {
-    setFormData(prev => ({
-      ...prev,
-      end_date: value?.format("YYYY-MM-DD") || "",
-    }));
-  };
+  const handleFileChange = e =>
+    setFormData(p => ({ ...p, file: e.target.files[0] || null }));
 
-  const handleFileChange = (e) => {
-    setFormData(prev => ({ ...prev, file: e.target.files[0] }));
-  };
-
-  const handleSubmit = (e) => {
+  /* -------------- submit ------------- */
+  const handleSubmit = async e => {
     e.preventDefault();
+    setSubmitting(true);
+    setServerErrors({});               // reset previous errors
+
+    /* build multipart form‑data */
     const data = new FormData();
-    // Manually append relationship IDs
-    formData.representi.forEach(id => data.append('representi', id));
+    formData.representi.forEach(id  => data.append('representi',  id));
     formData.representor.forEach(id => data.append('representor', id));
-    data.append('applicant', formData.applicant);
-    // Append other fields explicitly
-    data.append('start_date', formData.start_date);
-    data.append('end_date', formData.end_date);
-    data.append('another_deligation', formData.another_deligation);
-    data.append('representor_dismissal', formData.representor_dismissal);
-    data.append('representation_summary', formData.representation_summary);
-    data.append('doc_number', formData.doc_number);
-    data.append('verification_code', formData.verification_code);
-    // Append file if present
+    data.append('applicant',               formData.applicant);
+    data.append('start_date',              formData.start_date);
+    data.append('end_date',                formData.end_date);
+    data.append('another_deligation',      formData.another_deligation);
+    data.append('representor_dismissal',   formData.representor_dismissal);
+    data.append('representation_summary',  formData.representation_summary);
+    data.append('doc_number',              formData.doc_number);
+    data.append('verification_code',       formData.verification_code);
     if (formData.file) data.append('file', formData.file);
 
-    dispatch(createRepresentation(data))
-      .then(() => {
-        alert('وکالت‌نامه با موفقیت ایجاد شد!');
-        navigate('/representations');
-      })
-      .catch(err => console.error("Error creating representation:", err));
+    try {
+      /* ‑‑ If you used RTK’s createAsyncThunk call unwrap() here ‑‑
+         await dispatch(createRepresentation(data)).unwrap();
+         otherwise plain dispatch below works when the thunk
+         *throws* on non‑2xx HTTP */
+      await dispatch(createRepresentation(data));
+      alert('وکالت‌نامه با موفقیت ایجاد شد!');
+      navigate('/representations');
+    } catch (err) {
+      /* Axios / fetch error */
+      const errData = extractErrorData(err);
+      setServerErrors(errData);
+      console.error('Representation create failed:', errData);
+    } finally {
+      setSubmitting(false);
+    }
   };
-  const handleMultiChange = (field) => (options) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: options ? options.map(o => o.value) : []
-    }));
-  };
+
+  /* ---------- UI helpers ---------- */
+  const fieldError = key =>
+    serverErrors?.[key] ? (
+      <div className="field-error">{Array.isArray(serverErrors[key])
+        ? serverErrors[key][0]
+        : serverErrors[key]}</div>
+    ) : null;
+
+  /* ========== RENDER ========== */
   return (
     <form className="cottage-form" onSubmit={handleSubmit}>
       <h2 className="form-title">افزودن وکالت‌نامه</h2>
 
-      {customersError && <div className="add-error">خطا در دریافت لیست مشتریان</div>}
+      {customersError && (
+        <div className="add-error">خطا در دریافت لیست مشتریان</div>
+      )}
+      {serverErrors.detail && (      /* non‑field error */
+        <div className="add-error">{serverErrors.detail}</div>
+      )}
 
+      {/* ---- موکل ---- */}
       <div className="form-group">
         <label className="form-label">موکل:</label>
-        {customersLoading ? (<p>در حال بارگذاری...</p>) : (
+        {customersLoading ? (
+          <p>در حال بارگذاری...</p>
+        ) : (
           <Select
             isMulti
             inputId="representi"
+            className='selectPrf'
             name="representi"
             classNamePrefix="form-input"
             options={customerOptions}
@@ -121,14 +145,19 @@ const RepresentationForm = () => {
             required
           />
         )}
+        {fieldError('representi')}
       </div>
 
+      {/* ---- وکیل ---- */}
       <div className="form-group">
         <label className="form-label">وکیل:</label>
-        {customersLoading ? (<p>در حال بارگذاری...</p>) : (
+        {customersLoading ? (
+          <p>در حال بارگذاری...</p>
+        ) : (
           <Select
             isMulti
             inputId="representor"
+            className='selectPrf'
             name="representor"
             classNamePrefix="form-input"
             options={customerOptions}
@@ -139,13 +168,18 @@ const RepresentationForm = () => {
             required
           />
         )}
+        {fieldError('representor')}
       </div>
 
+      {/* ---- درخواست دهنده ---- */}
       <div className="form-group">
         <label className="form-label">درخواست دهنده:</label>
-        {customersLoading ? (<p>در حال بارگذاری...</p>) : (
+        {customersLoading ? (
+          <p>در حال بارگذاری...</p>
+        ) : (
           <Select
             inputId="applicant"
+            className='selectPrf'
             name="applicant"
             classNamePrefix="form-input"
             options={customerOptions}
@@ -155,8 +189,10 @@ const RepresentationForm = () => {
             isClearable
           />
         )}
+        {fieldError('applicant')}
       </div>
 
+      {/* ---- تاریخ شروع / پایان ---- */}
       <div className="form-group">
         <label className="form-label">تاریخ شروع:</label>
         <DatePicker
@@ -169,6 +205,7 @@ const RepresentationForm = () => {
           placeholder="----/--/--"
           required
         />
+        {fieldError('start_date')}
       </div>
 
       <div className="form-group">
@@ -182,32 +219,33 @@ const RepresentationForm = () => {
           format="YYYY-MM-DD"
           placeholder="----/--/--"
         />
+        {fieldError('end_date')}
+      </div>
+
+      {/* ---- چک‌باکس‌ها ---- */}
+      <div className="form-group checkbox-group">
+        <label className="form-label">توکل به غیر</label>
+        <input
+          type="checkbox"
+          name="another_deligation"
+          checked={formData.another_deligation}
+          onChange={handleChange}
+          className="form-checkbox"
+        />
       </div>
 
       <div className="form-group checkbox-group">
-        <label className="form-label">توکل به غیر
-        </label>
-          <input
-            type="checkbox"
-            name="another_deligation"
-            checked={formData.another_deligation}
-            onChange={handleChange}
-            className="form-checkbox"
-          /> 
+        <label className="form-label">عزل وکیل</label>
+        <input
+          type="checkbox"
+          name="representor_dismissal"
+          checked={formData.representor_dismissal}
+          onChange={handleChange}
+          className="form-checkbox"
+        />
       </div>
 
-      <div className="form-group checkbox-group">
-        <label className="form-label">عزل وکیل
-        </label>
-          <input
-            type="checkbox"
-            name="representor_dismissal"
-            checked={formData.representor_dismissal}
-            onChange={handleChange}
-            className="form-checkbox"
-          /> 
-      </div>
-
+      {/* ---- متن خلاصه ---- */}
       <div className="form-group">
         <label className="form-label">خلاصه وکالت:</label>
         <textarea
@@ -218,8 +256,10 @@ const RepresentationForm = () => {
           placeholder="خلاصه‌ای از وکالت را وارد کنید"
           required
         />
+        {fieldError('representation_summary')}
       </div>
 
+      {/* ---- شماره سند ---- */}
       <div className="form-group">
         <label className="form-label">شماره سند:</label>
         <input
@@ -231,8 +271,10 @@ const RepresentationForm = () => {
           placeholder="شماره سند را وارد کنید"
           required
         />
+        {fieldError('doc_number')}
       </div>
 
+      {/* ---- کد تصدیق ---- */}
       <div className="form-group">
         <label className="form-label">کد تصدیق:</label>
         <input
@@ -244,8 +286,10 @@ const RepresentationForm = () => {
           placeholder="کد تصدیق را وارد کنید"
           required
         />
+        {fieldError('verification_code')}
       </div>
 
+      {/* ---- فایل ---- */}
       <div className="form-group">
         <label className="form-label">فایل:</label>
         <input
@@ -254,9 +298,16 @@ const RepresentationForm = () => {
           onChange={handleFileChange}
           className="form-input-file"
         />
+        {fieldError('file')}
       </div>
 
-      <button type="submit" className="form-button">ثبت</button>
+      <button
+        type="submit"
+        className="form-button"
+        disabled={submitting}
+      >
+        {submitting ? 'در حال ثبت...' : 'ثبت'}
+      </button>
     </form>
   );
 };

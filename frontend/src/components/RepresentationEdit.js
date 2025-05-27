@@ -145,7 +145,7 @@ export default function RepresentationEdit() {
             value={customerOptions.filter(o => formData.representi.includes(o.value))}
             onChange={handleMultiChange('representi')}
             placeholder="انتخاب موکل‌ها"
-            className="editable-input"
+            className="selectPrf"
             classNamePrefix="editable-input"
             isClearable
             required
@@ -161,7 +161,7 @@ export default function RepresentationEdit() {
             value={customerOptions.filter(o => formData.representor.includes(o.value))}
             onChange={handleMultiChange('representor')}
             placeholder="انتخاب وکیل‌ها"
-            className="editable-input"
+            className="selectPrf"
             classNamePrefix="editable-input"
             isClearable
             required
@@ -179,7 +179,7 @@ export default function RepresentationEdit() {
               applicant: opt ? opt.value : ''
             }))}
             placeholder="انتخاب درخواست‌دهنده"
-            className="editable-input"
+            className="selectPrf"
             classNamePrefix="editable-input"
             isClearable
             
@@ -215,6 +215,8 @@ export default function RepresentationEdit() {
         {/* Delegation to another */}
         <div className="form-group checkbox-group">
           <label>
+                        توکل به غیر
+          </label>
             <input
               type="checkbox"
               name="another_deligation"
@@ -222,13 +224,14 @@ export default function RepresentationEdit() {
               onChange={handleChange}
               className="form-checkbox"
             />
-            توکل به غیر
-          </label>
+
         </div>
 
         {/* Attorney dismissal */}
         <div className="form-group checkbox-group">
           <label>
+                        عزل وکیل
+          </label>
             <input
               type="checkbox"
               name="representor_dismissal"
@@ -236,8 +239,7 @@ export default function RepresentationEdit() {
               onChange={handleChange}
               className="form-checkbox"
             />
-            عزل وکیل
-          </label>
+
         </div>
 
         {/* Summary */}

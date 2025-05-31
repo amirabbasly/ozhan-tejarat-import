@@ -278,41 +278,58 @@ class SaveCottageView(APIView):
 
 class SaveCottageGoodsView(APIView):
     permission_classes = [IsAdmin]
-    """
-    API endpoint to save goods for a cottage instance.
-    """
+
     def post(self, request):
-        data = request.data  # Data from the frontend
+        data = request.data
+        cottage_number = data.get("cottage_number")
+
         try:
-            # Get the related cottage by its number
-            cottage_number = data.get('cottage_number')
             cottage = Cottage.objects.get(cottage_number=cottage_number)
+        except Cottage.DoesNotExist:
+            return Response(
+                {"error": "Cottage not found."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
-            # Process and save each good
-            goods_data = data.get('goods', [])
-            for good in goods_data:
+        goods_data = data.get("goods", [])
+
+        # ---------- 1. build a set of the *new* codes -----------------------
+        new_codes = set()
+        for good in goods_data:
+            code = good.get("ggsVcodeInt") or good.get("goodscode")
+            if code:                      # skip rows with no key
+                new_codes.add(code)
                 CottageGoods.objects.update_or_create(
-                    goodscode=good.get('ggsVcodeInt'),
                     cottage=cottage,
+                    goodscode=code,
                     defaults={
-                        'customs_value': Decimal(good.get('customs_value', '0')),
-                        'import_rights': Decimal(good.get('import_rights', '0')),
-                        'red_cersent': Decimal(good.get('red_cersent', '0')),
-                        'total_value': Decimal(good.get('total_value', '0')),
-                        'added_value': Decimal(good.get('added_value', '0')),
-                        'discount': Decimal(good.get('discount', '0')),
-                        'quantity': Decimal(good.get('quantity', '0')),
-                        'goods_description': good.get('ggscommodityDescription','0')
-
-                    }
+                        "customs_value":  Decimal(good.get("customs_value",  "0")),
+                        "import_rights":  Decimal(good.get("import_rights", "0")),
+                        "red_cersent":    Decimal(good.get("red_cersent",   "0")),
+                        "total_value":    Decimal(good.get("total_value",   "0")),
+                        "added_value":    Decimal(good.get("added_value",   "0")),
+                        "discount":       Decimal(good.get("discount",      "0")),
+                        "quantity":       Decimal(good.get("quantity",      "0")),
+                        "goods_description":
+                            good.get("goods_description")
+                            or good.get("ggscommodityDescription", ""),
+                    },
                 )
 
-            return Response({'message': 'Goods saved successfully!'}, status=status.HTTP_201_CREATED)
+        # ---------- 2. purge codes that disappeared from the payload -------
+        (
+            CottageGoods.objects
+            .filter(cottage=cottage)
+            .exclude(goodscode__in=new_codes)
+            .delete()
+        )
+        # -------------------------------------------------------------------
 
-        except Cottage.DoesNotExist:
-            return Response({'error': 'Cottage not found.'}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response(
+            {"message": "Goods saved successfully!"},
+            status=status.HTTP_201_CREATED,
+        )
+
 class FetchCustomsDutyInformationAPIView(APIView):
     permission_classes = [IsAdmin]
     """

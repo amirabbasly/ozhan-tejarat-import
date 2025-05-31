@@ -21,6 +21,7 @@ class Performa(models.Model):
     prf_date = jmodels.jDateField(null=True, blank=True)
     prf_expire_date = jmodels.jDateField(null=True, blank=True)
     prfVCodeInt = models.CharField(max_length=50, unique=True,)
+    booked_amount = models.DecimalField(max_digits=20, decimal_places=2, default=0)
     remaining_total = models.DecimalField(max_digits=20, decimal_places=2, default=0)
     registrant = models.CharField(max_length=100)
     goods_type = models.CharField(max_length=100, null=True, blank=True)

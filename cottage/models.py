@@ -8,6 +8,7 @@ from accounts.models import Costumer
 class Cottage(models.Model):
     cottage_number = models.IntegerField(unique=True)
     cottage_date = jmodels.jDateField()
+    booked = models.BooleanField(default=False)
     proforma = models.ForeignKey(Performa, to_field='prf_order_no', on_delete=models.CASCADE, related_name='cottages')
     refrence_number = models.CharField(null=True, blank=True)
     total_value = models.DecimalField(max_digits=20, decimal_places=2)

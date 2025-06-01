@@ -229,7 +229,7 @@ const ProformaInvoiceItemsEditor = ({ items, onItemsChange, unitOptions, country
               <label htmlFor="modal_description">شرح کالا لاتین:</label>
               <textarea
                 id="modal_description"
-                name="description"
+                name="translated_description"
                 className="form-textarea"
                 value={modalItemData.translated_description || ""}
                 onChange={handleModalChange}
@@ -241,7 +241,7 @@ const ProformaInvoiceItemsEditor = ({ items, onItemsChange, unitOptions, country
               <label htmlFor="modal_description">شرح کالا فارسی:</label>
               <textarea
                 id="modal_description"
-                name="description"
+                name="original_description"
                 className="form-textarea"
                 value={modalItemData.original_description || ""}
                 onChange={handleModalChange}

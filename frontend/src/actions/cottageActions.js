@@ -82,6 +82,9 @@ export const fetchCottages = (page = 1, pageSize = 50, filters = {}) => async (d
     if (filters.cottageDateBefore) params.append("cottage_date_before", filters.cottageDateBefore);
 
     if (filters.cottageDate) params.append("cottage_date_after", filters.cottageDate);
+    if (filters.docs_recieved) params.append("docs_recieved", filters.docs_recieved);
+    if (filters.rafee_taahod) params.append("rafee_taahod", filters.rafee_taahod);
+    if (filters.rewatch) params.append("rewatch", filters.rewatch);
 
     // NEW: add 'search' if it exists
     if (filters.search) params.append("search", filters.search);

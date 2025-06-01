@@ -37,6 +37,10 @@ const CottageList = () => {
       navigate("/");
     }
   }, [auth.isAuthenticated, navigate]);
+// -------------------- BOOLEAN FILTERS --------------------
+  const [rafeeTaahod,   setRafeeTaahod]   = useState("");   // "", "true", "false"
+  const [docsRecieved,  setDocsRecieved]  = useState("");
+  const [rewatchStatus, setRewatchStatus] = useState("");
 
   const dispatch = useDispatch();
   const [searchText, setSearchText] = useState("");
@@ -103,11 +107,17 @@ const CottageList = () => {
     
     dispatch(fetchOrders());
     const filters = {
-      search: query, // using the renamed variable
-      cottageDate: convertToWesternDigits(cottageDate), // Use helper if necessary
-      cottageDateBefore: convertToWesternDigits(cottageDateBefore),
+      search: query,
+      cottageDate:        convertToWesternDigits(cottageDate),
+      cottageDateBefore:  convertToWesternDigits(cottageDateBefore),
       prfOrderNo,
+
+      // فقط اگر کاربر «همه» را برنداشته باشد بفرست
+      ...(rafeeTaahod   && { rafee_taahod:  rafeeTaahod }),
+      ...(docsRecieved  && { docs_recieved: docsRecieved }),
+      ...(rewatchStatus && { rewatch:       rewatchStatus }),
     };
+
     console.log("Dispatching filters:", filters);
     console.log("Cottage Date before sending:", filters.cottageDate);
 
@@ -120,14 +130,13 @@ const CottageList = () => {
     cottageDate,
     prfOrderNo,
     cottageDateBefore,
+     rafeeTaahod,
+    docsRecieved,
+    rewatchStatus, 
   ]);
 
   // If currency updates are done, refetch
-  useEffect(() => {
-    if (Object.keys(updatingCurrencyPrice || {}).length === 0) {
-      dispatch(fetchCottages(currentPage));
-    }
-  }, [updatingCurrencyPrice, dispatch, currentPage]);
+
 
   // We define booleans for enabling next/prev based on the presence of `next`/`previous`
   const hasNext = !!next;
@@ -198,6 +207,11 @@ const CottageList = () => {
         alert("خطا در به‌روزرسانی نرخ ارز برای برخی از کوتاژها.");
       });
   };
+const booleanOptions = [
+  { value: "",      label: "همه" },
+  { value: "True",  label: "بله" },
+  { value: "False", label: "خیر" },
+];
 
   const handleDeleteSelectedCottages = () => {
     if (!selectedCottages.length) {
@@ -242,6 +256,8 @@ const CottageList = () => {
         {/* NO PROFORMA / DATE FILTERS ANYMORE */}
 
         <div className="filter-container">
+          <div className="filter-row">
+            <label>ثبت سفارش:</label>
           <Select
             name="proforma"
             className="filter-react-select"
@@ -265,6 +281,9 @@ const CottageList = () => {
               !loading && !error ? "سفارشی موجود نیست" : "در حال بارگذاری..."
             }
           />
+          </div>
+          <div className="filter-row">
+              <label>تاریخ شروع:</label>
           <DatePicker
             value={cottageDate}
             onChange={handleCottageDateChange}
@@ -276,6 +295,9 @@ const CottageList = () => {
             className="date-picker"
             clearable
           />
+          </div>
+          <div className="filter-row">
+              <label>تاریخ پایین:</label>
           <DatePicker
             value={cottageDateBefore}
             onChange={handleCottageDateBeforeChange}
@@ -287,6 +309,44 @@ const CottageList = () => {
             className="date-picker"
             clearable
           />
+          </div>
+   <div className="filter-row">
+    <label>رفع تعهد:</label>
+    <Select
+      className="filter-react-select"
+      options={booleanOptions}
+      value={ booleanOptions.find(opt => opt.value === rafeeTaahod) || null }
+      onChange={(opt) => setRafeeTaahod(opt ? opt.value : "")}
+      
+      placeholder="همه"
+    />
+  </div>
+
+  {/* اخذ مدارک */}
+  <div className="filter-row">
+    <label>اخذ مدارک:</label>
+    <Select
+      className="filter-react-select"
+      options={booleanOptions}
+      value={ booleanOptions.find(opt => opt.value === docsRecieved) || null }
+      onChange={(opt) => setDocsRecieved(opt ? opt.value : "")}
+      
+      placeholder="همه"
+    />
+  </div>
+
+  {/* بازبینی */}
+  <div className="filter-row">
+    <label>بازبینی:</label>
+    <Select
+      className="filter-react-select"
+      options={booleanOptions}
+      value={ booleanOptions.find(opt => opt.value === rewatchStatus) || null }
+      onChange={(opt) => setRewatchStatus(opt ? opt.value : "")}
+      
+      placeholder="همه"
+    />
+  </div>
         </div>
 
         {/* CURRENCY PRICE */}
@@ -371,6 +431,9 @@ const CottageList = () => {
                     <th>نام مشتری</th> {/* New column header */}
                     <th>ارزش کل</th>
                     <th>نرخ ارز</th>
+                    <th>رفع تعهد</th>
+                    <th>اخذ مدارک</th>
+                    <th>بازبینی </th>
                     <th></th>
                   </tr>
                 </thead>
@@ -397,9 +460,10 @@ const CottageList = () => {
         <td>{cottage.cottage_number}</td>
         <td>{cottage.cottage_date}</td>
         <td>{cottage.proforma.prf_number}</td>
-        <td>{cottage.proforma.prf_order_no}</td>
+        <td><Link to={`/order-details/${cottage.proforma.prfVCodeInt}`}>{cottage.proforma.prf_order_no}</Link></td>
         <td>{customer ? customer.full_name : "—"}</td> {/* Display customer name */}
         <td>{cottage.total_value}</td>
+        
         <td>
           {updatingCurrencyPrice && updatingCurrencyPrice[cottage.id] ? (
             <span className="loading">در حال به‌روزرسانی...</span>
@@ -415,6 +479,10 @@ const CottageList = () => {
             "—"
           )}
         </td>
+        <td>{cottage.rafee_taahod ? "بله" : "خیر"}</td>
+        <td>{cottage.docs_recieved ? "بله" : "خیر"}</td>
+        <td>{cottage.rewatch ? "بله" : "خیر"}</td>
+
         <td>
           <Link to={`/cottages/${cottage.cottage_number}`}>
             جزئیات

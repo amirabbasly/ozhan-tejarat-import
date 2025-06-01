@@ -73,6 +73,8 @@ class JalaliDateFromToRangeFilter(DateFromToRangeFilter):
 class CottageFilter(django_filters.FilterSet):
     cottage_status = django_filters.Filter(field_name="cottage_status", lookup_expr="exact")
     docs_recieved = django_filters.Filter(field_name="docs_recieved", lookup_expr="exact")
+    rafee_taahod = django_filters.Filter(field_name="rafee_taahod", lookup_expr="exact")
+    rewatch = django_filters.Filter(field_name="rewatch", lookup_expr="exact")
     proforma = django_filters.Filter(field_name="proforma__prf_order_no", lookup_expr="exact")
     cottage_date_after = JalaliFromDateFilter(field_name="cottage_date")
     cottage_date_before = JalaliToDateFilter(field_name="cottage_date")

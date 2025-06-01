@@ -7,8 +7,8 @@
 }
 
 .cottage-list-container {
-  width: 100%;
-  max-width: 1200px;
+  width: 96%;
+  max-width: 1500px;
   background-color: #ffffff;
   padding: 20px;
   border-radius: 10px;
@@ -20,6 +20,7 @@ h2 {
   margin-bottom: 20px;
 }
 
+/* جدول */
 .cottage-table {
   width: 100%;
   border-collapse: collapse;
@@ -27,8 +28,8 @@ h2 {
   direction: rtl;
 }
 
-.cottage-table th, .cottage-table td {
-
+.cottage-table th,
+.cottage-table td {
   padding: 15px;
   text-align: center;
 }
@@ -37,10 +38,10 @@ h2 {
   background-color: #ffffff;
   font-weight: bold;
 }
-.cottage-table thead tr {
-border-top: 1px solid #a4a4a4;
-}
 
+.cottage-table thead tr {
+  border-top: 1px solid #a4a4a4;
+}
 
 .cottage-table tr:nth-child(odd) {
   background-color: #efefef;
@@ -55,62 +56,73 @@ border-top: 1px solid #a4a4a4;
   cursor: pointer;
 }
 
+/* پیغام "بدون داده" */
 .no-data {
   text-align: center;
   color: #777;
   margin-top: 20px;
   font-size: 18px;
 }
+
+/* فیلترها */
 .filter-container {
-  flex-wrap: wrap;
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-evenly;
-  align-items: center;
+  align-items: flex-end;
+  gap: 20px;            /* فاصلهٔ افقی/عمودی بین فیلدها */
   margin-bottom: 20px;
-
-}
-.rmdp-clear-button {
-  color: red;
-  font-size: 12px;
-  cursor: pointer;
 }
 
+.filter-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
 
+.filter-row label {
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+/* استایل مشترک برای همه <select> های فیلتر */
+.filter-row select {
+  width: 200px;
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* اگر از React-Select استفاده می‌کنید */
+.filter-react-select {
+  width: 200px;
+  margin-bottom: 0; /* چون margin را در filter-row مدیریت کردیم */
+}
+
+/* اگر از یک اینپوت جستجو استفاده می‌کنید */
 .search-input {
   border: 1px solid #ccc;
   border-radius: 4px;
-}
-.filter-container input {
-  padding: 10px;
-  margin-bottom: 30px;
-  width: 100%;
-
+  padding: 8px 10px;
+  width: 200px;
 }
 
-.filter-select {
- width: 273px;
- padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  margin-bottom: 30px;
-}
-.filter-react-select {
-  width: 273px;
-  padding: 10px;
-   margin-bottom: 30px;
- }
-
+/* هنگام فوکوس کردن روی فیلترها */
 .search-input:focus,
+.filter-row select:focus,
 .filter-select:focus {
   outline: none;
   border-color: #007bff;
 }
+
+/* دکمه حذف */
 .delete-button {
-  background-color: #e74c3c; /* Red color */
+  background-color: #e74c3c;
   color: white;
   border: none;
-  padding: 10px;
+  padding: 10px 15px;
   margin-left: 10px;
+  border-radius: 4px;
   cursor: pointer;
 }
 
@@ -118,12 +130,34 @@ border-top: 1px solid #a4a4a4;
   background-color: #bdc3c7;
   cursor: not-allowed;
 }
-.c-price-input{
-  padding: 10px;
-  width: auto;
-  margin-bottom: 30px;
+
+/* اگر باکس نرخ ارز دارید */
+.c-price-input {
+  padding: 8px 10px;
+  width: 150px;
   border: 1px solid #ccc;
   border-radius: 4px;
-  margin-bottom: 30px;
-  width: 250px;
+  margin-bottom: 0; /* چون gap در filter-container کافی است */
 }
+
+/* دکمه جستجو */
+.btn-grad {
+  background: linear-gradient(90deg, #36d1dc, #5b86e5);
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-grad:hover {
+  opacity: 0.9;
+}
+
+/* دکمه‌های صفحه بندی (اختیاری) */
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+

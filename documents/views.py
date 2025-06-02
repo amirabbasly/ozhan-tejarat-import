@@ -1203,7 +1203,8 @@ class ProformaInvoicePDFView(APIView):
             gw_kg = str(item.gw_kg)
             unit = Paragraph(str(item.unit), styles["Cnt"])
             quantity = str(item.quantity)
-            unit_price = str(item.unit_price)
+            unit_price = f"{float(item.unit_price):.2f}"
+
             try:
                 amount_val = float(item.quantity) * float(item.unit_price)
             except (ValueError, TypeError):

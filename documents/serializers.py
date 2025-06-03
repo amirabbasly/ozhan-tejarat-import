@@ -139,7 +139,9 @@ class InvoiceSerializer(serializers.ModelSerializer):
     proforma = serializers.SlugRelatedField(
         slug_field="prfVCodeInt",          # unique field on Performa
         queryset=Performa.objects.all(),   # required for writes
-        write_only=True                    # show it only on POST / PATCH
+        write_only=True,
+        allow_null=True,
+        required=False
     )
 
     # ───────────────────────────────────────────────────────────

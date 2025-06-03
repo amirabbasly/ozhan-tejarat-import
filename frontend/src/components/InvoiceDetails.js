@@ -1,7 +1,7 @@
 // src/components/InvoiceDetails.jsx
-import React from "react";
 import Select from "react-select";
 import { iranCustoms } from "../data/iranCustoms";
+import React, { useEffect } from "react";
 
 const InvoiceDetails = ({
   invoice,
@@ -15,25 +15,45 @@ const InvoiceDetails = ({
   cottageOptions,
   proformaOptions,
 }) => {
+    useEffect(() => {
+    if (
+      !invoice.proforma && 
+      invoice.proforma_details?.prfVCodeInt != null
+    ) {
+      // Make sure to convert to string if your options’ values are strings
+      onFieldChange(
+        "proforma",
+        String(invoice.proforma_details.prfVCodeInt)
+      );
+    }
+  }, [invoice.proforma, invoice.proforma_details, onFieldChange]);
   const iranCustomsOptions = iranCustoms.map((custom) => ({
     value: custom.ctmNameStr, // or combine with ctmNameStr if needed
     label: `${custom.ctmNameStr} (${custom.ctmVCodeInt})`,
   }));
   return (
     <div>
-        {/* Cottage selector */}
-        <div className="form-group">
+      <div className="form-group">
         <label htmlFor="proforma">ثبت سفارش:</label>
         <Select
           id="proforma"
           className="selectPrf"
           name="proforma"
           options={proformaOptions}
- value={
-   proformaOptions.find(
-     o => o.value === (invoice.proforma ?? invoice.proforma_details?.prfVCodeInt)
-   ) || null
- }          onChange={(opt) => onFieldChange("proforma", opt ? opt.value : "")}
+          value={
+            proformaOptions.find(
+              (o) =>
+                o.value ===
+                // Try invoice.proforma first; if that’s still empty,
+                // fall back to invoice.proforma_details.prfVCodeInt (as string)
+                (invoice.proforma !== "" && invoice.proforma != null
+                  ? invoice.proforma
+                  : invoice.proforma_details?.prfVCodeInt?.toString())
+            ) || null
+          }
+          onChange={(opt) =>
+            onFieldChange("proforma", opt ? opt.value : "")
+          }
           placeholder="-- انتخاب ثبت سفارش --"
         />
       </div>

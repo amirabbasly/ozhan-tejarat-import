@@ -30,7 +30,7 @@ const CottageGoodsList = ({ goods }) => {
                 <thead>
                     <tr>
                         <th>ردیف</th>
-                        <th>ارزش گمرکی</th>
+                        <th>مبنای محاسبه</th>
                         <th>حقوق ورودی</th>
                         <th>ارزش کل ارزی</th>
                         <th>ارزش افزوده</th>

@@ -11,7 +11,7 @@ const EditGoodModal = ({ good, onClose, onSave }) => {
     const [otherExpense, setOtherExpense] = useState('');
     const [quantity, setQuantity] = useState('');
     const [goodsDescription, setGoodsDescription] = useState('');
-
+    const [discount, setDiscount] = useState('');
     useEffect(() => {
         if (good) {
             setCustomsValue(good.customs_value || '');
@@ -22,6 +22,7 @@ const EditGoodModal = ({ good, onClose, onSave }) => {
             setQuantity(good.quantity || '');
             setGoodsDescription(good.goods_description || '');
             setOtherExpense(good.other_expense || '');
+            setDiscount(good.discount || '');
         }
     }, [good]);
 
@@ -66,6 +67,15 @@ const EditGoodModal = ({ good, onClose, onSave }) => {
                             required
                         />
                     </div>
+                    <div className="form-group">
+                        <label>تخفیف:</label>
+                        <input
+                            type="number"
+                            value={discount}
+                            onChange={(e) => setDiscount(e.target.value)}
+                            required
+                        />
+                    </div>                    
                     <div className="form-group">
                         <label>ارزش کل ارزی:</label>
                         <input

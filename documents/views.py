@@ -415,7 +415,7 @@ class InvoicePDFView(APIView):
             gw_kg = str(item.gw_kg)
             unit = Paragraph(str(item.unit), styles["Cnt"])
             quantity = Paragraph(str(item.quantity), styles["Cnt"])
-            unit_price = str(item.unit_price)
+            unit_price = f"{float(item.unit_price):.2f}"
             try:
                 amount_val = float(item.quantity) * float(item.unit_price)
             except (ValueError, TypeError):
@@ -1225,9 +1225,9 @@ class ProformaInvoicePDFView(APIView):
             ])
 
         col_widths = [
-            0.3 * inch, 1.5 * inch, 0.6 * inch, 0.9 * inch,
+            0.3 * inch, 1.2 * inch, 1.2 * inch, 0.8 * inch,
             0.8 * inch, 0.8 * inch, 0.7 * inch, 0.5 * inch,
-            0.9 * inch, 0.9 * inch
+            0.7 * inch, 0.9 * inch
         ]
         items_table = Table(table_data, colWidths=col_widths)
         items_table.setStyle(TableStyle([
@@ -1268,7 +1268,7 @@ class ProformaInvoicePDFView(APIView):
 
             ]
         ]
-        cost_summary_table = Table(total_amount_data, colWidths=[3.3 * inch, 0.8 * inch, 0.8 * inch,0.7 * inch, 2.3 * inch])
+        cost_summary_table = Table(total_amount_data, colWidths=[3.5 * inch, 0.8 * inch, 0.8 * inch,0.7 * inch, 2.1 * inch])
         cost_summary_table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.white),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),

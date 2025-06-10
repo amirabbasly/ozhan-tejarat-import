@@ -7,7 +7,7 @@ import {
 } from "../actions/cottageActions";
 import { fetchOrders } from "../actions/performaActions";
 import { Link, useNavigate } from "react-router-dom";
-
+import { formatNumber } from "../utils/numberFormat";
 import "./CottageList.css";
 import PaginationControls from "./PaginationControls"; // <-- Import your component
 import Select from "react-select";
@@ -428,8 +428,9 @@ const booleanOptions = [
                     <th>تاریخ</th>
                     <th>شماره پرفورم</th>
                     <th>شماره ثبت سفارش</th>
-                    <th>نام مشتری</th> {/* New column header */}
+                    <th>نام مشتری</th> 
                     <th>ارزش کل</th>
+                    <th>ارزش گمرکی</th>
                     <th>نرخ ارز</th>
                     <th>رفع تعهد</th>
                     <th>اخذ مدارک</th>
@@ -462,8 +463,8 @@ const booleanOptions = [
         <td>{cottage.proforma.prf_number}</td>
         <td><Link to={`/order-details/${cottage.proforma.prfVCodeInt}`}>{cottage.proforma.prf_order_no}</Link></td>
         <td>{customer ? customer.full_name : "—"}</td> {/* Display customer name */}
-        <td>{cottage.total_value}</td>
-        
+        <td>{formatNumber(cottage.total_value)}</td>
+        <td>{formatNumber(cottage.customs_value)}</td>
         <td>
           {updatingCurrencyPrice && updatingCurrencyPrice[cottage.id] ? (
             <span className="loading">در حال به‌روزرسانی...</span>

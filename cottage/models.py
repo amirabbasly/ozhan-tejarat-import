@@ -137,7 +137,12 @@ class CottageGoods(models.Model):
         self.other_expense = self.calculate_other_expense()
         self.final_price = self.calculate_final_price()
         super().save(*args, **kwargs)
-    
+        self.cottage._update_customs_value()
+
+    def delete(self, *args, **kwargs):
+        cottage = self.cottage
+        super().delete(*args, **kwargs)
+        cottage._update_customs_value()
     
 
 class ExportedCottages(models.Model):

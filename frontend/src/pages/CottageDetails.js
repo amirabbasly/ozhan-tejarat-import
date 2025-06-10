@@ -36,6 +36,7 @@ const CottageDetails = () => {
   const [cottageNum, setCottageNum] = useState("");
   const [cottageDate, setCottageDate] = useState(null);
   const [totalValue, setTotalValue] = useState("");
+  const [customsValue, setCustomsValue] = useState("");
   const [quantity, setQuantity] = useState("");
   const [proforma, setProforma] = useState("");
   const [status, setStatus] = useState("");
@@ -87,6 +88,7 @@ const CottageDetails = () => {
       setCottageNum(cottage.cottage_number || "");
       setRefrenceNumber(cottage.refrence_number || "");
       setTotalValue(cottage.total_value || "");
+      setCustomsValue(cottage.customs_value || "");
       setQuantity(cottage.quantity || "");
       setProforma(cottage.proforma.prfVCodeInt || "");
       setDocuments(cottage.documents || "");
@@ -132,6 +134,7 @@ const CottageDetails = () => {
           cottage_number: cottageNum,
           cottage_date: cottageDate ? cottageDate.format("YYYY-MM-DD") : null,
           total_value: totalValue,
+          customs_value: customsValue,
           quantity: quantity,
           cottage_status: status,
           cottage_customer: customer,
@@ -245,6 +248,13 @@ const CottageDetails = () => {
           ) : (
             <span className="readonly-text">{totalValue}</span>
           )}
+        </div>
+        <div className="input-group">
+          <label htmlFor="customsValue">
+            <strong>ارزش گمرکی :</strong>
+          </label>
+
+          <span className="readonly-text">{customsValue}</span>
         </div>
 
         <div className="input-group">
@@ -372,6 +382,8 @@ const CottageDetails = () => {
             </span>
           )}
         </div>
+
+        
 
         <div className="input-group">
           <label htmlFor="rafeeTaahod">

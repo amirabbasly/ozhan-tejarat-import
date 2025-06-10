@@ -173,7 +173,7 @@ export const iranCustoms = [
   { ctmVCodeInt: 40201, ctmNameStr: "Shalamcheh", ctmCodeStr: "187" },
   {
     ctmVCodeInt: 40202,
-    ctmNameStr: "Arvand Free Trade Zone - Khorramshahr",
+    ctmNameStr: "Arvand Free Trade Zone Khorramshahr",
     ctmCodeStr: "183",
   },
   { ctmVCodeInt: 40302, ctmNameStr: "Arvandkenar", ctmCodeStr: "157" },

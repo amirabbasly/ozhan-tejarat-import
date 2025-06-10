@@ -63,6 +63,8 @@ function InvoiceForm() {
     { value: "M2", label: "M2" },
     { value: "M", label: "M" },
     { value: "PCS", label: "PCS" },
+    { value: "SET", label: "SET" },
+
   ];
   const iranCustomsOptions = iranCustoms.map((custom) => ({
     value: custom.ctmNameStr, // or combine with ctmNameStr if needed

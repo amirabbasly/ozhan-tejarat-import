@@ -32,6 +32,7 @@ const CottageDetails = () => {
   const [rafeeTaahod, setRafeeTaahod] = useState("");
   const [docsRecieved, setDocsRecieved] = useState("");
   const [rewatch, setRewatch] = useState("");
+  const [booked, setBooked] = useState("");
   const [cottageNum, setCottageNum] = useState("");
   const [cottageDate, setCottageDate] = useState(null);
   const [totalValue, setTotalValue] = useState("");
@@ -94,6 +95,7 @@ const CottageDetails = () => {
       setRafeeTaahod(cottage.rafee_taahod === true ? "true" : "false"); // Ensure proper boolean handling
       setDocsRecieved(cottage.docs_recieved === true ? "true" : "false");
       setRewatch(cottage.rewatch === true ? "true" : "false");
+      setBooked(cottage.booked === true ? "true" : "false");
       setIntermediary(cottage.Intermediary || "")
 
       if (cottage.cottage_date) {
@@ -139,6 +141,7 @@ const CottageDetails = () => {
           rafee_taahod: rafeeTaahod,
           docs_recieved: docsRecieved,
           rewatch: rewatch,
+          booked: booked,
           refrence_number: refrenceNumber,
         };
         dispatch(
@@ -427,6 +430,24 @@ const CottageDetails = () => {
           ) : (
             <span className="readonly-text">
               {rewatch === "true" ? "بله" : "خیر"} {/* Display in Persian */}
+            </span>
+          )}
+        </div>
+                <div className="input-group">
+          <label htmlFor="booked">
+            <strong>بوک شده :</strong>
+          </label>
+          {isEditing ? (
+            <input
+              type="checkbox"
+              id="docsRecieved"
+              checked={booked === "true"} // Ensure proper boolean handling
+              onChange={(e) => setBooked(e.target.checked ? "true" : "false")}
+              className="editable-checkbox"
+            />
+          ) : (
+            <span className="readonly-text">
+              {booked === "true" ? "بله" : "خیر"} {/* Display in Persian */}
             </span>
           )}
         </div>

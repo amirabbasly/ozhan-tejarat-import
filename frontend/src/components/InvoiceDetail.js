@@ -56,6 +56,8 @@ const InvoiceDetail = () => {
     { value: "M2", label: "M2" },
     { value: "M", label: "M" },
     { value: "PCS", label: "PCS" },
+    { value: "SET", label: "SET" },
+    
   ];
   const cottageOptions = cottages.map((c) => ({ value: c.cottage_number, label: String(c.cottage_number) }));
   const proformaOptions = orders.map((c) => ({ value: c.prfVCodeInt, label: String(c.prf_order_no) }));

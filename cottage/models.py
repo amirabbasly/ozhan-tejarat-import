@@ -4,6 +4,7 @@ from decimal import Decimal
 from django_jalali.db import models as jmodels
 from django.core.exceptions import ValidationError
 from accounts.models import Costumer
+from django.db.models import Sum, F, DecimalField
 
 class Cottage(models.Model):
     cottage_number = models.IntegerField(unique=True)
@@ -12,6 +13,7 @@ class Cottage(models.Model):
     proforma = models.ForeignKey(Performa, to_field='prf_order_no', on_delete=models.CASCADE, related_name='cottages')
     refrence_number = models.CharField(null=True, blank=True)
     total_value = models.DecimalField(max_digits=20, decimal_places=2)
+    customs_value = models.DecimalField(max_digits=28, decimal_places=2, null=True, blank=True)
     quantity = models.PositiveIntegerField()
     currency_price = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
     cottage_customer = models.ForeignKey(Costumer, on_delete=models.SET_NULL, null=True, blank=True)
@@ -21,12 +23,33 @@ class Cottage(models.Model):
     rewatch = models.BooleanField(default=False)
     Intermediary = models.CharField(max_length=50, null=True, blank=True)
     documents = models.FileField(null=True,blank=True )
+
     class Meta:
         ordering = ["-cottage_date"] 
 
 
     def __str__(self):
         return f"Cottage {self.cottage_number} - {self.proforma}"
+
+    def _update_customs_value(self):
+        """
+        Sum up import_rights + customs_value + added_value + red_cersent
+        across all related CottageGoods and write it back to self.customs_value.
+        """
+        agg = self.cottage_goods.aggregate(
+            total=Sum(
+                F('import_rights')
+                - F('discount')
+                + F('added_value')
+                + F('red_cersent'),
+                output_field=DecimalField()
+            )
+        )
+        total = agg['total'] or Decimal('0')
+        # write directly to the DB, avoid re-entering save()
+        Cottage.objects.filter(pk=self.pk).update(customs_value=total)
+        # also update the in-memory instance
+        self.customs_value = total
 
     def save(self, *args, **kwargs):
         if not self.currency_price and self.proforma.prf_currency_price is not None:
@@ -43,6 +66,7 @@ class Cottage(models.Model):
 
         # Always recalculate related CottageGoods after saving Cottage
         if self.pk:
+            self._update_customs_value()
             self.recalculate_goods()
 
     def delete(self, *args, **kwargs):
@@ -60,7 +84,7 @@ class Cottage(models.Model):
         for good in related_goods:
             good.recalculate_fields()
             good.save()
-
+        self._update_customs_value()
 
 
 class CottageGoods(models.Model):

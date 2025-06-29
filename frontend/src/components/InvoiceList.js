@@ -87,7 +87,9 @@ function InvoiceList() {
   return (
     <div className="invoice-list-container">
       <h2>فهرست فاکتور ها</h2>
-<button><Link to={"/invoices/new"}>فاکتور جدید</Link></button>
+      <Link to={"/invoices/new"}>
+        <button>فاکتور جدید</button>
+      </Link>
       {/* Search Input */}
       <div className="filter-container">
         <input
@@ -117,7 +119,8 @@ function InvoiceList() {
         <thead>
           <tr>
             <th>شماره اظهارنامه</th>
-            <th>شماره پرفورم</th>
+            <th>شماره ثبت سفارش</th>
+            <th>شماره فاکتور</th>
             <th>مبلغ کل</th>
             <th>هزینه حمل</th>
             <th>واحد پول</th>
@@ -132,8 +135,17 @@ function InvoiceList() {
         <tbody>
           {invoices.map((inv) => (
             <tr key={inv.id}>
-              <td><Link to={`/cottages/${inv.cottage}`}>{inv.cottage}</Link></td>
-              <td><Link to={`/order-details/${inv.proforma_details?.prfVCodeInt}`}>{inv.proforma_details?.prf_number}</Link></td>
+              <td>
+                <Link to={`/cottages/${inv.cottage}`}>{inv.cottage}</Link>
+              </td>
+              <td>
+                <Link
+                  to={`/order-details/${inv.proforma_details?.prfVCodeInt}`}
+                >
+                  {inv.proforma_details?.prf_order_no}
+                </Link>
+              </td>
+              <td>{inv.invoice_number}</td>
               <td>{inv.total_amount}</td>
               <td>{inv.freight_charges}</td>
               <td>{inv.invoice_currency}</td>

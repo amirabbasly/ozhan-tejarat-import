@@ -31,6 +31,9 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .filters import CottageFilter
 from django.db.models import Q
 import re
+from openpyxl import Workbook
+import datetime
+
 
 
 
@@ -1029,3 +1032,57 @@ class ImportExportedCottagesView(APIView):
 
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+class CottageExcelExportView(APIView):
+
+    def post(self, request, *args, **kwargs):
+        cottage_numbers = request.data.get('cottage_numbers', [])
+        if not isinstance(cottage_numbers, list) or not cottage_numbers:
+            return Response(
+                {"detail": "Provide a non-empty list of cottage_numbers."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        qs = Cottage.objects.filter(cottage_number__in=cottage_numbers)
+
+        # create workbook and sheet
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Cottages"
+
+        # header row
+        headers = [
+            "شماره کوتاژ", "تاریخ",
+            "شماره ثبت سفارش", 
+            "شماره ساتا",
+            "ارزش ارزی", "ارزش گمرکی",
+             "مشتری",
+            "وضعیت", 
+             "ارزش افزوده"
+        ]
+        ws.append(headers)
+
+        # data rows
+        for c in qs:
+            ws.append([
+                c.cottage_number,
+                str(c.cottage_date),                
+                c.proforma.prf_order_no,           
+                c.refrence_number or "",
+                float(c.total_value),
+                float(c.customs_value or 0),
+                (c.cottage_customer.full_name 
+                   if c.cottage_customer else ""),
+                c.cottage_status or "",
+                float(c.added_value or 0),
+            ])
+
+        # prepare HTTP response
+        today = datetime.date.today().isoformat()
+        filename = f"cottages_{today}.xlsx"
+        response = HttpResponse(
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        wb.save(response)
+        return response

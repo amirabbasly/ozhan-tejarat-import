@@ -69,7 +69,7 @@ class CottageSerializer(serializers.ModelSerializer):
         model = Cottage
         fields = [
             'cottage_number', 'cottage_date', 'proforma','refrence_number',
-            'total_value','customs_value','quantity', 'currency_price', 'cottage_customer',
+            'total_value','customs_value','added_value','quantity', 'currency_price', 'cottage_customer',
             'cottage_status', 'rafee_taahod', 'documents', 'docs_recieved',
             'rewatch','booked', 'id',"Intermediary", 'cottage_goods',
         ]

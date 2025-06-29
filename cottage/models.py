@@ -23,6 +23,7 @@ class Cottage(models.Model):
     rewatch = models.BooleanField(default=False)
     Intermediary = models.CharField(max_length=50, null=True, blank=True)
     documents = models.FileField(null=True,blank=True )
+    added_value = models.DecimalField(max_digits=30, decimal_places=2, null=True, blank=True, default=0)
 
     class Meta:
         ordering = ["-cottage_date"] 
@@ -43,11 +44,19 @@ class Cottage(models.Model):
                 + F('added_value')
                 + F('red_cersent'),
                 output_field=DecimalField()
+            ),
+            added_total=Sum(
+                F('added_value'),
+                output_field=DecimalField()
             )
         )
+        added_total = agg['added_total'] or Decimal('0')
         total = agg['total'] or Decimal('0')
         # write directly to the DB, avoid re-entering save()
-        Cottage.objects.filter(pk=self.pk).update(customs_value=total)
+        Cottage.objects.filter(pk=self.pk).update(
+        customs_value=total,
+        added_value=added_total
+    )
         # also update the in-memory instance
         self.customs_value = total
 

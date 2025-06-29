@@ -36,6 +36,7 @@ const CottageDetails = () => {
   const [cottageNum, setCottageNum] = useState("");
   const [cottageDate, setCottageDate] = useState(null);
   const [totalValue, setTotalValue] = useState("");
+  const [addedValue, setAddedValue] = useState("");
   const [customsValue, setCustomsValue] = useState("");
   const [quantity, setQuantity] = useState("");
   const [proforma, setProforma] = useState("");
@@ -88,6 +89,7 @@ const CottageDetails = () => {
       setCottageNum(cottage.cottage_number || "");
       setRefrenceNumber(cottage.refrence_number || "");
       setTotalValue(cottage.total_value || "");
+      setAddedValue(cottage.added_value || "");
       setCustomsValue(cottage.customs_value || "");
       setQuantity(cottage.quantity || "");
       setProforma(cottage.proforma.prfVCodeInt || "");
@@ -135,6 +137,7 @@ const CottageDetails = () => {
           cottage_date: cottageDate ? cottageDate.format("YYYY-MM-DD") : null,
           total_value: totalValue,
           customs_value: customsValue,
+          addedValue: addedValue,
           quantity: quantity,
           cottage_status: status,
           cottage_customer: customer,
@@ -255,6 +258,13 @@ const CottageDetails = () => {
           </label>
 
           <span className="readonly-text">{customsValue}</span>
+        </div>
+          <div className="input-group">
+          <label htmlFor="addedValue">
+            <strong>ارزش افزوده :</strong>
+          </label>
+
+          <span className="readonly-text">{addedValue}</span>
         </div>
 
         <div className="input-group">

@@ -51,6 +51,14 @@ const CottageList = () => {
     setQuery(searchText);
     setCurrentPage(1); // optional: reset to page 1 when searching
   };
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setQuery(searchText);
+      setCurrentPage(1);
+    }, 300); // ← 300ms “wait time”
+
+    return () => clearTimeout(handler);
+  }, [searchText]);
 
   // Access cottages state from Redux store
   const {
@@ -281,9 +289,10 @@ const CottageList = () => {
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
           />
+          {/* search button 
           <button className="btn-grad" onClick={handleSearchButtonClick}>
             Search
-          </button>
+          </button>*/}
         </div>
 
         <div className="filter-container">
@@ -321,6 +330,7 @@ const CottageList = () => {
               onChange={handleCottageDateChange}
               calendar={persian}
               locale={persian_fa}
+              isClearable
               format="YYYY-MM-DD"
               numerals="en"
               placeholder="تاریخ شروع"
@@ -476,6 +486,7 @@ const CottageList = () => {
                     <th>نام مشتری</th>
                     <th>ارزش کل</th>
                     <th>ارزش گمرکی</th>
+                    <th>هزینه ها</th>
                     <th>نرخ ارز</th>
                     <th>ارزش افزوده</th>
 
@@ -520,6 +531,7 @@ const CottageList = () => {
                         {/* Display customer name */}
                         <td>{formatNumber(cottage.total_value)}</td>
                         <td>{formatNumber(cottage.customs_value)}</td>
+                        <td>{formatNumber(cottage.total_expenses)}</td>
                         <td>
                           {updatingCurrencyPrice &&
                           updatingCurrencyPrice[cottage.id] ? (

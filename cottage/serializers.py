@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Cottage, CottageGoods, ExportedCottages
+from .models import Cottage, CottageGoods, ExportedCottages, Expenses
 from proforma.models import Performa
 import jdatetime
 from proforma.serializers import  ProformaCSerializer
@@ -45,6 +45,18 @@ class serializerForGoods(serializers.ModelSerializer):
     class Meta:
         model = Cottage
         fields = [
+            
+            'cottage_number', 
+            'proforma',
+            'cottage_date'
+        ]  
+class serializerForExpenses(serializers.ModelSerializer):
+    proforma = ProformaCSerializer(many=False, read_only=True)
+    
+    class Meta:
+        model = Cottage
+        fields = [
+            'id',
             'cottage_number', 
             'proforma',
             'cottage_date'
@@ -69,7 +81,7 @@ class CottageSerializer(serializers.ModelSerializer):
         model = Cottage
         fields = [
             'cottage_number', 'cottage_date', 'proforma','refrence_number',
-            'total_value','customs_value','added_value','quantity', 'currency_price', 'cottage_customer',
+            'total_value','customs_value','added_value','total_expenses','quantity', 'currency_price', 'cottage_customer',
             'cottage_status', 'rafee_taahod', 'documents', 'docs_recieved',
             'rewatch','booked', 'id',"Intermediary", 'cottage_goods',
         ]
@@ -190,3 +202,29 @@ class CottageNumberSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cottage
         fields = ("id", "cottage_number")
+from rest_framework import serializers
+
+class ExpensesSerializer(serializers.ModelSerializer):
+    # 1️⃣ write-only: accepts cottage ID in POST payload
+    cottage = serializers.PrimaryKeyRelatedField(
+        queryset=Cottage.objects.all(),
+        write_only=True
+    )
+    # 2️⃣ read-only: returns nested cottage data on GET
+    cottage_detail = serializerForGoods(
+        source='cottage',
+        read_only=True
+    )
+
+    class Meta:
+        model = Expenses
+        # include both fields, plus any others you have
+        fields = [
+            'id',
+            'value',
+            'description',
+            'receipt',
+            'cottage',         # the FK ID, write-only
+            'cottage_detail',  # the nested object, read-only
+            
+        ]

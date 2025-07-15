@@ -1,10 +1,11 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import CottageViewSet, CustomsDeclarationListView, GreenCustomsDeclarationView, SaveCottageView, SaveCottageGoodsView, FetchGoodsAPIView,FetchCustomsDutyInformationAPIView, upload_file,CottageGoodsViewSet, CottageCombinedDataView, ExportCustomsDeclarationListView, ExportedCottagesViewSet, FetchCotageRemainAmountView, ChatbotAPIView, ImportExportedCottagesView, ImportCottagesView, CottageExcelExportView
+from .views import CottageViewSet, CustomsDeclarationListView, GreenCustomsDeclarationView, SaveCottageView, SaveCottageGoodsView, FetchGoodsAPIView,FetchCustomsDutyInformationAPIView, upload_file,CottageGoodsViewSet, CottageCombinedDataView, ExportCustomsDeclarationListView, ExportedCottagesViewSet, FetchCotageRemainAmountView, ChatbotAPIView, ImportExportedCottagesView, ImportCottagesView, CottageExcelExportView, ExpensesViewSet
 router = DefaultRouter()
 router.register(r'cottages', CottageViewSet)
 router.register(r'cottage-goods', CottageGoodsViewSet, basename='cottagegoods')
 router.register(r'exported-cottage', ExportedCottagesViewSet, basename='exportedcottages')
+router.register(r'expenses', ExpensesViewSet)
 
 
 urlpatterns = [

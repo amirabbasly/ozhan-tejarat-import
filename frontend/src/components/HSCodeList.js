@@ -27,7 +27,14 @@ const HSCodeListComponent = () => {
   // Search
   const [searchText, setSearchText] = useState("");
   const [query, setQuery] = useState("");
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setQuery(searchText);
+      setCurrentPage(1);
+    }, 300); // ← 300ms “wait time”
 
+    return () => clearTimeout(handler);
+  }, [searchText]);
   // Array of selected HS code IDs
   const [selectedCodes, setSelectedCodes] = useState([]);
 
@@ -37,13 +44,21 @@ const HSCodeListComponent = () => {
       priority,
       customsDutyRate,
       suq,
-      search: query,  // using the renamed variable
+      search: query, // using the renamed variable
     };
     console.log("Dispatching filters:", filters);
 
     dispatch(HSCodeList(currentPage, pageSize, filters));
-  }, [dispatch, currentPage, pageSize, profit, priority, customsDutyRate, suq, query]);
-  
+  }, [
+    dispatch,
+    currentPage,
+    pageSize,
+    profit,
+    priority,
+    customsDutyRate,
+    suq,
+    query,
+  ]);
 
   // Pagination
   const handlePageChange = (e) => setCurrentPage(Number(e.target.value));
@@ -91,7 +106,9 @@ const HSCodeListComponent = () => {
 
       {/* SEARCH ROW */}
       <div className="search-bar">
-        <label htmlFor="searchInput">Search (کد / نام فارسی / نام انگلیسی):</label>
+        <label htmlFor="searchInput">
+          Search (کد / نام فارسی / نام انگلیسی):
+        </label>
         <input
           id="searchInput"
           type="text"
@@ -99,31 +116,43 @@ const HSCodeListComponent = () => {
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
         />
+        {/* Search button */}
+        {/* Uncomment if you want a button instead of auto-search 
         <button className="btn-grad" onClick={handleSearchButtonClick}>
           Search
-        </button>
+        </button>*/}
       </div>
 
       {/* FILTER SECTION */}
       <div className="filter-form">
         <div className="filter-row">
           <label>سود بازگانی:</label>
-          <select value={profit} onChange={(e) => handleFilterChange(e, setProfit)}>
-            {["", "0", "1", "4", "6", "9", "11", "16", "18", "28", "51"].map((val) => (
-              <option key={val} value={val}>
-                {val === "" ? "همه" : val}
-              </option>
-            ))}
+          <select
+            value={profit}
+            onChange={(e) => handleFilterChange(e, setProfit)}
+          >
+            {["", "0", "1", "4", "6", "9", "11", "16", "18", "28", "51"].map(
+              (val) => (
+                <option key={val} value={val}>
+                  {val === "" ? "همه" : val}
+                </option>
+              )
+            )}
           </select>
         </div>
         <div className="filter-row">
           <label>الویت:</label>
-          <select value={priority} onChange={(e) => handleFilterChange(e, setPriority)}>
-            {["", "2", "4", "21", "22", "23", "24", "25", "26", "27"].map((val) => (
-              <option key={val} value={val}>
-                {val === "" ? "همه" : val}
-              </option>
-            ))}
+          <select
+            value={priority}
+            onChange={(e) => handleFilterChange(e, setPriority)}
+          >
+            {["", "2", "4", "21", "22", "23", "24", "25", "26", "27"].map(
+              (val) => (
+                <option key={val} value={val}>
+                  {val === "" ? "همه" : val}
+                </option>
+              )
+            )}
           </select>
         </div>
         <div className="filter-row">
@@ -225,7 +254,7 @@ const HSCodeListComponent = () => {
 
           {/* SINGLE Update Component for ALL selected rows */}
           <div style={{ marginTop: "2rem" }}>
-          <HSCodeUpdateBulk codes={selectedCodes} />
+            <HSCodeUpdateBulk codes={selectedCodes} />
 
             {/* Optional: Button to clear selections */}
             {selectedCodes.length > 0 && (

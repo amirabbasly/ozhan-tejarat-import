@@ -23,6 +23,7 @@ class Performa(models.Model):
     prfVCodeInt = models.CharField(max_length=50, unique=True,)
     booked_amount = models.DecimalField(max_digits=20, decimal_places=2, default=0)
     remaining_total = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+    remaining_freight_charges = models.DecimalField(max_digits=20, decimal_places=2, default=0)
     registrant = models.CharField(max_length=100)
     goods_type = models.CharField(max_length=100, null=True, blank=True)
     payment_instrument = models.CharField(max_length=100, null=True, blank=True)
@@ -45,12 +46,17 @@ class Performa(models.Model):
         if not self.pk:
             # If creating a new Performa, remaining_total is prf_total_price
             self.remaining_total = self.prf_total_price
+            self.remaining_freight_charges = self.prf_freight_price
         else:
             # Recalculate remaining_total based on related Cottages
             total_allocated = self.cottages.aggregate(
                 total=models.Sum('total_value')
             )['total'] or Decimal('0.00')
+            freight_allocated = self.invoices.aggregate(
+                total=models.Sum('freight_charges')
+            )['total'] or Decimal('0.00')
             self.remaining_total = self.prf_total_price - total_allocated
+            self.remaining_freight_charges = self.prf_freight_price - freight_allocated
         super().save(*args, **kwargs)
         new_prf_currency_price = self.prf_currency_price
         if old_prf_currency_price != new_prf_currency_price:

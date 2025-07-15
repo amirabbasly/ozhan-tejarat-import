@@ -31,7 +31,7 @@ from PyPDF2 import PdfMerger
 from rest_framework.test import APIRequestFactory
 from django.http import HttpResponse, HttpRequest
 from rest_framework import filters
-
+from cottage.views import CustomPageNumberPagination
 class OverlayTextView(APIView):
     def post(self, request):
         # 1) Fetch the template based on template_id
@@ -180,6 +180,7 @@ class InvoiceViewSet(viewsets.ModelViewSet):
     serializer_class = InvoiceSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ["invoice_number", "invoice_id",]  # fields you want to search
+    pagination_class = CustomPageNumberPagination  # Apply pagination here
 
     @action(detail=False, methods=['get'], url_path='by-number/(?P<invoice_id>[^/.]+)')
     def get_by_invoice_number(self, request, invoice_id=None):
@@ -198,6 +199,8 @@ class ProformaInvoiceViewSet(viewsets.ModelViewSet):
     serializer_class = ProformaInvoiceSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ["proforma_invoice_number", "proforma_invoice_id",]  # fields you want to search
+    pagination_class = CustomPageNumberPagination  # Apply pagination here
+
     @action(detail=False, methods=['get'], url_path='by-number/(?P<proforma_invoice_id>[^/.]+)')
     def get_by_invoice_number(self, request, proforma_invoice_id=None):
         try:

@@ -24,6 +24,7 @@ class Cottage(models.Model):
     Intermediary = models.CharField(max_length=50, null=True, blank=True)
     documents = models.FileField(null=True,blank=True )
     added_value = models.DecimalField(max_digits=30, decimal_places=2, null=True, blank=True, default=0)
+    total_expenses = models.DecimalField(max_digits=30, decimal_places=2, null=True, blank=True, default=0)
 
     class Meta:
         ordering = ["-cottage_date"] 
@@ -50,12 +51,21 @@ class Cottage(models.Model):
                 output_field=DecimalField()
             )
         )
+        agg_exp = self.expenses.aggregate(
+            total_expenses=Sum(
+                F('value'),
+                output_field=DecimalField()
+
+            )
+        ) 
+        total_expenses = agg_exp['total_expenses'] or Decimal('0')
         added_total = agg['added_total'] or Decimal('0')
         total = agg['total'] or Decimal('0')
         # write directly to the DB, avoid re-entering save()
         Cottage.objects.filter(pk=self.pk).update(
         customs_value=total,
-        added_value=added_total
+        added_value=added_total,
+        total_expenses=total_expenses
     )
         # also update the in-memory instance
         self.customs_value = total
@@ -165,3 +175,18 @@ class ExportedCottages(models.Model):
     remaining_total = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
     class Meta:
         ordering = ["-id"] 
+
+class Expenses(models.Model):
+    cottage = models.ForeignKey(Cottage, related_name='expenses', on_delete=models.CASCADE)
+    value = models.DecimalField(max_digits=30, decimal_places=2)
+    description = models.CharField(max_length=255, null=True, blank=True)
+    receipt = models.ImageField(upload_to='receipts/', null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.cottage._update_customs_value()
+
+    def delete(self, *args, **kwargs):
+        cottage = self.cottage
+        super().delete(*args, **kwargs)
+        cottage._update_customs_value()

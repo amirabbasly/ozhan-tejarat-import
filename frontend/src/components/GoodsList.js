@@ -8,14 +8,9 @@ const GoodsList = () => {
   const dispatch = useDispatch();
 
   // Access goods state from Redux store
-  const {
-    goods,
-    loading,
-    error,
-    next,
-    previous,
-    count,
-  } = useSelector((state) => state.cottageGoods);
+  const { goods, loading, error, next, previous, count } = useSelector(
+    (state) => state.cottageGoods
+  );
 
   const [searchText, setSearchText] = useState("");
   const [query, setQuery] = useState("");
@@ -56,13 +51,21 @@ const GoodsList = () => {
     };
     dispatch(fetchGoddsList(currentPage, pageSize, filters));
   }, [dispatch, currentPage, pageSize, query]);
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setQuery(searchText);
+      setCurrentPage(1);
+    }, 300); // ← 300ms “wait time”
 
+    return () => clearTimeout(handler);
+  }, [searchText]);
   return (
     <div className="goods-cont">
       <div className="goods-list-container">
         <h2>لیست کالاها</h2>
 
         {/* SEARCH BAR */}
+
         <label>جستجو (کد کالا/شرح کالا):</label>
         <div className="search-bar">
           <input
@@ -71,9 +74,11 @@ const GoodsList = () => {
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
           />
+          {/* Search button */}
+          {/* Uncomment if you want a button instead of auto-search 
           <button className="btn-grad" onClick={handleSearchButtonClick}>
             جستجو
-          </button>
+          </button>*/}
         </div>
 
         {/* LOADING/ERROR */}
@@ -114,7 +119,6 @@ const GoodsList = () => {
                     <th>حواله ریالی</th>
                     <th>قیمت نهایی</th>
                     <th>قیمت واحد</th>
-
                   </tr>
                 </thead>
                 <tbody>
@@ -122,16 +126,24 @@ const GoodsList = () => {
                     <tr key={good.id}>
                       <td>{index + 1}</td>
                       <td>{good.goodscode}</td>
-                      <td><Link to={`/order-details/${good.cottage.proforma.prfVCodeInt}`}>{good.cottage.proforma.prf_order_no}</Link></td>
-                      <td><Link to={`/cottages/${good.cottage.cottage_number}`}>{good.cottage.cottage_number}</Link></td>
+                      <td>
+                        <Link
+                          to={`/order-details/${good.cottage.proforma.prfVCodeInt}`}
+                        >
+                          {good.cottage.proforma.prf_order_no}
+                        </Link>
+                      </td>
+                      <td>
+                        <Link to={`/cottages/${good.cottage.cottage_number}`}>
+                          {good.cottage.cottage_number}
+                        </Link>
+                      </td>
                       <td>{good.goods_description}</td>
                       <td>{good.quantity}</td>
                       <td>{good.total_value}</td>
                       <td>{good.riali}</td>
                       <td>{good.final_price}</td>
                       <td>{(good.final_price / good.quantity).toFixed(0)}</td>
-
-
                     </tr>
                   ))}
                 </tbody>

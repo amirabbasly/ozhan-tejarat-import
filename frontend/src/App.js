@@ -66,7 +66,9 @@ import BuyerList from "./components/BuyerList";
 import ImportTags from "./components/ImportTags";
 import CustomerList from "./components/CustomerList";
 import CustomerDetails from "./components/CustomerDetails";
-import RepresentationEdit from './components/RepresentationEdit';
+import RepresentationEdit from "./components/RepresentationEdit";
+import ExpensesList from "./pages/CottageExpenses";
+import ExpenseForm from "./pages/ExpenseForm";
 
 function App() {
   return (
@@ -241,7 +243,7 @@ function AppContent() {
               </PrivateRoute>
             }
           />
-                    <Route
+          <Route
             path="/representations"
             element={
               <PrivateRoute>
@@ -250,7 +252,7 @@ function AppContent() {
             }
           />
           <Route
-            path="/representations/:id/edit" 
+            path="/representations/:id/edit"
             element={
               <PrivateRoute>
                 <RepresentationEdit />
@@ -327,6 +329,22 @@ function AppContent() {
                   endpoint="/customs/import-seasons/"
                   title="Import Seasons"
                 />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/expense-list"
+            element={
+              <PrivateRoute>
+                <ExpensesList />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/new-expense"
+            element={
+              <PrivateRoute>
+                <ExpenseForm />
               </PrivateRoute>
             }
           />

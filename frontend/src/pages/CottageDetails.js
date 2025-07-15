@@ -38,6 +38,7 @@ const CottageDetails = () => {
   const [totalValue, setTotalValue] = useState("");
   const [addedValue, setAddedValue] = useState("");
   const [customsValue, setCustomsValue] = useState("");
+  const [totalExpenses, setTotalExpenses] = useState("");
   const [quantity, setQuantity] = useState("");
   const [proforma, setProforma] = useState("");
   const [status, setStatus] = useState("");
@@ -46,7 +47,7 @@ const CottageDetails = () => {
   const [refrenceNumber, setRefrenceNumber] = useState("");
   const navigate = useNavigate();
   const [intermediary, setIntermediary] = useState("");
-  
+
   const costumerstate = useSelector((state) => state.costumers);
   const { costumerList, costumersLoading, costumersError } = costumerstate || {
     costumerList: [],
@@ -94,13 +95,14 @@ const CottageDetails = () => {
       setQuantity(cottage.quantity || "");
       setProforma(cottage.proforma.prfVCodeInt || "");
       setDocuments(cottage.documents || "");
+      setTotalExpenses(cottage.total_expenses || "");
       setStatus(cottage.cottage_status || "");
       setCustomer(cottage.cottage_customer?.toString() || "");
       setRafeeTaahod(cottage.rafee_taahod === true ? "true" : "false"); // Ensure proper boolean handling
       setDocsRecieved(cottage.docs_recieved === true ? "true" : "false");
       setRewatch(cottage.rewatch === true ? "true" : "false");
       setBooked(cottage.booked === true ? "true" : "false");
-      setIntermediary(cottage.Intermediary || "")
+      setIntermediary(cottage.Intermediary || "");
 
       if (cottage.cottage_date) {
         const dateObject = new DateObject({
@@ -137,10 +139,12 @@ const CottageDetails = () => {
           cottage_date: cottageDate ? cottageDate.format("YYYY-MM-DD") : null,
           total_value: totalValue,
           customs_value: customsValue,
+
           addedValue: addedValue,
           quantity: quantity,
           cottage_status: status,
           cottage_customer: customer,
+          total_expenses: totalExpenses,
           Intermediary: intermediary,
           proforma: proforma,
           currency_price: currencyPrice,
@@ -259,14 +263,20 @@ const CottageDetails = () => {
 
           <span className="readonly-text">{customsValue}</span>
         </div>
-          <div className="input-group">
+        <div className="input-group">
           <label htmlFor="addedValue">
             <strong>ارزش افزوده :</strong>
           </label>
 
           <span className="readonly-text">{addedValue}</span>
         </div>
+        <div className="input-group">
+          <label htmlFor="totalExpenses">
+            <strong>هزینه ها :</strong>
+          </label>
 
+          <span className="readonly-text">{totalExpenses}</span>
+        </div>
         <div className="input-group">
           <label htmlFor="quantity">
             <strong>تعداد کالا ها :</strong>
@@ -340,7 +350,9 @@ const CottageDetails = () => {
               placeholder="نام واسط را وارد کنید"
             />
           ) : (
-            <span className="readonly-text">{intermediary ||"نام واسط را وارد کنید" }</span>
+            <span className="readonly-text">
+              {intermediary || "نام واسط را وارد کنید"}
+            </span>
           )}
         </div>
         <div className="input-group">
@@ -392,8 +404,6 @@ const CottageDetails = () => {
             </span>
           )}
         </div>
-
-        
 
         <div className="input-group">
           <label htmlFor="rafeeTaahod">
@@ -455,7 +465,7 @@ const CottageDetails = () => {
             </span>
           )}
         </div>
-                <div className="input-group">
+        <div className="input-group">
           <label htmlFor="booked">
             <strong>بوک شده :</strong>
           </label>

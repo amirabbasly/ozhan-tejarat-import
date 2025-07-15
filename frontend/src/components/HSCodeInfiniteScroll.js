@@ -22,10 +22,40 @@ const HSCodeInfiniteScroll = () => {
   const [suq, setSuq] = useState("");
   const [searchText, setSearchText] = useState("");
   const [search, setSearch] = useState("");
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setSearch(searchText);
+      setCurrentPage(1);
+    }, 300); // ← 300ms “wait time”
 
+    return () => clearTimeout(handler);
+  }, [searchText]);
   // Options for filters
-  const profitOptions = ["", "0", "1", "4", "6", "9", "11", "16", "18", "28", "51"];
-  const priorityOptions = ["", "2", "4", "21", "22", "23", "24", "25", "26", "27"];
+  const profitOptions = [
+    "",
+    "0",
+    "1",
+    "4",
+    "6",
+    "9",
+    "11",
+    "16",
+    "18",
+    "28",
+    "51",
+  ];
+  const priorityOptions = [
+    "",
+    "2",
+    "4",
+    "21",
+    "22",
+    "23",
+    "24",
+    "25",
+    "26",
+    "27",
+  ];
   const cdrOptions = ["", "4", "1"];
   const suqOptions = ["", "Kg", "L", "U", "m", "m2"];
 
@@ -34,7 +64,6 @@ const HSCodeInfiniteScroll = () => {
 
   // State for overlay modal
   const [showOverlay, setShowOverlay] = useState(false);
-
 
   // Effect to reset loaded data when filters or search change.
   useEffect(() => {
@@ -46,17 +75,25 @@ const HSCodeInfiniteScroll = () => {
   useEffect(() => {
     const filters = { profit, priority, customsDutyRate, suq, search };
     dispatch(HSCodeList(currentPage, pageSize, filters));
-    
-  }, [dispatch, currentPage, pageSize, profit, priority, customsDutyRate, suq, search]);
+  }, [
+    dispatch,
+    currentPage,
+    pageSize,
+    profit,
+    priority,
+    customsDutyRate,
+    suq,
+    search,
+  ]);
 
   // Append or set loaded data based on page.
   useEffect(() => {
     if (!hscodeList) return;
-  
+
     setLoadedHSCodes((prev) => {
       // Merge
       const merged = currentPage === 1 ? hscodeList : [...prev, ...hscodeList];
-  
+
       // Deduplicate by ID
       const seen = new Set();
       return merged.filter((item) => {
@@ -75,7 +112,7 @@ const HSCodeInfiniteScroll = () => {
     setSearch(searchText); // Pass the text value from the input
     setCurrentPage(1); // Optional: reset to page 1 when searching
   };
-  
+
   // Setup Intersection Observer for infinite scrolling.
   const observer = useRef();
   const loaderRef = useCallback(
@@ -118,14 +155,21 @@ const HSCodeInfiniteScroll = () => {
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
         />
-        <button className="btn-grad" onClick={handleSearchButtonClick}>Search</button>
+        {/* Search button */}
+        {/* Uncomment if you want a button instead of auto-search 
+        <button className="btn-grad" onClick={handleSearchButtonClick}>
+          Search
+        </button>*/}
       </div>
 
       {/* FILTERS */}
       <div className="filter-form">
         <div className="filter-row">
           <label>سود بازگانی:</label>
-          <select value={profit} onChange={(e) => handleFilterChange(e, setProfit)}>
+          <select
+            value={profit}
+            onChange={(e) => handleFilterChange(e, setProfit)}
+          >
             {profitOptions.map((val) => (
               <option key={val} value={val}>
                 {val === "" ? "همه" : val}
@@ -135,7 +179,10 @@ const HSCodeInfiniteScroll = () => {
         </div>
         <div className="filter-row">
           <label>الویت:</label>
-          <select value={priority} onChange={(e) => handleFilterChange(e, setPriority)}>
+          <select
+            value={priority}
+            onChange={(e) => handleFilterChange(e, setPriority)}
+          >
             {priorityOptions.map((val) => (
               <option key={val} value={val}>
                 {val === "" ? "همه" : val}
@@ -172,45 +219,42 @@ const HSCodeInfiniteScroll = () => {
       {error && <p className="error">Error: {error}</p>}
 
       <div className="hscards-container">
-  {loadedHSCodes && loadedHSCodes.length > 0 ? (
-    loadedHSCodes.map((hscode) => (
-      <div
-        className="hscode-card"
-        key={hscode.id}
-        onClick={() => openOverlay(hscode.code)}
-      >
-        {/* Background Image Layer */}
-        <div
-          className="background-image"
-          style={{
-            backgroundImage: `url(${hscode.season.icon})`,
-          }}
-        ></div>
+        {loadedHSCodes && loadedHSCodes.length > 0
+          ? loadedHSCodes.map((hscode) => (
+              <div
+                className="hscode-card"
+                key={hscode.id}
+                onClick={() => openOverlay(hscode.code)}
+              >
+                {/* Background Image Layer */}
+                <div
+                  className="background-image"
+                  style={{
+                    backgroundImage: `url(${hscode.season.icon})`,
+                  }}
+                ></div>
 
-        {/* Content Layer */}
-        <div className="content-layer">
-          <div className="card-header">
-            <h3>
-              <strong></strong> {hscode.goods_name_fa}
-            </h3>
-          </div>
-          <div className="card-body">
-            <p>
-              <strong>{hscode.code}</strong>
-            </p>
-            <p>
-              <strong>حقوق ورودی:</strong>{" "}
-              {Number(hscode.profit) + Number(hscode.customs_duty_rate)}
-            </p>
-          </div>
-        </div>
+                {/* Content Layer */}
+                <div className="content-layer">
+                  <div className="card-header">
+                    <h3>
+                      <strong></strong> {hscode.goods_name_fa}
+                    </h3>
+                  </div>
+                  <div className="card-body">
+                    <p>
+                      <strong>{hscode.code}</strong>
+                    </p>
+                    <p>
+                      <strong>حقوق ورودی:</strong>{" "}
+                      {Number(hscode.profit) + Number(hscode.customs_duty_rate)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))
+          : !loading && <p className="no-data">No HSCode data available.</p>}
       </div>
-    ))
-  ) : (
-    !loading && <p className="no-data">No HSCode data available.</p>
-  )}
-</div>
-
 
       {/* Loader */}
       {loading && <p className="loading">Loading more data...</p>}

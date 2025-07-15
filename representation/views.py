@@ -9,13 +9,18 @@ from openpyxl import load_workbook
 from django.db.models import Sum, Count
 from datetime import datetime
 from .utils import jalali_to_gregorian  # You need a utility to convert Jalali to Gregorian
-
+from cottage.views import CustomPageNumberPagination
+from rest_framework import filters
+from .filters import RepresentationFilter
 
 class RepresentationViewSet(ModelViewSet):
     queryset = Representation.objects.all()
     serializer_class = RepresentationSerializer
     parser_classes = (MultiPartParser, FormParser)
-
+    filter_backends = [filters.SearchFilter]
+    pagination_class = CustomPageNumberPagination  
+    search_fields = ['representi__full_name', 'representor__full_name', 'doc_number','verification_code']
+    filterset_class = RepresentationFilter
 class CheckViewSet(ModelViewSet):
     queryset = Check.objects.all()
     serializer_class = CheckSerializer

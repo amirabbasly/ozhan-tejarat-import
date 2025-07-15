@@ -118,6 +118,7 @@ function InvoiceList() {
       <table className="invoice-list-table">
         <thead>
           <tr>
+            <th>ردیف</th>
             <th>شماره اظهارنامه</th>
             <th>شماره ثبت سفارش</th>
             <th>شماره فاکتور</th>
@@ -133,8 +134,9 @@ function InvoiceList() {
           </tr>
         </thead>
         <tbody>
-          {invoices.map((inv) => (
+          {invoices.map((inv, index) => (
             <tr key={inv.id}>
+              <td>{index + 1 + (currentPage - 1) * pageSize}</td>
               <td>
                 <Link to={`/cottages/${inv.cottage}`}>{inv.cottage}</Link>
               </td>

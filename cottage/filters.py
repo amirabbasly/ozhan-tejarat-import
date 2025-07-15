@@ -2,7 +2,7 @@ import jdatetime
 import datetime
 
 import django_filters
-from .models import Cottage
+from .models import Cottage, CottageGoods, ExportedCottages, Expenses
 from django_filters.filters import DateFromToRangeFilter
 from django.core.exceptions import ValidationError
 
@@ -84,3 +84,18 @@ class CottageFilter(django_filters.FilterSet):
 
 
 
+class CottageGoodsFilter(django_filters.FilterSet):
+    cottage = django_filters.Filter(field_name="cottage__cottage_number", lookup_expr="exact")
+    proforma = django_filters.Filter(field_name="cottage__proforma__prf_order_no", lookup_expr="exact")
+    class Meta:
+        model = CottageGoods
+        fields = ["cottage", "goodscode", "proforma",]
+
+class ExpensesFilter(django_filters.FilterSet):
+    cottage = django_filters.Filter(field_name="cottage__cottage_number", lookup_expr="exact")
+    cottage_date_after = JalaliFromDateFilter(field_name="cottage__cottage_date")
+    cottage_date_before = JalaliToDateFilter(field_name="cottage__cottage_date")
+
+    class Meta:
+        model = Expenses
+        fields = ["cottage", "value"]

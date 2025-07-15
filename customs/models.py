@@ -76,7 +76,7 @@ class HSCode(models.Model):
     updated_date = models.DateTimeField(auto_now=True)
     season = models.ForeignKey(Season, on_delete=models.CASCADE, related_name="code_seasons")
     heading = models.ForeignKey(Heading, on_delete=models.SET_NULL, null=True, blank=True, related_name="hscodes")
-    commercials = models.ManyToManyField(Commercial, null=True, blank=True)
+    commercials = models.ManyToManyField(Commercial, blank=True)
 
     class Meta:
         ordering = ["-code"] 

@@ -2,14 +2,14 @@ from rest_framework import viewsets, status, filters
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import action
-from .models import Cottage, CottageGoods, ExportedCottages
+from .models import Cottage, CottageGoods, ExportedCottages, Expenses
 from decimal import Decimal  # Import Decimal
 from proforma.models import Performa  # Import Performa model
 from django.http import HttpResponse, JsonResponse
 from urllib.parse import urljoin
 from django.views.decorators.http import require_http_methods
 from django.middleware.csrf import get_token
-from .serializers import CottageSerializer,CottageGoodsSerializer ,CustomsDeclarationInputSerializer, GreenCustomsDeclarationInputSerializer, CottageSaveSerializer, ExportedCottagesSerializer, FetchCotageRemainAmountSerializer, CottageNumberSerializer
+from .serializers import CottageSerializer,CottageGoodsSerializer ,CustomsDeclarationInputSerializer, GreenCustomsDeclarationInputSerializer, CottageSaveSerializer, ExportedCottagesSerializer, FetchCotageRemainAmountSerializer, CottageNumberSerializer, ExpensesSerializer
 import requests
 import logging
 from django.conf import settings
@@ -28,7 +28,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from openpyxl import load_workbook
 from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
-from .filters import CottageFilter
+from .filters import CottageFilter, ExpensesFilter, CottageGoodsFilter
 from django.db.models import Q
 import re
 from openpyxl import Workbook
@@ -631,6 +631,8 @@ class CottageGoodsViewSet(viewsets.ModelViewSet):
     queryset = CottageGoods.objects.all()
     serializer_class = CottageGoodsSerializer
     pagination_class = CustomPageNumberPagination  # Apply pagination here
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_class = CottageGoodsFilter
     search_fields = ["cottage__cottage_number", ]  # fields you want to search
 
     # Add custom logic or actions if needed
@@ -1086,3 +1088,12 @@ class CottageExcelExportView(APIView):
         response["Content-Disposition"] = f'attachment; filename="{filename}"'
         wb.save(response)
         return response
+
+class ExpensesViewSet(viewsets.ModelViewSet):
+    queryset = Expenses.objects.all()
+    serializer_class = ExpensesSerializer
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_class = ExpensesFilter
+    pagination_class = CustomPageNumberPagination  # Apply pagination here
+    search_fields = ["cottage__cottage_number","description","value" ]  # fields you want to search
+

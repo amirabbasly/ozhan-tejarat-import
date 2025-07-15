@@ -18,20 +18,19 @@ import {
   UPDATE_ORDER_STATUS_FAILURE,
   ADD_PERFORMA_REQUEST,
   ADD_PERFORMA_SUCCESS,
-  ADD_PERFORMA_FAILURE, 
+  ADD_PERFORMA_FAILURE,
   RESET_ADD_PERFORMA,
   IMPORT_PERFORMA_REQUEST,
   IMPORT_PERFORMA_SUCCESS,
   IMPORT_PERFORMA_FAILURE,
-
-} from '../actions/actionTypes';
+} from "../actions/actionTypes";
 
 // Initial state for performaReducer
 const initialState = {
   loading: false,
   performas: [],
-  error: '',
-  message: '',
+  error: "",
+  message: "",
 };
 const initialImportState = {
   loading: false,
@@ -47,43 +46,46 @@ const detailsInitialState = {
 const orderInitialState = {
   loading: false,
   orders: [],
-  error: '',
-  message: '',
+  error: "",
+  message: "",
   orderCreation: {
     loading: false,
     success: false,
-    error: '',
-},
+    error: "",
+  },
 };
-export const regedOrderDetailsReducer = (state = detailsInitialState, action) => {
+export const regedOrderDetailsReducer = (
+  state = detailsInitialState,
+  action
+) => {
   switch (action.type) {
-      case FETCH_PERFORMA_REQUEST:
-      case UPDATE_ORDER_STATUS_REQUEST:
-          return {
-              ...state,
-              loading: true,
-              error: null,
-          };
-      case FETCH_PERFORMA_SUCCESS:
-          return {
-              ...state,
-              order: action.payload,
-              loading: false,
-          };
-      case UPDATE_ORDER_STATUS_SUCCESS:
-          return {
-              ...state,
-              loading: false,
-          };
-      case FETCH_PERFORMA_FAILURE:
-      case UPDATE_ORDER_STATUS_FAILURE:
-          return {
-              ...state,
-              loading: false,
-              error: action.payload,
-          };
-      default:
-          return state;
+    case FETCH_PERFORMA_REQUEST:
+    case UPDATE_ORDER_STATUS_REQUEST:
+      return {
+        ...state,
+        loading: true,
+        error: null,
+      };
+    case FETCH_PERFORMA_SUCCESS:
+      return {
+        ...state,
+        order: action.payload,
+        loading: false,
+      };
+    case UPDATE_ORDER_STATUS_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+      };
+    case FETCH_PERFORMA_FAILURE:
+    case UPDATE_ORDER_STATUS_FAILURE:
+      return {
+        ...state,
+        loading: false,
+        error: action.payload,
+      };
+    default:
+      return state;
   }
 };
 // Reducer for registered orders
@@ -93,16 +95,16 @@ const orderReducer = (state = orderInitialState, action) => {
       return {
         ...state,
         loading: true,
-        error: '',
-        message: '',
+        error: "",
+        message: "",
       };
     case FETCH_REGED_ORDERS_SUCCESS:
       return {
         ...state,
         loading: false,
-        orders: action.payload, // Update orders with fetched data
-        error: '',
-        message: '',
+        orders: action.payload.results, // Update orders with fetched data
+        error: "",
+        message: "",
       };
     case FETCH_REGED_ORDERS_FAILURE:
       return {
@@ -110,45 +112,45 @@ const orderReducer = (state = orderInitialState, action) => {
         loading: false,
         error: action.payload,
       };
-      case ADD_PERFORMA_REQUEST:
-        return {
-            ...state,
-            orderCreation: {
-                loading: true,
-                success: false,
-                error: '',
-            },
-        };
+    case ADD_PERFORMA_REQUEST:
+      return {
+        ...state,
+        orderCreation: {
+          loading: true,
+          success: false,
+          error: "",
+        },
+      };
     case ADD_PERFORMA_SUCCESS:
-        return {
-            ...state,
-            orderCreation: {
-                loading: false,
-                success: true,
-                error: '',
-            },
-            // Optionally, add the new cottage to performas
-            // performas: [...state.performas, action.payload],
-        };
+      return {
+        ...state,
+        orderCreation: {
+          loading: false,
+          success: true,
+          error: "",
+        },
+        // Optionally, add the new cottage to performas
+        // performas: [...state.performas, action.payload],
+      };
     case ADD_PERFORMA_FAILURE:
-        return {
-            ...state,
-            orderCreation: {
-                loading: false,
-                success: false,
-                error: action.payload,
-            },
-        };
+      return {
+        ...state,
+        orderCreation: {
+          loading: false,
+          success: false,
+          error: action.payload,
+        },
+      };
 
     case RESET_ADD_PERFORMA:
-        return {
-            ...state,
-            orderCreation: {
-                loading: false,
-                success: false,
-                error: '',
-            },
-        };
+      return {
+        ...state,
+        orderCreation: {
+          loading: false,
+          success: false,
+          error: "",
+        },
+      };
     default:
       return state;
   }
@@ -162,15 +164,15 @@ const performaReducer = (state = initialState, action) => {
       return {
         ...state,
         loading: true,
-        error: '',
-        message: '',
+        error: "",
+        message: "",
       };
     case FETCH_PERFORMAS_SUCCESS:
       return {
         ...state,
         loading: false,
         performas: action.payload,
-        error: '',
+        error: "",
       };
     case FETCH_PERFORMAS_FAILURE:
       return {
@@ -183,7 +185,7 @@ const performaReducer = (state = initialState, action) => {
         ...state,
         loading: false,
         message: action.payload,
-        error: '',
+        error: "",
       };
     case SAVE_SELECTED_PERFORMAS_FAILURE:
       return {

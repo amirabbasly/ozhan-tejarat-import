@@ -30,7 +30,7 @@ from rest_framework.exceptions import ValidationError
 from .utils import get_performa_combined_data, import_performa_from_excel
 import os
 from django.conf import settings
-
+from cottage.views import CustomPageNumberPagination
 
 logger = logging.getLogger(__name__)
 
@@ -54,12 +54,15 @@ class PerformaCombinedDataView(APIView):
 
 class PerformaListView(APIView):
     def get(self, request):
-        # Retrieve all Performa instances
         performas = Performa.objects.all()
-        # Serialize the queryset
-        serializer = PerformaListSerializer(performas, many=True)
-        # Return the serialized data
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        
+        paginator = CustomPageNumberPagination()
+        
+        paginated_performas = paginator.paginate_queryset(performas, request, view=self)
+        
+        serializer = PerformaListSerializer(paginated_performas, many=True)
+        
+        return paginator.get_paginated_response(serializer.data)
 
 class PerformaDetailView(APIView):
     def get(self, request, prfVCodeInt):

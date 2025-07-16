@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import CottageViewSet, CustomsDeclarationListView, GreenCustomsDeclarationView, SaveCottageView, SaveCottageGoodsView, FetchGoodsAPIView,FetchCustomsDutyInformationAPIView, upload_file,CottageGoodsViewSet, CottageCombinedDataView, ExportCustomsDeclarationListView, ExportedCottagesViewSet, FetchCotageRemainAmountView, ChatbotAPIView, ImportExportedCottagesView, ImportCottagesView, CottageExcelExportView, ExpensesViewSet
+from .views import CottageViewSet, CustomsDeclarationListView, GreenCustomsDeclarationView, SaveCottageView, SaveCottageGoodsView, FetchGoodsAPIView,FetchCustomsDutyInformationAPIView, upload_file,CottageGoodsViewSet, CottageCombinedDataView, ExportCustomsDeclarationListView, ExportedCottagesViewSet, FetchCotageRemainAmountView, ChatbotAPIView, ImportExportedCottagesView, ImportCottagesView, CottageExcelExportView, ExpensesViewSet, CottageGoodsExportView
 router = DefaultRouter()
 router.register(r'cottages', CottageViewSet)
 router.register(r'cottage-goods', CottageGoodsViewSet, basename='cottagegoods')
@@ -23,5 +23,6 @@ urlpatterns = [
     path('import-cottages/', ImportCottagesView.as_view(), name='import_cottages'),
     path('import-exported-cottages/', ImportExportedCottagesView.as_view(), name='import_exported_cottages'),
     path("export-cottages-excel/",CottageExcelExportView.as_view(),name="export-cottages"),
+    path("export-cottage-goods-excel/",CottageGoodsExportView.as_view(),name="export-cottages"),
 
 ]

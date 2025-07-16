@@ -5,11 +5,13 @@ from rest_framework import generics, permissions
 from rest_framework.response import Response
 from rest_framework import status
 from .models import CustomUser, Costumer
-from .serializers import UserSerializer, LoginSerializer, CostumerSerializer
+from .serializers import UserSerializer, LoginSerializer, CostumerSerializer, CostumuserSerializer, UpdateCurrentUserSerializer, ChangePasswordSerializer
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.parsers import MultiPartParser, FormParser
 
 class RegisterView(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
@@ -66,3 +68,54 @@ class CostumerListView(APIView):
         serializer = CostumerSerializer(costumers, many=True)
         # Return the serialized data
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class CurrentUserView(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    def get(self, request):
+        serializer = CostumuserSerializer(request.user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class UpdateCurrentUserView(APIView):
+    parser_classes = [MultiPartParser, FormParser] 
+
+    def put(self, request):
+        user = request.user
+        serializer = UpdateCurrentUserSerializer(user, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request):  
+        user = request.user
+        serializer = UpdateCurrentUserSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+class ChangePasswordView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+        user = request.user
+        serializer = ChangePasswordSerializer(data=request.data)
+
+        if serializer.is_valid():
+            old_password = serializer.validated_data['old_password']
+            new_password = serializer.validated_data['new_password']
+
+            if not user.check_password(old_password):
+                return Response(
+                    {"old_password": ["Wrong password."]},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            user.set_password(new_password)
+            user.save()
+            return Response({"detail": "Password changed successfully."}, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

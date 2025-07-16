@@ -29,7 +29,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField(max_length=50, null=True, blank=True)
     phone_number = models.CharField(max_length=20, null=True, blank=True)
     birth_date = models.DateField(null=True, blank=True)
-
+    picture = models.ImageField (null=True, blank=True)
     ROLE_CHOICES = [
         ('admin', 'Admin'),
         ('editor', 'Editor'),

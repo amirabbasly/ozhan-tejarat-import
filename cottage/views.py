@@ -1060,12 +1060,18 @@ class CottageExcelExportView(APIView):
             "ارزش ارزی", "ارزش گمرکی",
              "مشتری",
             "وضعیت", 
-             "ارزش افزوده"
+             "ارزش افزوده",
+             "بازبینی",
+             "اخذ مدارک", 
+              "رفع تعهد",                        
         ]
         ws.append(headers)
 
         # data rows
         for c in qs:
+            rewatch_display = "بله" if getattr(c, "rewatch", False) else "خیر"
+            docs_recieved_display = "بله" if getattr(c, "docs_recieved", False) else "خیر"
+            rafee_taahod_display = "بله" if getattr(c, "rafee_taahod", False) else "خیر"
             ws.append([
                 c.cottage_number,
                 str(c.cottage_date),                
@@ -1077,6 +1083,10 @@ class CottageExcelExportView(APIView):
                    if c.cottage_customer else ""),
                 c.cottage_status or "",
                 float(c.added_value or 0),
+                rewatch_display,
+                docs_recieved_display,
+                rafee_taahod_display
+
             ])
 
         # prepare HTTP response
@@ -1097,3 +1107,46 @@ class ExpensesViewSet(viewsets.ModelViewSet):
     pagination_class = CustomPageNumberPagination  # Apply pagination here
     search_fields = ["cottage__cottage_number","description","value" ]  # fields you want to search
 
+class CottageGoodsExportView(APIView):
+    def post( self , request, *args, **kwargs):
+        goods_codes = request.data.get('goods_codes', [])
+        if not isinstance(goods_codes, list) or not goods_codes:
+            return Response(
+                {"detail": "Provide a non-empty list of goodscodes."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        qs = CottageGoods.objects.filter(goodscode__in=goods_codes)
+        # create workbook and sheet
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Cottage Goods"
+        headers = [
+            "شماره کوتاژ",
+            "شماره ثبت سفارش", 
+            "ارزش ارزی",
+             "ارزش گمرکی",
+             "حقوق ورودی",
+            "ارزش افزوده", 
+             "حلال احمر	",
+        ]
+        ws.append(headers)
+        for c in qs:
+            ws.append([
+                c.cottage.cottage_number,
+                c.cottage.proforma.prf_order_no,           
+                float(c.total_value or 0),
+                float(c.customs_value),
+                float(c.added_value or 0),
+                float(c.red_cersent or 0),
+
+
+            ])
+        today = datetime.date.today().isoformat()
+        filename = f"cottage_goods_{today}.xlsx"
+        response = HttpResponse(
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        wb.save(response)
+        return response

@@ -10,9 +10,12 @@ from .models import Performa
 from .serializers import (
     PerformaSerializer,
     PerformaListSerializer,
-    PerformaYearSumSerializer
+    PerformaYearSumSerializer,
+    PerformaNumberListSerializer
 
 )
+from rest_framework import viewsets, status, filters
+
 from rest_framework.parsers import MultiPartParser
 import requests
 from decimal import Decimal, InvalidOperation
@@ -31,6 +34,9 @@ from .utils import get_performa_combined_data, import_performa_from_excel
 import os
 from django.conf import settings
 from cottage.views import CustomPageNumberPagination
+from django_filters.rest_framework import DjangoFilterBackend
+from .filters import ProformaFilter
+from rest_framework.generics import ListAPIView
 
 logger = logging.getLogger(__name__)
 
@@ -52,18 +58,14 @@ class PerformaCombinedDataView(APIView):
         data = get_performa_combined_data(selected_year)
         return Response(data)
 
-class PerformaListView(APIView):
-    def get(self, request):
-        performas = Performa.objects.all()
-        
-        paginator = CustomPageNumberPagination()
-        
-        paginated_performas = paginator.paginate_queryset(performas, request, view=self)
-        
-        serializer = PerformaListSerializer(paginated_performas, many=True)
-        
-        return paginator.get_paginated_response(serializer.data)
-
+class PerformaListView(ListAPIView):
+    queryset = Performa.objects.all()
+    serializer_class = PerformaListSerializer
+    pagination_class = CustomPageNumberPagination
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    search_fields = ['prf_order_no']
+    filterset_class = ProformaFilter  # Optional: if you want to support filters too
+    permission_classes = [IsAuthenticated]  # or whatever you prefer
 class PerformaDetailView(APIView):
     def get(self, request, prfVCodeInt):
         try:
@@ -298,8 +300,13 @@ class SaveSelectedPerformas(APIView):
             logger.error(f"Error saving proforma: {e}", exc_info=True)
             return Response({'error': 'An error occurred while saving the proforma.'},
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+class PerformaNumberListView(APIView):
+    permission_classes = [IsAuthenticated]
 
-
+    def get(self, request):
+        performas = Performa.objects.all()
+        serializer = PerformaNumberListSerializer(performas, many=True)
+        return Response(serializer.data)
 class UpdatePerformaView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]

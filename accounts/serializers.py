@@ -10,7 +10,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ('id', 'email', 'username', 'password', 'role','phone_number','birth_date')
+        fields = ('id', 'email', 'username', 'password', 'role','phone_number','birth_date',)
 
     def create(self, validated_data):
         password = validated_data.pop('password')
@@ -36,3 +36,23 @@ class CostumerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Costumer
         fields = ['id', 'full_name','customer_address', 'phone_number', 'national_code','customer_birthday']
+class CostumuserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['email','username','first_name','last_name','phone_number','role','birth_date','picture']
+
+class UpdateCurrentUserSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(read_only=True)  
+
+    class Meta:
+        model = CustomUser
+        fields = [
+            'email', 'username', 'first_name', 'last_name',
+            'phone_number', 'birth_date', 'picture', 'role'
+        ]
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True, min_length=8)
+
+    def validate_new_password(self, value):
+        return value

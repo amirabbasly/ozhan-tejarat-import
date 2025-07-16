@@ -78,3 +78,13 @@ class PerformaListSerializer(serializers.ModelSerializer):
             
         ]
 
+class PerformaNumberListSerializer(serializers.ModelSerializer):
+
+
+    class Meta:
+        model = Performa
+        fields = [
+            'prf_order_no', 
+            'prfVCodeInt' 
+        ]
+

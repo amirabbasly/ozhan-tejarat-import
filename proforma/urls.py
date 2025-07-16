@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import PerformaListView, PerformaDetailView, GUIDApiView, SaveSelectedPerformas,UpdatePerformaView, PerformaDeleteView, PerformaCreateView, PerformaCombinedDataView, PerformaImportView
+from .views import PerformaListView, PerformaDetailView, GUIDApiView, SaveSelectedPerformas,UpdatePerformaView, PerformaDeleteView, PerformaCreateView, PerformaCombinedDataView, PerformaImportView, PerformaNumberListView
 
 urlpatterns = [
     path('performas/', PerformaListView.as_view(), name='performa-list'),
@@ -11,5 +11,7 @@ urlpatterns = [
     path('new-performa/', PerformaCreateView.as_view(), name='add_performas'),
     path('prf-summary/', PerformaCombinedDataView.as_view(), name='performa-summary'),
     path('import-performa/', PerformaImportView.as_view(), name='import_performa'),
+    path('performas/numbers', PerformaNumberListView.as_view(), name='order_no_list'),
+
 
 ]

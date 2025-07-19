@@ -4,9 +4,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchPerformas, saveSelectedPerformas } from '../actions/performaActions';
 import { setCustomsParams, clearCustomsParams } from '../actions/customsParamsAction'; // Ensure correct import path
-import '../components/CottageForm.css'; // Import your CSS file
+import '../style/CottageForm.css'; // Import your CSS file
 import ImportExcel from '../components/ImportExcel';
-import './importPrf.css'; // Create and import a dedicated CSS file for additional styling if needed
+import '../style/importPrf.css'; // Create and import a dedicated CSS file for additional styling if needed
 
 const ImportPf = () => {
   const dispatch = useDispatch();

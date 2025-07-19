@@ -8,7 +8,7 @@ import {
   uploadFile,
 } from "../actions/cottageActions";
 import { useParams } from "react-router-dom";
-import "./CottageDetails.css";
+import "../style/CottageDetails.css";
 import DatePicker from "react-multi-date-picker";
 import DateObject from "react-date-object";
 import persian from "react-date-object/calendars/persian";

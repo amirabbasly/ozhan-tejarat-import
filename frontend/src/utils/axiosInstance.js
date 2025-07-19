@@ -1,10 +1,10 @@
 import axios from "axios";
+const baseURL =
+  process.env.REACT_APP_API_BASE_URL || "http://localhost:8000/api"; // از .env می‌خوانیم
 
 const axiosInstance = axios.create({
-  baseURL: "http://192.168.8.23/api", // Set your API base URL here
-  headers: {
-    "Content-Type": "application/json",
-  },
+  baseURL,
+  headers: { "Content-Type": "application/json" },
 });
 
 // Flag to prevent multiple simultaneous token refresh requests
@@ -49,7 +49,7 @@ axiosInstance.interceptors.response.use(
       try {
         // Refresh the access token
         const refreshResponse = await axios.post(
-          "http://192.168.8.23/api/accounts/token/refresh/",
+          `${import.meta.env.VITE_API_BASE_URL}/accounts/token/refresh/` || "http://localhost:8000/api",
           {
             refresh: localStorage.getItem("refresh_token"),
           }

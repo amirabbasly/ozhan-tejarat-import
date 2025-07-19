@@ -407,6 +407,7 @@ export const importExportedCottagesAction = (file) => async (dispatch) => {
     });
   }
 };
+
 export const fetchGoddsList = (page = 1, pageSize = 50, filters = {}) => async (dispatch) => {
   dispatch({ type: FETCH_GODDS_LIST_REQUEST });
   try {
@@ -414,19 +415,21 @@ export const fetchGoddsList = (page = 1, pageSize = 50, filters = {}) => async (
     params.append("page", page);
     params.append("page_size", pageSize);
     if (filters.search) params.append("search", filters.search);
+    if (filters.cottage) params.append("cottage", filters.cottage);
+    if (filters.proforma) params.append("proforma", filters.proforma);
     const response = await axiosInstance.get(`cottage-goods/?` + params.toString());
-      dispatch({
-        type: FETCH_GODDS_LIST_SUCCESS,
-        payload: response.data,
-      });
+    dispatch({
+      type: FETCH_GODDS_LIST_SUCCESS,
+      payload: response.data,
+    });
   } catch (error) {
-      const errorMsg =
-          error.response && error.response.data
-              ? error.response.data
-              : error.message;
-              dispatch({
-                type: FETCH_GODDS_LIST_FAILURE,
-                payload: errorMsg,
-              });
+    const errorMsg =
+      error.response && error.response.data
+        ? error.response.data
+        : error.message;
+    dispatch({
+      type: FETCH_GODDS_LIST_FAILURE,
+      payload: errorMsg,
+    });
   }
 };

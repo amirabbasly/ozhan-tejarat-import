@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axiosInstance from "../utils/axiosInstance";
-import "../components/CottageForm.css";
+import "../style/CottageForm.css";
 import Select from "react-select";
 
 const ExpenseForm = () => {

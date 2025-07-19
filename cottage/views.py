@@ -633,7 +633,7 @@ class CottageGoodsViewSet(viewsets.ModelViewSet):
     pagination_class = CustomPageNumberPagination  # Apply pagination here
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_class = CottageGoodsFilter
-    search_fields = ["cottage__cottage_number", ]  # fields you want to search
+    search_fields = ["cottage__cottage_number","goodscode","cottage__proforma__prf_order_no" ]  # fields you want to search
 
     # Add custom logic or actions if needed
     def perform_create(self, serializer):
@@ -1126,7 +1126,6 @@ class CottageGoodsExportView(APIView):
             "شماره ثبت سفارش", 
             "ارزش ارزی",
              "ارزش گمرکی",
-             "حقوق ورودی",
             "ارزش افزوده", 
              "حلال احمر	",
         ]

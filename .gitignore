@@ -12,14 +12,11 @@ media/
 
 
 # Ignore Python cache files
-*/*/__pycache__/
-*.py[cod]
-cottage/__pycache__/
-
-proforma/__pycache__/
+# Ignore all __pycache__ folders recursively
+__pycache__/
+**/__pycache__/
+*.pyc
 *.log
-accounts/__pycache__/
 
-representation/__pycache__/
 
 

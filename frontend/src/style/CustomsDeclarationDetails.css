@@ -1,0 +1,191 @@
+/* CustomsDeclarationDetails.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+.customs-declaration-details-container {
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+    font-family: 'Vazirmatn', sans-serif;
+    background: #f7f7f7;
+    border-radius: 8px;
+    margin-top: 50px;
+}
+
+.title {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 1.8em;
+    color: #333;
+}
+
+.details-section {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.details-section p {
+    margin: 10px 0;
+    color: #444;
+}
+
+.loading, .error {
+    text-align: center;
+    margin-top: 50px;
+    font-size: 1.2em;
+    color: #555;
+}
+
+.error p {
+    color: red;
+}
+
+.back-link {
+    display: inline-block;
+    margin-top: 20px;
+    color: #007bff;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.back-link:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+.goods-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: #ffffff;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.goods-table th, .goods-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.goods-table th {
+    background-color: #f2f2f2;
+    color: #333;
+}
+
+.goods-table tr:hover {
+    background-color: #f9f9f9;
+}
+
+button {
+    padding: 8px 15px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    width: 80%;
+    max-width: 600px;
+    max-height: 80%;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: #333;
+}
+
+.close-button {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #444;
+    transition: color 0.3s;
+}
+
+.close-button:hover {
+    color: #000;
+}
+
+.customs-duty-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.customs-duty-table th, .customs-duty-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.customs-duty-table th {
+    background-color: #f2f2f2;
+    color: #333;
+}
+
+.customs-duty-table tr:hover {
+    background-color: #f9f9f9;
+}
+/* CustomsDeclarationDetails.css */
+
+/* Existing styles... */
+
+.save-button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  display: block;
+  width: fit-content;
+}
+
+.save-button:hover {
+  background-color: #218838;
+}
+
+.save-message {
+  margin-top: 15px;
+  color: #28a745;
+  font-weight: bold;
+}

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axiosInstance from "../utils/axiosInstance";
 import PaginationControls from "../components/PaginationControls";
 import { Link } from "react-router-dom";
-import "../components/GoodsList.css";
+import "../style/GoodsList.css";
 
 const ExpensesList = () => {
   const [expenses, setExpenses] = useState([]);

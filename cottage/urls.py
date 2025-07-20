@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import CottageViewSet, CustomsDeclarationListView, GreenCustomsDeclarationView, SaveCottageView, SaveCottageGoodsView, FetchGoodsAPIView,FetchCustomsDutyInformationAPIView, upload_file,CottageGoodsViewSet, CottageCombinedDataView, ExportCustomsDeclarationListView, ExportedCottagesViewSet, FetchCotageRemainAmountView, ChatbotAPIView, ImportExportedCottagesView, ImportCottagesView, CottageExcelExportView, ExpensesViewSet, CottageGoodsExportView
+from .views import CottageViewSet, CustomsDeclarationListView,StartEPLAutomationView, GreenCustomsDeclarationView, SaveCottageView, SaveCottageGoodsView, FetchGoodsAPIView,FetchCustomsDutyInformationAPIView, upload_file,CottageGoodsViewSet, CottageCombinedDataView, ExportCustomsDeclarationListView, ExportedCottagesViewSet, FetchCotageRemainAmountView, ChatbotAPIView, ImportExportedCottagesView, ImportCottagesView, CottageExcelExportView, ExpensesViewSet, CottageGoodsExportView
 router = DefaultRouter()
 router.register(r'cottages', CottageViewSet)
 router.register(r'cottage-goods', CottageGoodsViewSet, basename='cottagegoods')
@@ -24,5 +24,6 @@ urlpatterns = [
     path('import-exported-cottages/', ImportExportedCottagesView.as_view(), name='import_exported_cottages'),
     path("export-cottages-excel/",CottageExcelExportView.as_view(),name="export-cottages"),
     path("export-cottage-goods-excel/",CottageGoodsExportView.as_view(),name="export-cottages"),
+    path("start-epl-automation/", StartEPLAutomationView.as_view(), name="start-epl-automation"),
 
 ]

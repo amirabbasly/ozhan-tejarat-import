@@ -76,9 +76,7 @@
 
 // export { SkeletonBarChart, SkeletonLineChart, SkeletonPieChart, SkeletonDoughnutChart };
 
-
-
-import React from 'react';
+import React from "react";
 
 const SkeletonBarChart = () => {
   return (
@@ -140,7 +138,10 @@ const SkeletonLineChart = () => {
 
 const SkeletonPieChart = () => {
   return (
-    <div className="animate-pulse" style={{ width: '300px', height: '300px', margin: 'auto' }}>
+    <div
+      className="animate-pulse"
+      style={{ width: "300px", height: "300px", margin: "auto" }}
+    >
       <div className="h-full w-full bg-gray-300 rounded-full"></div>
     </div>
   );
@@ -148,10 +149,18 @@ const SkeletonPieChart = () => {
 
 const SkeletonDoughnutChart = () => {
   return (
-    <div className="animate-pulse" style={{ width: '300px', height: '300px', margin: 'auto' }}>
+    <div
+      className="animate-pulse"
+      style={{ width: "300px", height: "300px", margin: "auto" }}
+    >
       <div className="h-full w-full bg-gray-300 rounded-full"></div>
     </div>
   );
 };
 
-export { SkeletonBarChart, SkeletonLineChart, SkeletonPieChart, SkeletonDoughnutChart };
+export {
+  SkeletonBarChart,
+  SkeletonLineChart,
+  SkeletonPieChart,
+  SkeletonDoughnutChart,
+};

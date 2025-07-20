@@ -33,6 +33,7 @@ from django.db.models import Q
 import re
 from openpyxl import Workbook
 import datetime
+from .automation import start_epl_automation
 
 
 
@@ -1149,3 +1150,20 @@ class CottageGoodsExportView(APIView):
         response["Content-Disposition"] = f'attachment; filename="{filename}"'
         wb.save(response)
         return response
+
+
+class StartEPLAutomationView(APIView):
+    def post(self, request, *args, **kwargs):
+        cottage_numbers = request.data.get("cottage_numbers", [])
+
+        if not isinstance(cottage_numbers, list) or not cottage_numbers:
+            return Response(
+                {"detail": "Provide a non-empty list of cottage_numbers."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            result = start_epl_automation(cottage_numbers)
+            return Response({"message": result}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

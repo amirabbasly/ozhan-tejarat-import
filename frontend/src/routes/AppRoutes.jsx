@@ -66,6 +66,7 @@ import RepresentationEdit from "../components/RepresentationEdit";
 import ExpensesList from "../pages/CottageExpenses";
 import ExpenseForm from "../pages/ExpenseForm";
 import UserProfile from "../components/UserProfile";
+import InstallButton from "../components/InstallButton";
 
 function AppRoutes() {
   return (
@@ -86,6 +87,7 @@ function AppContent() {
 
   return (
     <>
+     <InstallButton />
       {/* Conditionally render Navbar */}
       {!noNavbarRoutes.includes(location.pathname) && <Navbar />}
 
@@ -93,11 +95,8 @@ function AppContent() {
         <Routes>
           {/* Public Route */}
           <Route path="/login" element={<Login />} />
-          <Route path="/forbidden"  />
- <Route
-            path="/user/profile"
-           element={<UserProfile />}
-          />
+          <Route path="/forbidden" />
+          <Route path="/user/profile" element={<UserProfile />} />
           {/* Protected Routes */}
           <Route
             path="/"
@@ -544,7 +543,7 @@ function AppContent() {
               </PrivateRoute>
             }
           />
-         
+
           {/* Add more protected routes as needed */}
         </Routes>
       </main>

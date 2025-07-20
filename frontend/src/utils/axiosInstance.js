@@ -49,7 +49,7 @@ axiosInstance.interceptors.response.use(
       try {
         // Refresh the access token
         const refreshResponse = await axios.post(
-          `${import.meta.env.VITE_API_BASE_URL}/accounts/token/refresh/` || "http://localhost:8000/api",
+          `${import.meta.env.REACT_APP_API_BASE_URL}/accounts/token/refresh/` || "http://localhost:8000/api",
           {
             refresh: localStorage.getItem("refresh_token"),
           }

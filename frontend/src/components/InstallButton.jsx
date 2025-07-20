@@ -1,40 +1,59 @@
 import React, { useEffect, useState } from "react";
-import { FiShare2, FiPlus } from "react-icons/fi";
+import { FiPlus } from "react-icons/fi";
+import { MdIosShare } from "react-icons/md";
+import logo from "../assets/logo.png";
 
-const IOSInstallPrompt = () => (
-  <div className="p-6 text-center">
-    <h2 className="text-lg font-semibold mb-4">
+// دستورالعمل نصب برای iOS
+const InstallInstructions = () => (
+  <div
+    dir="rtl"
+    className="flex flex-col justify-center items-center h-screen w-full p-4 bg-white"
+  >
+    <img
+      src={logo}
+      alt="App Logo"
+      className="mb-6 w-24 h-24"
+    />
+    <h2 className="text-xl font-bold mb-4 text-gray-800">
       جهت نصب وب اپلیکیشن مراحل زیر را انجام دهید
     </h2>
-    <ol className="text-right list-decimal list-inside space-y-2 text-gray-700">
-      <li>
-        در نوار پایین روی دکمه <FiShare2 className="inline-block mx-1" /> Share
-        بزنید
+    <ol className="w-full max-w-md text-right space-y-4 text-gray-700 text-base leading-relaxed">
+      <li className="flex items-center">
+        <span className="flex-none">1-</span>
+        <span className="flex-1">
+          در نوار پایینی روی دکمه <MdIosShare className="inline-block mx-1 text-xl" /> Share ضربه بزنید
+        </span>
       </li>
-      <li>
-        در منوی بازشده، در قسمت پایین، گزینه <strong>Add to Home Screen</strong>{" "}
-        را انتخاب کنید
+      <li className="flex items-center">
+        <span className="flex-none">2-</span>
+        <span className="flex-1">
+          در منوی بازشده، گزینه <strong>Add to Home Screen</strong> را انتخاب کنید
+        </span>
       </li>
-      <li>
-        در مرحله بعد روی دکمه <FiPlus className="inline-block mx-1" /> Add بزنید
+      <li className="flex items-center">
+        <span className="flex-none">3-</span>
+        <span className="flex-1">
+          در مرحله بعد روی دکمه <FiPlus className="inline-block mx-1 text-xl" /> Add ضربه بزنید
+        </span>
       </li>
     </ol>
   </div>
 );
 
+// کامپوننت اصلی که شرط iOS را بررسی می‌کند
 const InstallButton = () => {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showButton, setShowButton] = useState(false);
   const [isIosDevice, setIsIosDevice] = useState(false);
 
-  // Detect iOS devices
+  // تشخیص iOS
   useEffect(() => {
     const ua = window.navigator.userAgent;
     const isiOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
     setIsIosDevice(isiOS);
   }, []);
 
-  // Listen for PWA install prompt on non-iOS
+  // لیسنر نصب PWA (غیر iOS)
   useEffect(() => {
     if (isIosDevice) return;
     const handler = (e) => {
@@ -46,6 +65,7 @@ const InstallButton = () => {
     return () => window.removeEventListener("beforeinstallprompt", handler);
   }, [isIosDevice]);
 
+  // هندل کلیک روی دکمه نصب
   const handleInstallClick = async () => {
     if (!deferredPrompt) return;
     deferredPrompt.prompt();
@@ -59,12 +79,12 @@ const InstallButton = () => {
     setShowButton(false);
   };
 
-  // If iOS, show custom instructions
+  // اگر iOS بود، دستورالعمل نصب iOS نمایش داده شود
   if (isIosDevice) {
-    return <IOSInstallPrompt />;
+    return <InstallInstructions />;
   }
 
-  // On other devices, show install button when prompt is available
+  // در غیر این صورت، دکمه نصب PWA نمایش داده شود
   if (!showButton) return null;
 
   return (

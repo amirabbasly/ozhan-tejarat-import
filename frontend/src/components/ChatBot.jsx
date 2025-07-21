@@ -1,92 +1,21 @@
-// import React, { useState } from "react";
-// import axiosInstance from "../utils/axiosInstance";
-// import '../style/Chatbot.css'; // Import the CSS file
-
-// const Chatbot = () => {
-//   const [messages, setMessages] = useState([]); // Store chat history
-//   const [userInput, setUserInput] = useState(""); // Store user input
-//   const [loading, setLoading] = useState(false); // Track loading state
-
-//   // Function to handle sending messages
-//   const sendMessage = async () => {
-//     if (!userInput.trim()) return; // Prevent empty messages
-
-//     const userMessage = { sender: "user", text: userInput };
-//     setMessages((prev) => [...prev, userMessage]); // Add user message to chat history
-//     setUserInput(""); // Clear the input immediately after sending
-
-//     setLoading(true); // Set loading state to true while waiting for response
-
-//     try {
-//       const response = await axiosInstance.post("/chatbot/", { message: userInput });
-//       const botMessage = { sender: "bot", text: response.data.reply };
-
-//       // Add bot response to chat history
-//       setMessages((prev) => [...prev, botMessage]);
-//     } catch (error) {
-//       const errorMessage = { sender: "bot", text: "Sorry, something went wrong." };
-//       setMessages((prev) => [...prev, errorMessage]);
-//       console.error("Error:", error.response ? error.response.data : error.message);
-//     }
-
-//     setLoading(false); // Reset loading state when response is received
-//   };
-
-//   // Function to handle user pressing Enter
-//   const handleKeyPress = (e) => {
-//     if (e.key === "Enter") {
-//       sendMessage();
-//     }
-//   };
-
-//   // Chat bubble component
-//   const ChatBubble = ({ sender, text }) => (
-//     <div className={`chat-bubble ${sender}`} style={{ direction: 'rtl', unicodeBidi: 'plaintext' }}>
-//       <span>{text}</span>
-//     </div>
-//   );
-
-//   return (
-//     <div className="container">
-//       <h2>هوش مصنوعی اوژن</h2>
-
-//       <div className="chatWindow">
-//         <h2>چطور میتوانم به شما کمک کنم؟</h2>
-//         {messages.map((msg, index) => (
-//           <ChatBubble key={index} sender={msg.sender} text={msg.text} />
-//         ))}
-//         {loading && (
-//           <div className="chat-bubble bot">
-//             <span>Loading...</span>
-//             <div className="loading-indicator"></div>
-//           </div>
-//         )}
-//       </div>
-
-//       <div className="inputContainer">
-//         <button className="btn-grad1" onClick={sendMessage}>
-//           Send
-//         </button>
-//         <input
-//           type="text"
-//           value={userInput}
-//           onChange={(e) => setUserInput(e.target.value)}
-//           onKeyPress={handleKeyPress}
-//           placeholder="پیام خود را بنویسید..."
-//           className="input"
-//         />
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Chatbot;
-
-
-
-
 import React, { useState } from "react";
-import { FaBars, FaShareAlt, FaCog, FaUserCircle, FaPaperPlane, FaMicrophone, FaFilter, FaRobot } from "react-icons/fa";
+import {
+  FaBars,
+  FaShareAlt,
+  FaCog,
+  FaUserCircle,
+  FaPaperPlane,
+  FaMicrophone,
+  FaFilter,
+  FaRobot,
+  FaHome,
+  FaFileAlt,
+  FaChevronDown,
+  FaTimes,
+  FaUser,
+  FaBell,
+} from "react-icons/fa";
+import { Link } from "react-router-dom";
 import ChatBubble from "./ui/ChatBubble";
 import ChatSidebar from "./ui/ChatSidebar";
 import ProfileDropdown from "./ui/ProfileDropdown";
@@ -95,7 +24,7 @@ import { useChat } from "../hooks/useChat";
 import { useDarkMode } from "../hooks/useDarkMode";
 import { useResponsive } from "../hooks/useResponsive";
 import { useSidebar } from "../hooks/useSidebar";
-
+import { TbLayoutSidebarFilled } from "react-icons/tb";
 const Chatbot = () => {
   const { isMobile } = useResponsive();
   const { darkMode, toggleDarkMode } = useDarkMode();
@@ -103,11 +32,27 @@ const Chatbot = () => {
   const { messages, loading, sendMessage } = useChat();
   const [showProfile, setShowProfile] = useState(false);
   const [userInput, setUserInput] = useState("");
-  const [selectedVersion, setSelectedVersion] = useState("GPT-4");
-  const versions = ["GPT-4", "ChatGPT-Plus", "GPT-4O", "o3"];
+  const [selectedVersion, setSelectedVersion] = useState("Gemini");
+  const [showMenu, setShowMenu] = useState(false);
+  const [mobileSubmenu, setMobileSubmenu] = useState({
+    asnad: false,
+    receiveOrder: false,
+    declarations: false,
+    exportDeclarations: false,
+    checks: false,
+    representations: false,
+    issueDocuments: false,
+    parties: false,
+    tanzimat: false,
+  });
+  const versions = ["Gemini", "ChatGPT-Plus", "GPT-4O", "GPT-4"];
+  const role = "admin"; // Assuming admin role for conditional rendering
 
   const handleKeyPress = (e) => {
-    if (e.key === "Enter") sendMessage(userInput);
+    if (e.key === "Enter") {
+      sendMessage(userInput);
+      setUserInput("");
+    }
   };
 
   const handleSendMessage = () => {
@@ -115,8 +60,35 @@ const Chatbot = () => {
     setUserInput("");
   };
 
+  const toggleMobileSubmenu = (menu) => {
+    setMobileSubmenu((prev) => ({
+      ...prev,
+      [menu]: !prev[menu],
+    }));
+  };
+
+  const closeMenu = () => {
+    setShowMenu(false);
+    setMobileSubmenu({
+      asnad: false,
+      receiveOrder: false,
+      declarations: false,
+      exportDeclarations: false,
+      checks: false,
+      representations: false,
+      issueDocuments: false,
+      parties: false,
+      tanzimat: false,
+    });
+  };
+
   return (
-    <div className={`flex min-h-screen ${darkMode ? "dark bg-gray-900" : "bg-gray-50"}`} dir="rtl">
+    <div
+      className={`flex min-h-screen ${
+        darkMode ? "dark bg-gray-900" : "bg-gray-50"
+      }`}
+      dir="rtl"
+    >
       {/* Sidebar */}
       <ChatSidebar
         collapsedSidebar={collapsedSidebar}
@@ -142,6 +114,492 @@ const Chatbot = () => {
         />
       )}
 
+      {/* Mobile Menu Overlay */}
+      {showMenu && (
+        <div className="overlay-menu fixed inset-0 bg-black bg-opacity-60 flex justify-end z-50 transition-opacity duration-300 ease-in-out font-vazir">
+          <div className="bg-white w-full sm:w-80 h-full shadow-2xl p-6 flex flex-col gap-4">
+            <button
+              className="close-overlay self-end text-gray-600 text-2xl sm:text-3xl hover:text-red-500 bg-transparent hover:bg-transparent focus:bg-transparent active:bg-transparent transition-colors duration-200"
+              onClick={closeMenu}
+            >
+              <FaTimes />
+            </button>
+
+            <ul className="overlay-navbar flex flex-col gap-2">
+              <li>
+                <Link
+                  to="/"
+                  onClick={closeMenu}
+                  className="flex items-center gap-3 text-lg sm:text-xl bg-blue-50 text-blue-600 px-4 py-2 rounded-lg duration-200 hover:text-blue-700 focus:text-blue-700"
+                >
+                  <FaHome className="text-blue-500" />
+                  صفحه اصلی
+                </Link>
+              </li>
+              <li>
+                <button
+                  onClick={() => toggleMobileSubmenu("asnad")}
+                  className="flex items-center justify-between w-full text-lg sm:text-xl bg-blue-50 text-blue-600 px-4 py-2 rounded-lg duration-200 hover:text-blue-700 focus:text-blue-700"
+                >
+                  <div className="flex items-center gap-3">
+                    <FaFileAlt className="text-blue-500" />
+                    اسناد
+                  </div>
+                  <FaChevronDown
+                    className={`transition-transform duration-200 ${
+                      mobileSubmenu.asnad ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+                {mobileSubmenu.asnad && (
+                  <ul className="flex flex-col gap-2 pr-4">
+                    <li>
+                      <button
+                        onClick={() => toggleMobileSubmenu("receive-order")}
+                        className="flex items-center justify-between w-full text-base bg-gray-100 text-gray-700 px-3 py-1 rounded-md"
+                      >
+                        ثبت سفارش ها
+                        <FaChevronDown
+                          className={`transition-transform duration-200 ${
+                            mobileSubmenu["receive-order"] ? "rotate-180" : ""
+                          }`}
+                        />
+                      </button>
+                      {mobileSubmenu["receive-order"] && (
+                        <ul className="flex flex-col gap-1 pr-4">
+                          <li>
+                            <Link
+                              to="/add-order"
+                              onClick={closeMenu}
+                              className="block text-base text-gray-600 px-3 py-1 hover:bg-gray-200 rounded-md"
+                            >
+                              ایجاد ثبت سفارش
+                            </Link>
+                          </li>
+                          <li>
+                            <Link
+                              to="/reged-orders"
+                              onClick={closeMenu}
+                              className="block text-base text-gray-600 px-3 py-1 hover:bg-gray-200 rounded-md"
+                            >
+                              لیست ثبت سفارش ها
+                            </Link>
+                          </li>
+                          {role === "admin" && (
+                            <li>
+                              <Link
+                                to="/import-prf"
+                                onClick={closeMenu}
+                                className="block text-base text-gray-600 px-3 py-1 hover:bg-gray-200 rounded-md"
+                              >
+                                دریافت از سامانه
+                              </Link>
+                            </li>
+                          )}
+                        </ul>
+                      )}
+                    </li>
+                    <li>
+                      <button
+                        personally
+                        onClick={() => toggleMobileSubmenu("declarations")}
+                        className="flex items-center justify-between w-full text-base bg-gray-100 text-gray-700 px-3 py-1 rounded-md"
+                      >
+                        اظهارنامه ها
+                        <FaChevronDown
+                          className={`transition-transform duration-200 ${
+                            mobileSubmenu.declarations ? "rotate-180" : ""
+                          }`}
+                        />
+                      </button>
+                      {mobileSubmenu.declarations && (
+                        <ul className="flex flex-col gap-1 pr-4">
+                          <li>
+                            <Link
+                              to="/expense-list"
+                              onClick={closeMenu}
+                              className="block text-base text-gray-600 px-3 py-1 hover:bg-gray-200 rounded-md"
+                            >
+                              لیست هزینه ها
+                            </Link>
+                          </li>
+                          <li>
+                            <Link
+                              to="/cottages"
+                              onClick={closeMenu}
+                              className="block text-base text-gray-600 px-3 py-1 hover:bg-gray-200 rounded-md"
+                            >
+                              لیست اظهارنامه ها
+                            </Link>
+                          </li>
+                          <li>
+                            <Link
+                              to="/cottage-goods-list"
+                              onClick={closeMenu}
+                              className="block text-base text-gray-600 px-3 py-1 hover:bg-gray-200 rounded-md"
+                            >
+                              لیست کلی کالا ها
+                            </Link>
+                          </li>
+                          {role === "admin" && (
+                            <li>
+                              <Link
+                                to="/decl"
+                                onClick={closeMenu}
+                                className="block text-base text-gray-600 px-3 py-1 hover:bg-gray-200 rounded-md"
+                              >
+                                دریافت از سامانه
+                              </Link>
+                            </li>
+                          )}
+                        </ul>
+                      )}
+                    </li>
+                    <li>
+                      <button
+                        onClick={() =>
+                          toggleMobileSubmenu("exportDeclarations")
+                        }
+                        className="flex items-center justify-between w-full text-base bg-gray-100 text-gray-700 px-3 py-1 rounded-md"
+                      >
+                        اظهارنامه های صادراتی
+                        <FaChevronDown
+                          className={`transition-transform duration-200 ${
+                            mobileSubmenu.exportDeclarations ? "rotate-180" : ""
+                          }`}
+                        />
+                      </button>
+                      {mobileSubmenu.exportDeclarations && (
+                        <ul className="flex flex-col gap-1 pr-4">
+                          <li>
+                            <Link
+                              to="/add-export"
+                              onClick={closeMenu}
+                              className="block text-base text-gray-600 px-3 py-1 hover:bg-gray-200 rounded-md"
+                            >
+                              ایجاد اظهارنمه
+                            </Link>
+                          </li>
+                          <li>
+                            <Link
+                              to="/export-cottages"
+                              onClick={closeMenu}
+                              className="block text-base text-gray-600 px-3 py-1 hover:bg-gray-200 rounded-md"
+                            >
+                              لیست اظهارنامه ها
+                            </Link>
+                          </li>
+                          {role === "admin" && (
+                            <li>
+                              <Link
+                                to="/export-decl"
+                                onClick={closeMenu}
+                                className="block text-base text-gray-600 px-3 py-1 hover:bg-gray-200 rounded-md"
+                              >
+                                دریافت از سامانه
+                              </Link>
+                            </li>
+                          )}
+                        </ul>
+                      )}
+                    </li>
+                    <li>
+                      <button
+                        onClick={() => toggleMobileSubmenu("checks")}
+                        className="flex items-center justify-between w-full text-base bg-gray-100 text-gray-700 px-3 py-1 rounded-md"
+                      >
+                        چک ها
+                        <FaChevronDown
+                          className={`transition-transform duration-200 ${
+                            mobileSubmenu.checks ? "rotate-180" : ""
+                          }`}
+                        />
+                      </button>
+                      {mobileSubmenu.checks && (
+                        <ul className="flex flex-col gap-1 pr-4">
+                          <li>
+                            <Link
+                              to="/add-check"
+                              onClick={closeMenu}
+                              className="block text-base text-gray-600 px-3 py-1 hover:bg-gray-200 rounded-md"
+                            >
+                              ایجاد چک جدید
+                            </Link>
+                          </li>
+                          <li>
+                            <Link
+                              to="/checks"
+                              onClick={closeMenu}
+                              className="block text-base text-gray-600 px-3 py-1 hover:bg-gray-200 rounded-md"
+                            >
+                              لیست چک ها
+                            </Link>
+                          </li>
+                          <li>
+                            <Link
+                              to="/check-from-excel"
+                              onClick={closeMenu}
+                              className="block text-base text-gray-600 px-3 py-1 hover:bg-gray-200 rounded-md"
+                            >
+                              ورود چک
+                            </Link>
+                          </li>
+                        </ul>
+                      )}
+                    </li>
+                    <li>
+                      <button
+                        onClick={() => toggleMobileSubmenu("representations")}
+                        className="flex items-center justify-between w-full text-base bg-gray-100 text-gray-700 px-3 py-1 rounded-md"
+                      >
+                        وکالت نامه ها
+                        <FaChevronDown
+                          className={`transition-transform duration-200 ${
+                            mobileSubmenu.representations ? "rotate-180" : ""
+                          }`}
+                        />
+                      </button>
+                      {mobileSubmenu.representations && (
+                        <ul className="flex flex-col gap-1 pr-4">
+                          <li>
+                            <Link
+                              to="/add-representation"
+                              onClick={closeMenu}
+                              className="block text-base text-gray-600 px-3 py-1 hover:bg-gray-200 rounded-md"
+                            >
+                              ایجاد وکالتنامه
+                            </Link>
+                          </li>
+                          <li>
+                            <Link
+                              to="/representations"
+                              onClick={closeMenu}
+                              className="block text-base text-gray-600 px-3 py-1 hover:bg-gray-200 rounded-md"
+                            >
+                              لیست وکالتنامه ها
+                            </Link>
+                          </li>
+                          <li>
+                            <Link
+                              to="/rep-from-excel"
+                              onClick={closeMenu}
+                              className="block text-base text-gray-600 px-3 py-1 hover:bg-gray-200 rounded-md"
+                            >
+                              ورود وکالتنامه
+                            </Link>
+                          </li>
+                        </ul>
+                      )}
+                    </li>
+                    <li>
+                      <button
+                        onClick={() => toggleMobileSubmenu("issueDocuments")}
+                        className="flex items-center justify-between w-full text-base bg-gray-100 text-gray-700 px-3 py-1 rounded-md"
+                      >
+                        صدور اسناد
+                        <FaChevronDown
+                          className={`transition-transform duration-200 ${
+                            mobileSubmenu.issueDocuments ? "rotate-180" : ""
+                          }`}
+                        />
+                      </button>
+                      {mobileSubmenu.issueDocuments && (
+                        <ul className="flex flex-col gap-1 pr-4">
+                          <li>
+                            <Link
+                              to="/invoices/new"
+                              onClick={closeMenu}
+                              className="block text-base text-gray-600 px-3 py-1 hover:bg-gray-200 rounded-md"
+                            >
+                              ایجاد اینوویس/پکینگ/گواهی مبدا
+                            </Link>
+                          </li>
+                          <li>
+                            <Link
+                              to="/invoices/list"
+                              onClick={closeMenu}
+                              className="block text-base text-gray-600 px-3 py-1 hover:bg-gray-200 rounded-md"
+                            >
+                              لیست اینوویس/پکینگ/گواهی مبدا
+                            </Link>
+                          </li>
+                          <li>
+                            <Link
+                              to="/proforma-invoices/new"
+                              onClick={closeMenu}
+                              className="block text-base text-gray-600 px-3 py-1 hover:bg-gray-200 rounded-md"
+                            >
+                              ایجاد پروفورما
+                            </Link>
+                          </li>
+                          <li>
+                            <Link
+                              to="/proforma-invoices/list"
+                              onClick={closeMenu}
+                              className="block text-base text-gray-600 px-3 py-1 hover:bg-gray-200 rounded-md"
+                            >
+                              لیست پروفورما
+                            </Link>
+                          </li>
+                        </ul>
+                      )}
+                    </li>
+                    <li>
+                      <button
+                        onClick={() => toggleMobileSubmenu("parties")}
+                        className="flex items-center justify-between w-full text-base bg-gray-100 text-gray-700 px-3 py-1 rounded-md"
+                      >
+                        طرفین
+                        <FaChevronDown
+                          className={`transition-transform duration-200 ${
+                            mobileSubmenu.parties ? "rotate-180" : ""
+                          }`}
+                        />
+                      </button>
+                      {mobileSubmenu.parties && (
+                        <ul className="flex flex-col gap-1 pr-4">
+                          <li>
+                            <Link
+                              to="/sellers/new"
+                              onClick={closeMenu}
+                              className="block text-base text-gray-600 px-3 py-1 hover:bg-gray-200 rounded-md"
+                            >
+                              ایجاد فروشنده
+                            </Link>
+                          </li>
+                          <li>
+                            <Link
+                              to="/sellers/list"
+                              onClick={closeMenu}
+                              className="block text-base text-gray-600 px-3 py-1 hover:bg-gray-200 rounded-md"
+                            >
+                              لیست فروشنده ها
+                            </Link>
+                          </li>
+                          <li>
+                            <Link
+                              to="/buyers/new"
+                              onClick={closeMenu}
+                              className="block text-base text-gray-600 px-3 py-1 hover:bg-gray-200 rounded-md"
+                            >
+                              ایجاد خریدار
+                            </Link>
+                          </li>
+                          <li>
+                            <Link
+                              to="/buyers/list"
+                              onClick={closeMenu}
+                              className="block text-base text-gray-600 px-3 py-1 hover:bg-gray-200 rounded-md"
+                            >
+                              لیست خریدار ها
+                            </Link>
+                          </li>
+                          <li>
+                            <Link
+                              to="/customers/new"
+                              onClick={closeMenu}
+                              className="block text-base text-gray-600 px-3 py-1 hover:bg-gray-200 rounded-md"
+                            >
+                              ایجاد شخص جدید
+                            </Link>
+                          </li>
+                          <li>
+                            <Link
+                              to="/customers/list"
+                              onClick={closeMenu}
+                              className="block text-base text-gray-600 px-3 py-1 hover:bg-gray-200 rounded-md"
+                            >
+                              لیست اشخاص
+                            </Link>
+                          </li>
+                        </ul>
+                      )}
+                    </li>
+                  </ul>
+                )}
+              </li>
+              <li>
+                <button
+                  onClick={() => toggleMobileSubmenu("tanzimat")}
+                  className="flex items-center justify-between w-full text-lg sm:text-xl bg-blue-50 text-blue-600 px-4 py-2 rounded-lg duration-200 hover:text-blue-700 focus:text-blue-700"
+                >
+                  <div className="flex items-center gap-3">
+                    <FaCog className="text-blue-500" />
+                    گمرکی
+                  </div>
+                  <FaChevronDown
+                    className={`transition-transform duration-200 ${
+                      mobileSubmenu.tanzimat ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+                {mobileSubmenu.tanzimat && (
+                  <ul className="flex flex-col gap-1 pr-4">
+                    <li>
+                      <Link
+                        to="/hscode-list"
+                        onClick={closeMenu}
+                        className="block text-base text-gray-600 px-3 py-1 hover:bg-gray-200 rounded-md"
+                      >
+                        جدول تعرفه ها
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        to="/hscode-inf"
+                        onClick={closeMenu}
+                        className="block text-base text-gray-600 px-3 py-1 hover:bg-gray-200 rounded-md"
+                      >
+                        لیست تعرفه ها
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        to="/tariff-calculator"
+                        onClick={closeMenu}
+                        className="block text-base text-gray-600 px-3 py-1 hover:bg-gray-200 rounded-md"
+                      >
+                        محاسبه گمرکی
+                      </Link>
+                    </li>
+                  </ul>
+                )}
+              </li>
+              <li>
+                <Link
+                  to="/chatbot"
+                  onClick={closeMenu}
+                  className="flex items-center gap-3 text-lg sm:text-xl bg-blue-50 text-blue-600 px-4 py-2 rounded-lg duration-200 hover:text-blue-700 focus:text-blue-700"
+                >
+                  <FaRobot className="text-blue-500" />
+                  مشاور هوش مصنوعی
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/user/profile"
+                  onClick={closeMenu}
+                  className="flex items-center gap-3 text-lg sm:text-xl bg-blue-50 text-blue-600 px-4 py-2 rounded-lg duration-200 hover:text-blue-700 focus:text-blue-700"
+                >
+                  <FaUser className="text-blue-500" />
+                  کاربر
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/notifications"
+                  onClick={closeMenu}
+                  className="flex items-center gap-3 text-lg sm:text-xl bg-blue-50 text-blue-600 px-4 py-2 rounded-lg duration-200 hover:text-blue-700 focus:text-blue-700"
+                >
+                  <FaBell className="text-blue-500" />
+                  اعلان‌ها
+                </Link>
+              </li>
+            </ul>
+          </div>
+        </div>
+      )}
+
       {/* Main area */}
       <div
         className={`flex-1 flex flex-col transition-all duration-300 ${
@@ -153,10 +611,16 @@ const Chatbot = () => {
           <div className="flex items-center justify-between max-w-7xl mx-auto flex-wrap gap-2 md:pl-12 sm:pl-8 pl-4">
             <div className="flex items-center space-x-reverse space-x-3">
               <button
-                onClick={toggleSidebar}
+                onClick={() => setShowMenu(true)}
                 className="text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
               >
                 <FaBars size={20} />
+              </button>
+              <button
+                onClick={toggleSidebar}
+                className="text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+              >
+                <TbLayoutSidebarFilled size={20} />
               </button>
               {isMobile && (
                 <VersionSelector
@@ -205,7 +669,7 @@ const Chatbot = () => {
           <div className="w-full max-w-3xl bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4">
             <input
               type="text"
-              className="w-full rounded-full px-4 py-2.5 border-0 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm"
+              className="w-full rounded-full px-4 py-2.5 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-0 focus:border-none border-none outline-none text-sm"
               placeholder="سوال خود را تایپ کنید..."
               value={userInput}
               onChange={(e) => setUserInput(e.target.value)}

@@ -609,7 +609,7 @@ import {
   FaUser,
   FaChevronDown,
 } from "react-icons/fa";
-
+import { AiFillSetting } from "react-icons/ai";
 const Navbar = () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user);
@@ -1075,29 +1075,35 @@ const Navbar = () => {
 
             {/* Submenu for User */}
             {showSubmenu.karbar && (
-              <ul className="submenu">
-                <li className="submenu-item">
-                  <FaUser
-                    size={28}
-                    style={{
-                      marginLeft: "15",
-                    }}
-                  />
-                  <Link to="/user/profile">پروفایل من</Link>
-                </li>
-                <li className="submenu-item">
-                  <button
-                    className="hover:bg-[#FFECEC] submenu-link logout-btn"
-                    onClick={handleLogout}
+              <ul className="submenu text-right">
+                <li>
+                  <Link
+                    to="/user/profile"
+                    className="block flex flex-row-reverse items-center gap-3 px-3 py-2.5 rounded-md hover:bg-gray-200 transition-colors cursor-pointer"
                   >
-                    خروج
-                    <FaSignOutAlt
-                      size={28}
-                      style={{
-                        marginLeft: "15",
-                      }}
-                    />
+                    <FaUser size={20} className="flex-shrink-0" />
+                    <span className="text-sm leading-none">پروفایل من</span>
+                  </Link>
+                </li>
+
+                <li>
+                  <button
+                    onClick={handleLogout}
+                    className="block w-full text-left flex flex-row-reverse items-center gap-3 px-3 py-2.5 rounded-md hover:bg-gray-200 transition-colors cursor-pointer bg-transparent border-0 text-sm leading-none"
+                  >
+                    <FaSignOutAlt size={20} className="flex-shrink-0" />
+                    <span>خروج</span>
                   </button>
+                </li>
+
+                <li>
+                  <Link
+                    to="/user/settings"
+                    className="block flex flex-row-reverse items-center gap-3 px-3 py-2.5 rounded-md hover:bg-gray-200 transition-colors cursor-pointer"
+                  >
+                    <AiFillSetting size={20} className="flex-shrink-0" />
+                    <span className="text-sm leading-none">تنظیمات</span>
+                  </Link>
                 </li>
               </ul>
             )}

@@ -24,7 +24,11 @@ class RepresentationViewSet(ModelViewSet):
 class CheckViewSet(ModelViewSet):
     queryset = Check.objects.all()
     serializer_class = CheckSerializer
-    
+    parser_classes = (MultiPartParser, FormParser)
+    filter_backends = [filters.SearchFilter]
+    pagination_class = CustomPageNumberPagination
+    search_fields = ['check_code']
+     
 class ImportRepresentationsView(APIView):
     """
     DRF view to handle Excel file uploads with Persian headings.

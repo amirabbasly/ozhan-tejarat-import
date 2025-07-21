@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import { Provider } from "react-redux";
 import store from "./store"; // Make sure you have a store.js file exporting your Redux store
 import App from "./App";
-import * as serviceWorkerRegistration from './serviceWorkerRegistration';
+import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
 // blocks wheel‑driven increments on every <input type="number">
 function stopNumberScroll(e) {
   const el = document.activeElement; // the field that has focus

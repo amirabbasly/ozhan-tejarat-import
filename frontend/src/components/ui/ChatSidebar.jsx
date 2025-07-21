@@ -33,14 +33,14 @@ const ChatSidebar = ({
   ];
 
   const environments = [
-    { icon: FaCode, label: "GPT-4" },
-    { icon: FaLightbulb, label: "ChatGPT-Plus" },
+    { icon: FaCode, label: "Gemini" },
+    { icon: FaLightbulb, label: "Lama-Pro" },
     { icon: FaBrain, label: "GPT-4O" },
     { icon: FaPaintBrush, label: "o3" },
     { icon: FaMagic, label: "Sora" },
     { icon: FaGithub, label: "Codex" },
   ];
-  
+
   return (
     <aside
       className={`bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 transition-all duration-300 ease-in-out shadow-lg ${
@@ -56,7 +56,7 @@ const ChatSidebar = ({
       } fixed top-0 bottom-0 right-0 z-20 flex flex-col`}
     >
       <div className="p-4 flex items-center justify-between border-b border-gray-100 dark:border-gray-700">
-        <div className="flex items-center mt-24">
+      <div className="flex items-center mt-4 sm:mt-6 md:mt-12 lg:mt-14 xl:mt-16">
           <FaRobot className="text-blue-600 dark:text-blue-400 text-2xl flex-shrink-0" />
           {(!collapsedSidebar || isMobile) && (
             <span className="mr-2 font-bold text-blue-600 dark:text-blue-400 text-lg">
@@ -142,7 +142,7 @@ const ChatSidebar = ({
               ? "justify-center"
               : "space-x-reverse space-x-2"
           }`}
-          onClick={() => setShowProfile(true)}
+          onClick={() => setShowProfile((prev) => !prev)} // تغییر به toggle
         >
           <FaUserCircle className="text-blue-500 dark:text-blue-400 text-2xl flex-shrink-0" />
           {(!collapsedSidebar || isMobile) && (

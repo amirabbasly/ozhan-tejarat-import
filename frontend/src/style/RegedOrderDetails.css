@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+.order-details-container {
+    width: 60%;
+    margin: 2rem auto;
+    padding: 2rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    font-family: 'Vazir', sans-serif; /* Consider using a Persian font like Vazir */
+    direction: rtl; /* Align text to right for Persian content */
+  }
+  
+  .order-details-container h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 1.5rem;
+  }
+  
+  .order-field {
+    display: flex;
+    flex-direction: column;
+    margin: 1rem 0;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #ccc;
+  }
+  
+  .order-field label {
+    font-weight: bold;
+    color: #444;
+  }
+  
+  .order-field span,
+  .order-field input {
+    flex: 1;
+    margin-left: 1rem;
+  }
+  .order-field span{
+    margin-top: 30px;
+  }
+  .order-field input {
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 90%;
+  }
+  
+  .order-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+  
+  .cottages-container {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+  }
+  
+  .cottages-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+  
+  .cottages-table th,
+  .cottages-table td {
+    border-top: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+  }
+
+  .cottages-table tr  {
+background-color: #fefefe;
+  }
+  
+  .cottages-table tr:nth-child(even)  {
+    background-color: #ddd;
+      }
+  .cottages-table th {
+    background-color: #ddd;
+    font-weight: bold;
+  }
+  
+  .cottage-link {
+    color: #007bff;
+    text-decoration: none;
+  }
+  
+  .cottage-link:hover {
+    text-decoration: underline;
+  }
+  

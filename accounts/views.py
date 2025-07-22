@@ -121,6 +121,7 @@ class ChangePasswordView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class CompanyViewSet(viewsets.ModelViewSet):
+    permission_classes = (permissions.AllowAny,)
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
     search_fields = ["full_name" ]  # fields you want to search

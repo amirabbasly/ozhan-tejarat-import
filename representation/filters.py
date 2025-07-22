@@ -15,3 +15,13 @@ class RepresentationFilter(django_filters.FilterSet):
     class Meta:
         model = Representation
         fields = ['representi']
+
+class ChecksFilter(django_filters.FilterSet):
+    """
+    Filter for Representation model.
+    """
+    is_paid = django_filters.Filter(field_name="is_paid", lookup_expr="exact")
+
+    class Meta:
+        model = Check
+        fields = ['is_paid']

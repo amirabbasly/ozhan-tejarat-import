@@ -33,7 +33,7 @@ from django.db.models import Q
 import re
 from openpyxl import Workbook
 import datetime
-from .automation import start_epl_automation
+from .automation import EPLAutomator
 
 
 
@@ -1150,20 +1150,50 @@ class CottageGoodsExportView(APIView):
         response["Content-Disposition"] = f'attachment; filename="{filename}"'
         wb.save(response)
         return response
-
-
 class StartEPLAutomationView(APIView):
     def post(self, request, *args, **kwargs):
         cottage_numbers = request.data.get("cottage_numbers", [])
-
         if not isinstance(cottage_numbers, list) or not cottage_numbers:
             return Response(
                 {"detail": "Provide a non-empty list of cottage_numbers."},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+        automator = EPLAutomator()
         try:
-            result = start_epl_automation(cottage_numbers)
-            return Response({"message": result}, status=status.HTTP_200_OK)
+            automator.login()
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            automator.close()
+            logger.exception("Login failed")
+            return Response(
+                {"error": f"Login failed: {e}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        overall = {}
+        for num in cottage_numbers:
+            data = automator.scrape_one(num)
+            overall[num] = data
+
+            # persist to DB immediately
+            try:
+                c = Cottage.objects.get(cottage_number=int(num))
+            except Cottage.DoesNotExist:
+                logger.warning("No Cottage with cottage_number=%s", num)
+                continue
+
+            if isinstance(data, dict):
+                c.cottage_status = data["stage"]
+                jam = data["jam_kol"].replace(",", "")
+                try:
+                    c.customs_value_epl = Decimal(jam)
+                except (InvalidOperation, AttributeError):
+                    c.customs_value_epl = None
+            else:
+                # NOT_FOUND or error message
+                c.cottage_status = data
+
+            c.save(update_fields=["cottage_status", "customs_value_epl"])
+
+        automator.close()
+        return Response({"results": overall}, status=status.HTTP_200_OK)

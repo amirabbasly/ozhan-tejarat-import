@@ -33,7 +33,7 @@ const ChatSidebar = ({
   ];
 
   const environments = [
-    { icon: FaCode, label: "Gemini" },
+    { icon: FaCode, label: "Ozhan Ai" },
     { icon: FaLightbulb, label: "Lama-Pro" },
     { icon: FaBrain, label: "GPT-4O" },
     { icon: FaPaintBrush, label: "o3" },

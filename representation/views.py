@@ -11,13 +11,14 @@ from datetime import datetime
 from .utils import jalali_to_gregorian  # You need a utility to convert Jalali to Gregorian
 from cottage.views import CustomPageNumberPagination
 from rest_framework import filters
-from .filters import RepresentationFilter
+from .filters import RepresentationFilter, ChecksFilter
+from django_filters.rest_framework import DjangoFilterBackend
 
 class RepresentationViewSet(ModelViewSet):
     queryset = Representation.objects.all()
     serializer_class = RepresentationSerializer
     parser_classes = (MultiPartParser, FormParser)
-    filter_backends = [filters.SearchFilter]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     pagination_class = CustomPageNumberPagination  
     search_fields = ['representi__full_name', 'representor__full_name', 'doc_number','verification_code']
     filterset_class = RepresentationFilter
@@ -25,10 +26,11 @@ class CheckViewSet(ModelViewSet):
     queryset = Check.objects.all()
     serializer_class = CheckSerializer
     parser_classes = (MultiPartParser, FormParser)
-    filter_backends = [filters.SearchFilter]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     pagination_class = CustomPageNumberPagination
-    search_fields = ['check_code']
-     
+    search_fields = ['check_code','is_paid']
+    filterset_class = ChecksFilter
+    
 class ImportRepresentationsView(APIView):
     """
     DRF view to handle Excel file uploads with Persian headings.

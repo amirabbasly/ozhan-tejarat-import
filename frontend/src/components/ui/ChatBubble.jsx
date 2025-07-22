@@ -3,7 +3,7 @@ import { FaRobot, FaUserCircle } from "react-icons/fa";
 
 const ChatBubble = ({ sender, text }) => (
   <div
-    className={`max-w-[70%] my-3 px-4 py-3 rounded-2xl break-words flex items-start space-x-reverse space-x-3 ${
+    className={`max-w-[70%] my-3 px-4 py-3 rounded-2xl  break-words flex items-start space-x-reverse space-x-3 ${
       sender === "user"
         ? "ml-auto bg-blue-600 text-white"
         : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200"

@@ -67,6 +67,8 @@ import ExpensesList from "../pages/CottageExpenses";
 import ExpenseForm from "../pages/ExpenseForm";
 import UserProfile from "../components/UserProfile";
 import InstallButton from "../components/InstallButton";
+import Settings from "../components/Settings";
+import UserGuide from "../components/UserGuide";
 
 function AppRoutes() {
   return (
@@ -95,8 +97,10 @@ function AppContent() {
         <Routes>
           {/* Public Route */}
           <Route path="/login" element={<Login />} />
+          <Route path="/user/settings" element={<Settings />} />
           <Route path="/forbidden" />
           <Route path="/user/profile" element={<UserProfile />} />
+          <Route path="/user/guide" element={<UserGuide />} />
           {/* Protected Routes */}
           <Route
             path="/"

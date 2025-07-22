@@ -1,0 +1,22 @@
+{
+    "settings": {
+      "title": "Kian Commerce Settings",
+      "theme": "Color Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "font": "Font",
+      "fonts": {
+        "vazir": "Vazir",
+        "iransans": "IRANSans",
+        "shabnam": "Shabnam"
+      },
+      "language": "Language",
+      "languages": {
+        "fa": "Persian",
+        "en": "English"
+      },
+      "save": "Save Settings"
+    }
+  }
+
+  

@@ -9,14 +9,16 @@
 // import { Link, useNavigate } from "react-router-dom";
 // import { formatNumber } from "../utils/numberFormat";
 // import "../style/CottageList.css";
-// import PaginationControls from "./PaginationControls"; // <-- Import your component
+// import PaginationControls from "./PaginationControls";
 // import Select from "react-select";
 // import DatePicker from "react-multi-date-picker";
 // import persian from "react-date-object/calendars/persian";
 // import persian_fa from "react-date-object/locales/persian_fa";
 // import moment from "moment-jalaali";
 // import { fetchCostumers } from "../actions/authActions";
-// import axiosInstance from "../utils/axiosInstance"; // ← make sure this path is correct
+// import axiosInstance from "../utils/axiosInstance";
+// import { toast } from "react-toastify"; // 🆕 Added for notifications
+// import "react-toastify/dist/ReactToastify.css"; // 🆕 Added for toast styling
 
 // const CottageList = () => {
 //   const navigate = useNavigate();
@@ -38,24 +40,27 @@
 //       navigate("/");
 //     }
 //   }, [auth.isAuthenticated, navigate]);
+
 //   // -------------------- BOOLEAN FILTERS --------------------
-//   const [rafeeTaahod, setRafeeTaahod] = useState(""); // "", "true", "false"
+//   const [rafeeTaahod, setRafeeTaahod] = useState("");
 //   const [docsRecieved, setDocsRecieved] = useState("");
 //   const [rewatchStatus, setRewatchStatus] = useState("");
 
 //   const dispatch = useDispatch();
 //   const [searchText, setSearchText] = useState("");
 //   const [query, setQuery] = useState("");
+//   const [automationLoading, setAutomationLoading] = useState(false); // 🆕 Added for automation loading state
 
 //   const handleSearchButtonClick = () => {
 //     setQuery(searchText);
-//     setCurrentPage(1); // optional: reset to page 1 when searching
+//     setCurrentPage(1);
 //   };
+
 //   useEffect(() => {
 //     const handler = setTimeout(() => {
 //       setQuery(searchText);
 //       setCurrentPage(1);
-//     }, 300); // ← 300ms “wait time”
+//     }, 300);
 
 //     return () => clearTimeout(handler);
 //   }, [searchText]);
@@ -74,15 +79,14 @@
 
 //   // -------------------- PAGINATION STATE --------------------
 //   const [currentPage, setCurrentPage] = useState(1);
-//   const [pageSize, setPageSize] = useState(50); // or 50, or your default
-//   const totalPages = Math.ceil(count / pageSize); // For the dropdown in PaginationControls
+//   const [pageSize, setPageSize] = useState(50);
+//   const totalPages = Math.ceil(count / pageSize);
 //   const [cottageDate, setCottageDate] = useState("");
 //   const [cottageDateBefore, setCottageDateBefore] = useState("");
 //   const [prfOrderNo, setPrfOrderNo] = useState("");
 
-//   // Optionally, keep the helper function or remove it
 //   const convertToWesternDigits = (str) => {
-//     if (typeof str !== "string") return str; // Safeguard
+//     if (typeof str !== "string") return str;
 //     const easternDigits = ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"];
 //     const westernDigits = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
 //     return str.replace(
@@ -91,8 +95,6 @@
 //     );
 //   };
 
-//   // Date change handler to ensure cottageDate is a string with English numerals
-//   // Handler for 'cottageDate'
 //   const handleCottageDateChange = (date) => {
 //     if (date && date.format) {
 //       setCottageDate(date.format("YYYY-MM-DD"));
@@ -100,6 +102,15 @@
 //       setCottageDate("");
 //     }
 //   };
+
+//   const handleCottageDateBeforeChange = (date) => {
+//     if (date && date.format) {
+//       setCottageDateBefore(date.format("YYYY-MM-DD"));
+//     } else {
+//       setCottageDateBefore("");
+//     }
+//   };
+
 //   const handleExport = async () => {
 //     if (!selectedCottages.length) {
 //       alert("لطفاً حداقل یک کوتاژ را انتخاب کنید.");
@@ -114,14 +125,12 @@
 //         { responseType: "blob" }
 //       );
 
-//       // create download link for the returned Excel file
 //       const blob = new Blob([res.data], {
 //         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 //       });
 //       const url = window.URL.createObjectURL(blob);
 //       const link = document.createElement("a");
 //       link.href = url;
-//       // use same naming convention as your view
 //       const filename = `cottages_${new Date().toISOString().slice(0, 10)}.xlsx`;
 //       link.setAttribute("download", filename);
 //       document.body.appendChild(link);
@@ -134,27 +143,39 @@
 //     }
 //   };
 
-//   // Handler for 'cottageDateBefore'
-//   const handleCottageDateBeforeChange = (date) => {
-//     if (date && date.format) {
-//       setCottageDateBefore(date.format("YYYY-MM-DD"));
-//     } else {
-//       setCottageDateBefore("");
+//   // 🆕 Start EPL automation for selected cottages
+//   const handleStartAutomation = async () => {
+//     if (!selectedCottages.length) {
+//       toast.warn("لطفاً حداقل یک کوتاژ را انتخاب کنید.");
+//       return;
+//     }
+
+//     const cottageNumbers = selectedCottages.map((c) => c.cottage_number);
+
+//     try {
+//       setAutomationLoading(true);
+//       const res = await axiosInstance.post("/start-epl-automation/", {
+//         cottage_numbers: cottageNumbers,
+//       });
+//       toast.success(res.data.message || "اتوماسیون آغاز شد.");
+//     } catch (err) {
+//       console.error("Automation error:", err);
+//       toast.error(
+//         err.response?.data?.error || "خطا در راه‌اندازی اتوماسیون EPL."
+//       );
+//     } finally {
+//       setAutomationLoading(false);
 //     }
 //   };
 
-//   // On mount or on `currentPage` change, fetch that page
 //   useEffect(() => {
 //     dispatch(fetchCostumers());
-
 //     dispatch(fetchOrders());
 //     const filters = {
 //       search: query,
 //       cottageDate: convertToWesternDigits(cottageDate),
 //       cottageDateBefore: convertToWesternDigits(cottageDateBefore),
 //       prfOrderNo,
-
-//       // فقط اگر کاربر «همه» را برنداشته باشد بفرست
 //       ...(rafeeTaahod && { rafee_taahod: rafeeTaahod }),
 //       ...(docsRecieved && { docs_recieved: docsRecieved }),
 //       ...(rewatchStatus && { rewatch: rewatchStatus }),
@@ -177,13 +198,9 @@
 //     rewatchStatus,
 //   ]);
 
-//   // If currency updates are done, refetch
-
-//   // We define booleans for enabling next/prev based on the presence of `next`/`previous`
 //   const hasNext = !!next;
 //   const hasPrevious = !!previous;
 
-//   // If you want the user to pick a page from a dropdown:
 //   const handlePageChange = (e) => {
 //     setCurrentPage(Number(e.target.value));
 //   };
@@ -196,7 +213,6 @@
 //     if (hasPrevious) setCurrentPage((prev) => prev - 1);
 //   };
 
-//   // If user changes page size => setPageSize, reset to page 1
 //   const handlePageSizeChange = (e) => {
 //     setPageSize(Number(e.target.value));
 //     setCurrentPage(1);
@@ -248,6 +264,7 @@
 //         alert("خطا در به‌روزرسانی نرخ ارز برای برخی از کوتاژها.");
 //       });
 //   };
+
 //   const booleanOptions = [
 //     { value: "", label: "همه" },
 //     { value: "True", label: "بله" },
@@ -289,10 +306,6 @@
 //             value={searchText}
 //             onChange={(e) => setSearchText(e.target.value)}
 //           />
-//           {/* search button
-//           <button className="btn-grad" onClick={handleSearchButtonClick}>
-//             Search
-//           </button>*/}
 //         </div>
 
 //         <div className="filter-container">
@@ -304,10 +317,10 @@
 //               value={
 //                 orderOptions.find((option) => option.value === prfOrderNo) ||
 //                 null
-//               } // Match the object
+//               }
 //               onChange={(selectedOption) =>
 //                 setPrfOrderNo(selectedOption ? selectedOption.value : "")
-//               } // Update state correctly
+//               }
 //               options={orderOptions}
 //               isLoading={loading}
 //               isClearable
@@ -364,8 +377,6 @@
 //               placeholder="همه"
 //             />
 //           </div>
-
-//           {/* اخذ مدارک */}
 //           <div className="filter-row">
 //             <label>اخذ مدارک:</label>
 //             <Select
@@ -378,8 +389,6 @@
 //               placeholder="همه"
 //             />
 //           </div>
-
-//           {/* بازبینی */}
 //           <div className="filter-row">
 //             <label>بازبینی:</label>
 //             <Select
@@ -395,37 +404,6 @@
 //           </div>
 //         </div>
 
-//         {/* CURRENCY PRICE */}
-//         {/*
-//         <div className="currency-price-section">
-//           <input
-//             className="c-price-input"
-//             type="number"
-//             id="currencyPrice"
-//             value={currencyPrice}
-//             onChange={(e) => setCurrencyPrice(e.target.value)}
-//             placeholder="نرخ ارز را وارد کنید"
-//           />
-//         </div>
-
-//         <div className="filter-row">
-//           <label>سود بازگانی:</label>
-//           <select value={cottageStatus} onChange={  (e) => handleFilterChange(e, setCottageStatus)}>
-//             {["", "0", "1", "4", "6", "9", "11", "16", "18", "28", "51"].map((val) => (
-//               <option key={val} value={val}>
-//                 {val === "" ? "همه" : val}
-//               </option>
-//             ))}
-//           </select>
-//         </div>
-
-//         <button
-//           className="primary-button"
-//           onClick={handleApplyCurrencyPrice}
-//           disabled={!selectedCottages.length || !currencyPrice}
-//         >
-//           ثبت نرخ ارز برای کوتاژهای انتخاب شده
-//         </button>*/}
 //         <button
 //           onClick={handleDeleteSelectedCottages}
 //           disabled={!selectedCottages.length}
@@ -433,7 +411,6 @@
 //         >
 //           حذف کوتاژهای انتخاب شده
 //         </button>
-//         {/* 2️⃣ Your new Export button */}
 //         <button
 //           onClick={handleExport}
 //           disabled={!selectedCottages.length}
@@ -442,19 +419,25 @@
 //         >
 //           صادر به اکسل
 //         </button>
+//         {/* 🆕 Start EPL Automation Button */}
+//         <button
+//           onClick={handleStartAutomation}
+//           disabled={!selectedCottages.length || automationLoading}
+//           className="export-button"
+//           style={{ marginLeft: "1rem" }}
+//         >
+//           {automationLoading ? "در حال اجرا..." : "شروع اتوماسیون EPL"}
+//         </button>
 
-//         {/* LOADING/ERROR */}
 //         {loading && <p className="loading">در حال بارگذاری...</p>}
 //         {error && <p className="error">{error}</p>}
 
-//         {/* DISPLAY TABLE & PAGINATION */}
 //         {!loading &&
 //           !error &&
 //           (cottages.length === 0 ? (
 //             <p className="no-data">هیچ اظهارنامه ای یافت نشد.</p>
 //           ) : (
 //             <>
-//               {/* -- TOP PAGINATION -- */}
 //               <PaginationControls
 //                 currentPage={currentPage}
 //                 totalPages={totalPages}
@@ -489,17 +472,14 @@
 //                     <th>هزینه ها</th>
 //                     <th>نرخ ارز</th>
 //                     <th>ارزش افزوده</th>
-
 //                     <th>رفع تعهد</th>
 //                     <th>اخذ مدارک</th>
-//                     <th>بازبینی </th>
+//                     <th>بازبینی</th>
 //                     <th></th>
 //                   </tr>
 //                 </thead>
 //                 <tbody>
 //                   {cottages.map((cottage, index) => {
-//                     // Adjust the property names as needed.
-//                     // For example, if costumerList items have an "id" property that corresponds to cottage.cottage_customer:
 //                     const customer = costumerList.find(
 //                       (cust) => cust.id === cottage.cottage_customer
 //                     );
@@ -527,8 +507,7 @@
 //                             {cottage.proforma.prf_order_no}
 //                           </Link>
 //                         </td>
-//                         <td>{customer ? customer.full_name : "—"}</td>{" "}
-//                         {/* Display customer name */}
+//                         <td>{customer ? customer.full_name : "—"}</td>
 //                         <td>{formatNumber(cottage.total_value)}</td>
 //                         <td>{formatNumber(cottage.customs_value)}</td>
 //                         <td>{formatNumber(cottage.total_expenses)}</td>
@@ -569,7 +548,6 @@
 //                 </tbody>
 //               </table>
 
-//               {/* -- BOTTOM PAGINATION -- */}
 //               <PaginationControls
 //                 currentPage={currentPage}
 //                 totalPages={totalPages}
@@ -1076,9 +1054,29 @@ const CottageList = () => {
                     const customer = costumerList.find(
                       (cust) => cust.id === cottage.cottage_customer
                     );
+                    // Check if customs_value and customs_value_ep1 are not equal
+                    const isValueMismatch =
+                      cottage?.customs_value !== cottage?.customs_value_epl;
+                    console.log(
+                      cottage.cottage_number,
+                      cottage.customs_value,
+                      cottage.customs_value_epl,
+                      "mismatch?",
+                      isValueMismatch
+                    );
 
                     return (
-                      <tr key={cottage.id}>
+                      <tr
+                        key={cottage.id}
+                        className={
+                          cottage?.customs_value != null &&
+                          cottage?.customs_value_epl != null &&
+                          Number(cottage.customs_value) !==
+                            Number(cottage.customs_value_epl)
+                            ? "!bg-sky-300 !text-white"
+                            : ""
+                        }
+                      >
                         <td>
                           <input
                             type="checkbox"

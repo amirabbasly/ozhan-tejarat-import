@@ -1105,6 +1105,15 @@ const Navbar = () => {
                     <span className="text-sm leading-none">تنظیمات</span>
                   </Link>
                 </li>
+                <li>
+                  <Link
+                    to="/user/guide"
+                    className="block flex flex-row-reverse items-center gap-3 px-3 py-2.5 rounded-md hover:bg-gray-200 transition-colors cursor-pointer"
+                  >
+                    <AiFillSetting size={20} className="flex-shrink-0" />
+                    <span className="text-sm leading-none">نرم افزار</span>
+                  </Link>
+                </li>
               </ul>
             )}
           </li>

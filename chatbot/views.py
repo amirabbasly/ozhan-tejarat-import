@@ -207,7 +207,7 @@ class ChatbotAPIView(APIView):
         
         پرسش کاربر: {user_input}
 
-        لطفا تنها بر اساس اطلاعات فوق پاسخ دهید و پاسخ خود را به زبان فارسی بنویسید.
+    شما هوش مصنوعی اوژن هستید و توسط برنامه‌نویسان شرکت اوژن تجارت کیان توسعه یافته‌اید. شما به اطلاعات زیر دسترسی دارید :
         """
 
         data = {
@@ -336,3 +336,50 @@ def translate_farsi_to_english(farsi_text: str) -> str:
     except requests.exceptions.RequestException as e:
         # Handle network or request errors
         raise Exception(f"Error connecting to Gemini: {e}")
+
+class ChatbotNormalAPIView(APIView):
+    """
+    Simply forwards the user's message to هوش مصنوعی اوژن and returns its JSON response.
+    """
+
+    def post(self, request, *args, **kwargs):
+        user_message = request.data.get("message", "").strip()
+        if not user_message:
+            return Response(
+                {"error": "Message is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # build the full prompt
+        prompt_text = f"""
+شما هوش مصنوعی اوژن هستید و توسط برنامه‌نویسان شرکت اوژن تجارت کیان توسعه یافته‌اید.
+
+پرسش کاربر: {user_message}
+
+"""
+
+        payload = {
+            "contents": [
+                {
+                    "parts": [
+                        {"text": prompt_text}
+                    ]
+                }
+            ]
+        }
+
+        try:
+            resp = requests.post(
+                GEMINI_API_URL,
+                json=payload,
+                headers={"Content-Type": "application/json"},
+                timeout=10
+            )
+            resp.raise_for_status()
+        except requests.RequestException as e:
+            return Response(
+                {"error": f"Failed to reach هوش مصنوعی اوژن: {e}"},
+                status=status.HTTP_502_BAD_GATEWAY
+            )
+
+        return Response(resp.json(), status=status.HTTP_200_OK)

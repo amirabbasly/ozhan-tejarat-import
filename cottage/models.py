@@ -14,6 +14,7 @@ class Cottage(models.Model):
     refrence_number = models.CharField(null=True, blank=True)
     total_value = models.DecimalField(max_digits=20, decimal_places=2)
     customs_value = models.DecimalField(max_digits=28, decimal_places=2, null=True, blank=True)
+    customs_value_epl = models.DecimalField(max_digits=28, decimal_places=2, null=True, blank=True)
     quantity = models.PositiveIntegerField()
     currency_price = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
     cottage_customer = models.ForeignKey(Costumer, on_delete=models.SET_NULL, null=True, blank=True)

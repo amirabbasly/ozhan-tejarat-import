@@ -55,3 +55,10 @@ class Costumer(models.Model):
     customer_birthday = models.CharField(max_length=100,null=True, blank=True)
     national_code = models.CharField(max_length=100, null=True, blank=True)
     customer_address = models.TextField(null=True, blank=True)
+
+class Company(models.Model):
+    full_name = models.CharField(max_length=100, unique=True)
+    phone_number = models.CharField(max_length=100,null=True, blank=True)
+    national_code = models.CharField(max_length=100,null=True, blank=True)
+    company_address = models.TextField(null=True, blank=True)
+    logo = models.ImageField(upload_to='company-logo/', null=True, blank=True)

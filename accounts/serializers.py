@@ -1,7 +1,7 @@
 # accounts/serializers.py
 
 from rest_framework import serializers
-from .models import CustomUser, Costumer
+from .models import CustomUser, Costumer, Company
 from django.contrib.auth import authenticate
 
 class UserSerializer(serializers.ModelSerializer):
@@ -56,3 +56,8 @@ class ChangePasswordSerializer(serializers.Serializer):
 
     def validate_new_password(self, value):
         return value
+
+class CompanySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Company
+        fields = '__all__'

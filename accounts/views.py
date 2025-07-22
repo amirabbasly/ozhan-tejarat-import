@@ -4,15 +4,15 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework import generics, permissions
 from rest_framework.response import Response
 from rest_framework import status
-from .models import CustomUser, Costumer
-from .serializers import UserSerializer, LoginSerializer, CostumerSerializer, CostumuserSerializer, UpdateCurrentUserSerializer, ChangePasswordSerializer
+from .models import CustomUser, Costumer, Company
+from .serializers import UserSerializer, LoginSerializer, CostumerSerializer, CostumuserSerializer, UpdateCurrentUserSerializer, ChangePasswordSerializer, CompanySerializer
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.parsers import MultiPartParser, FormParser
-
+from rest_framework import viewsets
 class RegisterView(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
     permission_classes = (permissions.AllowAny,)
@@ -119,3 +119,8 @@ class ChangePasswordView(APIView):
             return Response({"detail": "Password changed successfully."}, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class CompanyViewSet(viewsets.ModelViewSet):
+    queryset = Company.objects.all()
+    serializer_class = CompanySerializer
+    search_fields = ["full_name" ]  # fields you want to search

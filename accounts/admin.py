@@ -2,7 +2,7 @@
 
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import CustomUser, Costumer
+from .models import CustomUser, Costumer, Company
 
 class CustomUserAdmin(UserAdmin):
     model = CustomUser
@@ -28,4 +28,8 @@ admin.site.register(CustomUser, CustomUserAdmin)
 @admin.register(Costumer)
 class CostumerAdmin(admin.ModelAdmin):
     list_display = ('full_name', 'national_code')
-    
+@admin.register(Company)    
+class CompanyAdmin(admin.ModelAdmin):
+    model = Company
+    list_display = ('full_name',"national_code")
+   

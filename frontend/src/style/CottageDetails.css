@@ -1,0 +1,171 @@
+/* src/components/CottageDetails.css */
+
+.cottage-details-container {
+    direction: rtl;
+    max-width:1400px;
+    margin: 40px auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
+}
+.goods-table-container{
+    overflow-x: scroll;
+}
+
+.header {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* Input Groups */
+.input-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+}
+
+.input-group label {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 5px;
+}
+.select-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+}
+
+.select-group label {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 5px;
+}
+
+.editable-input,
+.editable-datepicker {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+.editable-select {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+.input-group input{
+    padding:8px  10px;
+    width: 97%;
+}
+
+
+.editable-input:focus,
+.editable-datepicker:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
+    outline: none;
+}
+
+.readonly-text {
+    font-size: 1rem;
+    color: #555;
+    padding: 8px 10px;
+    background-color: #f7f7f7;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    width: 97%;
+}
+
+
+
+.cottage-info {
+    margin-bottom: 20px;
+    font-size: 1rem;
+    color: #555;
+}
+
+.cottage-info p {
+    margin: 8px 0;
+}
+
+.goods-header {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.goods-table {
+    width: 100%;
+    direction: rtl;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.goods-table thead {
+    background-color: #333;
+    color: #fff;
+}
+
+.goods-table th,
+.goods-table td {
+    border-top: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+
+.goods-table tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+/* Buttons */
+.primary-button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    font-size: 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 10px;
+    transition: background-color 0.3s;
+    margin-top: 20px;
+    
+}
+
+.primary-button:hover {
+    background-color: #0056b3;
+}
+
+.delete-button {
+    margin-top: 20px;
+    margin-right: 40px;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    font-size: 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.delete-button:hover {
+    background-color: #c82333;
+}
+
+/* Loading, Error, and No Data */
+.loading,
+.error,
+.no-details {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #d9534f;
+    margin-top: 20px;
+}

@@ -49,7 +49,7 @@ axiosInstance.interceptors.response.use(
       try {
         // Refresh the access token
         const refreshResponse = await axios.post(
-          "http://192.168.8.23/api/accounts/token/refresh/",
+          "http://192.168.8.36:8000/api/accounts/token/refresh/",
           {
             refresh: localStorage.getItem("refresh_token"),
           }

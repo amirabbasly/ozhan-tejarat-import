@@ -32,7 +32,7 @@ const Chatbot = () => {
     parties: false,
     tanzimat: false,
   });
-  const versions = ["Ozhan Ai", "ChatGPT-Plus", "GPT-4O", "GPT-4"];
+  const versions = ["Ozhan Ai", "Ozhan-O1", "Ozhan-4O", "Ozhan-Co"];
   const role = "admin";
 
   const handleKeyPress = (e) => {

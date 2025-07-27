@@ -61,7 +61,7 @@ const RepresentationList = () => {
   const handleEditClick = (id) => navigate(`/representations/${id}/edit`);
 
   return (
-    <div className="representation-list">
+    <div className="representation-list mt-24">
       <Link to={"/add-representation"}>
         <button>وکالتنامه جدید</button>
       </Link>

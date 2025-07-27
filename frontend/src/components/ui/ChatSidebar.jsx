@@ -34,9 +34,9 @@ const ChatSidebar = ({
 
   const environments = [
     { icon: FaCode, label: "Ozhan Ai" },
-    { icon: FaLightbulb, label: "Lama-Pro" },
-    { icon: FaBrain, label: "GPT-4O" },
-    { icon: FaPaintBrush, label: "o3" },
+    { icon: FaLightbulb, label: "Ozhan-O1" },
+    { icon: FaBrain, label: "Ozhan-4O" },
+    { icon: FaPaintBrush, label: "Ozhan-Co" },
     { icon: FaMagic, label: "Sora" },
     { icon: FaGithub, label: "Codex" },
   ];

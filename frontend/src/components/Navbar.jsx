@@ -598,6 +598,7 @@ import "../style/Navbar.css";
 import { logout } from "../actions/authActions";
 import { useDispatch, useSelector } from "react-redux";
 import NotificationsDropdown from "./NotificationsDropdown"; // Adjust path as needed
+import { RiInformation2Fill } from "react-icons/ri";
 import {
   FaBell,
   FaCog,
@@ -1110,8 +1111,8 @@ const Navbar = () => {
                     to="/user/guide"
                     className="block flex flex-row-reverse items-center gap-3 px-3 py-2.5 rounded-md hover:bg-gray-200 transition-colors cursor-pointer"
                   >
-                    <AiFillSetting size={20} className="flex-shrink-0" />
-                    <span className="text-sm leading-none">نرم افزار</span>
+                    <RiInformation2Fill size={20} className="flex-shrink-0" />
+                    <span className="text-sm leading-none">پشتیبانی </span>
                   </Link>
                 </li>
               </ul>

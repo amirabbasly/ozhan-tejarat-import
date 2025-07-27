@@ -4,8 +4,15 @@ import ChatBubble from "./ChatBubble";
 
 const ChatArea = ({ messages, loading }) => {
   return (
-    <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-gray-50 dark:bg-gray-900 mt-16">
-      <div className="max-w-3xl mx-auto">
+    <div className="flex-1 overflow-y-auto p-4 sm:p-6 dark:bg-gray-900 mt-16">
+      <div
+        className={`
+  w-full max-w-3xl mx-auto
+  absolute right-3
+  md:static md:right-auto
+  h-[390px] md:h-[500px] lg:h-[600px] overflow-y-auto
+`}
+      >
         {messages.map((m, i) => (
           <ChatBubble key={i} sender={m.sender} text={m.text} />
         ))}

@@ -4,10 +4,12 @@ import CompanyInitializer from "./components/CompanyInitializer";
 
 const App = () => {
   return (
-    <CompanyProvider>
-      <CompanyInitializer />
-      <AppRoutes />
-    </CompanyProvider>
+    <div className="font-vazir">
+      <CompanyProvider>
+        <CompanyInitializer />
+        <AppRoutes />
+      </CompanyProvider>
+    </div>
   );
 };
 

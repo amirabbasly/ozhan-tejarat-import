@@ -985,7 +985,7 @@ const CottageList = () => {
         <button
           onClick={handleExport}
           disabled={!selectedCottages.length}
-          className="export-button"
+          className="text-white bg-sky-500 cursor-pointer hover:bg-sky-600 transition duration-300 shadow-md hover:shadow-lg px-6 py-2"
           style={{ marginLeft: "1rem" }}
         >
           صادر به اکسل
@@ -994,7 +994,7 @@ const CottageList = () => {
         <button
           onClick={handleStartAutomation}
           disabled={!selectedCottages.length || automationLoading}
-          className="export-button"
+          className="text-white bg-sky-500 cursor-pointer hover:bg-sky-600 transition duration-300 shadow-md hover:shadow-lg px-6 py-2"
           style={{ marginLeft: "1rem" }}
         >
           {automationLoading ? "در حال اجرا..." : "شروع اتوماسیون EPL"}

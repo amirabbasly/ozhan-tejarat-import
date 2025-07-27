@@ -69,6 +69,7 @@ import UserProfile from "../components/UserProfile";
 import InstallButton from "../components/InstallButton";
 import Settings from "../components/Settings";
 import UserGuide from "../components/UserGuide";
+import NotFound from "../components/NotFound";
 
 function AppRoutes() {
   return (
@@ -549,6 +550,7 @@ function AppContent() {
           />
 
           {/* Add more protected routes as needed */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
     </>

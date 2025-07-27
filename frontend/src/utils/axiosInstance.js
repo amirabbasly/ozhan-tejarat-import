@@ -1,6 +1,6 @@
 import axios from "axios";
 const baseURL =
-  process.env.REACT_APP_API_BASE_URL || "http://192.168.8.36:8000/api/"; // از .env می‌خوانیم
+  process.env.REACT_APP_API_BASE_URL || "http://192.168.8.23/api/"; // از .env می‌خوانیم
 
 const axiosInstance = axios.create({
   baseURL,
@@ -49,7 +49,7 @@ axiosInstance.interceptors.response.use(
       try {
         // Refresh the access token
         const refreshResponse = await axios.post(
-          "http://192.168.8.36:8000/api/accounts/token/refresh/",
+          "http://192.168.8.23/api/accounts/token/refresh/",
           {
             refresh: localStorage.getItem("refresh_token"),
           }

@@ -126,6 +126,7 @@ const ExpensesList = () => {
                       <td>{index + 1 + (currentPage - 1) * pageSize}</td>
                       <td>
                         <Link
+                          className="text-sky-700 border-b cursor-pointer border-sky-700"
                           to={`/cottages/${exp.cottage_detail.cottage_number}`}
                         >
                           {exp.cottage_detail.cottage_number}

@@ -101,7 +101,7 @@
 //       });
 //   };
 //   console.log();
-  
+
 //   return (
 //     <div className="cottage-cont">
 //       <div className="cottage-list-container">
@@ -245,8 +245,7 @@
 
 // export default RegedOrderList;
 
-// added pagination 
-
+// added pagination
 
 // import React, { useEffect, useState } from "react";
 // import { useSelector, useDispatch } from "react-redux";
@@ -336,69 +335,69 @@
 //     }
 //   };
 
-  // // Pagination handlers
-  // const totalPages = Math.ceil(count / pageSize);
-  // const hasNext = !!next;
-  // const hasPrevious = !!previous;
+// // Pagination handlers
+// const totalPages = Math.ceil(count / pageSize);
+// const hasNext = !!next;
+// const hasPrevious = !!previous;
 
-  // const handlePageChange = (e) => {
-  //   setCurrentPage(Number(e.target.value));
-  // };
+// const handlePageChange = (e) => {
+//   setCurrentPage(Number(e.target.value));
+// };
 
-  // const handleNextPage = () => {
-  //   if (hasNext) setCurrentPage((prev) => prev + 1);
-  // };
+// const handleNextPage = () => {
+//   if (hasNext) setCurrentPage((prev) => prev + 1);
+// };
 
-  // const handlePreviousPage = () => {
-  //   if (hasPrevious) setCurrentPage((prev) => prev - 1);
-  // };
+// const handlePreviousPage = () => {
+//   if (hasPrevious) setCurrentPage((prev) => prev - 1);
+// };
 
-  // const handlePageSizeChange = (e) => {
-  //   setPageSize(Number(e.target.value));
-  //   setCurrentPage(1);
-  // };
+// const handlePageSizeChange = (e) => {
+//   setPageSize(Number(e.target.value));
+//   setCurrentPage(1);
+// };
 
-  // // Selection handlers
-  // const handleSelectOrder = (event, order) => {
-  //   const { checked } = event.target;
-  //   let updatedSelections;
-  //   if (checked) {
-  //     updatedSelections = [...selectedOrders, order.prfVCodeInt];
-  //   } else {
-  //     updatedSelections = selectedOrders.filter((id) => id !== order.prfVCodeInt);
-  //   }
-  //   setSelectedOrders(updatedSelections);
-  // };
+// // Selection handlers
+// const handleSelectOrder = (event, order) => {
+//   const { checked } = event.target;
+//   let updatedSelections;
+//   if (checked) {
+//     updatedSelections = [...selectedOrders, order.prfVCodeInt];
+//   } else {
+//     updatedSelections = selectedOrders.filter((id) => id !== order.prfVCodeInt);
+//   }
+//   setSelectedOrders(updatedSelections);
+// };
 
-  // const handleSelectAll = (event) => {
-  //   const { checked } = event.target;
-  //   if (checked) {
-  //     setSelectedOrders(orders.map((order) => order.prfVCodeInt));
-  //   } else {
-  //     setSelectedOrders([]);
-  //   }
-  // };
+// const handleSelectAll = (event) => {
+//   const { checked } = event.target;
+//   if (checked) {
+//     setSelectedOrders(orders.map((order) => order.prfVCodeInt));
+//   } else {
+//     setSelectedOrders([]);
+//   }
+// };
 
-  // // Delete handler
-  // const handleDeleteSelectedOrders = () => {
-  //   if (!selectedOrders.length) {
-  //     alert("لطفاً حداقل یک سفارش را انتخاب کنید.");
-  //     return;
-  //   }
-  //   if (!window.confirm("آیا از حذف سفارش‌های انتخاب شده اطمینان دارید؟")) {
-  //     return;
-  //   }
-  //   dispatch(deletePerformas(selectedOrders))
-  //     .then(() => {
-  //       alert("سفارش‌های انتخاب شده با موفقیت حذف شدند.");
-  //       setSelectedOrders([]);
-  //       dispatch(fetchOrders(currentPage, pageSize, { search: query, status: statusFilter, startDate, endDate }));
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error deleting orders:", error);
-  //       alert("خطا در حذف سفارش‌ها.");
-  //     });
-  // };
+// // Delete handler
+// const handleDeleteSelectedOrders = () => {
+//   if (!selectedOrders.length) {
+//     alert("لطفاً حداقل یک سفارش را انتخاب کنید.");
+//     return;
+//   }
+//   if (!window.confirm("آیا از حذف سفارش‌های انتخاب شده اطمینان دارید؟")) {
+//     return;
+//   }
+//   dispatch(deletePerformas(selectedOrders))
+//     .then(() => {
+//       alert("سفارش‌های انتخاب شده با موفقیت حذف شدند.");
+//       setSelectedOrders([]);
+//       dispatch(fetchOrders(currentPage, pageSize, { search: query, status: statusFilter, startDate, endDate }));
+//     })
+//     .catch((error) => {
+//       console.error("Error deleting orders:", error);
+//       alert("خطا در حذف سفارش‌ها.");
+//     });
+// };
 
 //   return (
 //     <div className="cottage-cont">
@@ -570,8 +569,6 @@
 
 // export default RegedOrderList;
 
-
-
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchOrders, deletePerformas } from "../actions/performaActions";
@@ -593,7 +590,9 @@ const RegedOrderList = () => {
   const dispatch = useDispatch();
 
   // Access orders state from Redux store
-  const { orders, loading, error, count, next, previous } = useSelector((state) => state.order);
+  const { orders, loading, error, count, next, previous } = useSelector(
+    (state) => state.order
+  );
   const auth = useSelector((state) => state.auth);
 
   // Authentication check
@@ -652,7 +651,16 @@ const RegedOrderList = () => {
       currency: currency, // Add currency to filters
     };
     dispatch(fetchOrders(currentPage, pageSize, filters));
-  }, [dispatch, currentPage, pageSize, query, statusFilter, startDate, endDate, currency]);
+  }, [
+    dispatch,
+    currentPage,
+    pageSize,
+    query,
+    statusFilter,
+    startDate,
+    endDate,
+    currency,
+  ]);
 
   // Date change handlers
   const handleStartDateChange = (date) => {
@@ -700,7 +708,9 @@ const RegedOrderList = () => {
     if (checked) {
       updatedSelections = [...selectedOrders, order.prfVCodeInt];
     } else {
-      updatedSelections = selectedOrders.filter((id) => id !== order.prfVCodeInt);
+      updatedSelections = selectedOrders.filter(
+        (id) => id !== order.prfVCodeInt
+      );
     }
     setSelectedOrders(updatedSelections);
   };
@@ -727,14 +737,20 @@ const RegedOrderList = () => {
       .then(() => {
         alert("سفارش‌های انتخاب شده با موفقیت حذف شدند.");
         setSelectedOrders([]);
-        dispatch(fetchOrders(currentPage, pageSize, { search: query, status: statusFilter, startDate, endDate }));
+        dispatch(
+          fetchOrders(currentPage, pageSize, {
+            search: query,
+            status: statusFilter,
+            startDate,
+            endDate,
+          })
+        );
       })
       .catch((error) => {
         console.error("Error deleting orders:", error);
         alert("خطا در حذف سفارش‌ها.");
       });
   };
-
 
   return (
     <div className="cottage-cont">
@@ -758,16 +774,26 @@ const RegedOrderList = () => {
             <label>وضعیت:</label>
             <Select
               className="filter-react-select"
-              value={statusOptions.find((opt) => opt.value === statusFilter) || null}
+              value={
+                statusOptions.find((opt) => opt.value === statusFilter) || null
+              }
               onChange={(opt) => setStatusFilter(opt ? opt.value : "")}
               options={statusOptions}
               isLoading={loading}
               isClearable
-              placeholder={loading ? "در حال بارگذاری..." : error ? "خطا در بارگذاری" : "همه وضعیت‌ها"}
-              noOptionsMessage={() => (loading || error ? "در حال بارگذاری..." : "وضعیتی موجود نیست")}
+              placeholder={
+                loading
+                  ? "در حال بارگذاری..."
+                  : error
+                  ? "خطا در بارگذاری"
+                  : "همه وضعیت‌ها"
+              }
+              noOptionsMessage={() =>
+                loading || error ? "در حال بارگذاری..." : "وضعیتی موجود نیست"
+              }
             />
           </div>
-          
+
           {/* New Currency Filter */}
           <div className="filter-row">
             <label>ارز:</label>
@@ -779,7 +805,7 @@ const RegedOrderList = () => {
               placeholder="انتخاب ارز"
             />
           </div>
-          
+
           <div className="filter-row">
             <label>تاریخ شروع:</label>
             <DatePicker
@@ -825,7 +851,9 @@ const RegedOrderList = () => {
         {!loading && !error && (
           <>
             {orders.length === 0 ? (
-              <p className="no-data">هیچ سفارشی با این جستجو و فیلترها یافت نشد.</p>
+              <p className="no-data">
+                هیچ سفارشی با این جستجو و فیلترها یافت نشد.
+              </p>
             ) : (
               <>
                 <PaginationControls
@@ -847,7 +875,10 @@ const RegedOrderList = () => {
                         <input
                           type="checkbox"
                           onChange={handleSelectAll}
-                          checked={selectedOrders.length === orders.length && orders.length > 0}
+                          checked={
+                            selectedOrders.length === orders.length &&
+                            orders.length > 0
+                          }
                         />
                       </th>
                       <th>ردیف</th>
@@ -877,12 +908,19 @@ const RegedOrderList = () => {
                         <td>{formatNumber(order.prf_total_price)}</td>
                         <td>
                           {order.remaining_total > -1
-                            ? `باقی مانده : ${formatNumber(order.remaining_total)}`
-                            : `مابع تفاوت : ${formatNumber(Math.abs(order.remaining_total))}`}
+                            ? `باقی مانده : ${formatNumber(
+                                order.remaining_total
+                              )}`
+                            : `مابع تفاوت : ${formatNumber(
+                                Math.abs(order.remaining_total)
+                              )}`}
                         </td>
                         <td>{order.prf_status || "—"}</td>
                         <td>
-                          <Link to={`/order-details/${order.prfVCodeInt}`}>
+                          <Link
+                            className="text-sky-700 border-b cursor-pointer border-sky-700"
+                            to={`/order-details/${order.prfVCodeInt}`}
+                          >
                             جزئیات
                           </Link>
                         </td>

@@ -75,7 +75,7 @@
 //             onChange={(e) => setSearchText(e.target.value)}
 //           />
 //           {/* Search button */}
-//           {/* Uncomment if you want a button instead of auto-search 
+//           {/* Uncomment if you want a button instead of auto-search
 //           <button className="btn-grad" onClick={handleSearchButtonClick}>
 //             جستجو
 //           </button>*/}
@@ -171,7 +171,6 @@
 
 // export default GoodsList;
 
-
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchGoddsList } from "../actions/cottageActions";
@@ -218,7 +217,7 @@ const GoodsList = () => {
   useEffect(() => {
     const fetchPerformaNumber = async () => {
       try {
-        const response = await axiosInstance.get('/performas/numbers');
+        const response = await axiosInstance.get("/performas/numbers");
         if (response.data && Array.isArray(response.data)) {
           const proformaNumbers = response.data.map(
             (item) => item.prf_order_no
@@ -238,7 +237,7 @@ const GoodsList = () => {
   useEffect(() => {
     const fetchCottageNumber = async () => {
       try {
-        const response = await axiosInstance.get('/cottages/numbers/');
+        const response = await axiosInstance.get("/cottages/numbers/");
         if (response.data.results && Array.isArray(response.data.results)) {
           const cottageNumbers = response.data.results.map(
             (item) => item.cottage_number
@@ -256,26 +255,26 @@ const GoodsList = () => {
   }, []);
 
   // -------------------- SELECTION HANDLERS --------------------
-const handleSelectGood = (event, good) => {
-  const { checked } = event.target;
-  let updatedSelections;
-  if (checked) {
-    updatedSelections = [...selectedGoods, good.goodscode];
-  } else {
-    updatedSelections = selectedGoods.filter((id) => id !== good.goodscode);
-  }
-  setSelectedGoods(updatedSelections);
-  setAreAllSelected(updatedSelections.length === goods.length);
-};
- const handleSelectAll = (event) => {
-  const { checked } = event.target;
-  setAreAllSelected(checked);
-  if (checked) {
-    setSelectedGoods(goods.map((good) => good.goodscode));
-  } else {
-    setSelectedGoods([]);
-  }
-};
+  const handleSelectGood = (event, good) => {
+    const { checked } = event.target;
+    let updatedSelections;
+    if (checked) {
+      updatedSelections = [...selectedGoods, good.goodscode];
+    } else {
+      updatedSelections = selectedGoods.filter((id) => id !== good.goodscode);
+    }
+    setSelectedGoods(updatedSelections);
+    setAreAllSelected(updatedSelections.length === goods.length);
+  };
+  const handleSelectAll = (event) => {
+    const { checked } = event.target;
+    setAreAllSelected(checked);
+    if (checked) {
+      setSelectedGoods(goods.map((good) => good.goodscode));
+    } else {
+      setSelectedGoods([]);
+    }
+  };
 
   // -------------------- EXPORT HANDLER --------------------
   const handleExport = async () => {
@@ -404,7 +403,9 @@ const handleSelectGood = (event, good) => {
             <label>ثبت سفارش:</label>
             <Select
               className="filter-react-select"
-              value={proformaOptions.find((opt) => opt.value === proformaFilter)}
+              value={proformaOptions.find(
+                (opt) => opt.value === proformaFilter
+              )}
               onChange={(opt) => setProformaFilter(opt ? opt.value : "")}
               options={proformaOptions}
               placeholder="انتخاب ثبت سفارش"
@@ -414,7 +415,14 @@ const handleSelectGood = (event, good) => {
         </div>
 
         {/* ACTION BUTTONS */}
-        <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem" , justifyContent: 'right' }}>
+        <div
+          style={{
+            display: "flex",
+            gap: "1rem",
+            marginBottom: "1rem",
+            justifyContent: "right",
+          }}
+        >
           <button
             onClick={handleDeleteSelectedGoods}
             disabled={!selectedGoods.length}
@@ -492,13 +500,17 @@ const handleSelectGood = (event, good) => {
                       <td>{good.goodscode}</td>
                       <td>
                         <Link
+                          className="text-sky-700 border-b cursor-pointer border-sky-700"
                           to={`/order-details/${good.cottage.proforma.prfVCodeInt}`}
                         >
                           {good.cottage.proforma.prf_order_no}
                         </Link>
                       </td>
                       <td>
-                        <Link to={`/cottages/${good.cottage.cottage_number}`}>
+                        <Link
+                          className="text-sky-700 border-b cursor-pointer border-sky-700"
+                          to={`/cottages/${good.cottage.cottage_number}`}
+                        >
                           {good.cottage.cottage_number}
                         </Link>
                       </td>

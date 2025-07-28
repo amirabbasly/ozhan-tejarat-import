@@ -33,7 +33,13 @@ function BuyerList() {
               <td>{byr.buyer_tel}</td>
 
               <td>
-                <Link to={`/buyers/details/${byr.id}`}> جزئیات</Link>
+                <Link
+                  className="text-sky-700 border-b cursor-pointer border-sky-700"
+                  to={`/buyers/details/${byr.id}`}
+                >
+                  {" "}
+                  جزئیات
+                </Link>
               </td>
             </tr>
           ))}

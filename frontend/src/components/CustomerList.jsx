@@ -38,7 +38,13 @@ function CustomerList() {
               <td>{cmr.national_code}</td>
 
               <td>
-                <Link to={`/customers/details/${cmr.id}`}> جزئیات</Link>
+                <Link
+                  className="text-sky-700 border-b cursor-pointer border-sky-700"
+                  to={`/customers/details/${cmr.id}`}
+                >
+                  {" "}
+                  جزئیات
+                </Link>
               </td>
             </tr>
           ))}

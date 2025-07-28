@@ -1093,6 +1093,7 @@ const CottageList = () => {
                         <td>{cottage.proforma.prf_number}</td>
                         <td>
                           <Link
+                            className="text-sky-700 border-b cursor-pointer border-sky-700"
                             to={`/order-details/${cottage.proforma.prfVCodeInt}`}
                           >
                             {cottage.proforma.prf_order_no}
@@ -1129,7 +1130,10 @@ const CottageList = () => {
                         <td>{cottage.docs_recieved ? "بله" : "خیر"}</td>
                         <td>{cottage.rewatch ? "بله" : "خیر"}</td>
                         <td>
-                          <Link to={`/cottages/${cottage.cottage_number}`}>
+                          <Link
+                            className="text-sky-700 border-b cursor-pointer border-sky-700"
+                            to={`/cottages/${cottage.cottage_number}`}
+                          >
                             جزئیات
                           </Link>
                         </td>

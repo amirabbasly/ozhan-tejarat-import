@@ -138,10 +138,16 @@ function InvoiceList() {
             <tr key={inv.id}>
               <td>{index + 1 + (currentPage - 1) * pageSize}</td>
               <td>
-                <Link to={`/cottages/${inv.cottage}`}>{inv.cottage}</Link>
+                <Link
+                  className="text-sky-700 border-b cursor-pointer border-sky-700"
+                  to={`/cottages/${inv.cottage}`}
+                >
+                  {inv.cottage}
+                </Link>
               </td>
               <td>
                 <Link
+                  className="text-sky-700 border-b cursor-pointer border-sky-700"
                   to={`/order-details/${inv.proforma_details?.prfVCodeInt}`}
                 >
                   {inv.proforma_details?.prf_order_no}
@@ -217,7 +223,13 @@ function InvoiceList() {
                 </button>
               </td>
               <td>
-                <Link to={`/invoices/details/${inv.invoice_id}`}> جزئیات</Link>
+                <Link
+                  className="text-sky-700 border-b cursor-pointer border-sky-700"
+                  to={`/invoices/details/${inv.invoice_id}`}
+                >
+                  {" "}
+                  جزئیات
+                </Link>
               </td>
             </tr>
           ))}

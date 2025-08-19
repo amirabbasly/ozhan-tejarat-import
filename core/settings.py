@@ -43,7 +43,8 @@ ALLOWED_HOSTS = ['*']
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
-    'rest_framework',      
+    'rest_framework',
+    'drf_spectacular',      
     'corsheaders',             
     'proforma',
     'cottage.apps.CottageConfig',
@@ -186,6 +187,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    'DEFAULT_SCHEMA_CLASS': 'core.schema.ModelAutoSchema',
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
@@ -200,7 +202,17 @@ ROOT_URLCONF = 'core.urls'
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
 CSRF_TRUSTED_ORIGINS = ['http://localhost:3000']
+SPECTACULAR_SETTINGS = {
+    # (optional) provide descriptions for each app/tag
+    'TAGS': [
+        {'name': 'accounts', 'description': 'User & auth endpoints'},
+        {'name': 'cottage',  'description': 'Cottage management'},
+        {'name': 'proforma', 'description': 'Proforma & orders'},
+        # …add one entry per app…
+    ],
+    
 
+}
 
 
 TEMPLATES = [
